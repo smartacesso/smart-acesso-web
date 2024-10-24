@@ -1,0 +1,397 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:jsf="http://xmlns.jcp.org/jsf">
+	
+<body>
+	<f:metadata>
+    	<f:event type="preRenderView" listener="#{cadastroPedestreController.exibeMensagens}"/>  
+	</f:metadata>
+	
+	<ui:composition template="/tema/templates/template.xhtml">
+	
+		<ui:define name="titulo">
+			#{msgs['title.sistema']} | #{msgs[cadastroPedestreController.tituloPagina]}
+		</ui:define>
+		
+		<ui:define name="breadcrumb">
+			<a target="_top" href="/#{menuController.appName}/paginas/principal.xhtml"> <h:outputText
+					value="#{msgs['title.principal']}" />
+			</a> > 
+			
+			<f:subview id="consulta" rendered="#{empty cadastroPedestreController.origem
+													and empty cadastroPedestreController.tipo}">
+			
+				<a target="_top" href="/#{menuController.appName}/paginas/sistema/pedestres/pesquisaPedestre.xhtml"> <h:outputText
+						value="#{msgs['title.uc008.consulta.pedestre']}" />
+				</a> > 
+			</f:subview>
+			
+			<f:subview id="consultaPedestre" rendered="#{empty cadastroPedestreController.origem
+													and cadastroPedestreController.tipo == 'pe'}">
+			
+				<a target="_top" href="/#{menuController.appName}/paginas/sistema/pedestres/pesquisaPedestre.xhtml?tipo=pe"> <h:outputText
+						value="#{msgs['title.uc008.consulta.pedestre']}" />
+				</a> > 
+			</f:subview>
+			
+			<f:subview id="consultaVisitante" rendered="#{empty cadastroPedestreController.origem
+													and cadastroPedestreController.tipo == 'vi'}">
+			
+				<a target="_top" href="/#{menuController.appName}/paginas/sistema/pedestres/pesquisaPedestre.xhtml?tipo=vi"> <h:outputText
+						value="#{msgs['title.uc008.consulta.visitante']}" />
+				</a> > 
+			</f:subview>
+			
+			<f:subview id="relatorioVisitante" rendered="#{cadastroPedestreController.origem == 'reVisitantes'}">
+			
+				<a target="_top" href="/#{menuController.appName}/paginas/sistema/relatorios/visitantes.xhtml"> <h:outputText
+						value="#{msgs['title.uc011.relatorio.visitantes']}" />
+				</a> > 
+			
+			</f:subview>
+			
+			<f:subview id="relatorioPedestre" rendered="#{cadastroPedestreController.origem == 'rePedestres'}">
+			
+				<a target="_top" href="/#{menuController.appName}/paginas/sistema/relatorios/pedestres.xhtml"> <h:outputText
+						value="#{msgs['title.uc009.relatorio.pedestres']}" />
+				</a> > 
+			
+			</f:subview>
+			
+			<f:subview id="relatorioOcupacao" rendered="#{cadastroPedestreController.origem == 'reOcupacao'}">
+			
+				<a target="_top" href="/#{menuController.appName}/paginas/sistema/relatorios/ocupacao.xhtml"> <h:outputText
+						value="#{msgs['title.uc010.relatorio.ocupacao']}" />
+				</a> > 
+			
+			</f:subview>
+			
+			<h:outputText value="#{msgs[cadastroPedestreController.tituloPagina]}" />
+		</ui:define>
+		
+		<ui:define name="tools">
+			<h:panelGrid id="painelTools" columns="8" styleClass="conteudo_tools">
+	
+				<h:commandButton id="save"
+					action="#{cadastroPedestreController.salvar}"
+					title="#{msgs['alt.acao.save']}" alt="{msgs['alt.acao.save']}"
+					image="#{menuController.path}/tema/img/bt_saver.png">
+					<p:ajax process="@form" update="@form"/>
+				</h:commandButton>
+				
+				<h:commandButton id="addCredito" 
+					rendered="#{cadastroPedestreController.exibeBotaoAddCreditoVisitante()}"
+					onclick="PF('confirmarAddCredito').show(); return false;"
+					title="#{msgs['alt.acao.add.credito']}" alt="#{msgs['alt.acao.add.credito']}"
+					image="#{menuController.path}/tema/img/bt_security.png"/>
+				
+				<h:commandButton id="acaoExcliurPedestre" 
+					rendered="#{cadastroPedestreController.entidade.id != null}"
+					onclick="PF('confirmarExclusaoPedestre').show(); return false;"
+					title="#{msgs['alt.acao.excluir']}" alt="#{msgs['alt.acao.excluir']}"
+					image="#{menuController.path}/tema/img/bt_remover.png">
+				</h:commandButton>
+				
+				<h:commandButton id="gerarQrCode"
+					rendered="#{cadastroPedestreController.exibeBotaoGerarQRCode()}"
+					onclick="PF('gerarQrCode').show(); return false;"
+					title="#{msgs['alt.acao.gerar.qrcode']}" alt="#{msgs['alt.acao.gerar.qrcode']}"
+					image="#{menuController.path}/tema/img/bt_qr_code.png"/>
+					
+				<h:commandButton id="verQrCode" 
+					rendered="#{cadastroPedestreController.exibeBotaoVerQRCode()
+								and cadastroPedestreController.entidade.tipoQRCode != 'DINAMICO_TEMPO'}"
+					onclick="PF('verQrCode').show(); return false;"
+					title="#{msgs['alt.acao.ver.qrcode']}" alt="#{msgs['alt.acao.ver.qrcode']}"
+					image="#{menuController.path}/tema/img/bt_qr_code.png"/>
+					
+				<h:commandButton id="removerQrCode" 
+					rendered="#{cadastroPedestreController.exibeBotaoVerQRCode()
+								and cadastroPedestreController.entidade.tipoQRCode == 'DINAMICO_TEMPO'}"
+					onclick="PF('apagarQRCode').show(); return false;"
+					title="#{msgs['alt.acao.remover.qrcode']}" alt="#{msgs['alt.acao.remover.qrcode']}"
+					image="#{menuController.path}/tema/img/bt_qr_code.png"/>
+					
+					
+				<h:commandButton id="gerarLinkCadastroFacialExterno"
+					rendered="#{cadastroPedestreController.exibeBotaoLinkCadastroFacialExterno()}"
+					action="#{cadastroPedestreController.gerarLinkCadastroFacialExterno()}"
+					title="#{msgs['alt.acao.gerar.link.cadastro.facial.externo']}" alt="#{msgs['alt.acao.gerar.link.cadastro.facial.externo']}"
+					image="#{menuController.path}/tema/img/bt_facial.png">
+					
+					<f:ajax execute="@this" render="@this"/>
+				</h:commandButton>
+				
+				<h:commandButton id="editarSenha" 
+						rendered="#{cadastroPedestreController.habilitaAppPedestre 
+								and cadastroPedestreController.entidade.login != null}" 
+						title="#{msgs['alt.acao.alterar.senha']}"
+						image="#{menuController.path}/tema/img/bt_security.png">
+					<p:ajax process="@this" update="alteraSenhaDialog" oncomplete="PF('alteraSenha').show(); return false;"/>
+				</h:commandButton>
+				
+			</h:panelGrid>
+		</ui:define>
+		
+		<ui:define name="conteudo">
+		
+			<p:dialog id="alteraSenhaDialog" widgetVar="alteraSenha" header="#{msgs['header.alterar.dados.login.pedestre']}" modal="true">
+				<p:panelGrid columns="3">
+					
+					<p:column>
+						<h:outputText value="#{msgs['label.nova.senha']}" />
+						<br />
+						<p:inputText value="#{cadastroPedestreController.entidade.senhaLivre}" maxlength="30"/>
+					</p:column>
+					
+					<p:column>
+						<br />
+						<p:commandButton value="#{msgs['alt.acao.alterar']}" 
+								action="#{cadastroPedestreController.salvar()}" oncomplete="PF('alteraSenha').hide();"/>
+					</p:column>
+				</p:panelGrid>
+			</p:dialog>
+		
+			<p:confirmDialog id="dialogConfirmarExclusaoPedestre"
+					widgetVar="confirmarExclusaoPedestre"
+					header="#{msgs['alt.acao.confirmar']}"
+					message="#{msgs['msg.uc008.confirmar.excluir.pedestre']}">
+				
+				<p:button value="#{msgs['label.nao']}" onclick="PF('confirmarExclusaoPedestre').hide(); return false;"/>
+				<p:commandButton value="#{msgs['label.sim']}" oncomplete="PF('confirmarExclusaoPedestre').hide();"  
+					action="#{cadastroPedestreController.excluirPedestre}" process="@this"/>
+					
+			</p:confirmDialog>
+			
+			<p:confirmDialog id="dialogConfirmarAddCredito"
+					widgetVar="confirmarAddCredito"
+					header="#{msgs['alt.acao.confirmar']}"
+					message="#{msgs['label.uc008.confirmar.add.credito']}">
+				
+				<p:button value="#{msgs['label.nao']}" onclick="PF('confirmarAddCredito').hide(); return false;" />
+				<p:commandButton value="#{msgs['label.sim']}" oncomplete="PF('confirmarAddCredito').hide();"
+					action="#{cadastroPedestreController.adicionaUmCreditoVisitante()}" process="@this"/>
+			</p:confirmDialog>
+			
+			<p:dialog widgetVar="statusDialogEnviandoFile" modal="true" 
+					  draggable="false" closable="false" resizable="false" showHeader="false">
+				<div style="margin: 10px">
+				    <p:graphicImage value="/tema/img/status.gif" />
+				    <h:outputText value="Aguarde, arquivo sendo enviado..." style="font-weight: bold;margin-left: 10px;" />
+			    </div>
+			</p:dialog>
+			
+			<p:dialog id="dialogGerarQrCode" widgetVar="gerarQrCode" modal="true" header="#{msgs['title.dialog.gerar.qr.code']}"
+					draggable="false" closable="false" resizable="false" 
+					width="#{cadastroPedestreController.habilitaTiposQRCode ? '350px' : 'auto'}">
+				
+				<div>
+					<p:outputLabel value="#{cadastroPedestreController.habilitaTiposQRCode 
+								? msgs['msg.dialog.selecione.tipo.qr.code'] 
+								: msgs['msg.dialog.gerar.qr.code']}"/>
+					<br/>
+					<p:selectOneMenu value="#{cadastroPedestreController.tipoPadraoQrCode}"
+									 rendered="#{cadastroPedestreController.habilitaTiposQRCode}">
+						<f:selectItems value="#{cadastroPedestreController.listaTipoQRCode}" ></f:selectItems>
+						<p:ajax update="@this funcionamento" process="@this"/>
+					</p:selectOneMenu>
+					<br/>
+					<p:outputLabel id="funcionamento" 
+								   value="#{cadastroPedestreController.tipoPadraoQrCode == null 
+								   				or cadastroPedestreController.tipoPadraoQrCode == 'ESTATICO' 
+											? msgs['msg.dialog.qrcode.estatico'] 
+											: (cadastroPedestreController.tipoPadraoQrCode == 'DINAMICO_TEMPO' 
+												? msgs['msg.dialog.qrcode.dinamico.tempo'] 
+												: msgs['msg.dialog.qrcode.dinamico.uso'])}"/>
+					
+				</div>
+				
+				<div style="float: right; margin-top: 10px;">
+					<p:button value="#{msgs['label.cancelar']}" onclick="PF('gerarQrCode').hide(); return false;" style="margin-right: 10px;"/>
+					<p:commandButton value="#{msgs['label.ok']}" oncomplete="PF('gerarQrCode').hide(); return false;" 
+						action="#{cadastroPedestreController.gerarQrCode()}" process="@this" update="@this form:painelTools form:dialogVerQrCode"/>
+				</div>
+			</p:dialog>
+			
+			<p:dialog id="apagarQRCode" widgetVar="apagarQRCode" modal="true" 
+					header="#{msgs['title.dialog.ver.qr.code.dinamico']}"
+					draggable="false" closable="false" resizable="false" 
+					width="350px">
+				
+				<div>
+					<p:outputLabel value="#{msgs['msg.dialog.apagarQRCode']}"/>
+				</div>
+				
+				<div style="float: right; margin-top: 10px;">
+					<p:button value="#{msgs['label.nao']}" onclick="PF('apagarQRCode').hide(); return false;" style="margin-right: 10px;"/>
+					<p:commandButton value="#{msgs['label.sim']}" 
+						action="#{cadastroPedestreController.apagarQrCode()}" style="margin-left: 10px;"/>
+				</div>
+			</p:dialog>
+			
+			<p:dialog id="dialogVerQrCode" widgetVar="verQrCode" modal="true" header="#{msgs['title.dialog.ver.qr.code']}"
+					draggable="false" closable="true" resizable="false">
+					
+				<div style="text-align: center;">
+					<p:graphicImage id="imageQrCode" 
+						value="#{cadastroPedestreController.getSreamedContent(cadastroPedestreController.gerarImagemQRCode(cadastroPedestreController.entidade.qrCodeParaAcesso))}"
+						rendered="#{cadastroPedestreController.entidade.qrCodeParaAcesso != null}"
+						stream="false" style="width: 250px;"/>
+						
+					<br/>	
+					<p:outputLabel value="#{msgs['msg.dialog.dinamico.uso']}" rendered="#{cadastroPedestreController.entidade.tipoQRCode == 'DINAMICO_USO'}"/>
+				</div>
+				
+				<div>
+					<p:commandButton value="#{msgs['alt.acao.enviar.whatsapp']}"
+						action="#{cadastroPedestreController.enviarQRCodePorWhatsApp()}"
+						oncomplete="PF('verQrCode').hide(); return false;"/>
+					<p:commandButton value="#{msgs['alt.acao.imprimir']}" style="margin-left: 10px;"
+						action="#{cadastroPedestreController.imprimirQRCode()}"/>
+					<p:commandButton value="#{msgs['alt.acao.enviar.por.email']}" style="margin-left: 10px;"
+						action="#{cadastroPedestreController.enviarQRCodePorEmail()}"
+						oncomplete="PF('verQrCode').hide(); return false;"/>
+					<p:commandButton value="#{msgs['alt.acao.apagar']}" 
+						action="#{cadastroPedestreController.apagarQrCode()}" style="margin-left: 10px;"/>
+				</div>
+			</p:dialog>
+			
+			<p:dialog id="dialogGerarLinkCadastroFacialExterno" widgetVar="gerarLinkCadastroFacialExterno" modal="true" 
+					header="#{msgs['title.enviar.link.cadastro.facial.externo']}" draggable="true" closable="true" resizable="false"
+					width="700">
+					
+				<h:panelGrid columns="2">
+					<h:column rendered="#{cadastroPedestreController.ultimoCadastroExterno != null}">
+						<h:outputLabel value="#{msgs['label.uc008.status.ultimo.cadastro']}:" /> <br />
+						<h:outputLabel value="#{cadastroPedestreController.ultimoCadastroExterno.statusCadastroExterno.nomeFormated.toUpperCase()}" 
+							style="font-size: 16px; font-weight: bold !important;" /> <br/>
+						<p:graphicImage rendered="#{cadastroPedestreController.ultimoCadastroExterno.primeiraFoto != null}"
+							value="#{cadastroPedestreController.primeiraFotoStreamed}" stream="false"
+							width="200"/>
+						
+					</h:column>
+					
+					<h:column>
+						<h:panelGrid columns="1" style="margin-left: 30px;">
+							<h:column>
+								<h:outputText value="#{cadastroPedestreController.ultimoCadastroExterno != null 
+											? msgs['label.uc008.link.para.novo.cadastro'] : msgs['label.uc008.link']}" /><br/>
+								<p:outputLabel value="#{cadastroPedestreController.linkCadastroFacialExterno}"
+									style="font-weight: bold !important;"/>
+							</h:column>
+							
+							<br/>
+							
+							<h:column>
+								<p:commandButton value="#{msgs['alt.acao.enviar.por.email']}"
+										action="#{cadastroPedestreController.enviarPorEmailLinkCadastroFacialExterno()}"
+										oncomplete="PF('gerarLinkCadastroFacialExterno').hide(); return false;"/>
+								<p:commandButton value="#{msgs['alt.acao.enviar.whatsapp']}" 
+										action="#{cadastroPedestreController.enviarPorWhatsappLinkCadastroFacialExterno()}"
+										oncomplete="PF('gerarLinkCadastroFacialExterno').hide(); return false;"/>
+							</h:column>
+							
+						</h:panelGrid>
+					</h:column>
+				
+				</h:panelGrid>
+					
+			</p:dialog>
+			
+			<div id="imageQrCodeDiv" class="container" style="display: none;">
+				<div style="text-align: center;">
+					<div>
+						<h1 style="font-size: 36px; font-weight: bold;">QRCode de Acesso</h1>
+						<p:graphicImage 
+								value="#{cadastroPedestreController.getSreamedContent(cadastroPedestreController.gerarImagemQRCode(cadastroPedestreController.entidade.qrCodeParaAcesso))}"
+								rendered="#{cadastroPedestreController.entidade.qrCodeParaAcesso != null}"
+								stream="false" style="width: 350px;"/>
+
+						<div>
+							<h:outputText value="Data: " style="font-size: 24px !important;"/>
+							<h:outputText value="#{cadastroPedestreController.dataAtual}" style="font-size: 24px !important;">
+								<f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
+							</h:outputText>
+							<br/>
+							<h:outputText value="Usuário: #{cadastroPedestreController.nomeUsuarioLogado()}" 
+								style="font-size: 24px !important;"/>
+							<br/>
+							<h:outputText value="#{'vi' eq cadastroPedestreController.tipo ? 'Visitante' : 'Pedestre'}: #{cadastroPedestreController.entidade.nome}"
+								style="font-size: 24px !important;"/>
+						</div>
+					</div>
+					
+				</div>
+			</div>
+			
+			<h:panelGrid width="100%" columns="1" headerClass="h-grid-header">
+				<f:facet name="header">
+					<h:outputText value="#{cadastroPedestreController.entidade.id != null 
+								? ''.concat(msgs[cadastroPedestreController.tituloPagina]).concat(' - ')
+									.concat(cadastroPedestreController.entidade.nome)
+								: cadastroPedestreController.entidade.tipo == 'VISITANTE'
+									? msgs['title.uc008.cadastrar.visitante']
+									: msgs['title.uc008.cadastrar.pedestre']}" />
+				</f:facet>
+				
+				<h:column>
+				
+					<div class="row">
+						<div class="col-md-2">
+							<ui:include src="/WEB-INF/template/pedestres/abaLateral.xhtml" />								
+						</div>
+						
+						<div class="col-md-10">
+							
+							<p:tabView id="cadastroPedestreTab">
+					
+								<p:tab title="#{msgs['label.uc008.dados.basicos']}">
+									<ui:include src="/WEB-INF/template/pedestres/dadosBasicos.xhtml" />			
+								</p:tab>
+								
+								<p:tab title="#{msgs['label.uc001.endereco']}">
+									<ui:include src="/WEB-INF/template/pedestres/endereco.xhtml" />	
+								</p:tab>
+								
+								<p:tab title="#{msgs['title.uc008.regras.acesso']}">
+									<ui:include src="/WEB-INF/template/pedestres/regrasAcesso.xhtml" />	
+								</p:tab>
+								
+								<p:tab title="#{msgs['label.uc008.equipamentos']}">
+									<ui:include src="/WEB-INF/template/pedestres/equipamentos.xhtml" />
+								</p:tab>
+								
+								<p:tab title="#{msgs['label.uc008.documentos']}">
+									<ui:include src="/WEB-INF/template/pedestres/documentos.xhtml" />
+								</p:tab>
+								
+								<p:tab title="#{msgs['label.uc008.biometrias']}" rendered="#{not empty cadastroPedestreController.entidade.biometrias}" >
+									<ui:include src="/WEB-INF/template/pedestres/biometrias.xhtml" />
+								</p:tab>
+								
+								<p:tab title="#{msgs['label.uc008.mensagem.personalizada']}">
+									<ui:include src="/WEB-INF/template/pedestres/mensagensPersonalizadas.xhtml" />
+								</p:tab>
+								
+							</p:tabView>
+							
+							<ui:include src="/WEB-INF/template/pedestres/escolherArquivoDocumento.xhtml" />
+							
+							<ui:include src="/WEB-INF/template/pedestres/procurarRegras.xhtml" />
+						
+						</div>
+					</div>
+					
+				</h:column>
+			</h:panelGrid>
+			
+		</ui:define>
+		
+	</ui:composition>
+</body>
+</html>

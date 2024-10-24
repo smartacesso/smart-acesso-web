@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#27394a</color>
+    <color name="colorPrimaryDark">#27394a</color>
+    <color name="colorAccent">#99d11c</color>
+    <color name="colorFeatured">#99d11c</color>
+    <color name="colorTimer">#99d11c</color>
+    <color name="colorMessageChecked">#00d91d</color>
+
+    <color name="background_color">#f0f1f5</color>
+
+    <color name="card_branco">#ffffff</color>
+    <color name="card_branco_destaque">#ffffff</color>
+    <color name="card_branco_btn">#00263d</color>
+    <color name="card_branco_feito">#dddddd</color>
+    <color name="facial_color">#005E9F</color>
+
+    <color name="actionBarTextColor">#fff</color>
+
+    <color name="divider">#1e000000</color>
+    <color name="transparent">#00000000</color>
+    <!-- card colors -->
+    <color name="card_background">#ffffff</color>
+    <color name="card_shadow_1">#3d000000</color>
+    <color name="card_shadow_2">#3d000000</color>
+    <color name="card_detailing">#eee</color>
+
+    <color name="black">#000000</color>
+    <color name="white">#ffffff</color>
+    <color name="gray">#49000000</color>
+
+    <color name="default_text">#de000000</color>
+
+
+
+    <array name="tab_colors">
+        <item name="tab_1">#455C65</item>
+        <item name="tab_2">#00886A</item>
+        <item name="tab_3">#8B6B62</item>
+        <item name="tab_4">#6C4A42</item>
+    </array>
+
+    <color name="black_overlay">#66000000</color>
+</resources>

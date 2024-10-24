@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+
+<shortcuts>
+
+	<!--  
+	More options for shortcuts in
+	https://github.com/izpack/izpack/blob/master/src/doc-reST/desktop-shortcuts.txt
+	-->
+	
+    <skipIfNotSupported/>
+
+    <programGroup defaultName="SmartFaces" location="applications"/>
+    
+    <shortcut
+		name="SmartFaces Controle Facial"
+		programGroup="yes"
+		desktop="yes"
+		applications="no"
+		startMenu="no"
+		startup="yes"
+		target="$INSTALL_PATH\SmartFaces.exe"
+		description="SmartFaces Controle Facial"
+		iconFile="$INSTALL_PATH\images\facial.ico"
+		initialState="normal"/>
+		
+	<shortcut
+		name="Desinstalador SmartFaces Controle Facial"
+		programGroup="yes"
+		desktop="no"
+		applications="no"
+		startMenu="no"
+		startup="no"
+		target="$INSTALL_PATH\desinstalador\desinstalar.jar"
+		description="Desinstalador"
+		iconFile="%SystemRoot%\system32\SHELL32.dll"
+		initialState="normal"/>
+
+</shortcuts>

@@ -1,0 +1,78 @@
+<div style="width: 100%; height: 100%; font-size: 14px !important;"
+	xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+
+	<h:panelGrid width="100%" columns="#{menuController.mobile == false ? 3 : 1}" 
+		styleClass="icePnlGrdTop_" columnClasses="#{menuController.mobile == false 
+											? 'footer_column, footer_column, footer_column' 
+											: 'footer_column_mobile, footer_column_mobile, footer_column_mobile'}"
+		style="height: 100%;margin-top: 10px;">
+		
+		<h:column>
+			
+			<h:panelGrid width="auto" columns="1" rendered="#{menuController.mobile == false}">
+				<h:column >
+					<div align="left" style="margin-left: 30px;margin-bottom: 5px;">
+						Suporte (ligue ou clique)
+						<br/>
+						<a href="https://api.whatsapp.com/send?phone=5531991094687" target="_blank">Telefone 1: +55 (31) 99109-4687</a>
+						<br/>
+						<a href="https://api.whatsapp.com/send?phone=5531972259259" target="_blank">Telefone 2: +55 (31) 97225-9259</a>
+						
+					</div>
+				</h:column>
+				
+			</h:panelGrid>
+
+		</h:column>
+
+		<h:column>
+			<div align="center" >
+				<ul class="list-inline social-buttons">
+					<li style="display: #{not empty menuController.urlTwitter ? '' : 'none'}">
+							<a href="#{menuController.urlTwitter}"
+								target="_blank"><i class="fa fa-twitter" style="color: white;"></i></a>
+					</li>
+					<li style="display: #{not empty menuController.urlFacebook ? '' : 'none'}">
+							<a href="#{menuController.urlFacebook}"
+								target="_blank"><i class="fa fa-facebook" style="color: white"></i></a>
+					</li>
+					<li style="display: #{not empty menuController.urlGplus ? '' : 'none'}">
+							<a href="#{menuController.urlGplus}"
+								target="_blank"><i class="fa fa-google" style="color: white"></i></a>
+					</li>
+					<li style="display: #{not empty menuController.urlInstagram ? '' : 'none'}">
+							<a href="#{menuController.urlInstagram}"
+								target="_blank"><i class="fa fa-instagram" style="color: white"></i></a>
+					</li>
+					<li style="display: #{not empty menuController.urlBlog ? '' : 'none'}">
+							<a href="#{menuController.urlBlog}"
+								target="_blank"><i class="fa fa-rss" style="color: white"></i></a>
+					</li>
+				</ul>
+			</div>
+		</h:column>
+
+		<h:column>
+			<div align="center" style="width: 100%;float: right;margin-right:20px">
+				<div style="text-align: #{menuController.mobile == false ? 'left' : 'center'};width: 250px">
+				Copyright <a target="_" href='http://www.smartpontoempresarial.com.br'>SmartPonto 2020</a> 
+				<h:panelGrid >
+					<h:column rendered="#{sessionScope.usuario != null}">
+						<a href="javascript:void(jQuery('.buttonShowVersoes').click());" style="">#{msgs['versao.numero']}</a> <span style="margin-left: 15px">Tempo de sessão: <span id='timer'> </span></span>
+					</h:column>
+					<h:column rendered="#{menuController.isProdution() == false}">
+						<h:outputText value="DESENVOLVIMENTO"  style="font-weight: bold;" />	
+					</h:column>
+				</h:panelGrid>
+				</div>
+			</div>
+		</h:column>
+
+
+	</h:panelGrid>
+	
+</div>

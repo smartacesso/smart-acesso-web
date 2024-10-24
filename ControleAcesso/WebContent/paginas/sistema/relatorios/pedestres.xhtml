@@ -1,0 +1,280 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui">
+	
+<body>
+	
+	<ui:composition template="/tema/templates/template.xhtml">
+		<ui:define name="titulo">
+			#{msgs['title.sistema']} | #{msgs['title.uc009.relatorio.pedestres']}
+		</ui:define>
+		
+		<ui:define name="breadcrumb">
+			<a target="_top" href="/#{menuController.appName}/paginas/principal.xhtml"> <h:outputText
+					value="#{msgs['title.principal']}" />
+			</a> > <h:outputText value="#{msgs['title.uc009.relatorio.pedestres']}" />
+		</ui:define>
+		
+		<ui:define name="tools">
+			<h:panelGrid columns="4" styleClass="conteudo_tools">
+				
+				<h:commandButton id="acaoBuscar" 
+						action="#{relatorioPedestresController.buscar()}" 
+						title="#{msgs['alt.acao.buscar']}" alt="#{msgs['alt.acao.buscar']}"
+						image="#{menuController.path}/tema/img/bt_searcher.png">
+					
+					<p:ajax process="@form" update="@form"/>
+				</h:commandButton>
+
+				<h:commandButton id="acaoLimpar" 
+						action="#{relatorioPedestresController.limpar()}"
+						title="#{msgs['alt.acao.limpar']}" alt="#{msgs['alt.acao.limpar']}"
+						image="#{menuController.path}/tema/img/bt_cleaner.png">
+					
+					<p:ajax process="@this" update="@form"/>
+				</h:commandButton>
+				
+				<h:commandButton id="acaoExportar" 
+					image="#{menuController.path}/tema/img/bt_exporter_xlsx.png"
+					title="#{msgs['alt.acao.exportar']}" alt="#{msgs['alt.acao.exportar']}">
+					
+					<p:dataExporter type="xlsx" target="form:pedestresTable" fileName="pedestres" />
+				</h:commandButton>
+								
+			</h:panelGrid>
+			
+			<div style="float: right;">
+			
+				<h:outputText value="Total: #{relatorioPedestresController.result.size()}" style="margin-right: 5px"
+							  rendered="#{relatorioPedestresController.result.size() > 0}"/>
+			
+				<p:inputText id="filtro-nome" placeholder="Filtrar por nome" style="width:200px;"
+						onblur="sincronizarFiltro(this, 'filtro-nome-sync');" styleClass="filtro-nome filtro-nome-sync"
+						value="#{relatorioPedestresController.parans['pedestre.nome']}"/>
+				
+				<p:calendar id="filtro-data-inicio" value="#{relatorioPedestresController.parans['data_maior_data']}"
+					pattern="dd/MM/yyyy HH:mm" mask="99/99/9999 99:99" size="20" navigator="true"
+					valueChangeListener="#{relatorioPedestresController.alteraDataInicio}">
+					
+					<p:ajax event="dateSelect" update="@this filtro-avancado-dataInicio" />
+					<p:ajax event="change" update="filtro-avancado-dataInicio" />
+					<f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
+				</p:calendar>
+				até	
+				<p:calendar id="filtro-data-fim" value="#{relatorioPedestresController.parans['data_menor_data']}"
+					pattern="dd/MM/yyyy HH:mm" mask="99/99/9999 99:99" size="20" navigator="true"
+					valueChangeListener="#{relatorioPedestresController.alteraDataFim}">
+					
+					<p:ajax event="dateSelect" update="@this filtro-avancado-dataFim"/>
+					<p:ajax event="change" update="filtro-avancado-dataFim"/>
+					<f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
+				</p:calendar>
+				
+				<h:commandButton id="acaoFiltrosAvancados" 
+					image="#{menuController.path}/tema/img/ic_search_details.png"
+					styleClass="filtro-button" action="#{relatorioPedestresController.toggleFiltroFlag('relatorio-pedestres-filtroFlag')}">
+					
+					<p:ajax process="@this" update="@this" oncomplete="alternarFiltrosAvançados();"/>
+				</h:commandButton>
+				
+				<p:tooltip for="acaoFiltrosAvancados" value="#{msgs['alt.acao.alternar.filtros.avancados']}" />
+			</div>
+		</ui:define>
+		
+		<ui:define name="conteudo">
+		
+			<script>
+				jQuery(document).ready(function() {
+					try {
+						$('.filtro-nome').on('keydown', function(e) {
+						    if (e.key === "Enter") {
+						    	sincronizarFiltro(this, 'filtro-nome-sync');
+						    }
+						});
+					}catch(e){}
+				})
+			</script>
+			
+			<div class="filtros-avancados" 
+				style="width: 100%; display: #{relatorioPedestresController.getFiltroFlag('relatorio-pedestres-filtroFlag') ? 'inline-block' : 'none'}">
+				
+				<h:panelGrid id="parameters" width="100%" columns="1" headerClass="h-grid-header">
+					<f:facet name="header">
+						#{msgs['title.uc008.filtros.avancados']}				
+					</f:facet>
+					
+					<h:panelGrid columns="#{menuController.mobile == true ? 1 : 2}" width="100%">
+						<p:column>
+							<p:outputLabel value="#{msgs['label.uc009.data.inical']}" for="filtro-avancado-dataInicio"/>
+							<br/>
+							<p:calendar id="filtro-avancado-dataInicio" value="#{relatorioPedestresController.parans['data_maior_data']}" 
+								pattern="dd/MM/yyyy HH:mm" mask="99/99/9999 99:99" navigator="true"
+								valueChangeListener="#{relatorioPedestresController.alteraDataInicio}">
+								
+								<p:ajax event="dateSelect" update="filtro-data-inicio"/>
+								<p:ajax event="change" update="filtro-data-inicio"/>
+								<f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
+							</p:calendar>
+						</p:column>
+						
+						<p:column>
+							<p:outputLabel value="#{msgs['label.uc009.data.final']}" for="filtro-avancado-dataFim"/>
+							<br/>
+							<p:calendar id="filtro-avancado-dataFim" value="#{relatorioPedestresController.parans['data_menor_data']}" 
+								pattern="dd/MM/yyyy HH:mm" mask="99/99/9999 99:99" navigator="true"
+								valueChangeListener="#{relatorioPedestresController.alteraDataFim}">
+								
+								<p:ajax event="dateSelect" update="@this filtro-data-fim"/>
+								<p:ajax event="change" update="@this filtro-data-fim"/>
+								<f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
+							</p:calendar>
+						</p:column>
+
+						<p:column>
+							<p:outputLabel value="#{msgs['label.uc009.nome']}" for="filtro-avancado-nome"/>
+							<br />
+							<p:inputText id="filtro-avancado-nome" value="#{relatorioPedestresController.parans['pedestre.nome']}" size="50"
+								onblur="sincronizarFiltro(this, 'filtro-nome-sync');" styleClass="filtro-nome-sync" />
+						</p:column>
+						
+						<p:column>
+							<p:outputLabel value="#{msgs['label.uc009.equipamento']}" for="filtro-avancado-equipamento"/>
+							<br />
+							<p:selectOneMenu id="filtro-avancado-equipamento" value="#{relatorioPedestresController.parans['equipamento']}">
+								<f:selectItems value="#{relatorioPedestresController.listaEquipamentos}" />
+							</p:selectOneMenu>
+						</p:column>
+						
+						<p:column>
+							<p:outputLabel value="#{msgs['label.uc009.empresa']}" for="filtro-avancado-empresa"/>
+							<br />
+							<p:selectOneMenu id="filtro-avancado-empresa" value="#{relatorioPedestresController.parans['pedestre.empresa.id']}"
+								valueChangeListener="#{relatorioPedestresController.eventoEmpresaSelecionada}">
+								<f:selectItems value="#{relatorioPedestresController.listaEmpresas}"/>
+								<p:ajax process="@this" update="@this filtro-avancado-departamento filtro-avancado-centroCusto filtro-avancado-cargo" 
+									event="valueChange"/>
+								<f:converter converterId="javax.faces.Long"/>
+							</p:selectOneMenu>
+						</p:column>
+						
+						<p:column>
+							<p:outputLabel value="#{msgs['label.uc009.departamento']}" for="filtro-avancado-departamento"/>
+							<br />
+							<p:selectOneMenu id="filtro-avancado-departamento" value="#{relatorioPedestresController.parans['pedestre.departamento.id']}">
+								<f:selectItems value="#{relatorioPedestresController.listaDepartamentos}"/>
+								<f:converter converterId="javax.faces.Long"/>
+							</p:selectOneMenu>
+						</p:column>
+						
+						<p:column>
+							<p:outputLabel value="#{msgs['label.uc009.cargo']}" for="filtro-avancado-cargo"/>
+							<br />
+							<p:selectOneMenu id="filtro-avancado-cargo" value="#{relatorioPedestresController.parans['pedestre.cargo.id']}">
+								<f:selectItems value="#{relatorioPedestresController.listaCargos}"/>
+								<f:converter converterId="javax.faces.Long"/>
+							</p:selectOneMenu>
+						</p:column>
+						
+						<p:column>
+							<p:outputLabel value="#{msgs['label.uc009.centro.custo']}" for="filtro-avancado-centroCusto"/>
+							<br />
+							<p:selectOneMenu id="filtro-avancado-centroCusto" value="#{relatorioPedestresController.parans['pedestre.centroCusto.id']}">
+								<f:selectItems value="#{relatorioPedestresController.listaCentrosDeCusto}"/>
+								<f:converter converterId="javax.faces.Long"/>
+							</p:selectOneMenu>
+						</p:column>
+					
+					</h:panelGrid>
+				</h:panelGrid>
+			</div>
+			
+			<h:panelGrid width="100%" columns="1" headerClass="h-grid-header">
+				<f:facet name="header">
+					<h:outputText value="#{msgs['title.uc009.relatorio.pedestres']}" />
+				</f:facet>
+				
+				<h:column>
+				
+					<ui:include src="/tema/templates/vazio.xhtml">
+						<ui:param name="exibe" value="#{empty relatorioPedestresController.result}" />
+						<ui:param name="exibeAdicionar" value="true" />
+					</ui:include>
+					
+					<p:dataTable id="pedestresTable" value="#{relatorioPedestresController.result}" var="pedestre" 
+						rendered="#{not empty relatorioPedestresController.result}" paginator="true" 
+						rows="#{relatorioPedestresController.quantPorPagina}" paginatorPosition="bottom"
+						paginatorAlwaysVisible="false" >
+						
+						<p:column headerText="#{msgs['label.uc009.foto']}" style="text-align: center; width: 60px">
+							<p:graphicImage value="#{pedestre.pedestre.foto != null 
+									? relatorioPedestresController.getStreamedContent(pedestre.pedestre.foto)
+									: pedestre.pedestre.genero eq 'FEMININO'
+										? '../../../tema/img/ic_photo_female.png'
+										: '../../../tema/img/ic_photo_male.png'}" 
+								stream="false" 
+								style="height: 50px;width: 50px; padding: 0px; margin: 0px; cursor: pointer; border-radius: 50%;"/>
+						</p:column>
+						
+						<p:column headerText="#{msgs['label.uc009.matricula']}" style="text-align: center; width: 60px"
+								rendered="#{relatorioPedestresController.permiteCampoAdicionalCrachaMatricula}">
+							<h:outputText value="#{pedestre.pedestre.matricula != null ? pedestre.pedestre.matricula : '--'}" />
+						</p:column>
+						
+						<p:column headerText="#{msgs['label.uc009.numero.cartao.acesso']}" style="text-align: center">
+							<h:outputText value="#{pedestre.pedestre.codigoCartaoAcesso}" />
+						</p:column>
+						
+						<p:column headerText="#{msgs['label.uc009.nome']}" style="text-align: center">
+							<h:outputText value="#{pedestre.pedestre.nome}" />
+						</p:column>
+						
+						<p:column headerText="#{msgs['label.uc009.empresa']}" style="text-align: center">
+							<h:outputText value="#{pedestre.pedestre.empresa.nome}" />
+						</p:column>
+						
+						<p:column headerText="#{msgs['label.uc009.cargo']}" style="text-align: center">
+							<h:outputText value="#{pedestre.pedestre.cargo.nome}" />
+						</p:column>
+						
+						<p:column headerText="#{msgs['label.uc009.data.nascimento']}" style="text-align: center">
+							<h:outputText value="#{pedestre.pedestre.dataNascimento}">
+								<f:convertDateTime pattern="dd/MM/yyyy"/>
+							</h:outputText>
+						</p:column>
+						
+						<p:column headerText="#{msgs['label.uc009.data.acesso']}" style="text-align: center">
+							<h:outputText value="#{pedestre.data}">
+								<f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss"/>
+							</h:outputText>
+						</p:column>
+						
+						<p:column headerText="#{msgs['label.uc009.equipamento']}" style="text-align: center">
+							<h:outputText value="#{pedestre.equipamento}" />
+						</p:column>
+						
+						<p:column headerText="#{msgs['label.uc009.tipo.acesso']}" style="text-align: center">
+							<h:outputText value="#{msgs[pedestre.tipo]} #{not empty pedestre.razao ? ' - '.concat(pedestre.razao) : ''}" />
+						</p:column>
+						
+						<p:column headerText="#{msgs['label.uc009.sentido']}" style="text-align: center">
+							<h:outputFormat value="#{pedestre.tipo == 'ATIVO' ? pedestre.sentido : '---'}" />
+						</p:column>
+						
+						<p:column headerText="#{msgs['alt.acao.visualizar']}" style="text-align: center" exportable="false">
+							<h:commandButton id="acaoVisualizar"
+								action="#{relatorioPedestresController.redirecionaPaginaEditarPedetre(pedestre.pedestre.id, 'rePedestres')}"
+								title="#{msgs['alt.acao.visualizar']}" alt="#{msgs['alt.acao.visualizar']}"
+								image="#{menuController.path}/tema/img/bt_viewer_min.png"/>
+						</p:column>
+						
+					</p:dataTable>
+				</h:column>
+			</h:panelGrid>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

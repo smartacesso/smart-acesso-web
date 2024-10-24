@@ -1,0 +1,211 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui">
+
+<body>
+
+	<ui:composition template="/tema/templates/template.xhtml">
+
+		<ui:define name="titulo">
+			#{msgs['title.sistema']} | Principal
+		</ui:define>
+		
+		<ui:define name="breadcrumb">
+			<a target="_top" href="/paginas/principal.xhtml"> <h:outputText
+					value="#{msgs['title.principal']}" />
+			</a> > <h:outputText value="#{msgs['title.bem.vindo']}" />
+		</ui:define>
+		
+		<ui:define name="tools">
+			<div style="float: left;" >
+				<h4>#{msgs['msg.slogan.sistema']} - #{sessionScope.usuario.cliente.nome}</h4>
+			
+			</div>
+			
+			<div style="float: right;">
+			
+				<p:autoComplete id="buscarPedestre" value="#{principalController.pedestre}" 
+								var="p" itemLabel="#{p.nome}" itemValue="#{p.id}" forceSelection="true" queryDelay="800" cache="true"
+								minQueryLength="2" maxResults="10" completeMethod="#{principalController.buscarPedestreComplete}"
+								placeholder="#{msgs['placeholder.pesquisa.pedestre']}" size="40" maxlength="100">
+					<p:ajax event="itemSelect" listener="#{principalController.selecionaPedestre()}"/>
+				</p:autoComplete>
+			
+			</div>
+		
+		</ui:define>
+		
+		<ui:define name="conteudo">
+		
+			<div class="index-container">
+				
+				<f:subview id="estatisticas" rendered="#{sessionScope.usuario.perfil == 'ADMINISTRADOR' or sessionScope.usuario.perfil == 'GERENTE' }"></f:subview>
+				<div class="row" >
+					<div class="col-lg-3" style="padding-left: 0px !important" >
+						<div class="panel panel-primary dashboard-panel-green">
+							<div class="panel-heading panel-heading-green panel-font-color-white">
+								<div class="row">
+									<div class="col-xs-3">
+										<i class="fa fa-id-card fa-4x"></i>
+									</div>
+									<div class="col-xs-9 text-right">
+										<div class="huge" style="text-transform: lowercase !important">#{principalController.acessos}</div>
+										<div style="font-weight: bold;font-size: 11pt;">&nbsp;&nbsp;&nbsp;#{msgs['label.qtd.acessos.dia']}</div>
+									</div>
+								</div>
+								<!-- <br/> -->
+							</div>
+							<a href="/sistema/paginas/sistema/relatorios/ocupacao.xhtml">
+								<div class="panel-footer">
+									<span class="pull-left">#{msgs['label.detalhes']}</span>
+									<span class="pull-right"><i
+										class="fa fa-arrow-circle-right"></i></span>
+									<div class="clearfix"></div>
+								</div>
+							</a>
+						</div>
+					
+					</div>
+					
+					<div class="col-lg-3" >
+					
+						<div class="panel panel-primary dashboard-panel-blue">
+							<div class="panel-heading panel-heading-blue panel-font-color-white">
+								<div class="row">
+									<div class="col-xs-3">
+										<i class="fa fa-users fa-4x"></i>
+									</div>
+									<div class="col-xs-9 text-right">
+										<div class="huge" style="text-transform: lowercase !important">#{principalController.visitantes}</div>
+										<div style="font-weight: bold;font-size: 11pt;">&nbsp;&nbsp;&nbsp;#{msgs['label.qtd.visitante.dia']}</div>
+									</div>
+								</div>
+								<!-- <br/> -->
+							</div>
+							<a href="/sistema/paginas/sistema/relatorios/visitantes.xhtml">
+								<div class="panel-footer">
+									<span class="pull-left">#{msgs['label.detalhes']}</span>
+									<span class="pull-right"><i
+										class="fa fa-arrow-circle-right"></i></span>
+									<div class="clearfix"></div>
+								</div>
+							</a>
+						</div>
+					
+					</div>
+					
+					<div class="col-lg-3" >
+						
+						<div class="panel panel-primary dashboard-panel-yellow">
+							<div class="panel-heading panel-heading-yellow panel-font-color-white" >
+								<div class="row">
+									<div class="col-xs-3">
+										<i class="fa fa-unlock-alt fa-4x"></i>
+									</div>
+									<div class="col-xs-9 text-right">
+										<div class="huge" style="text-transform: lowercase !important">#{principalController.liberacoes}</div>
+										<div style="font-weight: bold;font-size: 11pt;">&nbsp;&nbsp;&nbsp;#{msgs['label.qtd.liberacoes.dia']}</div>
+									</div>
+								</div>
+								<!-- <br/> -->
+							</div>
+							<a href="/sistema/paginas/sistema/relatorios/liberacoesManuais.xhtml">
+								<div class="panel-footer">
+									<span class="pull-left">#{msgs['label.detalhes']}</span>
+									<span class="pull-right"><i
+										class="fa fa-arrow-circle-right"></i></span>
+									<div class="clearfix"></div>
+								</div>
+							</a>
+						</div>
+					
+					</div>
+					
+					<div class="col-lg-3" style="padding-right: 0px !important">
+						
+						<div class="panel panel-primary dashboard-panel-red">
+							<div class="panel-heading panel-heading-red panel-font-color-white">
+								<div class="row">
+									<div class="col-xs-3">
+										<i class="fa fa-folder fa-4x"></i>
+									</div>
+									<div class="col-xs-9 text-right">
+										<div class="huge" style="text-transform: lowercase !important">#{principalController.equipamentos}</div>
+										<div style="font-weight: bold;font-size: 11pt;">&nbsp;&nbsp;&nbsp;#{msgs['label.qtd.equipamentos.dia']}</div>
+									</div>
+								</div>
+								<!-- <br/> -->
+							</div>
+							<a href="/sistema/paginas/sistema/relatorios/equipamentosConectados.xhtml">
+								<div class="panel-footer">
+									<span class="pull-left">#{msgs['label.detalhes']}</span>
+									<span class="pull-right"><i
+										class="fa fa-arrow-circle-right"></i></span>
+									<div class="clearfix"></div>
+								</div>
+							</a>
+						</div>
+					
+					</div>
+					
+				</div>
+				
+				<div class="row" >
+					
+					<div class="col-lg-6" style="padding-left: 0px !important" >
+						<h4>#{msgs['label.ultimos.acessos']}</h4>
+						<br/>
+						<h:panelGrid columns="1" width="100%">
+							<h:column rendered="#{empty principalController.ultimas}">
+								<h:outputText value="#{msgs['msg.vazio']}" />	
+							</h:column>
+							<h:column rendered="#{not empty principalController.ultimas}">
+								<p:dataTable id="ultimos" value="#{principalController.ultimas}" 
+											 var="acesso" paginator="false" rows="10" >
+									<p:column headerText="#{msgs['label.ultimos.acessos.pedestre']}" style="text-align: center">
+										<h:outputText value="#{acesso.pedestre.nome}" />
+									</p:column>
+									<p:column headerText="#{msgs['label.ultimos.acessos.data.hora']}" style="text-align: center">
+										<h:outputText value="#{acesso.data}">
+											<f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss"/>
+										</h:outputText>
+									</p:column>
+								</p:dataTable>
+							</h:column>
+						</h:panelGrid>
+					</div>
+					<div class="col-lg-6" style="padding-right: 0px !important" >
+						<h4>#{msgs['label.equipamentos.disponiveis']}</h4>
+						<br/>
+						<h:panelGrid columns="1" width="100%">
+							<h:column rendered="#{empty principalController.equipamentosDisponiveis}">
+								<h:outputText value="#{msgs['msg.vazio']}" />	
+							</h:column>
+							<h:column rendered="#{not empty principalController.equipamentosDisponiveis}">
+								<p:dataTable id="equipamentos" value="#{principalController.equipamentosDisponiveis}" 
+											 var="equipamento" paginator="false" rows="10" >
+									<p:column headerText="#{msgs['label.nome.equipamento']}" style="text-align: center">
+										<h:outputText value="#{equipamento.nome}" />
+									</p:column>
+									<p:column headerText="#{msgs['label.local.equipamento']}" style="text-align: center">
+										<h:outputText value="#{empty equipamento.local ? 'Não especificado' : equipamento.local}" />
+									</p:column>
+								</p:dataTable>
+							</h:column>
+						</h:panelGrid>
+					</div>
+				</div>
+			
+			</div>
+
+		</ui:define>
+
+	</ui:composition>
+
+
+</body>
+</html>

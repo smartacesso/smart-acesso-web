@@ -1,0 +1,46 @@
+<resources>
+    <string name="app_name">SmartAcesso App</string>
+
+    <!-- Labels -->
+    <string name="configurations">Configurações</string>
+    <string name="email">E-mail</string>
+    <string name="usuario">Usuário</string>
+    <string name="password">Senha</string>
+    <string name="login">Entrar</string>
+    <string name="save">Salvar</string>
+    <string name="recognition_server_url">Endereço do servidor de reconhecimento</string>
+    <string name="desktop_url">Endereço do aplicativo desktop</string>
+    <string name="home">Tela de reconhecimento</string>
+    <string name="ok">Ok</string>
+    <string name="selected_device">Catraca selecionada</string>
+    <string name="position_the_face">Posicione o rosto</string>
+
+    <!-- SharedPreferences -->
+    <string name="pref_app_id">prefs_luxand_app</string>
+    <string name="pref_desktop_ip">desktop_ip</string>
+    <string name="pref_desktop_port">desktop_port</string>
+    <string name="pref_recognition_server_ip">recognition_server_ip</string>
+    <string name="pref_recognition_server_port">recognition_server_port</string>
+    <string name="pref_camera">preferred_camera</string>
+    <string name="pref_selected_device">selected_device</string>
+    <string name="pref_sdk_configurations">sdk_configurations</string>
+    <string name="pref_tipo_verificacao">tipo_verificacao</string>
+
+    <!-- Properties -->
+    <string name="prop_luxand_key">luxand_key</string>
+    <string name="tipo_verificacao">Tipo de reconhecimento</string>
+    <string name="tipo_verificacao_servidor">Servidor</string>
+    <string name="selecione">Selecione</string>
+    <string name="title_dados_segundo_plano">SmartAcesso</string>
+    <string name="label_toque_detalhes">Sincronização em segundo plano, toque para mais detalhes</string>
+    <string name="title_sincronizacao_finalizada">SmartAcesso</string>
+    <string name="msg_sincronizacao_completa_p1">Sincronização finalizada!</string>
+    <string name="msg_aguarde_sincronizacao">Aguarde a sincronização completa!</string>
+    <string name="title_sincronizando">SmartAcesso</string>
+    <string name="sair">Sair</string>
+    <string name="atualizar">Atualizar</string>
+    <string name="msg_aguarde_procuro_dados">Aguarde atualização...</string>
+    <string name="organizacao">Organização</string>
+
+
+</resources>

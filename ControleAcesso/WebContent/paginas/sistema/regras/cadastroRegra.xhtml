@@ -1,0 +1,276 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui">
+	
+<body>
+	<ui:composition template="/tema/templates/template.xhtml">
+		
+		<ui:define name="titulo">
+			#{msgs['title.sistema']} | #{cadastroRegraAcessoController.entidade.id != null 
+											? msgs['title.uc006.editar.regra'] 
+											: msgs['title.uc006.cadastrar.regra']}
+		</ui:define>
+		
+		<ui:define name="breadcrumb">
+			<a target="_top" href="/#{menuController.appName}/paginas/principal.xhtml"> <h:outputText
+					value="#{msgs['title.principal']}" />
+			</a> > 
+			<a target="_top" href="/#{menuController.appName}/paginas/sistema/regras/pesquisaRegra.xhtml"> <h:outputText
+					value="#{msgs['title.uc006.consulta.regras']}" />
+			</a> > <h:outputText value="#{cadastroRegraAcessoController.entidade.id != null 
+										? msgs['title.uc006.editar.regra'] 
+										: msgs['title.uc006.cadastrar.regra']}" />
+		</ui:define>
+		
+		<ui:define name="tools">
+			<h:panelGrid columns="4" styleClass="conteudo_tools">
+	
+				<h:commandButton id="save"
+					action="#{cadastroRegraAcessoController.salvar}"
+					title="#{msgs['alt.acao.save']}"
+					image="#{menuController.path}/tema/img/bt_saver.png">
+					<p:ajax process="@form" update="@form"/>
+				</h:commandButton>
+				
+			</h:panelGrid>
+		</ui:define>
+		
+		<ui:define name="conteudo">
+			<h:panelGrid width="100%" columns="1" headerClass="h-grid-header">
+				<f:facet name="header">
+					<h:outputText value="#{cadastroRegraAcessoController.entidade.id != null 
+										? msgs['title.uc006.editar.regra'] 
+										: msgs['title.uc006.cadastrar.regra']}"/>
+				</f:facet>
+				
+				<h:column>
+					<p:tabView id="cadastroRegraTab" widgetVar="cadastroRegraWid">
+					
+						<p:tab title="#{msgs['label.uc006.dados.regra']}">
+							<p:panelGrid columns="2" id="painelCadastroRegra" style="width: 100%">
+								
+								<p:column>
+									<p:outputLabel value="#{msgs['label.uc006.nome.regra']}" for="nome" indicateRequired="true"/>
+									<br />
+									<p:inputText id="nome" value="#{cadastroRegraAcessoController.entidade.nome}" required="true" size="40" />
+								</p:column>
+								
+								<p:column>
+									<p:outputLabel value="#{msgs['label.uc005.status']}" for="status" indicateRequired="true"/>
+									<br />
+									<p:selectOneMenu id="status" value="#{cadastroRegraAcessoController.entidade.status}" required="true" >
+										<f:selectItems value="#{cadastroRegraAcessoController.listaStatus}"/>
+									</p:selectOneMenu>
+								</p:column>
+								
+								<p:column>
+									<p:outputLabel value="#{msgs['label.uc006.data.validade']}" for="dataValidade"/>
+									<br />
+									<p:calendar id="dataValidade" value="#{cadastroRegraAcessoController.entidade.validade}" 
+											pattern="dd/MM/yyyy" mask="99/99/9999" navigator="true"/>
+								</p:column>
+								
+								<p:column>
+									<p:outputLabel value="#{msgs['label.uc006.empresa']}" for="empresa"/>
+									<br />
+									<p:selectOneMenu id="empresa" value="#{cadastroRegraAcessoController.idEmpresaSelecionada}">
+										<f:selectItems value="#{cadastroRegraAcessoController.listaEmpresas}"/>
+									</p:selectOneMenu>
+								</p:column>
+
+								<p:column>
+									<p:outputLabel value="#{msgs['label.uc006.tipo.pedestre']}" for="tipoPedestre" indicateRequired="true"/>
+									<br />
+									<p:selectOneMenu id="tipoPedestre" value="#{cadastroRegraAcessoController.entidade.tipoPedestre}" required="true">
+										<f:selectItems value="#{cadastroRegraAcessoController.listaTipoPedestre}"/>
+									</p:selectOneMenu>
+								</p:column>								
+								
+								<p:column>
+									<p:panelGrid columns="3" id="panelTipoRegra" styleClass="grid-interno">
+										<p:column>
+											<p:outputLabel value="#{msgs['label.uc006.tipo.regra']}" for="tipoRegra" indicateRequired="true"/>
+											<br />
+											<p:selectOneMenu id="tipoRegra" value="#{cadastroRegraAcessoController.entidade.tipo}" required="true" 
+													valueChangeListener="#{cadastroRegraAcessoController.eventoAlteraListaTipoRegra}">
+												<p:ajax process="@form" update="@form" event="valueChange"/>
+												<f:selectItems value="#{cadastroRegraAcessoController.listaTipoRegra}"/>
+											</p:selectOneMenu>
+										</p:column>
+										
+										<p:column rendered="#{cadastroRegraAcessoController.tipoRegra == 'ACESSO_PERIODO'}">
+											<p:outputLabel value="#{msgs['label.uc006.data.inicio']}" indicateRequired="true"/>
+											<br />
+											<p:calendar id="dataInicio" value="#{cadastroRegraAcessoController.entidade.dataInicioPeriodo}" 
+													pattern="dd/MM/yyyy" mask="99/99/9999" size="10" navigator="true"/>
+										</p:column>
+										
+										<p:column rendered="#{cadastroRegraAcessoController.tipoRegra == 'ACESSO_PERIODO'}">
+											<p:outputLabel value="#{msgs['label.uc006.data.fim']}" indicateRequired="true"/>
+											<br />
+											<p:calendar id="dataFim" value="#{cadastroRegraAcessoController.entidade.dataFimPeriodo}" 
+													pattern="dd/MM/yyyy" mask="99/99/9999" size="10" navigator="true"/>
+										</p:column>
+										
+										<p:column rendered="#{cadastroRegraAcessoController.tipoRegra == 'ACESSO_CREDITO'}">
+											<p:outputLabel value="#{msgs['label.uc008.qtde.creditos']}"/>
+											<br />
+											<p:inputNumber id="qtdeCreditos" value="#{cadastroRegraAcessoController.entidade.qtdeDeCreditos}" 
+													minValue="0" decimalPlaces="0" size="6"/>
+										</p:column>
+										
+										<p:column rendered="#{cadastroRegraAcessoController.tipoRegra == 'ACESSO_CREDITO'}">
+											<p:outputLabel value="#{msgs['label.uc008.validade.creditos.dias']}"/>
+											<br />
+											<p:inputNumber id="validadeCreditos" value="#{cadastroRegraAcessoController.entidade.diasValidadeCredito}" 
+													minValue="0" decimalPlaces="0" size="6"/>
+										</p:column>
+										
+										<p:column rendered="#{cadastroRegraAcessoController.tipoRegra == 'ACESSO_ESCALA'}">
+											<p:outputLabel value="#{msgs['label.uc006.turnos.disponiveis']}"/>
+											<br />
+											<p:selectOneMenu id="escalasDisponiveis" value="#{cadastroRegraAcessoController.entidade.tipoEscala}"
+													autoWidth="false">
+												<f:selectItems value="#{cadastroRegraAcessoController.listaTipoEscala}"/>
+											</p:selectOneMenu>
+										</p:column>
+										
+										<p:column rendered="#{cadastroRegraAcessoController.tipoRegra == 'ACESSO_ESCALA'}">
+											<p:outputLabel value="#{msgs['label.uc006.horario.inicio.turno']}"/>
+											<br />
+											<p:calendar id="horarioInicioTurno" value="#{cadastroRegraAcessoController.entidade.horarioInicioTurno}" 
+												timeOnly="true" pattern="HH:mm" mask="99:99" size="10" navigator="true"/>
+										</p:column>
+  			
+
+									
+									</p:panelGrid>
+									
+								</p:column>
+								
+								<p:column>
+									<p:outputLabel value="#{msgs['label.uc006.descricao']}" for="descricao"/>
+									<br />
+									<p:inputTextarea id="descricao" value="#{cadastroRegraAcessoController.entidade.descricao}" cols="50" rows="4" 
+										maxlength="255"/>
+								</p:column>
+							</p:panelGrid>
+						
+						</p:tab>
+						
+						<p:tab title="#{msgs['label.uc006.horarios']}"
+							rendered="#{cadastroRegraAcessoController.tipoRegra == 'ACESSO_HORARIO' 
+									or cadastroRegraAcessoController.tipoRegra == 'ACESSO_PERIODO'}">
+							
+							<h:panelGrid columns="4" styleClass="conteudo_tools">
+								<f:facet name="header">
+									<h:outputText value="#{msgs['title.uc006.lista.horarios']}" style="font-size: 20px; margin-left: 12px; margin-top: 8px;"/>
+								</f:facet>
+								
+							</h:panelGrid>
+
+							<div style="float: right;">
+								<p:commandButton id="addHorario" value="#{msgs['alt.acao.adicionar']}" 
+										action="#{cadastroRegraAcessoController.adicionarHorario}"
+										update="horarios" style="margin-right: 12px; margin-top: 8px;">
+								</p:commandButton>
+							</div>
+							
+							<p:panelGrid columns="7" id="horarios" style="width: 100%;">
+							
+								<h:outputText value="#{msgs['msg.nenhum.item.encontrato.adicionar']}" escape="false"
+											  rendered="#{empty cadastroRegraAcessoController.listaHorarios}" />
+								
+								<p:dataTable id="tableHorarios" value="#{cadastroRegraAcessoController.listaHorarios}" 
+									var="horario" paginator="true" rows="5" paginatorPosition="bottom" 
+									editable="true" editMode="cell" paginatorAlwaysVisible="false"
+									rendered="#{not empty cadastroRegraAcessoController.listaHorarios}">
+								
+									<p:column headerText="#{msgs['label.uc006.nome.regra']}" style="text-align: center;">
+										<p:inputText value="#{horario.nome}"/>
+									</p:column>
+									
+									<p:column headerText="#{msgs['label.uc005.status']}" style="text-align: center;">
+										<p:selectOneMenu value="#{horario.status}"  style="width:100%" autoWidth="false" >
+											<f:selectItems value="#{cadastroRegraAcessoController.listaStatus}"/>
+										</p:selectOneMenu>
+									</p:column>
+									
+									<p:column headerText="#{msgs['label.uc006.dias.semana']}" style="text-align: center; width: 400px;">
+										<h:panelGrid columns="3" width="auto">
+											<h:column>
+												<p:selectBooleanCheckbox value="#{horario.sunday}" style="text-align: left;">
+													<p:ajax process="@this" update="@this"/>
+												</p:selectBooleanCheckbox>
+												<h:outputText value="Domingo" style="margin-left: 3px"/>
+											</h:column>
+											<h:column>
+												<p:selectBooleanCheckbox value="#{horario.monday}">
+													<p:ajax process="@this" update="@this"/>
+												</p:selectBooleanCheckbox>
+												<h:outputText value="Segunda-feira" style="margin-left: 3px"/>
+											</h:column>
+											<h:column>
+												<p:selectBooleanCheckbox value="#{horario.tuesday}" >
+													<p:ajax process="@this" update="@this"/>
+												</p:selectBooleanCheckbox>
+												<h:outputText value="Terça-feira" style="margin-left: 3px"/>
+											</h:column>
+											<h:column>
+												<p:selectBooleanCheckbox value="#{horario.wednesday}">
+													<p:ajax process="@this" update="@this"/>
+												</p:selectBooleanCheckbox>
+												<h:outputText value="Quarta-feira" style="margin-left: 3px"/>
+											</h:column>
+											<h:column>
+												<p:selectBooleanCheckbox value="#{horario.thursday}" >
+													<p:ajax process="@this" update="@this"/>
+												</p:selectBooleanCheckbox>
+												<h:outputText value="Quinta-feira" style="margin-left: 3px"/>
+											</h:column>
+											<h:column>
+												<p:selectBooleanCheckbox value="#{horario.friday}" >
+													<p:ajax process="@this" update="@this"/>
+												</p:selectBooleanCheckbox>
+												<h:outputText value="Sexta-feira" style="margin-left: 3px"/>
+											</h:column>
+											<h:column>
+												<p:selectBooleanCheckbox value="#{horario.saturday}" >
+													<p:ajax process="@this" update="@this"/>
+												</p:selectBooleanCheckbox>
+												<h:outputText value="Sábado" style="margin-left: 3px"/>
+											</h:column>
+										</h:panelGrid>
+									</p:column>
+									
+									<p:column headerText="#{msgs['label.uc006.horario.inicio']}" style="text-align: center;">
+										<p:calendar value="#{horario.horarioInicio}" timeOnly="true" pattern="HH:mm" mask="99:99" navigator="true"/>
+									</p:column>
+									
+									<p:column headerText="#{msgs['label.uc006.horario.fim']}" style="text-align: center;">
+										<p:calendar value="#{horario.horarioFim}" timeOnly="true" pattern="HH:mm" mask="99:99" navigator="true"/>
+									</p:column>
+							        
+							        <p:column headerText="#{msgs['alt.acao.excluir']}" style="text-align: center; width: 35px;">
+										<h:commandButton image="#{menuController.path}/tema/img/bt_remove_min.png" 
+													title="#{msgs['alt.acao.excluir']}" action="#{cadastroRegraAcessoController.removeHorario(horario)}">
+											<p:ajax process="@this" update="form:cadastroRegraTab:tableHorarios form:cadastroRegraTab:horarios"/>
+										</h:commandButton>
+									</p:column>
+									
+								</p:dataTable>
+							</p:panelGrid>
+						</p:tab>
+					
+					</p:tabView>
+				</h:column>
+			</h:panelGrid>
+		</ui:define>
+	</ui:composition>
+</body>
+
+</html>

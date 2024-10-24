@@ -1,0 +1,218 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:c="http://java.sun.com/jsp/jstl/core" 
+	id="html" >
+
+
+
+<h:head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"></meta>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
+	<meta name="theme-color" content="#00263d"/>
+	
+	<title>
+		<ui:insert name="titulo">Title Page</ui:insert>
+	</title>
+	
+	<link rel="icon" href="/#{menuController.appName}/tema/img/icon_48x48.png"/>
+	
+	<!-- estilos -->
+	<link type="text/css" rel="stylesheet" href="/#{menuController.appName}/#{menuController.path}/tema/css/bootstrap.min.css" />
+	<link type="text/css" rel="stylesheet" href="/#{menuController.appName}/#{menuController.path}/tema/css/agency.css" />
+	<link type="text/css" rel="stylesheet" href="/#{menuController.appName}/#{menuController.path}/tema/css/sb-admin-2.css" />
+	<link type="text/css" rel="stylesheet" href="/#{menuController.appName}/#{menuController.path}/tema/css/ui-theme.css" />
+	<link type="text/css" rel="stylesheet" href="/#{menuController.appName}/#{menuController.path}/tema/css/base.css" />
+	
+	<!-- fontes -->
+	<link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css" />
+	<link href='https://fonts.googleapis.com/css?family=Kaushan+Script' rel='stylesheet' type='text/css' />
+	<link href='https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic,700italic' rel='stylesheet' type='text/css' />
+	<link href='https://fonts.googleapis.com/css?family=Roboto+Slab:400,100,300,700' rel='stylesheet' type='text/css'/>
+	<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,700" rel="stylesheet"/>
+	<link href="/#{menuController.appName}/#{menuController.path}/tema/fonts/awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+	
+	<!-- scripts do sistema -->
+	<script type="text/javascript" src="/#{menuController.appName}/tema/js/bootstrap.min.js"></script>
+	<script type="text/javascript" src="/#{menuController.appName}/tema/js/base.js"/>
+	
+	<!-- algum javascript ou css especifico da página -->
+	<ui:insert name="scripts">
+	
+	</ui:insert>
+		
+</h:head>
+<f:view locale="pt_BR" contentType="text/html" >	
+	
+	<f:loadBundle basename="br.com.startjob.acesso.resources.#{menuController.pathCode}message"
+			var="msgs" />
+
+	<h:body id="body" >
+	
+		<div style="margin: 0px;top: 71px;height: 91%;">
+			<div class="overlay"></div>	
+			<div style="margin: 0px;position: fixed;top: 0;width: 100%;" class="zindex-menu">
+				<div class="menu_normal">
+					<div class="overlay"></div>	
+					<!-- Menu -->
+					<ui:insert name="menu">
+						<ui:include src="./menu.xhtml" />
+					</ui:insert>
+				</div>
+			</div>
+			
+			<div style="margin: 0px;top: 0;height: 71px;width: 100%;z-index: -100"></div>
+			
+			<h:form id="form" styleClass="form_external" >
+			
+				<p:ajaxStatus onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" />
+             
+				<p:dialog widgetVar="statusDialog" modal="true" 
+						  draggable="false" closable="false" resizable="false" showHeader="false">
+					<div style="margin: 10px">
+					    <p:graphicImage value="/tema/img/status.gif" />
+					    <h:outputText value="Aguarde..." style="font-weight: bold;margin-left: 10px;" />
+				    </div>
+				</p:dialog>
+				
+			
+		        <div class="breadcrumb_pro" >
+					<!-- Caminho -->
+					<ui:insert name="breadcrumb"></ui:insert>
+				</div>
+			
+				<div class="tools_content" style="background-color: rgb(240,240,241);position: absolute;left: 0;right: 0;" >
+					<!-- Barra de ferramentas -->
+					<div style="margin-left: 20px; margin-right: 20px;">
+						<ui:insert name="tools">
+							<ui:include src="./tools.xhtml" />
+						</ui:insert>
+					</div>
+				</div>
+				
+				<div class="conteudo_internal total">
+				
+					<!-- Mensagens JSF customizadas -->
+					<p:growl id="growl" showDetail="true" showSummary="false" sticky="true" severity="info,warn,error,fatal" >
+						<p:autoUpdate />
+					</p:growl>
+						
+					<!-- Corpo -->
+					<ui:insert name="conteudo">
+						
+					</ui:insert>
+					<br/><br/>
+					
+				</div>
+				            
+				<footer>
+					<div class="footer_external">
+						<ui:include src="./footer_external.xhtml" />
+					</div>
+				</footer>
+				
+				<p:dialog header="#{msgs['header.download.app']}"
+					widgetVar="downloads" modal="true" width="400px">
+			
+					<br />
+					<h:panelGrid columns="1">
+						<h:column>
+							<h:outputText value="#{msgs['label.antes.instalar']}" />
+							<br />
+							<a href="#{menuController.urlMain}/downloads/jre-8u201-windows-i586.exe" target="_blank">
+								jre-8u201-windows-i586.exe
+							</a>
+							<br />
+							<br />
+						</h:column>
+						<h:column>
+							<h:outputText value="#{msgs['label.instalar']}" />
+							<br />
+							<a href="#{menuController.urlMain}/downloads/SmartAcessoInstaller.exe" target="_blank">
+								SmartAcessoInstaller.exe
+							</a>
+							<br />
+							<br />
+						</h:column>
+						<h:column>
+							<h:outputText value="#{msgs['label.instalar.depois']}" />
+							<br />
+							<br />
+						</h:column>
+						<h:column>
+							<h:outputText value="#{msgs['label.instalar.depois.2']}" />
+							<br />
+							<br />
+						</h:column>
+					</h:panelGrid>
+			
+				</p:dialog>
+				
+				<p:dialog header="#{msgs['header.download.smart.faces.app']}"
+					widgetVar="downloadSmartFaces" modal="true" width="400px">
+			
+					<br />
+					<h:panelGrid columns="1">
+						<h:column>
+							<h:outputText value="#{msgs['label.antes.instalar']}" />
+							<br />
+							<a href="#{menuController.urlMain}/downloads/jre-8u201-windows-i586.exe" target="_blank">
+								jre-8u201-windows-i586.exe
+							</a>
+							<br />
+							<br />
+						</h:column>
+						<h:column>
+							<h:outputText value="#{msgs['label.instalar.smart.faces']}" />
+							<br />
+							<a href="#{menuController.urlMain}/downloads/SmartFacesInstaller.exe" target="_blank">
+								SmartFacesInstaller.exe
+							</a>
+							<br />
+							<a href="#{menuController.urlMain}/downloads/SmartFacesInstaller-x86.exe" target="_blank">
+								SmartFacesInstaller-x86.exe
+							</a>
+							<br /><br />
+						</h:column>
+						<h:column>
+							<h:outputText value="#{msgs['label.instalar.depois']}" />
+							<br />
+							<br />
+						</h:column>
+						<h:column>
+							<h:outputText value="#{msgs['label.instalar.app.android']}" />
+							<br />
+							<a href="https://play.google.com/store/apps/details?id=br.com.smartacesso&amp;hl=pt_BR&amp;gl=US" target="_blank">
+								SmartAcesso App - Google Play
+							</a>
+							<br />
+							<a href="http://smartacesso.com.br/downloads/smartfaces/smartacesso-app-release.apk" target="_blank">
+								SmartAcesso App - Apk
+							</a>
+							<br />
+							<br />
+						</h:column>
+					</h:panelGrid>
+			
+				</p:dialog>
+				
+				<ui:insert name="modal">
+					<!-- As modais devem ser inseridas nesta área -->
+				</ui:insert>
+				
+			</h:form>
+			
+			<ui:insert name="modalOutForm">
+				<!-- As modais devem ser inseridas nesta área -->
+			</ui:insert>
+			
+		</div>
+		
+	</h:body>
+	
+</f:view>
+</html>

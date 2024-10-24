@@ -1,0 +1,169 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui">
+	
+	<style>
+		.whiteIcon .ui-icon{
+			color: #fff;
+		}
+	</style>
+	
+	<p:panelGrid columns="5" id="painelCadastroPedestreRegras">
+		
+		<p:column>
+			<p:outputLabel value="#{msgs['label.uc008.regra']}" for="buscarRegraAutoComplete"/>
+			<br />
+			<p:autoComplete id="buscarRegraAutoComplete" value="#{cadastroPedestreController.pedestreRegra.regra}" 
+				var="regra" itemLabel="#{regra.nome}" itemValue="#{regra}" forceSelection="true" queryDelay="800" cache="true"
+				minQueryLength="2" maxResults="10" completeMethod="#{cadastroPedestreController.buscarRegraAutoComplete}">
+				
+				<p:ajax event="itemSelect" update="painelCadastroPedestreRegras"/>
+			</p:autoComplete>
+			
+			<p:commandButton id="buscarRegras" actionListener="#{cadastroPedestreController.montaListaTipoRegra}" 
+				 	icon="pi pi-search" update="form:dialogEscolherRegra" oncomplete="PF('escolherRegra').show(); return false;"
+				 	styleClass="whiteIcon" process="@this"/>
+		</p:column>
+		
+		<p:column>
+			<p:outputLabel value="#{msgs['label.uc008.validade']}" for="validadeRegra"/>
+			<br />
+			<p:calendar id="validadeRegra" value="#{cadastroPedestreController.pedestreRegra.validade}" 
+					pattern="dd/MM/yyyy" mask="99/99/9999"/>
+		</p:column>
+		
+		<p:column rendered="#{cadastroPedestreController.pedestreRegra.regra.tipo == 'ACESSO_CREDITO'}">
+			<p:outputLabel value="#{msgs['label.uc008.qtde.creditos']}"/>
+			<br />
+			<p:inputNumber id="qtdeCreditos" value="#{cadastroPedestreController.pedestreRegra.regra.qtdeDeCreditos}" 
+					minValue="0" decimalPlaces="0" size="6"/>
+		</p:column>
+		
+		<p:column rendered="#{cadastroPedestreController.pedestreRegra.regra.tipo == 'ACESSO_CREDITO'}">
+			<p:outputLabel value="#{msgs['label.uc008.validade.creditos.dias']}"/>
+			<br />
+			<p:inputNumber id="validadeCreditos" value="#{cadastroPedestreController.pedestreRegra.regra.diasValidadeCredito}" 
+					minValue="0" decimalPlaces="0" size="6"/>
+		</p:column>
+		
+		<p:column rendered="#{cadastroPedestreController.pedestreRegra.regra.tipo == 'ACESSO_PERIODO'
+						or cadastroPedestreController.pedestreRegra.regra.tipo == 'ACESSO_ESCALA'}">
+			<p:outputLabel value="#{msgs['label.uc006.data.inicio']}" indicateRequired="true"/>
+			<br />
+			<p:calendar id="dataInicio" value="#{cadastroPedestreController.pedestreRegra.regra.dataInicioPeriodo}" 
+					pattern="dd/MM/yyyy" mask="99/99/9999" size="10"/>
+		</p:column>
+		
+		<p:column rendered="#{cadastroPedestreController.pedestreRegra.regra.tipo == 'ACESSO_PERIODO'}">
+			<p:outputLabel value="#{msgs['label.uc006.data.fim']}" indicateRequired="true"/>
+			<br />
+			<p:calendar id="dataFim" value="#{cadastroPedestreController.pedestreRegra.regra.dataFimPeriodo}"
+					pattern="dd/MM/yyyy" mask="99/99/9999" size="10"/>
+		</p:column>
+		
+		<p:column rendered="#{cadastroPedestreController.pedestreRegra.regra.tipo == 'ACESSO_ESCALA_3_3'}">
+			<p:outputLabel value="#{msgs['label.uc006.data.inicio']}" indicateRequired="true"/>
+			<br />
+			<p:calendar id="dataInicioEscala3_3" value="#{cadastroPedestreController.pedestreRegra.dataInicioEscala3_3}" 
+					pattern="dd/MM/yyyy" mask="99/99/9999" size="10"/>
+		</p:column>
+		
+		<p:column>
+			<br />
+			<p:commandButton id="adicionarRegra" action="#{cadastroPedestreController.adicionarRegra()}" 
+					value="#{msgs['alt.acao.adicionar']}" process="painelCadastroPedestreRegras" 
+					update="painelCadastroPedestreRegras regras form:dialogEscolherRegra"/>
+		</p:column>
+	</p:panelGrid>
+	
+	<br />
+	
+	<p:panelGrid columns="2" id="regras" style="width: 100%;">
+							
+		<h:outputText value="#{msgs['msg.nenhum.item.encontrato.adicionar']}" escape="false"
+					  rendered="#{empty cadastroPedestreController.listaPedestreRegra}" />
+	
+		<p:dataTable id="tableRegras" value="#{cadastroPedestreController.listaPedestreRegra}" 
+			var="pedestreRegra" paginator="true" rows="5" 
+			paginatorPosition="bottom" paginatorAlwaysVisible="false"
+			rendered="#{not empty cadastroPedestreController.listaPedestreRegra}">
+			
+			<p:column headerText="#{msgs['label.uc008.nome']}" style="text-align: center;">
+				<h:outputText id="nomeRegra" value="#{pedestreRegra.regra.nome}" 
+					style="color: #{pedestreRegra.dataRemovido != null ? 'gray' : 'black'}; 
+					font-weight: #{pedestreRegra.dataRemovido != null ? '' : 'bold'};"/>
+						
+				<h:button id="ajudaRegra" title="#{msgs[alt.label.ajuda]}" 
+					image="#{menuController.path}/tema/img/bt_helper.png" 
+					style="height: 20px; margin-left: 2px" 
+					onclick="return false;">
+				</h:button>
+				
+				<p:tooltip id="dicaMostraDadosRegra" for="nomeRegra ajudaRegra" position="bottom">
+					<p:column>
+				        <h:outputText value="#{msgs['label.uc008.nome']}: " style="font-weight: bold; color: #fff"/>
+				        <h:outputText value="#{pedestreRegra.regra.nome}" />
+					</p:column>
+					<br />
+					<p:column>
+						<h:outputText value="#{msgs['label.uc008.validade']}: " style="font-weight: bold; color: #fff"/>
+				        <h:outputText value="#{pedestreRegra.validade}">
+				        	<f:convertDateTime pattern="dd/MM/yyyy"/>
+				        </h:outputText>
+					</p:column>
+					<br />
+					<p:column>
+						<h:outputText value="#{msgs['label.uc006.tipo.regra']}: " style="font-weight: bold; color: #fff"/>
+				        <h:outputText value="#{pedestreRegra.regra.tipo.descricao}" />
+					</p:column>
+					<br />
+					<p:column rendered="#{pedestreRegra.regra.tipo == 'ACESSO_CREDITO'}">
+						<h:outputText value="Qtde créditos: " style="font-weight: bold; color: #fff"/>
+				        <h:outputText value="#{pedestreRegra.qtdeDeCreditos}/#{pedestreRegra.qtdeTotalDeCreditos}" />
+						<br />
+					</p:column>
+					<p:column rendered="#{pedestreRegra.regra.tipo == 'ACESSO_CREDITO'}">
+						<h:outputText value="Validade dos créditos em dias: " style="font-weight: bold; color: #fff"/>
+				        <h:outputText value="#{pedestreRegra.diasValidadeCredito}" />
+						<br />
+					</p:column>
+					<p:column rendered="#{pedestreRegra.regra.tipo == 'ACESSO_PERIODO' or
+								pedestreRegra.regra.tipo == 'ACESSO_ESCALA'}">
+						<h:outputText value="Data de início: " style="font-weight: bold; color: #fff"/>
+				        <h:outputText value="#{pedestreRegra.dataInicioPeriodo}">
+				        	<f:convertDateTime pattern="dd/MM/yyyy"/>
+				        </h:outputText>
+						<br />
+					</p:column>
+					<p:column rendered="#{pedestreRegra.regra.tipo == 'ACESSO_PERIODO'}">
+						<h:outputText value="Data final: " style="font-weight: bold; color: #fff"/>
+				        <h:outputText value="#{pedestreRegra.dataFimPeriodo}">
+				        	<f:convertDateTime pattern="dd/MM/yyyy"/>
+				        </h:outputText>
+					</p:column>
+			    </p:tooltip>
+				
+			</p:column>
+			
+			<p:column headerText="#{msgs['label.uc008.validade']}" style="text-align: center;">
+				<h:outputText value="#{pedestreRegra.validade}" style="color: #{pedestreRegra.dataRemovido != null ? 'gray' : 'black'}">
+					<f:convertDateTime pattern="dd/MM/yyyy"/>
+				</h:outputText>
+			</p:column>
+			
+			<p:column headerText="#{msgs['label.uc006.tipo.regra']}" style="text-align: center;">
+				<h:outputText value="#{pedestreRegra.regra.tipo.descricao}" style="color: #{pedestreRegra.dataRemovido != null ? 'gray' : 'black'}"/>
+			</p:column>
+			
+			<p:column headerText="#{msgs['alt.acao.excluir']}" style="text-align: center;">
+				<h:commandButton image="#{menuController.path}/tema/img/bt_remove_min.png" rendered="#{pedestreRegra.dataRemovido == null}"
+							title="#{msgs['alt.acao.excluir']}" action="#{cadastroPedestreController.removerRegra(pedestreRegra)}">
+					<p:ajax process="@this" update="form:cadastroPedestreTab:tableRegras form:cadastroPedestreTab:regras"/>
+				</h:commandButton>
+			</p:column>
+			
+		</p:dataTable>
+	</p:panelGrid>
+</ui:composition>

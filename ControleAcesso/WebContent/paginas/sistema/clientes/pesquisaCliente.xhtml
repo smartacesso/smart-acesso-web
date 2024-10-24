@@ -1,0 +1,137 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui">
+	
+<body>
+
+	<ui:composition template="/tema/templates/template.xhtml">
+	
+		<ui:define name="titulo">
+			#{msgs['title.sistema']} | #{msgs['title.uc001.consulta.clientes']}
+		</ui:define>
+		
+		<ui:define name="breadcrumb">
+			<a target="_top" href="/#{menuController.appName}/paginas/principal.xhtml"> <h:outputText
+					value="#{msgs['title.principal']}" />
+			</a> > <h:outputText value="#{msgs['title.uc001.consulta.clientes']}" />
+		</ui:define>
+		
+		<ui:define name="tools">
+			<h:panelGrid columns="4" styleClass="conteudo_tools">
+	
+				<h:commandButton id="acaoNovo"
+						action="#{consultaClienteController.novo}"
+						title="#{msgs['alt.acao.novo.cliente']}" alt="#{msgs['alt.acao.novo.cliente']}"
+						image="#{menuController.path}/tema/img/bt_newer.png">
+					
+					<p:ajax process="@this" update="@form"/>
+				</h:commandButton>
+				
+				<h:commandButton id="acaoBuscar" 
+						action="#{consultaClienteController.buscar()}" 
+						title="#{msgs['alt.acao.buscar']}" alt="#{msgs['alt.acao.buscar']}"
+						image="#{menuController.path}/tema/img/bt_searcher.png">
+					
+					<p:ajax process="@form" update="@form"/>
+				</h:commandButton>
+
+				<h:commandButton id="acaoLimpar" 
+						action="#{consultaClienteController.limpar()}"
+						title="#{msgs['alt.acao.limpar']}" alt="#{msgs['alt.acao.limpar']}"
+						image="#{menuController.path}/tema/img/bt_cleaner.png">
+					
+					<p:ajax process="@this" update="@form"/>
+				</h:commandButton>
+				
+			</h:panelGrid>
+			
+			<div style="float: right;">
+				<p:inputText id="filtro-nome" placeholder="Filtrar por nome" style="width:200px;" 
+						value="#{consultaClienteController.parans['nome']}"/>
+				
+				<p:inputText id="filtro-cnpj" placeholder="Filtrar por CNPJ" style="width:200px;"
+						value="#{consultaClienteController.parans['cnpj']}"/>
+			</div>
+		</ui:define>
+		
+		<ui:define name="conteudo">
+			
+			<h:panelGrid width="100%" columns="1" headerClass="h-grid-header">
+				<f:facet name="header">
+					<h:outputText value="#{msgs['title.uc001.consulta.clientes']}" />
+				</f:facet>
+				
+				<h:column>
+				
+					<ui:include src="/tema/templates/vazio.xhtml">
+						<ui:param name="exibe" value="#{empty consultaClienteController.result}" />
+						<ui:param name="exibeAdicionar" value="true" />
+					</ui:include>
+					
+					<p:dataTable id="clientesTable" value="#{consultaClienteController.result}" var="cliente" 
+						rendered="#{not empty consultaClienteController.result}" paginator="true" 
+						rows="#{consultaClienteController.quantPorPagina}" paginatorPosition="bottom"
+						paginatorAlwaysVisible="false" >
+						
+						<p:column headerText="#{msgs['label.uc001.nome']}" style="text-align: center">
+							<h:outputText value="#{cliente.nome}" />
+						</p:column>
+	
+						<p:column headerText="#{msgs['label.uc001.email']}" style="text-align: center">
+							<h:outputText value="#{cliente.email}" />
+						</p:column>
+	
+						<p:column headerText="#{msgs['label.uc001.cnpj']}" style="text-align: center">
+							<h:outputText value="#{cliente.cnpj}">
+								<f:converter converterId="cnpjConverter"/>
+							</h:outputText>
+						</p:column>
+	
+						<p:column headerText="#{msgs['label.uc001.status']}" style="text-align: center">
+							<h:outputText value="#{cliente.status}" />
+						</p:column>
+						
+						<p:column headerText="#{msgs['alt.acao.editar']}" style="text-align: center;width: 40px">
+							<h:commandButton id="botaoEditarCliente"
+								action="#{consultaClienteController.editar(cliente.id)}"
+								title="#{msgs['alt.acao.novo.cliente']}"
+								image="#{menuController.path}/tema/img/bt_edit_min.png">
+							</h:commandButton>
+						</p:column>
+	
+						<p:column headerText="#{msgs['alt.acao.excluir']}" style="text-align: center;width: 40px">
+							<h:commandButton image="#{menuController.path}/tema/img/bt_remove_min.png" 
+										title="#{msgs['alt.acao.excluir']}" >
+								
+								<f:setPropertyActionListener value="#{cliente}" target="#{consultaClienteController.clienteSelecionado}" />
+								<p:ajax oncomplete="PF('confirmarExclusao').show()"></p:ajax>
+							</h:commandButton>
+						</p:column>
+						
+					</p:dataTable>
+				
+				</h:column>
+				
+			</h:panelGrid>
+				
+			<p:confirmDialog id="dialogConfirmarExclusao"
+				widgetVar="confirmarExclusao"
+					header="Confirmar"
+					message="Tem certeza que deseja excluir este cliente?">
+				
+				<p:button value="Não" onclick="PF('confirmarExclusao').hide(); return false;"/>
+				<p:commandButton value="Sim" oncomplete="PF('confirmarExclusao').hide();"  
+					action="#{consultaClienteController.excluirCliente()}" process="@this" update="@form"/>
+			</p:confirmDialog>
+				
+		</ui:define>
+
+	</ui:composition>
+
+
+</body>
+</html>

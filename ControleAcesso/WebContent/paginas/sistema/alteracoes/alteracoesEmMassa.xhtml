@@ -1,0 +1,420 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui">
+	
+<body>
+	
+	<f:metadata>  
+    	<f:event type="preRenderView" listener="#{alteracoesEmMassaController.exibeMensagens}"/>  
+	</f:metadata>
+	
+	<ui:composition template="/tema/templates/template.xhtml">
+		<ui:define name="titulo">
+			#{msgs['title.sistema']} | #{msgs['title.uc014.alteracao.em.massa']}
+		</ui:define>
+		
+		<ui:define name="breadcrumb">
+			<a target="_top" href="/#{menuController.appName}/paginas/principal.xhtml"> <h:outputText
+					value="#{msgs['title.principal']}" />
+			</a> > <h:outputText value="#{msgs['title.uc014.alteracao.em.massa']}" />
+		</ui:define>
+		
+		<ui:define name="tools">
+			<h:panelGrid columns="5" styleClass="conteudo_tools">
+				
+				<h:commandButton id="acaoBuscar" 
+						action="#{alteracoesEmMassaController.buscar}" 
+						title="#{msgs['alt.acao.buscar']}" alt="#{msgs['alt.acao.buscar']}"
+						image="#{menuController.path}/tema/img/bt_searcher.png">
+					
+					<p:ajax process="@form" update="@form"/>
+				</h:commandButton>
+
+				<h:commandButton id="acaoLimpar" 
+						action="#{alteracoesEmMassaController.limpar}"
+						title="#{msgs['alt.acao.limpar']}" alt="#{msgs['alt.acao.limpar']}"
+						image="#{menuController.path}/tema/img/bt_cleaner.png" >
+					
+					<p:ajax process="@this" update="@form"/>
+				</h:commandButton>
+				
+				<h:commandButton id="acaoAlterarDados"
+						title="#{msgs['alt.acao.alterar.dados.em.massa']}" alt="#{msgs['alt.acao.alterar.dados.em.massa']}"
+						image="#{menuController.path}/tema/img/bt_mult_training.png" 
+						onclick="PF('alteracaoEmMassa').show(); return false;"/>
+			
+			</h:panelGrid>
+			
+			<div style="float: right;">
+				
+				<p:inputText id="filtro-nome" placeholder="Filtrar por nome" 
+						style="width:200px;" 
+						value="#{alteracoesEmMassaController.parans['nome']}"
+						onblur="sincronizarFiltro(this, 'filtro-nome-sync');"
+						styleClass="filtro-nome filtro-nome-sync"/>
+						
+				<div style="float: right;">				
+					<p:selectOneMenu id="filtro-emepresa" value="#{alteracoesEmMassaController.parans['empresa.id']}"
+						onchange="sincronizarFiltro(this, 'filtro-empresa-sync');"
+						valueChangeListener="#{alteracoesEmMassaController.eventoEmpresaSelecionada}" 
+						styleClass="filtro-empresa-sync">
+						<f:selectItems value="#{alteracoesEmMassaController.listaEmpresas}"/>
+						<f:converter converterId="javax.faces.Long"/>
+					</p:selectOneMenu>
+					
+					<h:commandButton id="acaoFiltrosAvancados" 
+						image="#{menuController.path}/tema/img/ic_search_details.png"
+						styleClass="filtro-button"
+						action="#{alteracoesEmMassaController.toggleFiltroFlag('procurarPedestre-filtroFlag')}">
+						<p:ajax process="@this" update="@this" oncomplete="alternarFiltrosAvançados();"/>
+					</h:commandButton>
+					
+					<p:tooltip for="acaoFiltrosAvancados" value="#{msgs['alt.acao.alternar.filtros.avancados']}" />
+				</div>
+				
+			</div>
+			
+		</ui:define>
+		
+		<ui:define name="conteudo">
+		
+			<p:dialog id="dialogAlteracaoEmMassa" widgetVar="alteracaoEmMassa" header="#{msgs['title.uc014.dados.para.alteracao.em.massa']}"
+				modal="true" width="70%" resizable="false" positionType="absolute">
+				<p:panelGrid id="alteracaoEmpresa" columns="4">
+				
+					<p:column>
+						<p:outputLabel value="#{msgs['label.uc008.empresa']}" for="empresa-alterar"/>
+						<br />
+						<p:selectOneMenu id="empresa-alterar" value="#{alteracoesEmMassaController.idEmpresaAlteracao}"
+							valueChangeListener="#{alteracoesEmMassaController.eventoEmpresaSelecionada}">
+							<f:selectItems value="#{alteracoesEmMassaController.listaEmpresas}"/>
+							<p:ajax process="@this" update="@this departamento-alterar centro-alterar cargo-alterar" 
+								event="valueChange"/>
+							<f:converter converterId="javax.faces.Long"/>
+						</p:selectOneMenu>
+					</p:column>
+					
+					<p:column>
+						<p:outputLabel value="#{msgs['label.uc008.departamento']}" for="departamento-alterar"/>
+						<br />
+						<p:selectOneMenu id="departamento-alterar" value="#{alteracoesEmMassaController.idDepartamentoAlteracao}">
+							<f:selectItems value="#{alteracoesEmMassaController.listaDepartamentos}"/>
+							<f:converter converterId="javax.faces.Long"/>
+						</p:selectOneMenu>
+					</p:column>
+					
+					<p:column>
+						<p:outputLabel value="#{msgs['label.uc008.centro.custo']}" for="centro-alterar"/>
+						<br />
+						<p:selectOneMenu id="centro-alterar" value="#{alteracoesEmMassaController.idCentroCustoAlteracao}">
+							<f:selectItems value="#{alteracoesEmMassaController.listaCentrosDeCusto}"/>
+							<f:converter converterId="javax.faces.Long"/>
+						</p:selectOneMenu>
+					</p:column>
+					
+					<p:column>
+						<p:outputLabel value="#{msgs['label.uc008.cargo']}" for="cargo-alterar"/>
+						<br />
+						<p:selectOneMenu id="cargo-alterar" value="#{alteracoesEmMassaController.idCargoAlteracao}">
+							<f:selectItems value="#{alteracoesEmMassaController.listaCargos}"/>
+							<f:converter converterId="javax.faces.Long"/>
+						</p:selectOneMenu>
+					</p:column>
+				</p:panelGrid>
+				
+				<p:panelGrid id="alteracaoRegras" columns="4">
+					
+					<p:column>
+						<p:outputLabel value="#{msgs['label.uc008.regra']}" for="buscarRegraAutoComplete"/>
+						<br />
+						<p:autoComplete id="buscarRegraAutoComplete" value="#{alteracoesEmMassaController.regraAlteracao}" 
+							var="regra" itemLabel="#{regra.nome}" itemValue="#{regra}" forceSelection="true" queryDelay="800" cache="true"
+							minQueryLength="2" maxResults="10" completeMethod="#{alteracoesEmMassaController.buscarRegraAutoComplete}">
+							
+							<p:ajax event="itemSelect" update="alteracaoRegras"/>
+						</p:autoComplete>
+						
+						<p:commandButton id="buscarRegras" actionListener="#{alteracoesEmMassaController.montaListaTipoRegra}" 
+						 	icon="pi pi-search" update="dialogEscolherRegra" oncomplete="PF('escolherRegra').show(); return false;"
+						 	styleClass="whiteIcon" process="@this"/>
+						 	
+					</p:column>
+					
+					<p:column>
+						<p:outputLabel value="#{msgs['label.uc008.validade']}" for="validadeRegra"/>
+						<br />
+						<p:calendar id="validadeRegra" value="#{alteracoesEmMassaController.pedestreRegraAlteracao.validade}" 
+								pattern="dd/MM/yyyy" mask="99/99/9999" navigator="true"/>
+					</p:column>
+					
+					<p:column rendered="#{alteracoesEmMassaController.regraAlteracao.tipo == 'ACESSO_CREDITO'}">
+						<p:outputLabel value="#{msgs['label.uc008.qtde.creditos']}"/>
+						<br />
+						<p:inputNumber id="qtdeCreditos" value="#{alteracoesEmMassaController.pedestreRegraAlteracao.qtdeDeCreditos}" 
+								minValue="0" decimalPlaces="0" size="6"/>
+					</p:column>
+					
+					<p:column rendered="#{alteracoesEmMassaController.regraAlteracao.tipo == 'ACESSO_CREDITO'}">
+						<p:outputLabel value="#{msgs['label.uc008.validade.creditos.dias']}"/>
+						<br />
+						<p:inputNumber id="validadeCreditos" value="#{alteracoesEmMassaController.pedestreRegraAlteracao.diasValidadeCredito}" 
+								minValue="0" decimalPlaces="0" size="6"/>
+					</p:column>
+					
+					<p:column rendered="#{alteracoesEmMassaController.regraAlteracao.tipo == 'ACESSO_PERIODO'}">
+						<p:outputLabel value="#{msgs['label.uc006.data.inicio']}" indicateRequired="true"/>
+						<br />
+						<p:calendar id="dataInicio" value="#{alteracoesEmMassaController.pedestreRegraAlteracao.dataInicioPeriodo}" 
+								pattern="dd/MM/yyyy" mask="99/99/9999" size="10" navigator="true"/>
+					</p:column>
+					
+					<p:column rendered="#{alteracoesEmMassaController.regraAlteracao.tipo == 'ACESSO_PERIODO'}">
+						<p:outputLabel value="#{msgs['label.uc006.data.fim']}" indicateRequired="true"/>
+						<br />
+						<p:calendar id="dataFim" value="#{alteracoesEmMassaController.pedestreRegraAlteracao.dataFimPeriodo}"
+								pattern="dd/MM/yyyy" mask="99/99/9999" size="10" navigator="true"/>
+					</p:column>
+				
+				</p:panelGrid>
+				
+				<p:panelGrid id="confirmarAlteracao" columns="2" style="margin-left: 79%;">
+					<p:column>
+						<p:commandButton id="aplicarAlteracao" value="#{msgs['alt.acao.aplicar']}"
+							action="#{alteracoesEmMassaController.iniciarAlteracaoEmMassa}" update="@form"
+							oncomplete="PF('alteracaoEmMassa').hide();"/>
+					</p:column>
+					
+					<p:column>
+						<p:commandButton id="cancelarAlteracao" value="#{msgs['alt.acao.cancelar']}" 
+							onclick="PF('alteracaoEmMassa').hide(); return false;"/>
+
+					</p:column>
+				</p:panelGrid>
+			
+			</p:dialog>
+			
+			<p:dialog id="dialogEscolherRegra" header="#{msgs['label.uc014.consultar.regras']}" 
+				widgetVar="escolherRegra" modal="true" resizable="false"
+				onHide="PF('alteracaoEmMassa').show(); return false;">
+				
+				<p:panelGrid id="gridEscolherRegra" columns="4">
+					<p:column>
+						<p:outputLabel value="#{msgs['label.uc008.nome']}" for="inputNomeRegra"/>
+						<br />
+						<p:inputText id="inputNomeRegra" value="#{buscarRegrasController.parans['nome']}"/>
+					</p:column>
+					
+					<p:column>
+						<p:outputLabel value="#{msgs['label.uc008.empresa']}" for="inputEmpresaRegra"/>
+						<br />
+						<p:inputText id="inputEmpresaRegra" value="#{buscarRegrasController.parans['empresa.nome']}"/>
+					</p:column>
+					
+					<p:column>
+						<p:outputLabel value="#{msgs['label.uc008.tipo.regra']}"/>
+						<br />
+						<p:selectOneMenu id="selectTipoRegra" value="#{buscarRegrasController.parans['tipo']}">
+							<f:selectItems value="#{alteracoesEmMassaController.listaTipoRegra}"/>
+						</p:selectOneMenu>
+					</p:column>
+					
+					<p:column>
+						<br />
+						<p:commandButton id="buscarRegra" value="#{msgs['alt.acao.buscar']}" action="#{buscarRegrasController.buscarRegraPedestre}"
+							update="gridEscolherRegra regras" process="gridEscolherRegra"/>
+					</p:column>
+			
+				</p:panelGrid>
+				
+				<br />
+		
+				<p:panelGrid columns="4" id="regras" style="width: 700px">
+				
+					<h:outputText value="#{msgs['msg.nenhum.item.encontrato.buscar']}" escape="false"
+													  rendered="#{empty buscarRegrasController.result}" />
+				
+					<p:dataTable id="tableEscolherRegra" value="#{buscarRegrasController.result}" var="regra"
+							rendered="#{not empty buscarRegrasController.result}" paginator="true"
+							rows="#{buscarRegrasController.quantPorPagina}" paginatorPosition="bottom"
+							paginatorAlwaysVisible="false" selectionMode="single" rowKey="#{regra.id}"
+							selection="#{alteracoesEmMassaController.regraAlteracao}">
+						
+						<p:ajax event="rowSelect" update="form:dialogAlteracaoEmMassa" process="@this"
+							oncomplete="PF('escolherRegra').hide(); return false;" />
+						
+						<p:column headerText="#{msgs['label.uc008.codigo']}" style="text-align: center">
+							<h:outputText value="#{regra.id}" />
+						</p:column>
+						
+						<p:column headerText="#{msgs['label.uc008.nome']}" style="text-align: center">
+							<h:outputText value="#{regra.nome}" />
+						</p:column>
+						
+						<p:column headerText="#{msgs['label.uc008.empresa']}" style="text-align: center">
+							<h:outputText value="#{regra.empresa.nome}" />
+						</p:column>
+						
+						<p:column headerText="#{msgs['label.uc008.tipo.regra']}" style="text-align: center">
+							<h:outputText value="#{regra.tipo.descricao}" />
+						</p:column>
+						
+					</p:dataTable>
+				
+				</p:panelGrid>
+			</p:dialog>
+			
+			<script>
+				jQuery(document).ready(function() {
+					try {
+						$('.filtro-nome').on('keydown', function(e) {
+						    if (e.key === "Enter") {
+						    	sincronizarFiltro(this, 'filtro-nome-sync');
+						    }
+						});
+					}catch(e){}
+				})
+			</script>
+			
+			<div class="filtros-avancados" 
+				style="width: 100%; display: #{alteracoesEmMassaController.getFiltroFlag('procurarPedestre-filtroFlag') ? 'inline-block' : 'none'}">
+				
+				<h:panelGrid id="parameters" width="100%" columns="1" headerClass="h-grid-header">
+					<f:facet name="header">
+						#{msgs['title.uc008.filtros.avancados']}				
+					</f:facet>
+	
+					<h:panelGrid columns="#{menuController.mobile == true ? 1 : 2}" width="100%">
+						
+						<p:column>
+							<p:outputLabel value="#{msgs['label.uc008.nome']}" for="filtro-avancado-nome"/>
+							<br />
+							<p:inputText id="filtro-avancado-nome" value="#{alteracoesEmMassaController.parans['nome']}" size="40"
+								onblur="sincronizarFiltro(this, 'filtro-nome-sync');" styleClass="filtro-nome-sync"/>
+						</p:column>
+						
+						<p:column>
+							<p:outputLabel value="#{msgs['label.uc008.empresa']}" for="filtro-avancado-emepresa"/>
+							<br />
+							<p:selectOneMenu id="filtro-avancado-emepresa" value="#{alteracoesEmMassaController.parans['empresa.id']}"
+								valueChangeListener="#{alteracoesEmMassaController.eventoEmpresaSelecionada}"
+								onchange="sincronizarFiltro(this, 'filtro-empresa-sync');"
+								styleClass="filtro-empresa-sync">
+								<f:selectItems value="#{alteracoesEmMassaController.listaEmpresas}"/>
+								<p:ajax process="@this" update="@this filtro-avancado-departamento filtro-avancado-centro filtro-avancado-cargo" 
+									event="valueChange"/>
+								<f:converter converterId="javax.faces.Long"/>
+							</p:selectOneMenu>
+						</p:column>
+						
+						<p:column>
+							<p:outputLabel value="#{msgs['label.uc008.departamento']}" for="filtro-avancado-departamento"/>
+							<br />
+							<p:selectOneMenu id="filtro-avancado-departamento" value="#{alteracoesEmMassaController.parans['departamento.id']}" >
+								<f:selectItems value="#{alteracoesEmMassaController.listaDepartamentos}"/>
+								<f:converter converterId="javax.faces.Long"/>
+							</p:selectOneMenu>
+						</p:column>
+						
+						<p:column>
+							<p:outputLabel value="#{msgs['label.uc008.centro.custo']}" for="filtro-avancado-centro"/>
+							<br />
+							<p:selectOneMenu id="filtro-avancado-centro" value="#{alteracoesEmMassaController.parans['centroCusto.id']}" >
+								<f:selectItems value="#{alteracoesEmMassaController.listaCentrosDeCusto}"/>
+								<f:converter converterId="javax.faces.Long"/>
+							</p:selectOneMenu>
+						</p:column>
+						
+						<p:column>
+							<p:outputLabel value="#{msgs['label.uc008.cargo']}" for="filtro-avancado-cargo"/>
+							<br />
+							<p:selectOneMenu id="filtro-avancado-cargo" value="#{alteracoesEmMassaController.parans['cargo.id']}" >
+								<f:selectItems value="#{alteracoesEmMassaController.listaCargos}"/>
+								<f:converter converterId="javax.faces.Long"/>
+							</p:selectOneMenu>
+						</p:column>
+						
+					</h:panelGrid>
+				</h:panelGrid>
+				
+				<br />
+			</div>
+			
+			<h:panelGrid width="100%" columns="1" headerClass="h-grid-header">
+				<f:facet name="header">
+					<h:outputText value="#{msgs['title.uc014.alteracao.em.massa']}" />
+				</f:facet>
+				
+				<h:column>
+				
+					<ui:include src="/tema/templates/vazio.xhtml">
+						<ui:param name="exibe" value="#{empty alteracoesEmMassaController.result}" />
+						<ui:param name="exibeAdicionar" value="true" />
+					</ui:include>
+					
+					<p:dataTable id="pedestresTable" value="#{alteracoesEmMassaController.result}" var="pedestre" 
+						rendered="#{not empty alteracoesEmMassaController.result}" paginator="true" 
+						rows="#{alteracoesEmMassaController.quantPorPagina}" paginatorPosition="bottom"
+						paginatorAlwaysVisible="false" >
+						
+						<p:column headerText="#{msgs['label.uc008.matricula']}" style="text-align: center; width: 60px" 
+								  rendered="#{alteracoesEmMassaController.permiteCampoAdicionalCrachaMatricula}">
+							<h:outputText value="#{pedestre.matricula != null ? pedestre.matricula : '--'}" />
+						</p:column>
+						
+						<p:column headerText="#{msgs['label.uc008.cartao.acesso']}" style="text-align: center">
+							<h:outputText value="#{pedestre.codigoCartaoAcesso}" />
+						</p:column>
+						
+						<p:column headerText="#{msgs['label.uc008.nome']}" style="text-align: center">
+							<h:outputText value="#{pedestre.nome}" />
+						</p:column>
+						
+						<p:column headerText="#{msgs['label.uc008.contato']}" style="text-align: center">
+							<h:outputText value="#{pedestre.allPhonesFormatted}" />
+						</p:column>
+						
+						<p:column headerText="#{msgs['label.uc008.cpf']}" style="text-align: center">
+							<h:outputText value="#{pedestre.cpf}" >
+								<f:converter converterId="cpfConverter"/>
+							</h:outputText>
+						</p:column>
+
+						<p:column headerText="#{msgs['label.uc008.rg']}" style="text-align: center">
+							<h:outputText value="#{pedestre.rg}" />
+						</p:column>
+						
+						<p:column headerText="#{msgs['label.uc008.tipo']}" style="text-align: center">
+							<h:outputText value="#{pedestre.tipo}" />
+						</p:column>
+						
+						<p:column headerText="#{msgs['label.uc008.empresa']}" style="text-align: center">
+							<h:outputText value="#{pedestre.empresa.nome}" />
+						</p:column>
+						
+						<p:column style="text-align: center; width: 40px">
+							<f:facet name="header">
+								<p:selectBooleanCheckbox id="acaoMarcarTodos" value="#{alteracoesEmMassaController.marcarTodos}"
+									valueChangeListener="#{alteracoesEmMassaController.acaoMarcarTodos}">
+									
+									<p:ajax event="valueChange" process="@this" update="pedestresTable"/>
+								</p:selectBooleanCheckbox>
+							</f:facet>
+							<p:selectBooleanCheckbox id="marcarOuDesmarcar" value="#{pedestre.alterarEmMassa}">
+								<p:ajax process="@this" update="@this" 
+									listener="#{alteracoesEmMassaController.alteraValorCampoAlterarEmMassaPedestre(pedestre)}"/>
+							</p:selectBooleanCheckbox>
+						</p:column>
+						
+					</p:dataTable>
+					
+				</h:column>
+				
+			</h:panelGrid>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

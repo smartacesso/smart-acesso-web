@@ -1,0 +1,9 @@
+<service>
+    <id>SmartFaces</id>
+    <name>SmartFaces</name>
+    <description>Servidor de reconhecimento facial</description>
+    <env name="PROGRAMFILES" value="%BASE%"/>
+    <executable>java</executable>
+    <arguments>-Xmx1064m -jar "%BASE%\backend.jar"</arguments>
+    <logmode>rotate</logmode>
+</service>

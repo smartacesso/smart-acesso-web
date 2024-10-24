@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+ 
+<processing>
+ 
+  <job name="Registra DLLs">
+    <executefile name="$INSTALL_PATH/lib/registraDLLs.bat" />
+  </job>
+ 
+</processing>

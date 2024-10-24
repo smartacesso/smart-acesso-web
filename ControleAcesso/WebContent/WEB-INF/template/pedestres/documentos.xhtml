@@ -1,0 +1,67 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui">
+	
+	<p:panelGrid columns="4" id="painelCadastroPedestreDocumentos">
+	
+		<p:column>
+			<p:outputLabel value="#{msgs['label.uc008.escolher.documento']}"/>
+			<br />
+			<p:button id="escolherArquivoDocumento" value="Escolher arquivo" onclick="PF('escolherFotoDoc').show(); return false;"/>
+		</p:column>
+		
+		<p:column>
+			<p:outputLabel value="#{msgs['label.uc008.nome']}" for="nomeDocumento"/>
+			<br />
+			<p:inputText id="nomeDocumento" value="#{cadastroPedestreController.documento.nome}" size="40"/>
+		</p:column>
+		
+		<p:column>
+			<p:outputLabel value="#{msgs['label.uc008.vencimento']}" for="vencimentoDocumento"/>
+			<br />
+			<p:calendar id="vencimentoDocumento" value="#{cadastroPedestreController.documento.validade}" size="10" mask="99/99/9999" pattern="dd/MM/yyyy"/>
+		</p:column>
+		
+		<p:column>
+			<br />
+			<p:commandButton id="addDocumento" action="#{cadastroPedestreController.adicionaDocumento}" 
+				value="#{msgs['alt.acao.adicionar']}" update="painelCadastroPedestreDocumentos documentos form:dialogTirarFotoDoc" process="painelCadastroPedestreDocumentos"/>
+		</p:column>
+	</p:panelGrid>
+	
+	<br/>
+	
+	<p:panelGrid columns="4" id="documentos" style="width: 100%;">
+		
+		<h:outputText value="#{msgs['msg.nenhum.item.encontrato.adicionar']}" escape="false"
+					  rendered="#{empty cadastroPedestreController.listaDocumentos}" />
+	
+		<p:dataTable id="tableDocumentos" value="#{cadastroPedestreController.listaDocumentos}" 
+			var="documento" paginator="true" rows="5" 
+			paginatorPosition="bottom" editable="true" paginatorAlwaysVisible="false"
+			rendered="#{not empty cadastroPedestreController.listaDocumentos}">
+			
+			<p:column headerText="#{msgs['label.uc008.nome']}" style="text-align: center">
+				<h:commandLink action="#{cadastroPedestreController.downloadDocumentoPedestre(documento)}" value="#{documento.nome}">
+					<p:ajax process="@this" update="@this"/>
+				</h:commandLink>
+			</p:column>
+			
+			<p:column headerText="#{msgs['label.uc008.vencimento']}" style="text-align: center">
+				<h:outputText value="#{documento.validade}">
+					<f:convertDateTime pattern="dd/MM/yyyy"/>
+				</h:outputText>
+			</p:column>
+			
+			<p:column headerText="#{msgs['alt.acao.excluir']}" style="text-align: center;">
+				<h:commandButton image="#{menuController.path}/tema/img/bt_remove_min.png" 
+							title="#{msgs['alt.acao.excluir']}" action="#{cadastroPedestreController.removerDocumento(documento)}">
+					<p:ajax process="@this" update="form:cadastroPedestreTab:tableDocumentos form:cadastroPedestreTab:documentos"/>
+				</h:commandButton>
+			</p:column>
+		</p:dataTable>
+	</p:panelGrid>
+	
+</ui:composition>

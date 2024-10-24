@@ -1,0 +1,142 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui">
+	
+<body>
+	
+	<ui:composition template="/tema/templates/template.xhtml">
+		
+		<ui:define name="titulo">
+			#{msgs['title.sistema']} | #{msgs['title.gerenciar.parametros.sistema']}
+		</ui:define>
+		
+		<ui:define name="breadcrumb">
+			<a target="_top" href="/#{menuController.appName}/paginas/principal.xhtml"> <h:outputText
+					value="#{msgs['title.principal']}" />
+			</a> > <h:outputText value="#{msgs['title.gerenciar.parametros.sistema']}" />
+		</ui:define>
+		
+		<ui:define name="tools">
+			<h:panelGrid columns="4" styleClass="conteudo_tools">
+	
+				<h:commandButton id="save"
+					action="#{gerenciarParametrosController.salvar}"
+					title="#{msgs['alt.acao.save']}"
+					image="#{menuController.path}/tema/img/bt_saver.png">
+					<p:ajax process="@form" update="@form menuForm"/>
+				</h:commandButton>
+				
+			</h:panelGrid>
+		</ui:define>
+		
+		<ui:define name="conteudo">
+		
+			<h:panelGrid width="100%" columns="1" headerClass="h-grid-header">
+				<f:facet name="header">
+					<h:outputText value="#{msgs['title.configuracoes.parametros.sistema']}" />
+				</f:facet>
+				
+				<p:dataTable id="gerenciarParametrosTable" value="#{gerenciarParametrosController.parametrosGerais}"
+							var="item">
+
+					<p:column headerText="#{msgs['label.uc007.nome']}" style="text-align: left">
+						<h:outputText id="nome" value="#{item.nomeAux}"/>
+					</p:column>
+
+					<p:column headerText="#{msgs['label.uc007.valor']}" style="text-align: left">
+						<p:selectBooleanCheckbox value="#{item.valor}" 
+									rendered="#{item.valor == 'true' or item.valor == 'false' }">
+							<p:ajax process="@this"/>
+						</p:selectBooleanCheckbox>
+						
+						
+						<p:spinner value="#{item.valor}" min="-1" max="23" rendered="#{item.nome.contains('SOC')}">
+							<p:ajax process="@this"/>
+						</p:spinner>
+
+						<p:inputNumber value="#{item.valor}" minValue="1" maxValue="16" decimalPlaces="0"
+								rendered="#{item.valor != 'true' and item.valor != 'false' 
+									and not item.nome.contains('Formato') and not item.nome.startsWith('Campos')
+									and not item.nome.contains('Comtele') and not item.nome.startsWith('Limite')
+									and not item.nome.contains('QR Code: Tipo padrão')
+									and not item.nome.contains('SOC')}">
+						
+							<p:ajax process="@this"/>
+						</p:inputNumber>
+						
+						<p:inputText value="#{item.valor}"  rendered="#{item.nome.contains('Formato')}">
+						
+							<p:ajax process="@this"/>
+						</p:inputText>
+
+						<p:inputText value="#{item.valor}"  rendered="#{item.nome.contains('Comtele')}" style="width: 400px;">
+						
+							<p:ajax process="@this"/>
+						</p:inputText>
+						
+						<p:selectOneMenu value="#{item.valor}" rendered="#{item.nome.startsWith('Limite')}">
+							<f:selectItem itemLabel="Sem limite" itemValue="Sem limite"/>
+							<f:selectItem itemLabel="1" itemValue="1"/>
+							<f:selectItem itemLabel="2" itemValue="2"/>
+						</p:selectOneMenu>
+						
+						<p:selectOneMenu value="#{item.valor}" rendered="#{item.nome.contains('QR Code: Tipo padrão')}">
+							<f:selectItem itemLabel="Estático" itemValue="ESTATICO"/>
+							<f:selectItem itemLabel="Dinâmico por tempo" itemValue="DINAMICO_TEMPO"/>
+							<f:selectItem itemLabel="Dinâmico por uso" itemValue="DINAMICO_USO"/>
+						</p:selectOneMenu>
+						
+						<h:button id="btnDoc" title="#{msgs[alt.label.ajuda]}" 
+							image="#{menuController.path}/tema/img/bt_helper.png" 
+							rendered="#{item.nome.contains('Formato')}" style="height: 20px;" 
+							onclick="window.open('https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html'); return false;">
+							
+							<f:ajax event="click" execute="@none"></f:ajax>
+						</h:button>
+						
+						<p:tooltip for="btnDoc" value="#{msgs['msg.uc007.ver.documentacao']}" />
+						
+						<p:selectOneMenu value="#{gerenciarParametrosController.campoObrigatorio}" rendered="#{item.nome.startsWith('Campos')}"
+							style="margin-right: 10px; display: inline-flex; margin-bottom: 5px;">
+							<f:selectItems value="#{gerenciarParametrosController.listaCamposObrigatorios}"/>
+							<p:ajax process="@this"/>
+						</p:selectOneMenu>
+						
+						<p:commandButton id="addCampoObrigatorio" value="#{msgs['alt.acao.adicionar']}"
+							rendered="#{item.nome.startsWith('Campos')}" action="#{gerenciarParametrosController.adicionaCampoObrigatorio}"
+							process="@this" update="@form">
+						</p:commandButton>
+						
+						<br />
+						<p:dataTable id="tableCamposObrigatorios" value="#{gerenciarParametrosController.camposObrigatorios}"
+							rendered="#{not empty gerenciarParametrosController.camposObrigatorios and item.nome.startsWith('Campos')}" 
+							var="campo" style="width: 300px;">
+							
+							<p:column headerText="#{msgs['label.uc008.campo']}">
+								<h:outputText value="#{msgs['label.uc008.'.concat(campo)]}" />
+							</p:column>
+							
+							<p:column headerText="#{msgs['alt.acao.excluir']}">
+								<h:commandButton image="#{menuController.path}/tema/img/bt_remove_min.png" 
+										title="#{msgs['alt.acao.excluir']}" action="#{gerenciarParametrosController.removerCampoObrigatorio(campo)}">
+									<p:ajax process="@this" update="tableCamposObrigatorios form:gerenciarParametrosTable"/>
+								</h:commandButton>
+							</p:column>
+						
+						</p:dataTable>
+					</p:column>
+
+				</p:dataTable>
+			</h:panelGrid>
+		
+		</ui:define>
+
+	</ui:composition>
+
+</body>
+
+</html>

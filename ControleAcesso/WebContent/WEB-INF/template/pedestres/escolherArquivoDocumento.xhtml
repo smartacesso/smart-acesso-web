@@ -1,0 +1,80 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui">
+	
+	<h:form enctype="multipart/form-data" prependId="false">
+		<p:dialog id="dialogEscolherFotoDoc" widgetVar="escolherFotoDoc" header="#{msgs['label.uc008.origem.foto']}" modal="true">
+
+			<p:panelGrid columns="1" style="text-align: center;">
+				<p:column>
+					<p:button id="abrirCameraDoc" value="#{msgs['alt.acao.tirar.foto']}" update="dialogTirarFotoDoc"
+							onclick="PF('escolherFotoDoc').hide(); PF('pcDoc').attach(); PF('tirarFotoDoc').show(); return false;" style="width: 100%"/>
+				</p:column>
+				
+				<p:column>
+					<p:button value="#{msgs['alt.acao.procurar.arquivo']}" onclick="clicaBotaoDocumentUpload(); return false;" style="width: 100%"/>
+				</p:column>
+						
+				<p:fileUpload id="acaoAbrirArquivoDoc" listener="#{cadastroPedestreController.uploadDocumento}" multiple="false"
+						sizeLimit="3145728" allowTypes="/(\.|\/)(jpe?g|png|pdf)$/" auto="true" style="display: none;" 
+						update="form:cadastroPedestreTab:painelCadastroPedestreDocumentos" onstart="PF('statusDialogEnviandoFile').show(); return true;"
+						oncomplete="PF('statusDialogEnviandoFile').hide(); PF('escolherFotoDoc').hide(); return false;">
+				</p:fileUpload>
+				
+				<p:column>
+					<p:button value="#{msgs['alt.acao.cancelar']}" onclick="PF('escolherFotoDoc').hide(); return false;" style="width: 100%"/>
+				</p:column>
+			</p:panelGrid>
+			
+		</p:dialog>
+		
+		<p:dialog id="dialogTirarFotoDoc" widgetVar="tirarFotoDoc" header="#{msgs['label.uc008.tirar.foto']}" 
+					modal="true" onShow="PF('pcDoc').attach()" onHide="PF('pcDoc').dettach()">
+				
+			<p:panelGrid columns="1">
+				<p:photoCam id="idPcDoc" widgetVar="pcDoc" listener="#{cadastroPedestreController.capturarFotoDocumento}" autoStart="false" 
+					update="dialogConfirmarFoto"/>
+			
+				<p:commandButton value="#{msgs['label.uc008.capturar']}" 
+					process="@this"
+					onclick="PF('pcDoc').capture();"
+					oncomplete="PF('tirarFotoDoc').hide(); PF('confirmarFoto').show(); return false;"/>
+			
+			</p:panelGrid>
+				
+		</p:dialog>
+		
+		<p:dialog id="dialogConfirmarFoto" widgetVar="confirmarFoto" header="#{msgs['alt.acao.confirmar']}"
+				modal="true">
+			
+			<p:panelGrid columns="1">
+				<h:graphicImage id="photoDoc" value="#{menuController.urlMain}/resources/upload/#{cadastroPedestreController.documento.nome}" />
+				
+				<p:column>
+					<p:commandButton id="confirmarFotoDoc" value="#{msgs['alt.acao.confirmar']}" 
+							update="form:cadastroPedestreTab:painelCadastroPedestreDocumentos"
+							process="@this" actionListener="#{cadastroPedestreController.removerFotoDocumento}"
+							oncomplete="PF('confirmarFoto').hide(); return false;"/>
+	
+					<p:commandButton id="cancelarFotoDoc" value="#{msgs['alt.acao.cancelar']}"
+							process="@this" actionListener="#{cadastroPedestreController.removerFotoDocumento}"
+							oncomplete="PF('confirmarFoto').hide(); PF('tirarFotoDoc').show(); return false;" />
+				</p:column>	
+
+			</p:panelGrid>
+
+		</p:dialog>
+		
+	</h:form>
+	
+	
+	
+	<script>
+		function clicaBotaoDocumentUpload() {
+			document.getElementById("form:acaoAbrirArquivoDoc_label").click();
+		}
+	</script>
+	
+</ui:composition>

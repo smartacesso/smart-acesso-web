@@ -1,0 +1,119 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui">
+	
+<body>
+
+	<ui:composition template="/tema/templates/template.xhtml">
+		<ui:define name="titulo">
+			#{msgs['title.sistema']} | #{msgs['title.uc015.equipamentos.conectados']}
+		</ui:define>
+		
+		<ui:define name="breadcrumb">
+			<a target="_top" href="/#{menuController.appName}/paginas/principal.xhtml"> <h:outputText
+					value="#{msgs['title.principal']}" />
+			</a> > <h:outputText value="#{msgs['title.uc015.equipamentos.conectados']}" />
+		</ui:define>
+		
+		<ui:define name="tools">
+			<h:panelGrid columns="4" styleClass="conteudo_tools">
+				
+				<h:commandButton id="acaoBuscar" 
+						action="#{equipamentosConectadosController.buscar()}" 
+						title="#{msgs['alt.acao.buscar']}" alt="#{msgs['alt.acao.buscar']}"
+						image="#{menuController.path}/tema/img/bt_searcher.png">
+					
+					<p:ajax process="@form" update="@form"/>
+				</h:commandButton>
+
+				<h:commandButton id="acaoLimpar" 
+						action="#{equipamentosConectadosController.limpar()}"
+						title="#{msgs['alt.acao.limpar']}" alt="#{msgs['alt.acao.limpar']}"
+						image="#{menuController.path}/tema/img/bt_cleaner.png">
+					
+					<p:ajax process="@this" update="@form"/>
+				</h:commandButton>
+				
+				<h:commandButton id="acaoExportar" 
+					image="#{menuController.path}/tema/img/bt_exporter_xlsx.png"
+					title="#{msgs['alt.acao.exportar']}" alt="#{msgs['alt.acao.exportar']}">
+					
+					<p:dataExporter type="xlsx" target="form:equipamentosTable" fileName="equipamentos" />
+				</h:commandButton>
+								
+			</h:panelGrid>
+			
+			<div style="float: right;">
+			
+				<h:outputText value="Total: #{equipamentosConectadosController.result.size()}" style="margin-right: 5px"
+							  rendered="#{equipamentosConectadosController.result.size() > 0}"/>
+			
+				<p:inputText id="filtro-nome" placeholder="Filtrar por nome" style="width:200px;" 
+						value="#{equipamentosConectadosController.parans['nome']}"/>
+				
+				<p:inputText id="filtro-modelo" placeholder="Filtrar por modelo" style="width:200px;"
+						value="#{equipamentosConectadosController.parans['modelo']}"/>
+			</div>
+		</ui:define>
+		
+		<ui:define name="conteudo">
+			
+			<h:panelGrid width="100%" columns="1" headerClass="h-grid-header">
+				<f:facet name="header">
+					<h:outputText value="#{msgs['title.uc015.equipamentos.conectados']}" />
+				</f:facet>
+				
+				<h:column>
+				
+					<ui:include src="/tema/templates/vazio.xhtml">
+						<ui:param name="exibe" value="#{empty equipamentosConectadosController.result}" />
+						<ui:param name="exibeAdicionar" value="true" />
+					</ui:include>
+					
+					<p:dataTable id="equipamentosTable" value="#{equipamentosConectadosController.result}" var="equipamento" 
+						rendered="#{not empty equipamentosConectadosController.result}" paginator="true" 
+						rows="#{equipamentosConectadosController.quantPorPagina}" paginatorPosition="bottom"
+						paginatorAlwaysVisible="false" >
+						
+						<p:column headerText="#{msgs['label.uc015.codigo']}" style="text-align: center">
+							<h:outputText value="#{equipamento.id}" />
+						</p:column>
+						
+						<p:column headerText="#{msgs['label.uc015.data.criacao']}" style="text-align: center">
+							<h:outputText value="#{equipamento.dataCriacao}">
+								<f:convertDateTime pattern="dd/MM/yyyy"/>
+							</h:outputText>
+						</p:column>
+						
+						<p:column headerText="#{msgs['label.uc015.identificador']}" style="text-align: center">
+							<h:outputText value="#{equipamento.identificador}" />
+						</p:column>
+						
+						<p:column headerText="#{msgs['label.uc015.ip']}" style="text-align: center">
+							<h:outputText value="#{equipamento.ip}" />
+						</p:column>
+						
+						<p:column headerText="#{msgs['label.uc015.marca']}" style="text-align: center">
+							<h:outputText value="#{equipamento.marca}" />
+						</p:column>
+						
+						<p:column headerText="#{msgs['label.uc015.modelo']}" style="text-align: center">
+							<h:outputText value="#{equipamento.modelo}" />
+						</p:column>
+						
+						<p:column headerText="#{msgs['label.uc015.nome']}" style="text-align: center">
+							<h:outputText value="#{equipamento.nome}" />
+						</p:column>
+						
+					</p:dataTable>
+					
+				</h:column>
+			</h:panelGrid>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

@@ -1,0 +1,108 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui">
+
+<body>
+
+	<ui:composition template="tema/templates/template_externo.xhtml">
+
+		<ui:define name="titulo">
+			#{msgs['title.sistema']} | #{msgs['title.alterar.senha']}
+		</ui:define>
+
+		<ui:define name="conteudo">
+		
+			<div class="row">
+				<div class="col-md-12 col-sm-12">
+					<div style="width: 100%" align="center">
+						<h2>#{msgs['title.alterar.senha']}</h2>
+					</div>
+					<br/><br/>
+				</div>
+			</div>
+		
+		
+
+			<div class="row">
+				<div class="col-md-5 col-sm-6">
+					<div class="collapse navbar-collapse">
+
+						<h3 style="margin-top: 0px; padding-top: 0px;">
+						#{msgs['title.dicas.boa.senha']}</h3>
+						<br/>
+						
+						<div style="width: 450px">
+						<p class="text">Sua senha deve ser:</p>
+						<ul>
+							<li class="text"><span class="fa fa-check img-centered img-conheca" />#{msgs['title.boa.senha.dica.1']}</li>
+							<li class="text"><span class="fa fa-check img-centered img-conheca" />#{msgs['title.boa.senha.dica.2']}</li>
+							<li class="text"><span class="fa fa-check img-centered img-conheca" />#{msgs['title.boa.senha.dica.3']}</li>
+							<li class="text"><span class="fa fa-check img-centered img-conheca" />#{msgs['title.boa.senha.dica.4']}</li>
+						</ul>
+						</div>
+
+
+					</div>
+				</div>
+
+				<div class="col-md-5 col-md-offset-2 col-sm-6">
+
+					<h:panelGrid columns="1" width="100%">
+
+							<h:column>
+								<h:outputText value="#{msgs['label.uc003.param.email']}" />
+								<h:outputText value="*" styleClass="obrigatorio" /><br/>
+								<p:inputText style="width:300px;padding: 12px;"
+									maxlength="100" id="email"
+									value="#{alteraDadosController.entidade.email}"
+									required="true" label="#{msgs['label.uc003.param.email']}"
+									disabled="true">
+								</p:inputText>
+							</h:column>
+
+							<h:column>
+								<h:outputText value="#{msgs['label.uc003.param.senha']}" />
+								<h:outputText value="*" styleClass="obrigatorio" /><br/>
+								<p:password style="width:200px;padding: 12px;"
+									maxlength="30" id="senha"
+									value="#{alteraDadosController.senha}" required="true"
+									label="#{msgs['label.uc003.param.senha']}" />
+							</h:column>
+
+							<h:column>
+								<h:outputText
+									value="#{msgs['label.uc003.param.senha.confirma']}" />
+								<h:outputText value="*" styleClass="obrigatorio" /><br/>
+								<p:password style="width:200px;padding: 12px;"
+									maxlength="30" id="repSenha"
+									value="#{alteraDadosController.confirmaSenha}"
+									required="true"
+									label="#{msgs['label.uc003.param.senha.confirma']}" />
+							</h:column>
+
+							<h:column>
+								<br />
+								<p:commandButton id="btAlterarSenha"
+									style="width: 200px;padding: 12px;"
+									value="#{msgs['label.alterar.senha.agora']}"
+									styleClass="bt-pro-news"
+									action="#{alteraDadosController.salvar}" >
+									<f:ajax render="@form" execute="@form" ></f:ajax>
+								</p:commandButton>
+
+							</h:column>
+					</h:panelGrid>
+
+				</div>
+			</div>
+			
+		</ui:define>
+
+	</ui:composition>
+
+</body>
+</html>

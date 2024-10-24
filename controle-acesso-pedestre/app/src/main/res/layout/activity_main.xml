@@ -1,0 +1,427 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    android:id="@+id/container"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    app:layout_collapseParallaxMultiplier="1.0"
+    tools:context="br.com.bvc.viagens.activity.MainActivity_">
+
+
+    <FrameLayout
+        android:id="@+id/content"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <androidx.cardview.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
+                android:id="@+id/cardGerais"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginLeft="8dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginRight="8dp"
+                android:layout_marginBottom="8dp"
+                android:visibility="visible"
+                card_view:cardBackgroundColor="@color/card_branco"
+                card_view:cardCornerRadius="@dimen/card_radius">
+
+                <LinearLayout android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:id="@+id/perfilGeral">
+
+                    <LinearLayout android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="10dp"
+                        android:orientation="horizontal"
+                        android:background="?android:attr/selectableItemBackground"
+                        android:clickable="true"
+                        android:id="@+id/perfil">
+
+                        <LinearLayout android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="3"
+                            android:orientation="vertical">
+
+                            <de.hdodenhof.circleimageview.CircleImageView
+                                android:id="@+id/imagemProfile"
+                                android:layout_width="64dp"
+                                android:layout_height="64dp"
+                                android:src="@drawable/ic_male_photo"/>
+
+                        </LinearLayout>
+
+                        <LinearLayout android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:layout_marginTop="5dp"
+                            android:orientation="vertical"
+                            android:id="@+id/nomes">
+
+                            <TextView
+                                android:id="@+id/pedestre"
+                                style="@style/MaterialLightHeadline"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:drawableEnd="@drawable/ic_action_right"
+                                android:text="@string/label_motorista"/>
+
+                            <TextView
+                                style="@style/MaterialLightBody1Secondary"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="2dp"
+                                android:id="@+id/textoVerPerfil"
+                                android:text="@string/label_toque_para_atualizar"
+                                />
+
+
+                        </LinearLayout>
+
+
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="@color/divider"
+                        android:id="@+id/divider"/>
+
+                    <LinearLayout android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:id="@+id/dadosHome">
+
+                        <LinearLayout android:id="@+id/cpfLabel"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:background="?android:attr/selectableItemBackground"
+                            android:clickable="true"
+                            android:padding="10dp"
+                            android:orientation="vertical">
+
+                            <TextView
+                                style="@style/MaterialLightLabel"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/label_cpf"
+                                android:id="@+id/labelCpf"
+                                />
+
+                            <TextView
+                                android:id="@+id/cpf"
+                                style="@style/MaterialLightBody1Secondary"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="5dp"
+                                android:text="@string/label_valor_cpf"/>
+
+                        </LinearLayout>
+
+                        <LinearLayout android:id="@+id/organizacaoContainer"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:background="?android:attr/selectableItemBackground"
+                            android:clickable="true"
+                            android:padding="10dp"
+                            android:orientation="vertical">
+
+                            <TextView
+                                style="@style/MaterialLightLabel"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/label_organizacao"
+                                android:id="@+id/organizacaoLabel"
+                                />
+
+                            <TextView
+                                android:id="@+id/organizacao"
+                                style="@style/MaterialLightBody1Secondary"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="5dp"
+                                android:text="@string/label_valor_organizacao"/>
+
+                        </LinearLayout>
+
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+            </androidx.cardview.widget.CardView>
+
+            <LinearLayout android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_gravity="center_vertical|center_horizontal|center"
+                android:id="@+id/qrcodeContainer"
+                android:layout_marginTop="50dp"
+                android:gravity="center_vertical|center_horizontal|center"
+                android:visibility="visible">
+
+                <ImageView
+                    android:layout_width="300dp"
+                    android:layout_height="300dp"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:id="@+id/qrCodeEmpty"
+                    android:scaleType="fitXY"
+                    android:layout_marginBottom="10dp"
+                    app:srcCompat="@drawable/ic_generic_qrcode"/>
+
+                <ImageView
+                    android:layout_width="300dp"
+                    android:layout_height="300dp"
+                    android:layout_gravity="center"
+                    android:gravity="center"
+                    android:id="@+id/qrCode"
+                    android:scaleType="fitXY"
+                    android:layout_marginBottom="10dp"
+                    app:srcCompat="@drawable/ic_qrcode"
+                    android:visibility="gone"/>
+
+                <TextView android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:id="@+id/qrCodeText"
+                    android:layout_gravity="center_vertical"
+                    android:gravity="center"
+                    android:layout_marginLeft="10dp"
+                    android:text="@string/mensagem_nenhum_item_encontrado"
+                    android:layout_weight="1"
+                    style="@style/MaterialLightBody1Secondary"/>
+
+            </LinearLayout>
+
+            <LinearLayout android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical"
+                android:layout_gravity="center_vertical|center_horizontal|center"
+                android:id="@+id/facialContainer"
+                android:gravity="center_vertical|center_horizontal|center"
+                android:visibility="visible">
+
+                <LinearLayout android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_gravity="center_vertical|center_horizontal|center"
+                    android:id="@+id/facialEmptyContainer"
+                    android:gravity="center_vertical|center_horizontal|center"
+                    android:visibility="gone">
+
+                    <ImageView
+                        android:layout_marginTop="50dp"
+                        android:layout_width="250dp"
+                        android:layout_height="250dp"
+                        android:layout_gravity="center"
+                        android:gravity="center"
+                        android:id="@+id/facialEmpty"
+                        android:scaleType="fitXY"
+                        android:layout_marginBottom="10dp"
+                        android:tint="@color/facial_color"
+                        app:srcCompat="@drawable/ic_facial"/>
+
+                    <TextView android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:id="@+id/facialText"
+                        android:layout_gravity="center_vertical"
+                        android:gravity="center"
+                        android:layout_marginLeft="10dp"
+                        android:text="@string/mensagem_nenhum_item_encontrado_facial"
+                        android:layout_weight="1"
+                        style="@style/MaterialLightBody1Secondary"/>
+
+                </LinearLayout>
+
+                <androidx.cardview.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
+                    android:id="@+id/dadosFacialCard"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginLeft="8dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginRight="8dp"
+                    android:layout_marginBottom="8dp"
+                    android:visibility="gone"
+                    card_view:cardBackgroundColor="@color/card_branco"
+                    card_view:cardCornerRadius="@dimen/card_radius">
+
+                    <LinearLayout android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <TextView
+                            style="@style/MaterialLightTitle"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="5dp"
+                            android:layout_weight="1"
+                            android:text="@string/cadastro_facial"
+                            android:textColor="@color/colorPrimary"
+                            android:textSize="22sp"
+                            android:layout_margin="10dp"
+                            android:drawableTint="@color/colorPrimary"
+                            android:drawableEnd="@drawable/ic_facial"
+                            android:layout_marginRight="10dp"/>
+
+                        <LinearLayout android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="horizontal"
+                            android:id="@+id/dadosFacial"
+                            android:layout_margin="10dp">
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:background="?android:attr/selectableItemBackground"
+                                android:clickable="true"
+                                android:layout_marginRight="5dp"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    style="@style/MaterialLightLabel"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/label_status"
+                                    android:id="@+id/labelStatus"
+                                    />
+
+                                <TextView
+                                    android:id="@+id/status"
+                                    style="@style/MaterialLightBody1Secondary"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="5dp"
+                                    android:text="@string/label_valor_status"/>
+
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1"
+                                android:background="?android:attr/selectableItemBackground"
+                                android:clickable="true"
+                                android:orientation="vertical">
+
+                                <TextView
+                                    style="@style/MaterialLightLabel"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/label_data"
+                                    android:id="@+id/dataCadastroLabel"
+                                    />
+
+                                <TextView
+                                    android:id="@+id/dataCadastro"
+                                    style="@style/MaterialLightBody1Secondary"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="5dp"
+                                    android:text="@string/label_valor_data_cadastro"/>
+
+                            </LinearLayout>
+
+
+                        </LinearLayout>
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:background="@color/divider"
+                            android:id="@+id/dividerFacial"/>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:layout_margin="10dp"
+                            android:orientation="vertical">
+
+                            <TextView
+                                android:id="@+id/labelListaImagens"
+                                style="@style/MaterialLightBody1Secondary"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="5dp"
+                                android:textColor="@color/black"
+                                android:textSize="16sp"
+                                android:text="@string/label_imagens"
+                                android:drawableEnd="@drawable/ic_help"
+                                android:layout_marginRight="4dp"/>
+
+                            <ListView android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:id="@+id/listaImagens"
+                                android:layout_gravity="top"
+                                android:layout_marginTop="10dp"
+                                android:layout_marginBottom="10dp"
+                                android:visibility="visible">
+                            </ListView>
+
+                            <Button
+                                android:id="@+id/enviar"
+                                android:layout_width="match_parent"
+                                android:layout_height="36dp"
+                                android:layout_marginBottom="20dp"
+                                android:layout_weight="1"
+                                android:background="@color/colorAccent"
+                                android:fontFamily="sans-serif-medium"
+                                android:text="@string/enviar"
+                                android:textColor="#ffffff"
+                                android:textSize="14sp"
+                                android:textStyle="normal"
+                                android:visibility="visible"
+                                />
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+
+                </androidx.cardview.widget.CardView>
+
+
+
+            </LinearLayout>
+
+
+        </LinearLayout>
+
+
+
+        <!-- substituido pelo menu mais configurável -->
+        <com.google.android.material.bottomnavigation.BottomNavigationView
+            android:id="@+id/navigation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
+            android:background="@color/colorPrimary"
+            app:itemIconTint="@color/background_navigator"
+            app:itemTextColor="@color/background_navigator"
+            app:menu="@menu/navigation"/>
+
+
+        <com.aurelhubert.ahbottomnavigation.AHBottomNavigation
+            android:id="@+id/bottom_navigation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"/>
+
+    </FrameLayout>
+
+</LinearLayout>

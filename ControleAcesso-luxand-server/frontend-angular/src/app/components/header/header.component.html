@@ -1,0 +1,26 @@
+<header class="main-header">
+	<div class="row no-gutters align-items-center">
+		<div class="col-4">
+			<img src="../../../assets/logo.png" class="img-fluid">
+		</div>
+		<div class="col-4 main-header-title">
+			<b>SmartAcesso Controle Facial</b>
+		</div>
+		<div class="col-4 d-flex justify-content-end align-items-center" *ngIf="authService.isLoggedIn()" >
+			<div style="margin-right: 5px; font-size: 24px;">
+				<i class="fa fa-user-circle" style="color: white;"></i>
+			</div>
+			<div style="margin-right: 20px; color: white;">
+				<b>{{ authService.getLoggedUser()?.name }}</b>
+			</div>
+			<button (click)="finalize_session()" class="btn btn-primary" style="font-size: 0.9rem;" aria-label="Sair">
+				<!-- <i class="fa fa-sign-out-alt"></i> -->
+				Sair
+			</button>
+			<button (click)="logout()" class="btn btn-primary" style="font-size: 0.9rem;" aria-label="Sair e limpar dados">
+				<!-- <i class="fa fa-sign-out-alt"></i> -->
+				Sair e limpar dados
+			</button>
+		</div>
+	</div>
+</header>

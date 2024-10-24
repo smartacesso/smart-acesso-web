@@ -1,0 +1,20 @@
+----------------------------------------------------------------
+<<<<<<< HEAD
+Mon Feb 08 17:56:41 BRST 2021:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance a816c00e-0177-8337-ace1-0000077544a8 
+on database directory C:\ambiente\workspaces\controle-acesso-web\ControleAcesso-luxand-server\backend-java\luxandserverdb with class loader sun.misc.Launcher$AppClassLoader@73d16e93 
+Loaded from file:/C:/Users/Pro-Treino/.m2/repository/org/apache/derby/derby/10.14.2.0/derby-10.14.2.0.jar
+=======
+Mon Feb 08 17:54:17 BRT 2021:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance a816c00e-0177-836c-6bb6-000000f5bc90 
+on database directory C:\Users\Gustavo Diniz\AppData\Roaming\SmartFaces\luxandserverdb with class loader sun.misc.Launcher$AppClassLoader@1d16e93 
+Loaded from file:/C:/Users/Gustavo%20Diniz/.m2/repository/org/apache/derby/derby/10.14.2.0/derby-10.14.2.0.jar
+>>>>>>> branch 'master' of https://danieldhsd@bitbucket.org/pro-treino/controle-acesso-web.git
+java.vendor=Oracle Corporation
+java.runtime.version=1.8.0_261-b12
+user.dir=C:\ambiente\workspaces\controle-acesso-web\ControleAcesso-luxand-server\backend-java
+os.name=Windows 10
+os.arch=x86
+os.version=10.0
+derby.system.home=null
+Database Class Loader started - derby.database.classpath=''

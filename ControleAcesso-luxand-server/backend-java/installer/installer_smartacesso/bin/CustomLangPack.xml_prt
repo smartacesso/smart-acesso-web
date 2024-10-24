@@ -1,0 +1,208 @@
+<izpack:langpack version="5.0" 
+		 xmlns:izpack="http://izpack.org/schema/langpack"
+   		 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+		 xsi:schemaLocation="http://izpack.org/schema/langpack http://izpack.org/schema/5.0/izpack-langpack-5.0.xsd">
+	
+	<!-- Ensure this file extension is xml_prt -->
+	<!-- 
+	This file only contains some modifications related to the original language pack prt.xml
+	
+	Complete prt pack can be found on
+	https://github.com/izpack/izpack/blob/master/izpack-core/src/main/resources/com/izforge/izpack/bin/langpacks/installer/prt.xml
+	-->
+	
+    <!-- Heading messages START -->
+    <str id="CheckedHelloPanel.headline" txt="Bem-vindo"/>
+    <str id="HelloPanel.headline" txt="Bem-vindo"/>
+    <str id="ImgPacksPanel.headline" txt="Selecione os Pacotes de Instalação"/>
+    <str id="PacksPanel.headline" txt="Selecione os Pacotes de Instalação"/>
+    <str id="TargetPanel.headline" txt="Local da Instalação"/>
+    <str id="TreePacksPanel.headline" txt="Selecione os Pacotes de Instalação"/>
+    <str id="UserPathPanel.headline" txt="Selecione a Localização"/>
+	<str id="ProcessPanel.headline" txt="Registro de bibliotecas"/>
+
+    <!-- ConsolePrompt strings -->
+    <str id="ConsolePrompt.okCancel" txt="Enter O for OK, C to Cancel: "/>
+    <str id="ConsolePrompt.yesNo" txt="Enter Y for Yes, N for No: "/>
+    <str id="ConsolePrompt.yesNoCancel" txt="Enter Y for Yes, N for No, or C to Cancel: "/>
+    <str id="ConsolePrompt.ok" txt="O"/>
+    <str id="ConsolePrompt.cancel" txt="C"/>
+    <str id="ConsolePrompt.yes" txt="Y"/>
+    <str id="ConsolePrompt.no" txt="N"/>
+
+    <!-- ConsoleInstaller strings -->
+    <str id="ConsoleInstaller.continueQuitRedisplay" txt="Press 1 to continue, 2 to quit, 3 to redisplay"/>
+    <str id="ConsoleInstaller.acceptRejectRedisplay" txt="Press 1 to accept, 2 to reject, 3 to redisplay"/>
+    <str id="ConsoleInstaller.redisplayQuit" txt="Press 1 to redisplay, 2 to quit"/>
+    <str id="ConsoleInstaller.permissionError" txt="Administrative privileges required. Please re-run the installer with administrative privileges."/>
+    <str id="ConsoleInstaller.inputSelection" txt="Input selection: "/>
+    <str id="ConsoleInstaller.pagingMore" txt="More"/>
+    <str id="ConsoleInstaller.aborted.PressedCTRL-C" txt="CTRL-C pressed"/>
+    <str id="ConsoleInstaller.aborted.LicenseRejected" txt="License rejected"/>
+    <str id="ConsoleInstaller.aborted.PressedQuit" txt="Quit pressed"/>
+    <str id="ConsoleInstaller.shutdown.pendingFileOperations" txt="There are file operations pending after reboot"/>
+    <str id="ConsoleInstaller.shutdown.rebootingNow" txt="Rebooting now automatically"/>
+    <str id="ConsoleInstaller.shutdown.done" txt="Console installation done"/>
+    <str id="ConsoleInstaller.shutdown.aborted" txt="Console installation ABORTED by the user!"/>
+    <str id="ConsoleInstaller.shutdown.failed" txt="Console installation FAILED!"/>
+
+    <!-- General installer strings -->
+    <str id="installer.title" txt="Instalação do "/>
+    <str id="installer.next" txt="Próximo"/>
+    <str id="installer.madewith" txt="SmartPonto"/>
+    <str id="installer.quit.title" txt="Deseja sair da instalação?"/>
+    <str id="installer.quit.message" txt="A instalação será cancelada!"/>
+    <str id="installer.error" txt="Erro"/>
+    <str id="installer.Message" txt="Mensagem"/>
+    <str id="installer.errorMessage" txt="Ocorreu um erro"/>
+    <str id="installer.close" txt="Fechar"/>
+    <str id="installer.showDetails" txt="Mostrar detalhes"/>
+    <str id="installer.hideDetails" txt="Esconder Details"/>
+    <str id="installer.copy" txt="Copiar"/>
+    <str id="installer.sendReport" txt="Enviar relatório"/>
+    <str id="installer.continueQuestion" txt="Continuar mesmo assim?"/>
+    <str id="installer.cancelled" txt="Instalação cancelada"/>
+    <str id="installer.started" txt="Instalação iniciada"/>
+    <str id="installer.platform" txt="Plataforma: {0}"/>
+    <str id="installer.version" txt="Framework: {0}"/>
+    <str id="installer.finished" txt="Instalação concluida"/>
+
+    <!-- Uninstaller specific strings -->
+    <str id="uninstaller.warning" txt="A aplicação será removida!"/>
+    <str id="uninstaller.destroytarget" txt=" Forçar a remoção de "/>
+    <str id="uninstaller.uninstall" txt="Desinstalar"/>
+
+    <!-- The strings for the 'official' IzPack plugins -->
+    <!-- HelloPanel strings -->
+    <str id="HelloPanel.welcome1" txt="Bem-vindo à instalação do "/>
+    <str id="HelloPanel.welcome2" txt=""/>
+    <str id="HelloPanel.authors" txt="Este programa foi desenvolvido por: "/>
+	<str id="HelloPanel.url" txt="Acesse nosso site em: "/>
+
+    <!-- LicensePanel strings -->
+    <str id="LicencePanel.info" txt="Por favor, leia atentamente o seguinte contrato de licença:"/>
+    <str id="LicencePanel.agree" txt="Concordo com este contrato de licença."/>
+    <str id="LicencePanel.notagree" txt="Não concordo com este contrato de licença."/>
+    <str id="LicencePanel.yes" txt="Sim"/>
+    <str id="LicencePanel.no" txt="Não"/>
+
+    <!-- PrinterSelect Panel -->
+    <str id="PrinterSelectPanel.select_printer"
+         txt="Selecione a impressora para utilizar na configuração inicial e testes."/>
+
+    <!-- InfoPanel strings -->
+    <str id="InfoPanel.info" txt="Por favor, leia atentamente a seguinte informação: "/>
+
+    <!-- PathInputPanel strings -->
+    <str id="PathInputPanel.required" txt="A pasta selecionada deverá existir."/>
+    <str id="PathInputPanel.required.forModificationInstallation" txt="A pasta selecionada deverão existir."/>
+    <str id="PathInputPanel.notValid" txt="A pasta selecionada não contém o produto necessário."/>
+
+    <!-- TargetPanel strings -->
+    <str id="TargetPanel.info" txt="Selecione o local de instalação: "/>
+    <str id="TargetPanel.warn" txt="A pasta já existe! Deseja continuar e substituir os arquivos existentes?"/>
+    <str id="TargetPanel.nodir" txt="Selecionou um arquivo! Por favor, selecione uma pasta!"/>
+    <str id="TargetPanel.notwritable" txt="Não tem permissões de escrita! Por favor, selecione outra localização!!"/>
+
+    <!-- JDKPathPanel strings -->
+    <str id="JDKPathPanel.badVersion1" txt="O JDK selecionado apresenta uma versão não recomendada (Dispon�vel: "/>
+
+    <!-- PacksPanel strings -->
+    <str id="PacksPanel.info" txt="Selecione os pacotes que deseja instalar:"/>
+    <str id="PacksPanel.tip" txt="Nota: Os pacotes na cor cinza são necessários."/>
+    <str id="PacksPanel.dependencyList"
+         txt="O pacote selecionado apresenta as seguintes dependêcias e/ou exclusões"/>
+
+    <!-- InstallPanel strings -->
+    <str id="InstallPanel.finished" txt="Concluído"/>
+    <str id="InstallPanel.progress" txt="Progresso total da instalação:"/>
+    <str id="InstallPanel.overwrite.title" txt="O arquivo já existe"/>
+    <str id="InstallPanel.overwrite.question" txt="O arquivo já existe. Deseja substituí-lo?"/>
+
+    <!-- InstallationGroupPanel strings -->
+    <str id="InstallationGroupPanel.colNameSelected" txt="Selecionado"/>
+
+    <!-- InstallationTypePanel strings -->
+    <str id="InstallationTypePanel.info" txt="Por favor, escolha o tipo de instalação:"/>
+
+    <!-- FinishPanel strings -->
+	<str id="FinishPanel.uninst.info" txt="Um arquivo de desinstalação foi criado em: "/>
+    <str id="FinishPanel.auto.tip" txt="Utilize este script para repetir esta instalação em outros computadores."/>
+    <str id="FinishPanel.auto.dialog.filterdesc" txt="Arquivos XML"/>
+
+    <!-- ImgPacksPanel strings -->
+
+    <!-- ShortcutPanel strings -->
+    <str id="ShortcutPanel.regular.list" txt="Selecione um grupo para os atalhos:"/>
+    <str id="ShortcutPanel.regular.desktop" txt="Criar atalhos na Área de Trabalho"/>
+    <str id="ShortcutPanel.regular.userIntro" txt="Criar atalho para:"/>
+	<str id="ShortcutPanel.regular.startup" txt="Abrir ao inicializar"/>
+    <str id="ShortcutPanel.regular.currentUser" txt="Usuário atual"/>
+    <str id="ShortcutPanel.regular.allUsers" txt="Todos os usuários"/>
+    <str id="ShortcutPanel.alternate.apology" txt="Desculpe, mas não foi possível criar os atalhos."/>
+    <str id="ShortcutPanel.alternate.textFileExplanation"
+         txt="Pode guardar informações detalhadas sobre os arquivos executáveis num arquivo de texto para referência futura."/>
+    <str id="ShortcutPanel.alternate.saveButton" txt="Guardar Arquivo de Texto"/>
+    <str id="ShortcutPanel.textFile.iconName" txt="Arquivo do ícone          : "/>
+    <str id="ShortcutPanel.location.startup" txt="Grupo de Inicialização Automática"/>
+    <str id="ShortcutPanel.regular.StartMenu:Start-Menu" txt="Menu-Iniciar"/>
+    <str id="ShortcutPanel.regular.StartMenu:K-Menu" txt="Menu-XDG"/>
+	
+    <!-- UserInputPanel strings -->
+    <str id="UserInputPanel.dir.nodirectory.message" txt="Selecione uma pasta válida.."/>
+    <str id="UserInputPanel.dir.nodirectory.caption" txt="Não foi selecionada uma pasta"/>
+    <str id="UserInputPanel.dir.notdirectory.message" txt="A pasta selecionada não existe ou é inválida."/>
+    <str id="UserInputPanel.file.nofile.message" txt="Selecione um arquivo válido."/>
+    <str id="UserInputPanel.file.nofile.caption" txt="Arquivo não selecionado"/>
+    <str id="UserInputPanel.file.notfile.message" txt="O arquivo selecionado não existe ou é inválido."/>
+    <str id="UserInputPanel.file.notfile.caption" txt="Arquivo inválido"/>
+    <str id="UserInputPanel.search.autodetect.failed.message" txt="A detecção automática falhou."/>
+    <str id="UserInputPanel.search.autodetect.failed.caption" txt="A detecção automática falhou."/>
+    <str id="UserInputPanel.search.autodetect.tooltip"
+         txt="Procure pelo arquivo ou pasta nas localizações seguintes."/>
+    <str id="UserInputPanel.search.location.checkedfile" txt="Verifique a existência de {0}."/>
+    <str id="UserInputPanel.search.wrongselection.message"
+         txt="O arquivo ou pasta selecionada não existe ou não é apropriado."/>
+    <str id="UserInputPanel.search.wrongselection.caption" txt="Seleção inválida"/>
+
+    <!-- UserPathPanel strings -->
+    <str id="UserPathPanel.required" txt="A pasta selecionada deverá existir."/>
+    <str id="UserPathPanel.info" txt="Selecione a localização: "/>
+    <str id="UserPathPanel.exists_warn"
+         txt="A pasta já existe! Deseja instalar nesta localização e possivelmente substituir os arquivos existentes?"/>
+    <str id="UserPathPanel.empty_target" txt="Não indicou uma localização de destino! Deseja continuar?"/>
+    <str id="UserPathPanel.nodir" txt="Selecionou um arquivo! Por favor selecione uma pasta!"/>
+    <str id="UserPathPanel.notwritable" txt="Não tem permissões de escrita na pasta! Selecione outra pasta!"/>
+
+    <!-- CompilePanel strings -->
+	<str id="CompilePanel.progress.finished" txt="Concluído"/>
+    <str id="CompilePanel.browse.approve" txt="Usar como compilador"/>
+    <str id="CompilePanel.progress.initial" txt="Clique no botão Iniciar"/>
+    <str id="CompilePanel.progress.finished" txt="Concluído"/>
+    <str id="CompilePanel.progress.overall" txt="Progresso total da compilação:"/>
+    <str id="CompilePanel.error.nofiles" txt="Erro durante a pesquisa dos arquivos a compilar."/>
+    <str id="CompilePanel.error.noclassfile" txt="O compilador não gerou um arquivo class para o código fonte "/>
+
+    <!-- ProcessPanel strings -->
+    <str id="ProcessPanel.heading" txt=""/>
+
+    <!-- SummaryPanel strings -->
+    <str id="SummaryPanel.info"
+         txt="A Instalação vai continuar com as seguintes configurações. Clique em Seguinte para continuar."/>
+    <str id="UserPathPanel.summaryCaption" txt="Localização Selecionada"/>
+    <str id="DefaultTargetPanel.summaryCaption" txt="Localização da Instalação"/>
+
+    <!-- Strings for the Registry -->
+
+    <!-- CheckedHelloPanel strings -->
+    <str id="CheckedHelloPanel.productAlreadyExist0" txt="Esta aplicação já se encontra instalada em "/>
+
+    <!-- Next Media Strings -->
+
+    <!-- This string defines the time stamp format in the installation report.
+	The format details are documented in java.text.SimpleDateFormat -->
+
+    <!-- Strings for various purposes in the logging/reporting system  -->
+    <str id="log.reportHeading" txt="              SMARTACESSO INSTALLATION REPORT"/>
+  
+</izpack:langpack>

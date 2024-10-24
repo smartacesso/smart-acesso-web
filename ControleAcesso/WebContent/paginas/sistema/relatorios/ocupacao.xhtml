@@ -1,0 +1,178 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui">
+	
+<body>
+	
+	<ui:composition template="/tema/templates/template.xhtml">
+		<ui:define name="titulo">
+			#{msgs['title.sistema']} | #{msgs['title.uc010.relatorio.ocupacao']}
+		</ui:define>
+		
+		<ui:define name="breadcrumb">
+			<a target="_top" href="/#{menuController.appName}/paginas/principal.xhtml"> <h:outputText
+					value="#{msgs['title.principal']}" />
+			</a> > <h:outputText value="#{msgs['title.uc010.relatorio.ocupacao']}" />
+		</ui:define>
+		
+		<ui:define name="tools">
+			<h:panelGrid columns="4" styleClass="conteudo_tools">
+				
+				<h:commandButton id="acaoBuscar" 
+						action="#{relatorioOcupacaoController.buscar()}" 
+						title="#{msgs['alt.acao.buscar']}" alt="#{msgs['alt.acao.buscar']}"
+						image="#{menuController.path}/tema/img/bt_searcher.png">
+					
+					<p:ajax process="@form" update="@form"/>
+				</h:commandButton>
+
+				<h:commandButton id="acaoLimpar" 
+						action="#{relatorioOcupacaoController.limpar()}"
+						title="#{msgs['alt.acao.limpar']}" alt="#{msgs['alt.acao.limpar']}"
+						image="#{menuController.path}/tema/img/bt_cleaner.png">
+					
+					<p:ajax process="@this" update="@form"/>
+				</h:commandButton>
+				
+				<h:commandButton id="acaoExportar" 
+					image="#{menuController.path}/tema/img/bt_exporter_xlsx.png"
+					title="#{msgs['alt.acao.exportar']}" alt="#{msgs['alt.acao.exportar']}">
+					
+					<p:dataExporter type="xlsx" target="form:relatorioOcupacaoTab:ocupacaoTable" fileName="relatorioOcupacao" />
+				</h:commandButton>
+				
+			</h:panelGrid>
+			
+			<div style="float: right;">
+				<p:inputText id="filtro-nome" placeholder="Filtrar por nome" style="width:200px;"
+						value="#{relatorioOcupacaoController.parans['pedestre.nome']}"/>
+				
+				<p:selectOneMenu id="filtro-equipamento" value="#{relatorioOcupacaoController.parans['equipamento']}">
+					<f:selectItems value="#{relatorioOcupacaoController.listaEquipamentos}" />
+				</p:selectOneMenu>
+
+				<p:selectOneMenu id="filtro-empresa" value="#{relatorioOcupacaoController.parans['pedestre.empresa.id']}">
+					<f:selectItems value="#{relatorioOcupacaoController.listaEmpresas}"/>
+					
+					<f:converter converterId="javax.faces.Long"/>
+				</p:selectOneMenu>
+				
+				<p:calendar id="filtro-data" value="#{relatorioOcupacaoController.dataSelecionada}"
+						pattern="dd/MM/yyyy" mask="99/99/9999" size="10" navigator="true"/>
+			</div>
+			
+		</ui:define>
+		
+		<ui:define name="conteudo">
+		
+			<h:panelGrid width="100%" columns="1" headerClass="h-grid-header">
+				<f:facet name="header">
+					<h:outputText value="#{msgs['title.uc010.relatorio.ocupacao']}" />
+				</f:facet>
+				
+				<h:column>
+					<p:tabView id="relatorioOcupacaoTab">
+						<p:tab title="#{msgs['label.uc010.qtde.pedestres.agora']}">
+							
+							<h:panelGrid width="100%" columns="1">
+								<h:column>
+									<ui:include src="/tema/templates/vazio.xhtml">
+										<ui:param name="exibe" value="#{empty relatorioOcupacaoController.result}" />
+										<ui:param name="exibeAdicionar" value="true" />
+									</ui:include>
+								
+									<div class="row">
+										<div class="col-xs-9 col-sm-9 col-md-9">
+											<p:dataTable id="ocupacaoTable" value="#{relatorioOcupacaoController.result}" var="acesso" 
+												rendered="#{not empty relatorioOcupacaoController.result}" paginator="true" 
+												rows="#{relatorioOcupacaoController.quantPorPagina}" paginatorPosition="bottom"
+												paginatorAlwaysVisible="false" style="margin-top: 2%; margin-bottom: 2%;">
+												
+												<p:column headerText="#{msgs['label.uc010.matricula']}" style="text-align: center; width: 60px"
+														rendered="#{relatorioOcupacaoController.permiteCampoAdicionalCrachaMatricula}">
+													<h:outputText value="#{acesso.pedestre.matricula != null ? acesso.pedestre.matricula : '--'}" />
+												</p:column>
+												
+												<p:column headerText="#{msgs['label.uc010.numero.cartao.acesso']}" style="text-align: center">
+													<h:outputText value="#{acesso.pedestre.codigoCartaoAcesso}" />
+												</p:column>
+												
+												<p:column headerText="#{msgs['label.uc010.nome']}" style="text-align: center">
+													<h:outputText value="#{acesso.pedestre.nome}" />
+												</p:column>
+												
+												<p:column headerText="#{msgs['label.uc010.empresa']}" style="text-align: center">
+													<h:outputText value="#{acesso.pedestre.empresa.nome}" />
+												</p:column>
+												
+												<p:column headerText="#{msgs['label.uc010.data.nascimento']}" style="text-align: center">
+													<h:outputText value="#{acesso.pedestre.dataNascimento}">
+														<f:convertDateTime pattern="dd/MM/yyyy"/>
+													</h:outputText>
+												</p:column>
+												
+												<p:column headerText="#{msgs['label.uc010.data.acesso']}" style="text-align: center">
+													<h:outputText value="#{acesso.data}">
+														<f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss"/>
+													</h:outputText>
+												</p:column>
+												
+												<p:column headerText="#{msgs['label.uc010.equipamento']}" style="text-align: center">
+													<h:outputText value="#{acesso.equipamento}" />
+												</p:column>
+												
+												<p:column headerText="#{msgs['label.uc010.tipo.acesso']}" style="text-align: center">
+													<h:outputText value="#{acesso.tipo}" />
+												</p:column>
+												
+												<p:column headerText="#{msgs['label.uc010.sentido']}" style="text-align: center">
+													<h:outputFormat value="#{acesso.sentido}" />
+												</p:column>
+												
+												<p:column headerText="#{msgs['alt.acao.visualizar']}" style="text-align: center" exportable="false">
+													<h:commandButton id="acaoVisualizar"
+														action="#{relatorioOcupacaoController.redirecionaPaginaEditarPedetre(acesso.pedestre.id, 'reOcupacao')}"
+														title="#{msgs['alt.acao.visualizar']}" alt="#{msgs['alt.acao.visualizar']}"
+														image="#{menuController.path}/tema/img/bt_viewer_min.png"/>
+												</p:column>
+												
+											</p:dataTable>
+										</div>
+										
+										<div class="col-xs-3 col-sm-3 col-md-3" align="center">
+											<p:panelGrid id="qtdePedestres" rendered="#{not empty relatorioOcupacaoController.result}" 
+												columns="1" style="text-align: center; margin-top: 20%;">
+													<p:column>
+														<h:outputText value="#{relatorioOcupacaoController.result.size()}" 
+																style="font-size: 56pt; font-weight: bold"/>
+													</p:column>
+													<p:column>
+														<h:outputText value="Quantidade de pessoas no momento" />
+													</p:column>
+											</p:panelGrid>
+										</div>
+									</div>
+								
+								</h:column>
+							</h:panelGrid>
+						</p:tab>
+						
+						<p:tab title="#{msgs['label.uc010.grafico.ocupacao.hora']}">
+							<h:panelGrid width="100%" columns="1">
+								<p:chart type="line" model="#{relatorioOcupacaoController.graficoLinha}" style="margin: 2%; height: 100%;"/>
+							</h:panelGrid>
+						</p:tab>
+						
+					</p:tabView>
+				</h:column>
+				
+			</h:panelGrid>
+			
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

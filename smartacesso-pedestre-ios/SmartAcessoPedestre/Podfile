@@ -1,0 +1,26 @@
+platform :ios, '9.0'
+
+def libs
+    pod 'QRCodeReader.swift', '~> 9.0.1'
+    pod 'MaterialComponents'
+end
+
+target 'SmartAcessoPedestre' do
+  use_frameworks!
+  libs
+end
+
+post_install do |installer|
+    installer.pods_project.build_configurations.each do |config|
+        config.build_settings.delete('CODE_SIGNING_ALLOWED')
+        config.build_settings.delete('CODE_SIGNING_REQUIRED')
+        config.build_settings['SWIFT_VERSION'] = "5.0"
+    end
+    installer.pods_project.targets.each do |target|
+        target.build_configurations.each do |config|
+            config.build_settings['SWIFT_VERSION'] = "5.0"
+        end
+    end
+end
+
+

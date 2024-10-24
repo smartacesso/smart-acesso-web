@@ -1,0 +1,138 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui">
+
+<body>
+
+	<f:metadata>
+		<f:event type="preRenderView" listener="#{loginController.exibeMensagens}" />
+	</f:metadata>
+
+	<ui:composition template="tema/templates/template_externo.xhtml">
+
+		<ui:define name="titulo">
+			#{msgs['title.sistema']} | Entrar
+		</ui:define>
+
+		<ui:define name="conteudo">
+
+			<div class="row">
+				<div class="col-md-5 col-sm-6">
+					<div class="collapse navbar-collapse">
+
+						<h:panelGroup style="margin: 0px; padding: 0px;width: 100%">
+							<br />
+							<br />
+							<div class="clearfix"></div>
+							<h4>Bem vindo de volta!</h4>
+							<br />
+							<p class="text-muted">Entre com sua conta existente e tenha
+								todos os seus dados em uma única ferramenta.</p>
+						</h:panelGroup>
+
+
+					</div>
+				</div>
+
+				<div class="col-md-5 col-md-offset-2 col-sm-6">
+
+					<h:panelGroup style="margin: 0px; padding: 0px;width: 100%">
+						<br />
+						<br />
+						<div class="clearfix"></div>
+						<h4>Preencha seus dados</h4>
+					</h:panelGroup>
+
+					<br />
+					<h:panelGrid columns="2" width="auto">
+					
+						<h:column styleClass="verticalMiddle">
+							<h:outputText value="#{msgs['label.login.organizacao']}" />
+							<h:outputText value="*" styleClass="obrigatorio"/> <br/>
+							
+							<p:inputText id="unidadeOrganizacional" value="#{loginController.unidadeOrganizacional}" 
+								label="#{msgs['label.login.organizacao']}"
+								style="width: 120px;padding: 8px;" required="true" title=""/>
+						</h:column>
+
+						<h:column>
+							<h:outputText value="#{msgs['login.usuario']}" style="margin-left: -122px;" />
+							<h:outputText value="*" styleClass="obrigatorio" /><br/>
+						
+							<p:inputText id="usuario" value="#{loginController.usuario}" label="#{msgs['login.usuario']}"
+								style="width: 120px;padding: 8px; margin-left: -122px;" required="true" title=""  >
+							</p:inputText>
+						</h:column>
+
+						<h:column styleClass="verticalMiddle">
+							<h:outputText value="#{msgs['login.senha']}" />
+							<h:outputText value="*" styleClass="obrigatorio" /><br/>
+							<p:password id="senha" value="#{loginController.senha}"
+								style="width: 250px;padding: 8px;" label="#{msgs['login.senha']}"
+								maxlength="30" required="true"/>
+						</h:column>
+						
+						<h:column/>
+
+						<h:column styleClass="verticalMiddle">
+							<div style="margin-top: 15px;">
+								<p:commandButton id="btLogin" 
+									style="padding-left: 15px;padding-right: 15px;"
+									value="#{msgs['login.botao']}"
+									action="#{loginController.login()}">
+									<p:ajax execute="@all" render="@all" />
+								</p:commandButton>
+								<span
+									style="margin-left: 20px; margin-top: 10px; position: absolute">
+									<a href="javascript:void(PF('esqueciSenha').show());">#{msgs['login.esqueci.senha']}</a>
+								</span>
+							</div>
+						</h:column>
+
+					</h:panelGrid>
+
+				</div>
+			</div>
+			
+			<p:dialog header="#{msgs['header.login.esqueci.senha']}" 
+					  widgetVar="esqueciSenha" modal="true" >
+					  
+					  
+				<h:panelGrid columns="2">
+					<h:column>
+						<h:outputText value="#{msgs['label.digite.email']}" />
+					    <br/>
+					    <p:inputText value="#{loginController.email}" size="25">
+					    	<p:ajax execute="@this" render="@this" />
+					    </p:inputText>	
+					</h:column>
+					
+					<h:column>
+						<br/>
+						<p:commandButton id="btSenha" 
+							style="margin-left: 10px;padding-left: 15px;padding-right: 15px;"
+							value="#{msgs['label.ok']}"
+							action="#{loginController.alterarSenha()}">
+							<p:ajax execute="@all" render="@all" />
+						</p:commandButton>
+					</h:column>				
+				
+				</h:panelGrid>
+			    
+			</p:dialog> 
+
+		</ui:define>
+
+
+		<ui:define name="script">
+
+		</ui:define>
+	</ui:composition>
+
+
+</body>
+</html>

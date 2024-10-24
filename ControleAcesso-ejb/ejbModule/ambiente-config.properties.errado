@@ -1,0 +1,45 @@
+# ------------------------------------------------------
+# --Arquivo que configurações de ambiente do sistema----
+# --Deve ser configurado conforme o ambiente utilizado-- 
+# ------------------------------------------------------
+
+# Definindo configurações globais de ambiente da aplica��o
+# esta configura��o deve ser feita para cada ambiente que for utilizado
+config.ambiente=prod
+config.ambiente.facebook=https://www.facebook.com/pages/Smart-Ponto-Controle-de-Ponto-e-Acesso/
+config.ambiente.twitter=
+config.ambiente.gplus=
+config.ambiente.instagram=
+config.ambiente.blog=https://www.smartempresarial.com.br/
+
+# Configura��o do endere�o base do sistema
+config.ambiente.main.site=https://www.smartacesso.com.br/
+config.ambiente.main.link=https://www.smartacesso.com.br/
+config.ambiente.nome.app=sistema
+
+
+# Configura��es de identificação
+config.ambiente.support.email=suporte@startjobtec.com.br
+config.ambiente.noreply.email=noreply@startjobtec.com.br
+config.ambiente.site=https://www.smartempresarial.com.br/
+
+# Configura��o de academia gestora
+# as configurações "include" e "exclude" n�o
+# podem ser setadas juntas, elas funcionando 
+# separadamente.
+# - include: ID da academia gestora quando h� um path indicado
+# - exclude: ID's das academias gestoras existentes quendo n�o h� um 
+#			 path indicado
+#config.management.academy.path=/flavours/xxxx
+#config.management.academy.include.id=1
+config.management.academy.exclude.ids=0
+
+# Configura��o da pasta de resources
+config.resources.folder.prod=C:/ambiente/servers/wildfly-20.0.0.Final/welcome-content/resources/
+config.resources.folder.dev=/home/gustavo/ambiente/servers/wildfly-20.0.0.Final/welcome-content/resources/
+
+config.tempo.dispositivo=10
+#config.sgdb.utilizado=plsql
+config.schema.name=controle_acesso.
+config.sqlserver.version=0
+config.sgdb.utilizado=plsql

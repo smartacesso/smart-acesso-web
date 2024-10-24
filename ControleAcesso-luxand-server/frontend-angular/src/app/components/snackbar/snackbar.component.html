@@ -1,0 +1,8 @@
+<div class="snack-bar row align-items-center" [class.success]="type === 'success'" [class.error]="type === 'error'" [class.warning]="type === 'warning'"
+	[@snack-visibility]="state">
+	<span>
+		<i class="fa {{ type === 'success' ? 'fa-check-circle' 
+			: ( type === 'error' ? 'fa-times-circle' : 'fa-exclamation-circle') }}"></i>
+	</span>
+	{{ message }}
+</div>

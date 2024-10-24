@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#27394a</color>
+    <color name="colorPrimaryDark">#192633</color>
+    <color name="colorAccent">#46b2ca</color>
+    <color name="rotateButtonBackground">#8846b2ca</color>
+    <color name="lightGray">#DDD</color>
+    <color name="card_background">#27394a</color>
+</resources>

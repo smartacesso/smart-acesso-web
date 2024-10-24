@@ -1,0 +1,154 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui">
+	
+<body>
+	<f:metadata>  
+    	<f:event type="preRenderView" listener="#{consultaEmpresaController.exibeMensagens}"/>  
+	</f:metadata> 
+	
+	<ui:composition template="/tema/templates/template.xhtml">
+	
+		<ui:define name="titulo">
+			#{msgs['title.sistema']} | #{msgs['title.uc005.consulta.empresas']}
+		</ui:define>
+		
+		<ui:define name="breadcrumb">
+			<a target="_top" href="/#{menuController.appName}/paginas/principal.xhtml"> <h:outputText
+					value="#{msgs['title.principal']}" />
+			</a> > <h:outputText value="#{msgs['title.uc005.consulta.empresas']}" />
+		</ui:define>
+		
+		<ui:define name="tools">
+			<h:panelGrid columns="4" styleClass="conteudo_tools">
+	
+				<h:commandButton id="acaoNovo"
+						action="#{consultaEmpresaController.novo}"
+						title="#{msgs['alt.acao.nova.empresa']}" alt="#{msgs['alt.acao.nova.empresa']}"
+						image="#{menuController.path}/tema/img/bt_newer.png">
+					
+					<p:ajax process="@this" update="@form"/>
+				</h:commandButton>
+				
+				<h:commandButton id="acaoBuscar" 
+						action="#{consultaEmpresaController.buscar}" 
+						title="#{msgs['alt.acao.buscar']}" alt="#{msgs['alt.acao.buscar']}"
+						image="#{menuController.path}/tema/img/bt_searcher.png">
+					
+					<p:ajax process="@form" update="@form"/>
+				</h:commandButton>
+
+				<h:commandButton id="acaoLimpar" 
+						action="#{consultaEmpresaController.limpar}"
+						title="#{msgs['alt.acao.limpar']}" alt="#{msgs['alt.acao.limpar']}"
+						image="#{menuController.path}/tema/img/bt_cleaner.png">
+					
+					<p:ajax process="@this" update="@form"/>
+				</h:commandButton>
+				
+				<h:commandButton id="acaoExportar" 
+					image="#{menuController.path}/tema/img/bt_exporter_xlsx.png"
+					title="#{msgs['alt.acao.exportar']}" alt="#{msgs['alt.acao.exportar']}">
+					
+					<p:dataExporter type="xlsx" target="form:empresasTable" fileName="empresas" />
+				</h:commandButton>
+				
+			</h:panelGrid>
+			
+			<div style="float: right;">
+				<p:inputText id="filtro-nome" placeholder="Filtrar por nome" style="width:200px;" 
+						value="#{consultaEmpresaController.parans['nome']}"/>
+				
+				<p:inputText id="filtro-cnpj" placeholder="Filtrar por CNPJ" style="width:200px;"
+						value="#{consultaEmpresaController.parans['cnpj']}" />
+			</div>
+		</ui:define>
+		
+		<ui:define name="conteudo">
+		
+			<h:panelGrid width="100%" columns="1" headerClass="h-grid-header">
+				<f:facet name="header">
+					<h:outputText value="#{msgs['title.uc005.consulta.empresas']}" />
+				</f:facet>
+				
+				<h:column>
+				
+					<ui:include src="/tema/templates/vazio.xhtml">
+						<ui:param name="exibe" value="#{empty consultaEmpresaController.result}" />
+						<ui:param name="exibeAdicionar" value="true" />
+					</ui:include>
+					
+					<p:dataTable id="empresasTable" value="#{consultaEmpresaController.result}" var="empresa" 
+						rendered="#{not empty consultaEmpresaController.result}" paginator="true" 
+						rows="#{consultaEmpresaController.quantPorPagina}" paginatorPosition="bottom"
+						paginatorAlwaysVisible="false" >
+						
+						<p:column headerText="#{msgs['label.uc005.codigo']}" style="text-align: center">
+							<h:outputText value="#{empresa.id}" />
+						</p:column>
+						
+						<p:column headerText="#{msgs['label.uc005.nome.empresa']}" style="text-align: center">
+							<h:outputText value="#{empresa.nome}" />
+						</p:column>
+
+						<p:column headerText="#{msgs['label.uc005.email']}" style="text-align: center">
+							<h:outputText value="#{empresa.email}" />
+						</p:column>
+
+						<p:column headerText="#{msgs['label.uc005.telefone']}" style="text-align: center">
+							<h:outputText value="#{empresa.telefone}"/>
+						</p:column>
+
+						<p:column headerText="#{msgs['label.uc005.celular']}" style="text-align: center">
+							<h:outputText value="#{empresa.celular}"/>
+						</p:column>
+
+						<p:column headerText="#{msgs['label.uc005.cnpj']}" style="text-align: center">
+							<h:outputText value="#{empresa.cnpj}">
+								<f:converter converterId="cnpjConverter"/>
+							</h:outputText>
+						</p:column>
+						
+						<p:column headerText="#{msgs['alt.acao.editar']}" style="text-align: center;width: 40px" exportable="false">
+							<h:commandButton id="botaoEditarEmpresa"
+								action="#{consultaEmpresaController.editar(empresa.id)}"
+								title="#{msgs['alt.acao.editar.empresa']}"
+								image="#{menuController.path}/tema/img/bt_edit_min.png">
+							</h:commandButton>
+						</p:column>
+	
+						<p:column headerText="#{msgs['alt.acao.excluir']}" style="text-align: center;width: 40px" exportable="false">
+							<h:commandButton image="#{menuController.path}/tema/img/bt_remove_min.png" 
+										title="#{msgs['alt.acao.excluir']}" >
+								
+								<f:setPropertyActionListener value="#{empresa}" target="#{consultaEmpresaController.empresaSelecionada}" />
+								<p:ajax oncomplete="PF('confirmarExclusao').show()"></p:ajax>
+							</h:commandButton>
+						</p:column>
+
+					</p:dataTable>
+				
+				</h:column>
+				
+			</h:panelGrid>
+			
+			<p:confirmDialog id="dialogConfirmarExclusao"
+				widgetVar="confirmarExclusao"
+					header="Confirmar"
+					message="Tem certeza que deseja excluir esta empresa?">
+				
+				<p:button value="Não" onclick="PF('confirmarExclusao').hide(); return false;"/>
+				<p:commandButton value="Sim" oncomplete="PF('confirmarExclusao').hide();"  
+					action="#{consultaEmpresaController.excluirEmpresa()}" process="@this" update="@form"/>
+			</p:confirmDialog>
+		
+		</ui:define>
+
+	</ui:composition>
+
+</body>
+</html>

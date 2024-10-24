@@ -1,0 +1,58 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui">
+	
+	<p:panelGrid columns="2" id="painelCadastroPedestreEndereco" style="width: 100%">
+						
+		<p:column>
+			<p:outputLabel value="#{msgs['label.uc001.cep']}" for="cep"/>
+			<br />
+			<p:inputMask id="cep" value="#{cadastroPedestreController.entidade.endereco.cep}" mask="99999-999"
+				required="#{cadastroPedestreController.verificaObrigatorio('endereco')}"/>
+		</p:column>
+
+		<p:column>
+			<p:outputLabel value="#{msgs['label.uc001.logradouro']}" for="logradouro"/>
+			<br />
+			<p:inputText id="logradouro" value="#{cadastroPedestreController.entidade.endereco.logradouro}" size="40"
+				required="#{cadastroPedestreController.verificaObrigatorio('endereco')}"/>
+		</p:column>
+
+		<p:column>
+			<p:outputLabel value="#{msgs['label.uc001.numero']}" for="numero"/>
+			<br />
+			<p:inputNumber id="numero" value="#{cadastroPedestreController.entidade.endereco.numero}" size="5" minValue="0" decimalPlaces="0"
+				required="#{cadastroPedestreController.verificaObrigatorio('endereco')}"/>
+		</p:column>
+
+		<p:column>
+			<p:outputLabel value="#{msgs['label.uc001.complemento']}" for="complemento"/>
+			<br />
+			<p:inputText id="complemento" value="#{cadastroPedestreController.entidade.endereco.complemento}" size="40"/>
+		</p:column>
+		
+		<p:column>
+			<p:outputLabel value="#{msgs['label.uc001.bairro']}" for="bairro"/>
+			<br />
+			<p:inputText id="bairro" value="#{cadastroPedestreController.entidade.endereco.bairro}" size="30"
+				required="#{cadastroPedestreController.verificaObrigatorio('endereco')}"/>
+		</p:column>
+
+		<p:column>
+			<p:outputLabel value="#{msgs['label.uc001.cidade']}" for="cidade"/>
+			<br />
+			<p:inputText id="cidade" value="#{cadastroPedestreController.entidade.endereco.cidade}" size="40"
+				required="#{cadastroPedestreController.verificaObrigatorio('endereco')}"/>
+		</p:column>
+
+		<p:column>
+			<p:outputLabel value="#{msgs['label.uc001.estado']}" for="estado"/>
+			<br />
+			<p:inputText id="estado" value="#{cadastroPedestreController.entidade.endereco.estado}" size="5"
+				required="#{cadastroPedestreController.verificaObrigatorio('endereco')}"/>
+		</p:column>
+				
+	</p:panelGrid>
+</ui:composition>

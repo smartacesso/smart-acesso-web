@@ -1,0 +1,78 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui">
+	
+	<p:panelGrid columns="2" id="painelCadastroPedestreBiometria" style="width: 100%" columnClasses="c-top, c-top">
+		
+		<p:column>
+			<p:panelGrid id="painelViewDigitalSelecionada" columns="1">
+				<p:column>
+					<div
+						style="width: 150px; text-align: center; margin-bottom: 2px;">
+						<h:outputText value="#{msgs['label.uc008.imagem.digital']}" />
+					</div>
+				</p:column>
+				
+				<p:column rendered="#{cadastroPedestreController.biometria == null}">
+					<div
+						style="width: 150px; height: 200px; display: table-cell; vertical-align: middle; text-align: center; 
+								border-style: solid; border-width: 2px; border-color: #39afc7">
+						<h:outputText value="#{msgs['label.uc008.sem.imagem']}" />
+					</div>
+				</p:column>
+				
+				<p:column rendered="#{cadastroPedestreController.imagemBiometria != null}">
+					<p:graphicImage value="#{cadastroPedestreController.imagemBiometria}" stream="false"
+						style="height: 200px; width:150px; padding: 0px; margin: 0px; border-style: solid; border-width: 2px; border-color: #39afc7"/>
+				</p:column>
+				
+				<p:column rendered="#{cadastroPedestreController.biometria != null}">
+					<div style="width: 150px; text-align: center; font-weight: bold;">
+						<h:outputText
+							value="#{msgs[cadastroPedestreController.biometria.dedo.toString()]}" />
+					</div>
+				</p:column>
+			
+			</p:panelGrid>
+		</p:column>
+
+		<p:column>
+			<p:panelGrid id="painelViewBiometriasCadastradas" columns="1">
+				<p:column>
+					<div
+						style="width: 150px; text-align: left; margin-bottom: 2px;">
+						<h:outputText value="#{msgs['label.uc008.digitais.cadastradas']}" />
+					</div>
+				</p:column>
+				
+				<p:dataTable id="biometrias" value="#{cadastroPedestreController.entidade.biometrias}"
+					var="biometria" paginator="true" rows="5" paginatorAlwaysVisible="false" 
+					paginatorPosition="bottom" rendered="#{not empty cadastroPedestreController.entidade.biometrias}">
+					
+					<p:column headerText="#{msgs['label.uc008.dedos.cadastrados']}" style="text-align: center;">
+						<h:outputText value="#{msgs[biometria.dedo.toString()]}" />
+					</p:column>
+					
+					<p:column headerText="#{msgs['alt.acao.visualizar']}" style="text-align: center;">
+						<h:commandButton image="#{menuController.path}/tema/img/bt_viewer_min.png"
+										action="#{cadastroPedestreController.visualizarDigital(biometria)}"
+										title="#{msgs['alt.acao.visualizar']}" alt="#{msgs['alt.acao.visualizar']}"
+										immediate="true" />
+					</p:column>
+					
+					<p:column headerText="#{msgs['alt.acao.excluir']}" style="text-align: center;">
+						<h:commandButton image="#{menuController.path}/tema/img/bt_remove_min.png" 
+									title="#{msgs['alt.acao.excluir']}" action="#{cadastroPedestreController.removerBiometria(biometria)}">
+							<p:ajax process="@this" update="form:cadastroPedestreTab:painelCadastroPedestreBiometria biometrias"/>
+						</h:commandButton>
+					</p:column>
+				</p:dataTable>
+				
+			</p:panelGrid>
+			
+		</p:column>
+	</p:panelGrid>
+	
+</ui:composition>

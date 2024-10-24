@@ -1,0 +1,279 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:jsf="http://xmlns.jcp.org/jsf">
+
+<body>
+	
+	<ui:composition template="tema/templates/template_externo.xhtml">
+	
+		<ui:define name="scripts">
+			<link type="text/css" rel="stylesheet" href="/#{menuController.appName}/#{menuController.path}/tema/css/cadastroFacialExterno.css" />
+			<script src="https://webrtc.github.io/adapter/adapter-latest.js" type="text/javascript"></script>
+		</ui:define>
+	
+		<ui:define name="titulo">
+			#{msgs['title.sistema']} | #{msgs['title.cadastro.facial.externo']}
+		</ui:define>
+		
+		<ui:define name="conteudo">
+			<div jsf:rendered="#{cadastroFacialExternoController.pedestre != null 
+								and cadastroFacialExternoController.cadastroExterno != null}">
+				
+				<div style="text-align: center; margin-bottom: 30px;">
+					<h1 style="font-weight: bold; margin-top: 0;">Captura da face</h1>
+				</div>
+				
+				<div class="row">
+					<div class="dados-basicos col-xl-6 col-lg-6">
+						<div>
+							<h2>Siga as  instruções abaixo</h2>
+							
+							<ul>
+								<li class="text" style="font-size: 16px;">
+									<span class="fa fa-check img-centered img-conheca"
+										style="margin-right: -20px;" />
+
+									Procure um local bem iluminado
+								</li>
+								
+								<li class="text" style="font-size: 16px;">
+									<span class="fa fa-check img-centered img-conheca"
+										style="margin-right: -20px;" />
+									Aproxime-se da câmera e à foque em sua face
+								</li>
+									
+								<li class="text" style="font-size: 16px;">
+									<span class="fa fa-check img-centered img-conheca"
+										style="margin-right: -20px;" />
+									Certifique-se que seu rosto está enquadrado na câmera
+								</li>
+								
+								<li class="text" style="font-size: 16px;">
+									<span class="fa fa-check img-centered img-conheca"
+										style="margin-right: -20px;" />
+									Tire as fotos com variações na posição da face conforme exemplo abaixo
+								</li>
+							</ul>
+						</div>
+						
+						<div style="margin-top: 20px;" class="row">
+							<img src="https://as1.ftcdn.net/jpg/03/31/65/02/500_F_331650225_tbouJjKpB9SseA1noMYlc6mC8Gy4Oqz7.jpg" 
+								class="col-xl-3 col-lg-3 col-1" width="150"/>
+
+							<img src="https://as1.ftcdn.net/jpg/03/31/65/02/500_F_331650225_tbouJjKpB9SseA1noMYlc6mC8Gy4Oqz7.jpg" 
+								class="col-xl-3 col-lg-3 col-1" width="150"/>
+
+							<img src="https://as1.ftcdn.net/jpg/03/31/65/02/500_F_331650225_tbouJjKpB9SseA1noMYlc6mC8Gy4Oqz7.jpg" 
+								class="col-xl-3 col-lg-3 col-1" width="150"/>
+						</div>
+					</div>
+					
+					
+					<div class="registra-foto col-xl-6 col-lg-6">
+						<div>
+							<h2>Enquadre seu rosto na câmera</h2>
+							
+							<div jsf:rendered="#{cadastroFacialExternoController.aindaCaputrandoFotos}">
+								<video id="camera" width="400" autoplay="autoplay" muted="muted" playsInline="playsInline"/>
+							</div>
+							
+							<div jsf:rendered="#{not cadastroFacialExternoController.aindaCaputrandoFotos}">
+								<h4>Caso queira verifique suas fotos abaixo</h4>
+								
+								<ul style="margin-top: 20px; margin-bottom: 20px;">
+									<li>
+										<h:commandLink action="#{cadastroFacialExternoController.download(1)}" 
+											value="Download foto 1">
+											<p:ajax process="@this" update="@this"/>
+										</h:commandLink>
+									</li>
+									<li>
+										<h:commandLink action="#{cadastroFacialExternoController.download(2)}" 
+											value="Download foto 2">
+											<p:ajax process="@this" update="@this"/>
+										</h:commandLink>
+									</li>
+									<li>
+										<h:commandLink action="#{cadastroFacialExternoController.download(3)}" 
+											value="Download foto 3">
+											<p:ajax process="@this" update="@this"/>
+										</h:commandLink>
+									</li>
+								</ul>
+							</div>
+							
+							<div>
+								<h:commandButton id="captura"
+									value="#{msgs['alt.acao.capturar']}" 
+									onclick="capture(); return true;" styleClass="btn btn-primary"
+									rendered="#{cadastroFacialExternoController.aindaCaputrandoFotos}">
+									
+									<f:ajax render="@form" ></f:ajax>
+								</h:commandButton>
+								
+								<h:commandButton id="atulizaForm"
+									style="display: none">
+									
+									<f:ajax render="@form" ></f:ajax>
+								</h:commandButton>
+								
+								<h:commandButton id="finalizaCaptura"
+									value="#{msgs['alt.acao.finalizar']}"
+									action="#{cadastroFacialExternoController.onFinalizaCapture}"
+									styleClass="btn btn-primary"
+									rendered="#{not cadastroFacialExternoController.aindaCaputrandoFotos}">
+								</h:commandButton>
+								
+								<h:commandButton id="reiniciarCaptura"
+									style="margin-left: 10px;"
+									styleClass="btn btn-primary"
+									value="#{msgs['alt.acao.reiniciar']}"
+									action="#{cadastroFacialExternoController.reload()}">
+								</h:commandButton>
+									
+								<h:outputLabel value="#{sessionScope.numeroFotoAtual}/#{cadastroFacialExternoController.qtdeFotosNecessarias}" 
+									id="labelFotoAtual" style="color: gray; margin-left: 10px;"
+									rendered="#{cadastroFacialExternoController.aindaCaputrandoFotos}"/>
+							</div>
+						</div>
+						
+						<div style="margin-top: 20px;">
+							<ul>
+								<li>
+									<p:outputLabel value="Nome: #{cadastroFacialExternoController.pedestre.nome}"
+										style="font-size: 16px !important;"/>
+								</li>
+								<li>
+									<p:outputLabel value="Empresa: #{cadastroFacialExternoController.pedestre.empresa.nome}"
+										style="font-size: 16px !important;"/>
+								</li>
+								<li>
+									<p:outputLabel value="Telefone: #{cadastroFacialExternoController.pedestre.celular}"
+										style="font-size: 16px !important;"/>
+								</li>
+								<li>
+									<p:outputLabel value="E-mail: #{cadastroFacialExternoController.pedestre.email}"
+										style="font-size: 16px !important;"/>
+								</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			<h:form rendered="#{cadastroFacialExternoController.pedestre == null 
+								or cadastroFacialExternoController.cadastroExterno == null}">
+				
+				<div style="text-align: center;">
+					<h1 class="text-lg">Dados inválidos</h1>
+				</div>
+			</h:form>
+			
+			<script>
+
+				jQuery(document).ready(function() {
+					openCam();
+				});
+
+				var mediaStream = null;
+				function openCam() {
+					try{
+
+						//usa camera
+						var name  = '#camera';
+						var fotoStremming = document.querySelector(name);
+
+						//abre camera
+						navigator.getMedia = ( navigator.getUserMedia ||
+		                        navigator.webkitGetUserMedia ||
+		                        navigator.mozGetUserMedia ||
+		                        navigator.msGetUserMedia);
+		
+						navigator.getMedia(
+						   {
+						     video: true,
+						     audio: false
+						   },
+						   function(stream) {
+
+							 //inicia stream
+						     if (navigator.mozGetUserMedia) {
+						    	 fotoStremming.srcObject = stream;
+						     } else {
+						        //var vendorURL = window.URL || window.webkitURL;
+						        //fotoStremming.src = vendorURL.createObjectURL(stream);
+						        fotoStremming.srcObject = stream;
+						     }
+						     fotoStremming.play();
+
+						     //ações para parar o stream
+						     mediaStream = stream;
+						     mediaStream.stop = function () {
+				                this.getAudioTracks().forEach(function (track) {
+				                    track.stop();
+				                });
+				                this.getVideoTracks().forEach(function (track) {
+				                    track.stop();
+				                });
+				            };
+						   },
+						   function(err) {
+							 alert("Não há camêras instaladas neste computador.")
+						     console.log("An error occured! " + err);
+						   }
+						);
+						
+					} catch(e) {
+						console.log(e.message);
+					}
+				}
+
+				function closeCam() {
+				    mediaStream.stop();
+				    navigator.getMedia = null;
+				    var name  = '#camera';
+				    var fotoStremming = document.querySelector(name);
+				    fotoStremming.src = "";
+				}
+	
+				function capture() {
+					try{
+						var name  = '#camera';
+					    var video = document.querySelector(name);
+	
+						var canvas = document.createElement("canvas");
+				        canvas.width = video.videoWidth;
+				        canvas.height = video.videoHeight;
+				        canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
+	
+				        jQuery.ajax({
+		        	         type: "POST", 
+		        	         url: "capturePhoto", 
+		        	         data: canvas.toDataURL("image/png"),
+		        	         success: function(msg) {
+			        	         document.getElementById("form:atulizaForm").click();
+		        	         },
+		        	         error: function(jqxhr){
+		        	         }
+		        	    });
+	
+					} catch(e) {
+						alert(e.message);
+						console.log(e.message);
+					}
+	
+				}
+
+			</script>
+			
+		</ui:define>
+		
+	</ui:composition>
+
+</body>
+</html>

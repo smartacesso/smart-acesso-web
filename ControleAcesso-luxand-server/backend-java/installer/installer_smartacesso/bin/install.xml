@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="iso-8859-1" standalone="yes" ?>
+
+<!--   
+	To compile it :
+	- go in the bin directory where you installed IzPack
+	- call "compile install.xml"
+	or if want to change the folder base
+	- call "compile ../sample/install.xml -b ../sample"
+   
+	More information in
+	https://izpack.atlassian.net/wiki/spaces/IZPACK/pages/491539/Installation+Files
+	https://github.com/izpack/izpack/blob/master/src/doc-reST/sample-install-definition.txt
+	
+	Complete tutorial in 
+	http://sonalimendis.blogspot.com.br/2010/05/write-installer-with-izpack.html
+-->
+
+<installation version="5.0">
+
+    <info>
+        <appname>SmartAcesso Controle Facial</appname>
+		<appversion>1.01</appversion>
+        <authors>
+            <author name="SmartPonto" email="suporte@smartempresarial.com.br"/>
+        </authors>
+        <url>https://www.smartempresarial.com.br/</url>
+		<javaversion>1.8</javaversion>
+        <requiresjdk>no</requiresjdk>
+		<uninstaller name="desinstalar.jar" path="${INSTALL_PATH}/desinstalador" write="yes"/>
+		<run-privileged condition="izpack.windowsinstall.vista|izpack.windowsinstall.7|izpack.windowsinstall.8|izpack.windowsinstall.10|izpack.linuxinstall|izpack.macinstall"/>
+    </info>
+
+    <guiprefs width="640" height="480" resizable="no">
+	
+		<!--  
+		More options for themes in
+		https://izpack.atlassian.net/wiki/spaces/IZPACK/pages/491730/GUI+Preferences
+		https://insubstantial.github.io/insubstantial/substance/docs/skins/toneddown.html
+		-->
+		<laf name="looks">
+			<os family="windows" />
+			<param name="variant" value="windows" />
+		</laf>
+		<laf name="substance">
+			<os family="mac" />
+			<param name="variant" value="default" />
+		</laf>
+		
+		<!--  
+		More options for GUI in
+		https://izpack.atlassian.net/wiki/spaces/IZPACK/pages/491730/GUI+Preferences
+		-->
+		<modifier key="allYGap" value="3"/>
+		<modifier key="allXGap" value="3"/>
+		
+		<modifier key="useLabelIcons" value="no"/>
+		<modifier key="useButtonIcons" value="yes"/>
+		<modifier key="layoutAnchor" value="CENTER"/>
+		
+		<modifier key="useHeadingPanel" value="yes"/>
+		<modifier key="useHeadingForSummary" value="no"/>
+		<modifier key="headingLineCount" value="2"/>
+		<modifier key="headingImageOnLeft" value="yes"/>
+		<modifier key="headingBackgroundColor" value="0x00ffffff"/>
+		<modifier key="headingFontSize" value="1.4"/>
+		<modifier key="headingPanelCounter" value="text"/> <!-- progressbar ou text -->
+		<modifier key="headingPanelCounterPos" value="inHeading"/> <!-- inHeading ou inNavigationPanel -->
+		
+		
+    </guiprefs>
+    
+    <variables>
+        <variable name="DesktopShortcutCheckboxEnabled" value="true"/>
+		<variable name="StartupShortcutCheckboxEnabled" value="true"/>
+		<variable name="TargetPanel.dir.windows" value="C:/Program Files/SmartFaces"/>
+		<variable name="TargetPanel.dir.unix" value="/opt/SmartFaces"/>
+		<variable name="TargetPanel.dir.mac" value="/Applications/SmartFaces"/>
+    </variables>
+	
+    <locale>
+        <langpack iso3="prt"/>
+    </locale>
+
+	<!-- <res id="Installer.image" src="images/side-image.png"/>-->
+    <resources>
+        <res id="shortcutSpec.xml" src="C:\ambiente\workspaces\controle-acesso-web\ControleAcesso-luxand-server\backend-java\installer\installer_smartacesso\bin\shortcutSpec.xml" />
+		<res id="CustomLangPack.xml_prt" src="C:\ambiente\workspaces\controle-acesso-web\ControleAcesso-luxand-server\backend-java\installer\installer_smartacesso\bin\CustomLangPack.xml_prt" />
+		<res id="Heading.image" src="C:\ambiente\workspaces\controle-acesso-web\ControleAcesso-luxand-server\backend-java\installer\installer_smartacesso\bin\images\heading_image.png" />
+		<res id="ProcessPanel.Spec.xml" src="C:\ambiente\workspaces\controle-acesso-web\ControleAcesso-luxand-server\backend-java\installer\installer_smartacesso\bin\processPanelSpec.xml" />
+    </resources>
+
+	<!--  
+	More options for panels in
+	https://izpack.atlassian.net/wiki/spaces/IZPACK/pages/491580/Built-in+Panel+Types
+	https://izpack.atlassian.net/wiki/spaces/IZPACK/pages/491702/Dividing+panel+translations+to+installation+update+and+uninstallation
+	
+	Creation of panels is covered in
+	http://www.imrantariq.com/blog/wp-content/uploads/2011/01/izpack-installer-guide.pdf	
+	-->
+    <panels>
+        <panel classname="HelloPanel"/>
+        <panel classname="TargetPanel"/>
+		<panel classname="ShortcutPanel"/>
+		<panel classname="InstallPanel"/>
+		<panel classname="ProcessPanel"/>
+        <panel classname="SimpleFinishPanel" allowClose="true"/>
+    </panels>
+
+	<packs>
+        <pack name="Base" required="yes">
+            <description>Arquivos principais do aplicativo</description>
+			<fileset dir="C:\ambiente\workspaces\controle-acesso-web\ControleAcesso-luxand-server\backend-java\installer\installer_smartacesso\bin\images" targetdir="$INSTALL_PATH\images">
+                <include name="**"/>
+            </fileset>
+			<fileset dir="C:\ambiente\workspaces\controle-acesso-web\ControleAcesso-luxand-server\backend-java\installer\installer_smartacesso\bin\lib" targetdir="$INSTALL_PATH\lib">
+                <include name="**"/>
+            </fileset>
+            <fileset dir="C:\ambiente\workspaces\controle-acesso-web\ControleAcesso-luxand-server\backend-java\installer\installer_smartacesso\bin\apache" targetdir="$INSTALL_PATH\apache">
+                <include name="**"/>
+            </fileset>
+            <fileset dir="C:\ambiente\workspaces\controle-acesso-web\ControleAcesso-luxand-server\backend-java\installer\installer_smartacesso\bin\app" targetdir="$INSTALL_PATH\app">
+                <include name="**"/>
+            </fileset>
+            <file src="C:\ambiente\workspaces\controle-acesso-web\ControleAcesso-luxand-server\backend-java\installer\installer_smartacesso\bin\backend.jar" targetdir="$INSTALL_PATH" override="true"/>
+            <file src="C:\ambiente\workspaces\controle-acesso-web\ControleAcesso-luxand-server\backend-java\installer\installer_smartacesso\bin\SmartFaces.exe" targetdir="$INSTALL_PATH" override="true"/>
+            <file src="C:\ambiente\workspaces\controle-acesso-web\ControleAcesso-luxand-server\backend-java\installer\installer_smartacesso\bin\SmartFaces.xml" targetdir="$INSTALL_PATH" override="true"/>
+            
+        </pack>
+    </packs>
+	
+	<natives>
+		<native type="izpack" name="ShellLink.dll"/>
+		<native type="izpack" name="ShellLink_x64.dll"/>
+		<native type="3rdparty" name="COIOSHelper.dll" stage="both">
+		   <os family="windows"/>
+		</native>
+		<native type="3rdparty" name="COIOSHelper_x64.dll" stage="both">
+		   <os family="windows"/>
+		</native>
+	</natives>	
+	
+	<listeners>
+		<listener classname="RegistryInstallerListener" stage="install">
+			<os family="windows"/>
+		</listener>
+		<listener classname="RegistryUninstallerListener" stage="uninstall">
+			<os family="windows"/>
+		</listener>
+	</listeners>
+	
+</installation>

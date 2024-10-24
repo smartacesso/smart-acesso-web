@@ -1,0 +1,237 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui">
+	
+<body>
+
+	<ui:composition template="/tema/templates/template.xhtml">
+	
+		<ui:define name="titulo">
+			#{msgs['title.sistema']} | #{cadastroUsuarioController.entidade.id != null 
+											? msgs['title.uc004.editar.usuario'] 
+											: msgs['title.uc004.cadastro.usuario']}
+		</ui:define>
+		
+		<ui:define name="breadcrumb">
+			<a target="_top" href="/#{menuController.appName}/paginas/principal.xhtml"> <h:outputText
+					value="#{msgs['title.principal']}" />
+			</a> > 
+			<a target="_top" href="/#{menuController.appName}/paginas/sistema/usuarios/pesquisaUsuarios.xhtml"> <h:outputText
+					value="#{msgs['title.uc001.consulta.usuarios']}" />
+			</a> > <h:outputText value="#{cadastroUsuarioController.entidade.id != null 
+										? msgs['title.uc004.editar.usuario'] 
+										: msgs['title.uc004.cadastro.usuario']}" />
+		</ui:define>
+		
+		<ui:define name="tools">
+			<h:panelGrid columns="4" styleClass="conteudo_tools">
+	
+				<h:commandButton id="save"
+					action="#{cadastroUsuarioController.salvar}"
+					title="#{msgs['alt.acao.save']}"
+					image="#{menuController.path}/tema/img/bt_saver.png">
+					<p:ajax process="@form" update="@form"/>
+				</h:commandButton>
+				
+				<h:commandButton id="editarSenha" 
+						rendered="#{cadastroUsuarioController.entidade.id != null}" 
+						title="#{msgs['alt.acao.alterar.senha']}"
+						image="#{menuController.path}/tema/img/bt_security.png"
+						action="#{cadastroUsuarioController.buscarLoginUsuario()}">
+					<p:ajax process="@this" update="alteraSenhaDialog" oncomplete="PF('alteraSenha').show(); return false;"/>
+				</h:commandButton>
+			</h:panelGrid>
+		</ui:define>
+		
+		<ui:define name="conteudo">
+		
+			<p:dialog id="alteraSenhaDialog" widgetVar="alteraSenha" header="#{msgs['header.alterar.dados.login']}" modal="true">
+				<p:panelGrid columns="3">
+					<p:column>
+						<h:outputText value="#{msgs['label.novo.login']}"/>
+						<br />
+						<p:inputText value="#{cadastroUsuarioController.usuarioLogin}">
+							<f:validateRegex pattern="[a-zA-Z0-9]+"/>
+						</p:inputText>
+					</p:column>
+					
+					<p:column>
+						<h:outputText value="#{msgs['label.nova.senha']}" />
+						<br />
+						<p:inputText value="#{cadastroUsuarioController.usuarioSenha}"/>
+					</p:column>
+					
+					<p:column>
+						<br />
+						<p:commandButton value="#{msgs['alt.acao.alterar']}" 
+								action="#{cadastroUsuarioController.alterarLoginSenhaUsuarioUsuario()}" oncomplete="PF('alteraSenha').hide();"/>
+					</p:column>
+				</p:panelGrid>
+			</p:dialog>
+		
+			
+			<h:panelGrid width="100%" columns="1" headerClass="h-grid-header">
+				<f:facet name="header">
+					<h:outputText value="#{cadastroUsuarioController.entidade.id != null 
+								? msgs['title.uc004.editar.usuario'] 
+								: msgs['title.uc004.cadastro.usuario']}" />
+				</f:facet>
+				
+				<h:column>
+			
+					<p:tabView id="cadastroUsuarioTab">
+						<p:tab title="#{msgs['label.uc004.dados.usuario']}">
+							<p:panelGrid columns="2" id="painelCadastroUsuario" style="width: 100%;">
+								<p:column>
+									<p:outputLabel value="#{msgs['label.uc004.nome.usuario']}" for="nome" indicateRequired="true"/>
+									<br />
+									<p:inputText id="nome" value="#{cadastroUsuarioController.entidade.nome}" required="true" size="40"/>
+								</p:column>
+								
+								<p:column>
+									<p:outputLabel value="#{msgs['label.uc004.status.usuario']}" for="status" indicateRequired="true"/>
+									<br />
+									<p:selectOneMenu id="status" value="#{cadastroUsuarioController.entidade.status}" required="true">
+										<f:selectItems value="#{cadastroUsuarioController.listaStatus}"/>
+									</p:selectOneMenu>
+								</p:column>
+								
+								<p:column rendered="#{cadastroUsuarioController.entidade.id == null}">
+									<p:outputLabel value="#{msgs['label.uc004.login']}" for="login" indicateRequired="true"/>
+									<br />
+									<p:inputText id="login" value="#{cadastroUsuarioController.entidade.login}" required="true">
+										<f:validateRegex pattern="[a-zA-Z0-9]+"/>
+									</p:inputText>
+								</p:column>
+								
+								<p:column rendered="#{cadastroUsuarioController.entidade.id == null}">
+									<p:outputLabel value="#{msgs['label.uc004.senha']}" for="senha" indicateRequired="true"/>
+									<br />
+									<p:inputText id="senha" value="#{cadastroUsuarioController.entidade.senha}" required="true"/>
+								</p:column>
+								
+								<p:column>
+									<p:outputLabel value="#{msgs['label.uc004.email.usuario']}" for="email"/>
+									<br />
+									<p:inputText id="email" value="#{cadastroUsuarioController.entidade.email}" size="40" validator="emailValidator"/>
+								</p:column>
+								
+								<p:column>
+									<p:outputLabel value="#{msgs['label.uc004.cpf']}" for="cpf" indicateRequired="true"/>
+									<br />
+									<p:inputMask id="cpf" value="#{cadastroUsuarioController.entidade.cpf}" mask="999.999.999-99"
+											required="true" converter="cpfConverter"/>
+								</p:column>
+								
+								<p:column>
+									<p:outputLabel value="#{msgs['label.uc004.rg']}" for="rg" indicateRequired="true"/>
+									<br />
+									<p:inputMask id="rg" value="#{cadastroUsuarioController.entidade.rg}" 
+											required="true"/><!-- mask="aa-99.999.999" -->
+								</p:column>
+		
+								<p:column>
+									<p:outputLabel value="#{msgs['label.uc004.telefone.usuario']}" for="telefone"/>
+									<br />
+									<p:inputMask id="telefone" value="#{cadastroUsuarioController.entidade.telefone}" mask="(99) 9999-9999"/>
+								</p:column>
+		
+								<p:column>
+									<p:outputLabel value="#{msgs['label.uc004.celular.usuario']}" for="celular" indicateRequired="true"/>
+									<br />
+									<p:inputMask id="celular" value="#{cadastroUsuarioController.entidade.celular}" mask="(99) 9 9999-9999"
+											required="true"/>
+								</p:column>
+		
+								<p:column>
+									<p:outputLabel value="#{msgs['label.uc004.data.nascimento']}" for="dataNascimento"/>
+									<br />
+									<p:calendar id="dataNascimento" value="#{cadastroUsuarioController.entidade.dataNascimento}" mask="99/99/9999" 
+												pattern="dd/MM/yyyy" locale="pt_BR" navigator="true"/>
+								</p:column>
+								
+								<p:column>
+									<p:outputLabel value="#{msgs['label.uc004.perfil.acesso']}" for="perfilAcesso" indicateRequired="true"/>
+									<br />
+									<p:selectOneMenu id="perfilAcesso" value="#{cadastroUsuarioController.entidade.perfil}" required="true">
+										<f:selectItems value="#{cadastroUsuarioController.listaPerfilAcesso}"/>
+									</p:selectOneMenu>
+								</p:column>
+								
+								<p:column rendered="#{cadastroUsuarioController.entidade.id != sessionScope.usuario.id}">
+								</p:column>
+								
+								<p:column rendered="#{cadastroUsuarioController.entidade.id != sessionScope.usuario.id}">
+									<p:selectBooleanCheckbox id="acessa" value="#{cadastroUsuarioController.entidade.acessaWeb}"
+															 itemLabel="#{msgs['label.uc001.acessa.web']}" />
+								</p:column>
+								
+								<p:column rendered="#{cadastroUsuarioController.entidade.id != sessionScope.usuario.id}">
+									<p:selectBooleanCheckbox id="expedidora" value="#{cadastroUsuarioController.entidade.expedidora}"
+															 itemLabel="#{msgs['label.uc001.habilita.expedidora']}" />
+								</p:column>
+								
+							</p:panelGrid>
+						</p:tab>
+						
+						<p:tab title="#{msgs['label.uc001.endereco']}">
+							<p:panelGrid columns="2" id="painelEnderecoUsuario" style="width: 100%;">
+								<p:column>
+									<p:outputLabel value="#{msgs['label.uc001.cep']}" for="cep"/>
+									<br />
+									<p:inputMask id="cep" value="#{cadastroUsuarioController.entidade.endereco.cep}" mask="99999-999"/>
+								</p:column>
+		
+								<p:column>
+									<p:outputLabel value="#{msgs['label.uc001.logradouro']}" for="logradouro"/>
+									<br />
+									<p:inputText id="logradouro" value="#{cadastroUsuarioController.entidade.endereco.logradouro}" size="40"/>
+								</p:column>
+		
+								<p:column>
+									<p:outputLabel value="#{msgs['label.uc001.numero']}" for="numero"/>
+									<br />
+									<p:inputNumber id="numero" value="#{cadastroUsuarioController.entidade.endereco.numero}" size="5" minValue="0" decimalPlaces="0"/>
+								</p:column>
+		
+								<p:column>
+									<p:outputLabel value="#{msgs['label.uc001.complemento']}" for="complemento"/>
+									<br />
+									<p:inputText id="complemento" value="#{cadastroUsuarioController.entidade.endereco.complemento}" size="40"/>
+								</p:column>
+								
+								<p:column>
+									<p:outputLabel value="#{msgs['label.uc001.bairro']}" for="bairro"/>
+									<br />
+									<p:inputText id="bairro" value="#{cadastroUsuarioController.entidade.endereco.bairro}" size="30"/>
+								</p:column>
+		
+								<p:column>
+									<p:outputLabel value="#{msgs['label.uc001.cidade']}" for="cidade"/>
+									<br />
+									<p:inputText id="cidade" value="#{cadastroUsuarioController.entidade.endereco.cidade}" size="40"/>
+								</p:column>
+		
+								<p:column>
+									<p:outputLabel value="#{msgs['label.uc001.estado']}" for="estado"/>
+									<br />
+									<p:inputText id="estado" value="#{cadastroUsuarioController.entidade.endereco.estado}" size="5"/>
+								</p:column>
+								
+							</p:panelGrid>
+						</p:tab>
+					</p:tabView>
+				</h:column>
+			</h:panelGrid>
+	
+		</ui:define>
+
+	</ui:composition>
+
+
+</body>
+</html>

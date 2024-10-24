@@ -1,0 +1,61 @@
+<div *ngIf="configurationsForm" class="container">
+	<h4 class="configurations-title">Configurações da Luxand Faces SDK</h4>
+
+	<form #form="ngForm" [formGroup]="configurationsForm" novalidate>
+
+		<div *ngFor="let configuration of configurations">
+
+			<div class="no-gutters align-items-top d-flex">
+
+				<div class="col-8 div-configuration-name">
+					{{ configuration.description }}
+				</div>
+
+				<div class="col-4 form-group has-feedback" style="margin-bottom: 0px;" [ngSwitch]="configuration.type">
+
+					<div *ngSwitchCase="'NUMBER'">
+						<input class="form-control" [class.is-invalid]="isInvalidField(configuration.name)"
+							formControlName="{{ configuration.name }}"
+							type="{{configuration.type === 'NUMBER' ? 'number' : 'text'}}">
+						<span
+							class="error-validation-message">{{ getValidationErrorMessage(configuration.name) }}</span>
+					</div>
+
+					<div *ngSwitchCase="'BOOLEAN'">
+						<div class="form-check" >
+							<input type="checkbox" class="form-control form-check-input"
+								formControlName="{{ configuration.name }}" id="{{ configuration.name }}" >
+							<span
+								class="error-validation-message">{{ getValidationErrorMessage(configuration.name) }}</span>
+						</div>
+					</div>
+
+				</div>
+
+			</div>
+
+		</div>
+
+		<div class="row justify-content-between" style="margin-top: 20px;">
+			<div class="col-6">
+				<span>
+					<button (click)="saveTrackerBackup()" class="btn btn-primary">
+						<i class="fa fa-cloud-upload-alt"></i>
+						<span>Salvar backup do Tracker</span>
+					</button>
+				</span>
+			</div>
+			<div class="col-6" style="text-align: right; padding: 0px;">
+				<span>
+					<a [routerLink]="" (click)="defaultValues()" class="link" style="margin-right: 15px;">Retornar valores padrão</a>
+				</span>
+				<button type="submit" (click)="save()" [disabled]="form.invalid" class="btn btn-primary">
+					<i class="fa fa-save"></i>
+					<span>Salvar configurações</span>
+				</button>
+			</div>
+		</div>
+
+	</form>
+
+</div>
