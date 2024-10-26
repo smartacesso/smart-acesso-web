@@ -9,11 +9,11 @@ import java.util.Map;
 
 import javax.ejb.Remote;
 
-import com.senior.services.dto.EmpresaSeniorDto;
-
 import br.com.startjob.acesso.modelo.entity.ClienteEntity;
 import br.com.startjob.acesso.modelo.entity.ImportacaoEntity;
 import br.com.startjob.acesso.modelo.entity.PedestreRegraEntity;
+import br.com.startjob.acesso.modelo.entity.RegraEntity;
+import br.com.startjob.acesso.modelo.enumeration.TipoArquivo;
 
 @Remote
 public interface PedestreEJBRemote extends BaseEJBRemote {
@@ -100,13 +100,6 @@ public interface PedestreEJBRemote extends BaseEJBRemote {
 	 * @throws Exception
 	 */
 	public void exportaSOC(ClienteEntity cliente) throws Exception;
-	
-	/**
-	 * Realiza importação do sistema Senior
-	 * 
-	 * @throws Exception
-	 */
-	public void importarSenior() throws Exception;
 
 }
 

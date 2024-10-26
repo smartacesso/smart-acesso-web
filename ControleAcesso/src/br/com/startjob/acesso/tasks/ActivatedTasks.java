@@ -32,15 +32,6 @@ public class ActivatedTasks {
 		}
 	}
 	
-	public void limpaTimersSenior() {
-		for (String key : timers.keySet()) {
-			if(key.contains("SENIOR")) {
-				timers.get(key).cancel();
-			}
-		}
-	}
-	
-	
 	public void limpaTimersSOC(String idClinete) {
 		for (String key : timers.keySet())
 			if(key.contains("SOC") && key.contains("cliente"+idClinete))

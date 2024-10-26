@@ -1,0 +1,60 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui">
+	
+	<p:dialog id="dialogEscolherResponsavel" header="#{msgs['title.uc016.consulta.responsavel']}" widgetVar="escolherResponsavel" 
+			modal="true" resizable="false">
+		
+		<p:panelGrid id="gridEscolherResponsavel" columns="4">
+			<p:column>
+				<p:outputLabel value="#{msgs['label.uc016.nome']}" for="inputNomeResponsavel"/>
+				<br />
+				<p:inputText id="inputNomeResponsavel" value="#{buscarResponsavelController.parans['nome']}"/>
+			</p:column>
+
+			<p:column>
+				<p:commandButton id="buscarResponsavelButton" value="#{msgs['alt.acao.buscar']}"
+				action="#{buscarResponsavelController.findResponsiblebyName()}"
+					update="gridEscolherResponsavel responsaveis" process="gridEscolherResponsavel"/>
+			</p:column>
+			
+		</p:panelGrid>
+		
+		<br />
+		
+		<p:panelGrid columns="4" id="responsaveis" style="width: 700px">
+		
+			<h:outputText value="#{msgs['msg.nenhum.item.encontrato.buscar']}" escape="false"
+											  rendered="#{empty buscarResponsavelController.result}" />
+		
+			<p:dataTable id="tableEscolherResponsavel" value="#{buscarResponsavelController.result}" var="responsavel"
+					rendered="#{not empty buscarResponsavelController.result}" paginator="true"
+					rows="#{buscarResponsavelController.quantPorPagina}" paginatorPosition="bottom"
+					paginatorAlwaysVisible="false" selectionMode="single" rowKey="#{responsavel.id}"
+					selection="#{cadastroPedestreController.responsaveis}">
+				
+				<p:ajax event="rowSelect" update="form:cadastroPedestreTab:painelCadastroResponsaveis" 
+					oncomplete="PF('escolherResponsavel').hide(); return false;" />
+				
+				<p:column headerText="#{msgs['label.uc016.codigo']}" style="text-align: center">
+					<h:outputText value="#{responsavel.id}" />
+				</p:column>
+				
+				<p:column headerText="#{msgs['label.uc016.nome']}" style="text-align: center">
+					<h:outputText value="#{responsavel.nome}" />
+				</p:column>
+				
+				<p:column headerText="#{msgs['label.uc016.dataNascimento']}" style="text-align: center">
+					<h:outputText value="#{responsavel.dataNascimento}" />
+				</p:column>
+				
+				
+			</p:dataTable>
+		
+		</p:panelGrid>
+		
+	</p:dialog>
+	
+</ui:composition>

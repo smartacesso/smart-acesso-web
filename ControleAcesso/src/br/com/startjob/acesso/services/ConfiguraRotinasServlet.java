@@ -19,7 +19,6 @@ import br.com.startjob.acesso.modelo.utils.AppAmbienteUtils;
 import br.com.startjob.acesso.tasks.ActivatedTasks;
 import br.com.startjob.acesso.tasks.ImportacaoSocTask;
 import br.com.startjob.acesso.tasks.ExportacaoSocTask;
-import br.com.startjob.acesso.tasks.ImportaSeniorTask;
 
 @SuppressWarnings("serial")
 @WebServlet(loadOnStartup = 1, asyncSupported = true, urlPatterns = { "/configuraRotinas" })
@@ -40,7 +39,6 @@ public class ConfiguraRotinasServlet extends BaseServlet {
 		log.info("Registra rotinas recorrentes...");
 
 		registraTimersParaSOC();
-		registraTimersParaSenior();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -85,30 +83,6 @@ public class ConfiguraRotinasServlet extends BaseServlet {
 
 		ActivatedTasks.getInstancia().timers.put("exportacaoSOC_cliente", timer);
 	}
-	
-	
-	@SuppressWarnings("unchecked")
-	private void registraTimersParaSenior() {
-	    log.info("Registra Integração Senior");
-
-//	     Limpa os timers anteriores relacionados à nova função
-	    ActivatedTasks.getInstancia().limpaTimersSenior();
-
-	    // Define o período para 30 minutos (30 * 60 * 1000 ms)
-	    Long period =  5 * 60 * 1000L;
-	    Timer timer = new Timer();
-	    
-	    // Define a nova tarefa
-	    TimerTask SeniorTask = new ImportaSeniorTask();
-	    
-	    // Agenda a tarefa para rodar a cada 30 minutos
-	    timer.scheduleAtFixedRate(SeniorTask, 0, period);
-	    
-	    log.info("Registrando rotina da Senior");
-
-	    ActivatedTasks.getInstancia().timers.put("importacaoSENIOR_cliente", timer);
-	}
-
 	
 	private Calendar getInicio(final String hourOfDay) {
 		Calendar inicio = Calendar.getInstance();

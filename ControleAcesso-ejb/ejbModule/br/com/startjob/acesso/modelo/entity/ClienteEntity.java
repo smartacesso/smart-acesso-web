@@ -54,12 +54,7 @@ import br.com.startjob.acesso.modelo.enumeration.Status;
 				query = "select obj from ClienteEntity obj "
 					  + "join fetch obj.integracaoSoc i "
 					  + "where (obj.removido = false or obj.removido is null) "
-					  + "order by obj.id asc"),
-	@NamedQuery(name = "ClienteEntity.findAllComIntegracaoSenior",
-				query = "select obj from ClienteEntity obj "
-					  + "join fetch obj.integracaoSenior i "
-					  + "where (obj.removido = false or obj.removido is null) "
-					  + "order by obj.id asc"),
+					  + "order by obj.id asc")
 })
 @SuppressWarnings("serial")
 public class ClienteEntity extends BaseEntity {
@@ -111,10 +106,6 @@ public class ClienteEntity extends BaseEntity {
 	@OneToOne(cascade={CascadeType.ALL}, fetch=FetchType.LAZY)
 	@JoinColumn(name="ID_INTEGRACAO_SOC", nullable=true)
 	private IntegracaoSOCEntity integracaoSoc;
-	
-	@OneToOne(cascade={CascadeType.ALL}, fetch=FetchType.LAZY)
-	@JoinColumn(name="ID_INTEGRACAO_SENIOR", nullable=true)
-	private IntegracaoSeniorEntity integracaoSenior;
 
 	public String getNome() {
 		return nome;
@@ -194,11 +185,6 @@ public class ClienteEntity extends BaseEntity {
 	public void setIntegracaoSoc(IntegracaoSOCEntity integracaoSoc) {
 		this.integracaoSoc = integracaoSoc;
 	}
-	public IntegracaoSeniorEntity getIntegracaoSenior() {
-		return integracaoSenior;
-	}
-	public void setIntegracaoSenior(IntegracaoSeniorEntity integracaoSenior) {
-		this.integracaoSenior = integracaoSenior;
-	}
+	
 	
 }

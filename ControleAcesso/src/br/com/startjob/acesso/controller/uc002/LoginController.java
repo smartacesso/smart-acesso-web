@@ -17,16 +17,9 @@ import javax.inject.Named;
 
 import org.primefaces.PrimeFaces;
 
-import com.senior.services.IntegracaoSeniorService;
-import com.senior.services.dto.CargoSeniorDto;
-import com.senior.services.dto.CentroDeCustoSeniorDto;
-import com.senior.services.dto.EmpresaSeniorDto;
-import com.senior.services.dto.FuncionarioSeniorDto;
-
 import br.com.startjob.acesso.controller.BaseController;
 import br.com.startjob.acesso.modelo.BaseConstant;
 import br.com.startjob.acesso.modelo.ejb.LoginEJBRemote;
-import br.com.startjob.acesso.modelo.ejb.PedestreEJB;
 import br.com.startjob.acesso.modelo.entity.UsuarioEntity;
 import br.com.startjob.acesso.modelo.exception.AccountException;
 import br.com.startjob.acesso.modelo.utils.EncryptionUtils;
@@ -67,14 +60,7 @@ public class LoginController extends BaseController {
 	public void login() {
 		
 		try {
-	    	IntegracaoSeniorService integracaoSeniorService = new IntegracaoSeniorService("smartwsintegra", "Sm4rt@s3n10r#");
-    		List<EmpresaSeniorDto> empresas = integracaoSeniorService.buscarEmpresas();
-//	    	List<FuncionarioSeniorDto> funcionarios =  integracaoSeniorService.buscarFuncionarios(empresas.get(0).getNumEmp());
-//	    	List<FuncionarioSeniorDto> funcionarios =  integracaoSeniorService.buscarFuncionariosAdmitidos("1", "15/10/2024");
-//	    	List<FuncionarioSeniorDto> funcionarios =  integracaoSeniorService.buscarFuncionariosDemitidos("1", "10/10/2024");
-//	    	List<CargoSeniorDto> cargos =  integracaoSeniorService.buscaCargos("1");
-//	    	List<CentroDeCustoSeniorDto> centrodecusto =  integracaoSeniorService.buscaCentroDeCusto("1");
-	    	
+		
 			UsuarioEntity u = loginEJB.validaUsuario(unidadeOrganizacional, usuario, EncryptionUtils.encrypt(senha),
 					BaseConstant.ACCESS_TYPES.WEB,
 					getDeviceType(getRequest()));
@@ -84,7 +70,6 @@ public class LoginController extends BaseController {
 				
 				//verifica se está na estrutura principal
 				//ou em outro servidor
-
 				String urlAtual = getRequest().getRemoteHost();
 				System.out.println(urlAtual);
 //				if(AppAmbienteUtils.isProdution() 
@@ -123,7 +108,6 @@ public class LoginController extends BaseController {
 				redirect("/paginas/principal.xhtml");
 				
 			} else {
-				
 				mensagemFatal("", "msg.usuario.nao.entrado");
 			}
 			

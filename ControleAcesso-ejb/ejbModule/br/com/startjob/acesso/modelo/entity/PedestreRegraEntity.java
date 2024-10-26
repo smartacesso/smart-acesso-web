@@ -68,17 +68,13 @@ public class PedestreRegraEntity extends BaseEntity {
 	@Column(name="BLOQUEADO", nullable=true, length=30)
 	private Boolean bloqueado;
 	
-	@Temporal(TemporalType.TIMESTAMP)
+	@Temporal(TemporalType.DATE)
 	@Column(name="DATA_INICIO_PERIODO", nullable=true, length=11)
 	private Date dataInicioPeriodo;
 	
-	@Temporal(TemporalType.TIMESTAMP)
+	@Temporal(TemporalType.DATE)
 	@Column(name="DATA_FIM_PERIODO", nullable=true, length=11)
 	private Date dataFimPeriodo;
-	
-	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name="DATA_INICIO_ESCALA_3_3", nullable=true, length=11)
-	private Date dataInicioEscala3_3;
 	
 	public Long getId() {
 		return id;
@@ -140,12 +136,6 @@ public class PedestreRegraEntity extends BaseEntity {
 	public void setQtdeTotalDeCreditos(Long qtdeTotalDeCreditos) {
 		this.qtdeDeCreditos = qtdeTotalDeCreditos;
 		this.qtdeTotalDeCreditos = qtdeTotalDeCreditos;
-	}
-	public Date getDataInicioEscala3_3() {
-		return dataInicioEscala3_3;
-	}
-	public void setDataInicioEscala3_3(Date dataInicioEscala3_3) {
-		this.dataInicioEscala3_3 = dataInicioEscala3_3;
 	}
 	
 }

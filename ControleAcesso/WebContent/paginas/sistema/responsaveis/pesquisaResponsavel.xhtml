@@ -1,0 +1,122 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui">
+	
+<body>
+	
+	<ui:composition template="/tema/templates/template.xhtml">
+	
+		<ui:define name="titulo">
+			#{msgs['title.sistema']} | #{msgs['title.uc016.consulta.responsavel']}
+		</ui:define>
+		
+		<ui:define name="breadcrumb">
+			<a target="_top" href="/#{menuController.appName}/paginas/principal.xhtml"> <h:outputText
+					value="#{msgs['title.principal']}" />
+			</a> > <h:outputText value="#{msgs['title.uc016.consulta.responsavel']}" />
+		</ui:define>
+		
+		<ui:define name="tools">
+			<h:panelGrid columns="5" styleClass="conteudo_tools">
+	
+				<h:commandButton id="acaoNovo"
+						title="#{msgs['alt.acao.novo']}" alt="#{msgs['alt.acao.novo']}"
+						image="#{menuController.path}/tema/img/bt_newer.png"
+						action="#{consultaResponsavelController.novo()}">
+					
+				</h:commandButton>
+				
+				<h:commandButton id="acaoBuscar" 
+						action="#{consultaResponsavelController.buscar}" 
+						title="#{msgs['alt.acao.buscar']}" alt="#{msgs['alt.acao.buscar']}"
+						image="#{menuController.path}/tema/img/bt_searcher.png">
+					
+					<p:ajax process="@form" update="@form"/>
+				</h:commandButton>
+
+				<h:commandButton id="acaoLimpar" 
+						action="#{consultaResponsavelController.limpar}"
+						title="#{msgs['alt.acao.limpar']}" alt="#{msgs['alt.acao.limpar']}"
+						image="#{menuController.path}/tema/img/bt_cleaner.png" >
+					
+					<p:ajax process="@this" update="@form"/>
+				</h:commandButton>
+				
+				
+			</h:panelGrid>
+			
+			<div style="float: right;">
+				
+				<p:inputText id="filtro-nome" placeholder="Filtrar por nome" style="width:200px;" 
+						value="#{consultaResponsavelController.parans['nome']}"/>
+				
+			</div>
+		</ui:define>
+		
+				<ui:define name="conteudo">
+		
+			<h:panelGrid width="100%" columns="1" headerClass="h-grid-header">
+				<f:facet name="header">
+					<h:outputText value="#{msgs['title.uc016.cadastra.responsavel']}" />
+				</f:facet>
+				
+				<h:column>
+				
+					<ui:include src="/tema/templates/vazio.xhtml">
+						<ui:param name="exibe" value="#{empty consultaResponsavelController.result}" />
+						<ui:param name="exibeAdicionar" value="true" />
+					</ui:include>
+					
+					
+					
+					<p:dataTable id="responsavelTable" value="#{consultaResponsavelController.result}" var="responsavel" 
+						rendered="#{not empty consultaResponsavelController.result}" paginator="true" 
+						rows="#{consultaResponsavelController.quantPorPagina}" paginatorPosition="bottom"
+						paginatorAlwaysVisible="false" >
+						
+						<p:column headerText="#{msgs['label.uc016.nome.responsavel']}" style="text-align: center">
+							<h:outputText value="#{responsavel.nome}" />
+						</p:column>
+
+						<p:column headerText="#{msgs['label.uc005.status']}" style="text-align: center">
+							<h:outputText value="#{responsavel.status}" />
+						</p:column>
+						
+						<p:column headerText="#{msgs['alt.acao.editar']}" style="text-align: center;width: 40px">
+							<h:commandButton id="botaoEditarResponsavel"
+								action="#{consultaResponsavelController.editar(responsavel.id)}"
+								title="#{msgs['alt.acao.editar']}"
+								image="#{menuController.path}/tema/img/bt_edit_min.png">
+							</h:commandButton>
+						</p:column>
+						
+						<p:column headerText="#{msgs['alt.acao.excluir']}" style="text-align: center;width: 40px">
+							<h:commandButton image="#{menuController.path}/tema/img/bt_remove_min.png" 
+										title="#{msgs['alt.acao.excluir']}" >
+								
+								<f:setPropertyActionListener value="#{responsavel}" target="#{consultaResponsavelController.responsavelSelecionado}" />
+								<p:ajax oncomplete="PF('confirmarExclusao').show()"></p:ajax>
+							</h:commandButton>
+						</p:column>
+					</p:dataTable>
+				</h:column>
+			</h:panelGrid>
+			
+			<p:confirmDialog id="dialogConfirmarExclusao"
+				widgetVar="confirmarExclusao"
+					header="Confirmar"
+					message="Tem certeza que deseja excluir este responsável?">
+				
+				<p:button value="Não" onclick="PF('confirmarExclusao').hide(); return false;"/>
+				<p:commandButton value="Sim" oncomplete="PF('confirmarExclusao').hide();"
+					action="#{consultaResponsavelController.excluirResponsavel()}" process="@this" update="@form"/>
+			</p:confirmDialog>
+			
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

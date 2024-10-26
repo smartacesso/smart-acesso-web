@@ -12,12 +12,11 @@ public class PedestreRegraTO {
 	private Long diasValidadeCredito;
 	private Date dataInicioPeriodo;
 	private Date dataFimPeriodo;
-	private Date dataInicioEscala3_3;
 	
 	public PedestreRegraTO() {}
 	
 	public PedestreRegraTO(Long id, Long idRegra, Date validade, Long qtdeDeCreditos, Long qtdeTotalDeCreditos,
-			Long diasValidadeCredito, Date dataInicioPeriodo, Date dataFimPeriodo, Date dataInicioEscala3_3) {
+			Long diasValidadeCredito, Date dataInicioPeriodo, Date dataFimPeriodo) {
 		this.id = id;
 		this.idRegra = idRegra;
 		this.validade = validade;
@@ -26,7 +25,6 @@ public class PedestreRegraTO {
 		this.diasValidadeCredito = diasValidadeCredito;
 		this.dataInicioPeriodo = dataInicioPeriodo;
 		this.dataFimPeriodo = dataFimPeriodo;
-		this.dataInicioEscala3_3 = dataInicioEscala3_3;
 	}
 	
 	public Long getId() {
@@ -76,13 +74,5 @@ public class PedestreRegraTO {
 	}
 	public void setDataFimPeriodo(Date dataFimPeriodo) {
 		this.dataFimPeriodo = dataFimPeriodo;
-	}
-
-	public Date getDataInicioEscala3_3() {
-		return dataInicioEscala3_3;
-	}
-
-	public void setDataInicioEscala3_3(Date dataInicioEscala3_3) {
-		this.dataInicioEscala3_3 = dataInicioEscala3_3;
 	}
 }

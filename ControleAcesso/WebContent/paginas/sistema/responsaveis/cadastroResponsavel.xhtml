@@ -1,0 +1,135 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui">
+	
+<body>
+	<ui:composition template="/tema/templates/template.xhtml">
+		
+		<ui:define name="titulo">
+			#{msgs['title.sistema']} | #{cadastroController.entidade.id != null 
+											? msgs['title.uc016.editar.responsavel'] 
+											: msgs['title.uc016.cadastrar.responsavel']}
+		</ui:define>
+		
+		<ui:define name="breadcrumb">
+			<a target="_top" href="/#{menuController.appName}/paginas/principal.xhtml"> <h:outputText
+					value="#{msgs['title.principal']}" />
+			</a> > 
+			<a target="_top" href="/#{menuController.appName}/paginas/sistema/responsaveis/pesquisaResponsavel.xhtml"> 
+			<h:outputText value="#{msgs['title.uc016.consulta.responsavel']}" />
+			</a> > <h:outputText value="#{cadastroController.entidade.id != null 
+										? msgs['title.uc016.editar.responsavel'] 
+										: msgs['title.uc016.cadastrar.responsavel']}" />
+		</ui:define>
+		
+		<ui:define name="tools">
+			<h:panelGrid columns="4" styleClass="conteudo_tools">
+	
+				<h:commandButton id="save"
+					action="#{cadastroResponsavelController.salvar}"
+					title="#{msgs['alt.acao.save']}"
+					image="#{menuController.path}/tema/img/bt_saver.png">
+					<p:ajax process="@form" update="@form"/>
+				</h:commandButton>
+				
+			</h:panelGrid>
+		</ui:define>
+		
+		<ui:define name="conteudo">
+			<h:panelGrid width="100%" columns="1" headerClass="h-grid-header">
+				<f:facet name="header">
+					<h:outputText value="#{cadastroResponsavelController.entidade.id != null 
+										? msgs['title.uc016.editar.responsavel'] 
+										: msgs['title.uc016.cadastrar.responsavel']}"/>
+				</f:facet>
+				
+				<h:column>
+					<p:tabView id="cadastroTab" widgetVar="cadastroWid">
+					
+						<p:tab title="#{msgs['label.uc016.dados.responsavel']}">
+							<p:panelGrid columns="2" id="painelCadastro" style="width: 100%">
+								
+								<p:column>
+									<p:outputLabel value="#{msgs['label.uc016.nome']}" for="nome" indicateRequired="true"/>
+									<br />
+									<p:inputText id="nome" value="#{cadastroResponsavelController.entidade.nome}" required="true" size="40" />
+								</p:column>
+								
+								<p:column>
+									<p:outputLabel value="#{msgs['label.uc005.status']}" for="status" indicateRequired="true"/>
+									<br />
+									<p:selectOneMenu id="status" value="#{cadastroResponsavelController.entidade.status}" required="true" >
+										<f:selectItems value="#{cadastroResponsavelController.listaStatus}"/>
+									</p:selectOneMenu>
+								</p:column>
+								
+								<p:column>
+									<p:outputLabel value="#{msgs['label.uc016.email.responsavel']}" for="email"/>
+									<br />
+									<p:inputText id="email" value="#{cadastroResponsavelController.entidade.email}" size="40" validator="emailValidator"/>
+								</p:column>
+								
+								<p:column>
+									<p:outputLabel value="#{msgs['label.uc016.cpf']}" for="cpf" indicateRequired="true"/>
+									<br />
+									<p:inputMask id="cpf" value="#{cadastroResponsavelController.entidade.cpf}" mask="999.999.999-99"
+											required="true" converter="cpfConverter"/>
+								</p:column>
+								
+								<p:column>
+									<p:outputLabel value="#{msgs['label.uc016.rg']}" for="rg" indicateRequired="true"/>
+									<br />
+									<p:inputMask id="rg" value="#{cadastroResponsavelController.entidade.rg}" 
+											required="true"/><!-- mask="aa-99.999.999" -->
+								</p:column>
+		
+								<p:column>
+									<p:outputLabel value="#{msgs['label.uc016.celular.responsavel']}" for="celular" indicateRequired="true"/>
+									<br />
+									<p:inputMask id="celular" value="#{cadastroResponsavelController.entidade.celular}" mask="(99) 9 9999-9999"
+											required="true"/>
+								</p:column>
+		
+								<p:column>
+									<p:outputLabel value="#{msgs['label.uc016.data.nascimento']}" for="dataNascimento"/>
+									<br />
+									<p:calendar id="dataNascimento" value="#{cadastroResponsavelController.entidade.dataNascimento}" mask="99/99/9999" 
+												pattern="dd/MM/yyyy" locale="pt_BR" navigator="true"/>
+								</p:column>
+															
+								<p:column>
+									<p:outputLabel value="#{msgs['label.uc016.descricao']}" for="descricao"/>
+									<br />
+									<p:inputTextarea id="descricao" value="#{cadastroResponsavelController.entidade.descricao}" cols="50" rows="4" 
+										maxlength="255"/>
+								</p:column>
+								
+								<p:column>
+									<p:outputLabel value="#{msgs['label.uc016.login']}" for="login" indicateRequired="true"/>
+									<br />
+									<p:inputMask id="login" value="#{cadastroResponsavelController.entidade.login}" 
+											required="true"/>
+								</p:column>
+								
+								<p:column>
+									<p:outputLabel value="#{msgs['label.uc016.senha']}" for="senha" indicateRequired="true"/>
+									<br />
+									<p:inputMask id="senha" value="#{cadastroResponsavelController.entidade.password}" 
+											required="true"/>
+								</p:column>
+							</p:panelGrid>
+						
+						</p:tab>
+						
+					</p:tabView>
+				</h:column>
+			</h:panelGrid>
+		</ui:define>
+	</ui:composition>
+</body>
+
+</html>

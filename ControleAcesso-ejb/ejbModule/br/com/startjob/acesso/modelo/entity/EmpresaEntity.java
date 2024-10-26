@@ -22,8 +22,6 @@ import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.Filter;
 
-import com.senior.services.dto.EmpresaSeniorDto;
-
 import br.com.startjob.acesso.modelo.entity.base.ClienteBaseEntity;
 import br.com.startjob.acesso.modelo.enumeration.Status;
 
@@ -66,13 +64,7 @@ import br.com.startjob.acesso.modelo.enumeration.Status;
 				query = "select obj from EmpresaEntity obj "
 					  + "where obj.cliente.id = :ID_CLIENTE "
 					  + "and obj.dataAlteracao >= :LAST_SYNC "
-					  + "order by obj.id asc"),
-	@NamedQuery(name = "EmpresaEntity.findByCodSeniorAndIdCliente",
-				query = "select obj from EmpresaEntity obj "
-						+ "left join fetch obj.cliente c "
-						+ "where obj.codEmpresaSenior = :COD_EMPRESA_SENIOR "
-						+ "and obj.cliente.id = :ID_CLIENTE "
-						+ "order by obj.id asc")
+					  + "order by obj.id asc")
 })
 @SuppressWarnings("serial")
 public class EmpresaEntity extends ClienteBaseEntity {
@@ -128,29 +120,6 @@ public class EmpresaEntity extends ClienteBaseEntity {
 	
 	@Column(name="CODIGO_EXTERNO", nullable=true, length=255)
 	private String codigoExterno;
-	
-	@Column(name="COD_EMPRESA_SENIOR", nullable=true, length=40)
-	private String codEmpresaSenior;
-	
-	@Column(name = "PRIM_IMPORT_FUNC_SENIOR_SUCESSO", nullable = true)
-	private Boolean primeiroImportacaoFuncionarioSeniorSucesso;
-	
-	public EmpresaEntity() {
-		
-	}
-	
-	public EmpresaEntity(final EmpresaSeniorDto empresaSeniorDto, final Boolean primeiroImportacaoFuncionarioSeniorSucesso,
-			final ClienteEntity cliente) {
-		this.nome = empresaSeniorDto.getNomEmp();
-		this.telefone = empresaSeniorDto.getDddTel() + empresaSeniorDto.getNumTel();
-		this.cnpj = empresaSeniorDto.getNumIns();
-		this.codEmpresaSenior = empresaSeniorDto.getNumEmp();
-		this.email = empresaSeniorDto.getEmaEmp();
-		this.primeiroImportacaoFuncionarioSeniorSucesso = primeiroImportacaoFuncionarioSeniorSucesso;
-		this.status = Status.ATIVO;
-
-		this.cliente = cliente;
-	}
 	
 	public String getNome() {
 		return nome;
@@ -223,18 +192,6 @@ public class EmpresaEntity extends ClienteBaseEntity {
 	}
 	public void setCodigoExterno(String codigoExterno) {
 		this.codigoExterno = codigoExterno;
-	}
-	public Boolean getPrimeiroImportacaoFuncionarioSeniorSucesso() {
-		return primeiroImportacaoFuncionarioSeniorSucesso;
-	}
-	public void setPrimeiroImportacaoFuncionarioSeniorSucesso(Boolean primeiroImportacaoFuncionarioSeniorSucesso) {
-		this.primeiroImportacaoFuncionarioSeniorSucesso = primeiroImportacaoFuncionarioSeniorSucesso;
-	}
-	public String getCodEmpresaSenior() {
-		return codEmpresaSenior;
-	}
-	public void setCodEmpresaSenior(String codEmpresaSenior) {
-		this.codEmpresaSenior = codEmpresaSenior;
 	}
 	
 }

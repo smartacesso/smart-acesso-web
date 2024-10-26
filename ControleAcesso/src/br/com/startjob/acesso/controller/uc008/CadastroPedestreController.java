@@ -52,6 +52,7 @@ import br.com.startjob.acesso.modelo.entity.PedestreEntity;
 import br.com.startjob.acesso.modelo.entity.PedestreEquipamentoEntity;
 import br.com.startjob.acesso.modelo.entity.PedestreRegraEntity;
 import br.com.startjob.acesso.modelo.entity.RegraEntity;
+import br.com.startjob.acesso.modelo.entity.ResponsibleEntity;
 import br.com.startjob.acesso.modelo.enumeration.Genero;
 import br.com.startjob.acesso.modelo.enumeration.PerfilAcesso;
 import br.com.startjob.acesso.modelo.enumeration.Status;
@@ -115,7 +116,10 @@ public class CadastroPedestreController extends CadastroBaseController {
 	private String cpfNovoPedestre;
 	
 	private PedestreRegraEntity pedestreRegra;
+	private List<ResponsibleEntity> responsaveis;
 	private List<PedestreRegraEntity> listaPedestreRegra;
+	
+	
 	
 	private PedestreEntity pedestreComCartaoAcesoExistente;
 	
@@ -401,7 +405,6 @@ public class CadastroPedestreController extends CadastroBaseController {
 			pedestre.setUsuario(getUsuarioLogado());
 		
 		validaListasPedestre(pedestre);
-
 		String retorno = super.salvar();
 		
 		if(!retorno.equals("ok")) {
@@ -681,9 +684,11 @@ public class CadastroPedestreController extends CadastroBaseController {
 	public void montaListaTipoRegra() {
 		listaTipoRegra = new ArrayList<SelectItem>();
 		listaTipoRegra.add(new SelectItem(null, "Selecione"));
-		
-		Arrays.asList(TipoRegra.values())
-			.forEach(tipoRegra -> listaTipoRegra.add(new SelectItem(tipoRegra, tipoRegra.getDescricao())));
+		listaTipoRegra.add(new SelectItem(TipoRegra.ACESSO_CREDITO, TipoRegra.ACESSO_CREDITO.getDescricao()));
+		listaTipoRegra.add(new SelectItem(TipoRegra.ACESSO_ESCALA, TipoRegra.ACESSO_ESCALA.getDescricao()));
+		listaTipoRegra.add(new SelectItem(TipoRegra.ACESSO_HORARIO, TipoRegra.ACESSO_HORARIO.getDescricao()));
+		listaTipoRegra.add(new SelectItem(TipoRegra.ACESSO_PERIODO, TipoRegra.ACESSO_PERIODO.getDescricao()));
+		listaTipoRegra.add(new SelectItem(TipoRegra.ACESSO_UNICO, TipoRegra.ACESSO_UNICO.getDescricao()));
 	}
 	
 	public void adicionaPedestreEquipamento() {
@@ -1751,6 +1756,14 @@ public class CadastroPedestreController extends CadastroBaseController {
 
 	public void setHabilitaAppPedestre(boolean habilitaAppPedestre) {
 		this.habilitaAppPedestre = habilitaAppPedestre;
+	}
+
+	public List<ResponsibleEntity> getResponsaveis() {
+		return responsaveis;
+	}
+
+	public void setResponsaveis(List<ResponsibleEntity> responsaveis) {
+		this.responsaveis = responsaveis;
 	}
 
 }

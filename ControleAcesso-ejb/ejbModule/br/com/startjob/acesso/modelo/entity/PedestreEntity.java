@@ -4,7 +4,6 @@ import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -29,8 +28,6 @@ import javax.persistence.Transient;
 
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
-
-import com.senior.services.dto.FuncionarioSeniorDto;
 
 import br.com.startjob.acesso.modelo.entity.base.ClienteBaseEntity;
 import br.com.startjob.acesso.modelo.enumeration.Genero;
@@ -87,14 +84,7 @@ import br.com.startjob.acesso.modelo.utils.EncryptionUtils;
 		@NamedQuery(name = "PedestreEntity.findByAllStatusLoginPass", query = "select obj from PedestreEntity obj "
 				+ " left join fetch obj.cliente c " + "where (obj.removido = false or obj.removido is null) "
 				+ "	   and lower(c.nomeUnidadeOrganizacional) = lower(:UNIDADE_ORGANIZACIONAL) "
-				+ "	   and obj.login = :LOGIN and obj.senha = :SENHA "),
-		@NamedQuery(name = "PedestreEntity.findByMatriculaAndIdEmpresaAndIdCliente",
-					query = "select obj from PedestreEntity obj "
-							+ "left join fetch obj.empresa e "
-							+ "where obj.matricula = :MATRICULA "
-							+ "and e.id = :ID_EMPRESA "
-							+ "and obj.cliente.id = :ID_CLIENTE ")
-})
+				+ "	   and obj.login = :LOGIN and obj.senha = :SENHA "), })
 @SuppressWarnings("serial")
 public class PedestreEntity extends ClienteBaseEntity {
 
@@ -136,9 +126,6 @@ public class PedestreEntity extends ClienteBaseEntity {
 
 	@Column(name = "OBSERVACOES", nullable = true, length = 300)
 	private String observacoes;
-
-	@Column(name = "RESPONSAVEL", nullable = true, length = 1000)
-	private String responsavel;
 
 	@Enumerated(EnumType.STRING)
 	@Column(name = "TIPO_QRCODE", nullable = true, length = 100)
@@ -220,11 +207,11 @@ public class PedestreEntity extends ClienteBaseEntity {
 
 	@Column(name = "SENHA", nullable = true, length = 255)
 	private String senha;
-
+	
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "DATA_CADASTRO_FOTO_HIKIVISION", nullable = true, length = 30)
+	@Column(name="DATA_CADASTRO_FOTO_HIKIVISION", nullable=true, length=30)
 	private Date dataCadastroFotoNaHikivision;
-
+	
 	@Transient
 	private String senhaLivre;
 
@@ -258,7 +245,11 @@ public class PedestreEntity extends ClienteBaseEntity {
 
 	@Column(name = "CODIGO_EXTERNO", nullable = true, length = 100)
 	private String codigoExterno;
-
+	
+	@ManyToOne(cascade = {}, fetch = FetchType.LAZY)
+	@JoinColumn(name = "ID_RESPONSAVEL", nullable = true)
+	private ResponsibleEntity responsavel;
+	
 	@Transient
 	private String token;
 
@@ -270,53 +261,6 @@ public class PedestreEntity extends ClienteBaseEntity {
 
 	@Transient
 	private CadastroExternoEntity facialAtual;
-
-	public PedestreEntity() {
-
-	}
-
-	public PedestreEntity(final FuncionarioSeniorDto funcionarioSeniorDto, final EmpresaEntity empresaEntity) {
-		this.nome = funcionarioSeniorDto.getNome();
-		this.matricula = funcionarioSeniorDto.getNumeroMatricula();
-		this.telefone = funcionarioSeniorDto.getDddtelefone() + funcionarioSeniorDto.getNumtelefone();
-		// this.dataNascimento = funcionarioSeniorDto.getDatNas(); //05/02/1997
-		this.rg = funcionarioSeniorDto.getRg();
-
-		if (Objects.nonNull(funcionarioSeniorDto.getDatAdm())) {
-			this.observacoes = "Data admissão: " + funcionarioSeniorDto.getDatAdm();
-			this.status = Status.ATIVO;
-		} else if (Objects.nonNull(funcionarioSeniorDto.getDatDem())) {
-			this.observacoes = "Data demissão: " + funcionarioSeniorDto.getDatDem();
-			this.status = Status.INATIVO;
-		}
-
-		this.cliente = empresaEntity.getCliente();
-		this.empresa = empresaEntity;
-		this.tipo = TipoPedestre.PEDESTRE;
-		this.sempreLiberado = true;
-	}
-
-	public void updateFuncionarioSenior(final FuncionarioSeniorDto funcionarioSeniorDto,
-			final EmpresaEntity empresaEntity) {
-		this.nome = funcionarioSeniorDto.getNome();
-		this.matricula = funcionarioSeniorDto.getNumeroMatricula();
-		this.telefone = funcionarioSeniorDto.getDddtelefone() + funcionarioSeniorDto.getNumtelefone();
-		// this.dataNascimento = funcionarioSeniorDto.getDatNas(); //05/02/1997
-		this.rg = funcionarioSeniorDto.getRg();
-
-		if (Objects.nonNull(funcionarioSeniorDto.getDatAdm())) {
-			this.observacoes = "Data admissão: " + funcionarioSeniorDto.getDatAdm();
-			this.status = Status.ATIVO;
-		} else if (Objects.nonNull(funcionarioSeniorDto.getDatDem())) {
-			this.observacoes = "Data demissão: " + funcionarioSeniorDto.getDatDem();
-			this.status = Status.INATIVO;
-		}
-
-		this.cliente = empresaEntity.getCliente();
-		this.empresa = empresaEntity;
-		this.tipo = TipoPedestre.PEDESTRE;
-		this.sempreLiberado = true;
-	}
 
 	public String getAllPhonesFormatted() {
 		String tel = getTelefone();
@@ -420,14 +364,6 @@ public class PedestreEntity extends ClienteBaseEntity {
 
 	public void setObservacoes(String observacoes) {
 		this.observacoes = observacoes;
-	}
-
-	public String getResponsavel() {
-		return responsavel;
-	}
-
-	public void setResponsavel(String responsavel) {
-		this.responsavel = responsavel;
 	}
 
 	public byte[] getFoto() {
@@ -756,4 +692,12 @@ public class PedestreEntity extends ClienteBaseEntity {
 		this.dataCadastroFotoNaHikivision = dataCadastroFotoNaHikivision;
 	}
 
+	public ResponsibleEntity getResponsavel() {
+		return responsavel;
+	}
+
+	public void setResponsavel(ResponsibleEntity responsavel) {
+		this.responsavel = responsavel;
+	}
+	
 }
