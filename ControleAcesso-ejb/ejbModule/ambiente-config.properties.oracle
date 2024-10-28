@@ -40,5 +40,5 @@ config.resources.folder.dev=/home/gustavo/ambiente/servers/wildfly-20.0.0.Final/
 
 config.tempo.dispositivo=10
 config.sgdb.utilizado=oracle
-config.schema.name=controle_acesso.
+config.schema.name=smartacesso.
 config.sqlserver.version=0

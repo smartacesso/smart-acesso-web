@@ -11,7 +11,7 @@
 			<property name="hibernate.dialect" value="org.hibernate.dialect.Oracle12cDialect"/>
 			
 			<!-- Esquema padrão (opcional) -->
-			<property name="hibernate.default_schema" value="controle_acesso"/>
+			<property name="hibernate.default_schema" value="smartacesso"/>
 
 			<!-- Gerenciamento de transações -->
 			<property name="hibernate.transaction.manager_lookup_class" value="org.hibernate.transaction.JBossTransactionManagerLookup"/>
