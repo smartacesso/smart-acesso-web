@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
+import javax.ejb.EJB;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -30,10 +31,12 @@ import javax.persistence.Transient;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 
+import com.senior.services.PedestreEquipamentoService;
 import com.senior.services.dto.FuncionarioSeniorDto;
 
 import br.com.startjob.acesso.modelo.entity.base.ClienteBaseEntity;
 import br.com.startjob.acesso.modelo.enumeration.Genero;
+import br.com.startjob.acesso.modelo.enumeration.Permissoes;
 import br.com.startjob.acesso.modelo.enumeration.Status;
 import br.com.startjob.acesso.modelo.enumeration.TipoPedestre;
 import br.com.startjob.acesso.modelo.enumeration.TipoQRCode;
@@ -91,6 +94,7 @@ import br.com.startjob.acesso.modelo.utils.EncryptionUtils;
 		@NamedQuery(name = "PedestreEntity.findByMatriculaAndIdEmpresaAndIdCliente",
 					query = "select obj from PedestreEntity obj "
 							+ "left join fetch obj.empresa e "
+							+ "left join fetch obj.equipamentos eq "
 							+ "where obj.matricula = :MATRICULA "
 							+ "and e.id = :ID_EMPRESA "
 							+ "and obj.cliente.id = :ID_CLIENTE ")
@@ -258,6 +262,9 @@ public class PedestreEntity extends ClienteBaseEntity {
 
 	@Column(name = "CODIGO_EXTERNO", nullable = true, length = 100)
 	private String codigoExterno;
+	
+	@Column(name = "CODIGO_PERMISSAO", nullable = true, length = 15)
+	private String codigoPermissao;
 
 	@Transient
 	private String token;
@@ -271,6 +278,8 @@ public class PedestreEntity extends ClienteBaseEntity {
 	@Transient
 	private CadastroExternoEntity facialAtual;
 
+
+
 	public PedestreEntity() {
 
 	}
@@ -279,9 +288,10 @@ public class PedestreEntity extends ClienteBaseEntity {
 		this.nome = funcionarioSeniorDto.getNome();
 		this.matricula = funcionarioSeniorDto.getNumeroMatricula();
 		this.telefone = funcionarioSeniorDto.getDddtelefone() + funcionarioSeniorDto.getNumtelefone();
+		this.codigoCartaoAcesso =  funcionarioSeniorDto.getNumCracha();
 		// this.dataNascimento = funcionarioSeniorDto.getDatNas(); //05/02/1997
 		this.rg = funcionarioSeniorDto.getRg();
-
+		
 		if (Objects.nonNull(funcionarioSeniorDto.getDatAdm())) {
 			this.observacoes = "Data admissão: " + funcionarioSeniorDto.getDatAdm();
 			this.status = Status.ATIVO;
@@ -289,18 +299,20 @@ public class PedestreEntity extends ClienteBaseEntity {
 			this.observacoes = "Data demissão: " + funcionarioSeniorDto.getDatDem();
 			this.status = Status.INATIVO;
 		}
-
+		
+		this.codigoPermissao = funcionarioSeniorDto.getCodPrm(); //codigo permissao
 		this.cliente = empresaEntity.getCliente();
 		this.empresa = empresaEntity;
 		this.tipo = TipoPedestre.PEDESTRE;
 		this.sempreLiberado = true;
-	}
+   }
 
 	public void updateFuncionarioSenior(final FuncionarioSeniorDto funcionarioSeniorDto,
 			final EmpresaEntity empresaEntity) {
 		this.nome = funcionarioSeniorDto.getNome();
 		this.matricula = funcionarioSeniorDto.getNumeroMatricula();
 		this.telefone = funcionarioSeniorDto.getDddtelefone() + funcionarioSeniorDto.getNumtelefone();
+		this.codigoCartaoAcesso =  funcionarioSeniorDto.getNumCracha();
 		// this.dataNascimento = funcionarioSeniorDto.getDatNas(); //05/02/1997
 		this.rg = funcionarioSeniorDto.getRg();
 
@@ -311,11 +323,8 @@ public class PedestreEntity extends ClienteBaseEntity {
 			this.observacoes = "Data demissão: " + funcionarioSeniorDto.getDatDem();
 			this.status = Status.INATIVO;
 		}
-
-		this.cliente = empresaEntity.getCliente();
-		this.empresa = empresaEntity;
-		this.tipo = TipoPedestre.PEDESTRE;
-		this.sempreLiberado = true;
+		
+		this.codigoPermissao = funcionarioSeniorDto.getCodPrm(); //codigo permissao
 	}
 
 	public String getAllPhonesFormatted() {
@@ -756,4 +765,12 @@ public class PedestreEntity extends ClienteBaseEntity {
 		this.dataCadastroFotoNaHikivision = dataCadastroFotoNaHikivision;
 	}
 
+	public String getCodigoPermissao() {
+		return codigoPermissao;
+	}
+
+	public void setCodigoPermissao(String codigoPermissao) {
+		this.codigoPermissao = codigoPermissao;
+	}
+	
 }

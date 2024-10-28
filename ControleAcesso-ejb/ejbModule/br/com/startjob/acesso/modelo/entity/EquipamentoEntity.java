@@ -33,6 +33,11 @@ import br.com.startjob.acesso.modelo.entity.base.ClienteBaseEntity;
 	@NamedQuery(name  = "EquipamentoEntity.findByIdentificador",
 				query = "select obj from EquipamentoEntity obj "
 					  + "where obj.identificador = :ID_EQUIPAMENTO "
+					  + "order by obj.id asc"),
+	@NamedQuery(name  = "EquipamentoEntity.findByNomeEquipamento",
+				query = "select obj from EquipamentoEntity obj "
+					  + "where obj.nome = :NOME_EQUIPAMENTO "
+					  + "and obj.cliente.id = :ID_CLIENTE "
 					  + "order by obj.id asc")
 })
 @SuppressWarnings("serial")

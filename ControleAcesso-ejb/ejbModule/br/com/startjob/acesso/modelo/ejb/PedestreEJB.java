@@ -14,6 +14,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -26,8 +27,11 @@ import java.util.concurrent.TimeUnit;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
+import javax.inject.Inject;
 import javax.persistence.Column;
+import javax.persistence.EntityManager;
 import javax.persistence.JoinColumn;
+import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.xml.ws.soap.MTOMFeature;
 
@@ -52,6 +56,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.senior.services.IntegracaoSeniorService;
+import com.senior.services.PedestreEquipamentoService;
 import com.senior.services.dto.EmpresaSeniorDto;
 import com.senior.services.dto.FuncionarioSeniorDto;
 
@@ -63,6 +68,7 @@ import br.com.startjob.acesso.modelo.entity.ClienteEntity;
 import br.com.startjob.acesso.modelo.entity.DepartamentoEntity;
 import br.com.startjob.acesso.modelo.entity.EmpresaEntity;
 import br.com.startjob.acesso.modelo.entity.EnderecoEntity;
+import br.com.startjob.acesso.modelo.entity.EquipamentoEntity;
 import br.com.startjob.acesso.modelo.entity.HorarioEntity;
 import br.com.startjob.acesso.modelo.entity.ImportacaoEntity;
 import br.com.startjob.acesso.modelo.entity.IntegracaoSOCEntity;
@@ -72,6 +78,7 @@ import br.com.startjob.acesso.modelo.entity.PedestreEquipamentoEntity;
 import br.com.startjob.acesso.modelo.entity.PedestreRegraEntity;
 import br.com.startjob.acesso.modelo.entity.RegraEntity;
 import br.com.startjob.acesso.modelo.entity.base.BaseEntity;
+import br.com.startjob.acesso.modelo.enumeration.Permissoes;
 import br.com.startjob.acesso.modelo.enumeration.Status;
 import br.com.startjob.acesso.modelo.enumeration.TipoPedestre;
 import br.com.startjob.acesso.modelo.enumeration.TipoRegra;
@@ -80,7 +87,7 @@ import br.com.startjob.acesso.modelo.utils.AppAmbienteUtils;
 @Stateless
 @TransactionAttribute(TransactionAttributeType.REQUIRED)
 public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
-
+	
 	private static final ObjectMapper mapper = new ObjectMapper()
 			.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
@@ -1275,7 +1282,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 					e.printStackTrace();
 				}
 			}
-
+			System.out.println("Importando empresa : " + empresaSenior.getNumEmp());
 			importaFuncionariosSenior(empresaExistente, cliente);
 
 			if (Objects.isNull(empresaExistente.getPrimeiroImportacaoFuncionarioSeniorSucesso())
@@ -1295,6 +1302,8 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		List<FuncionarioSeniorDto> funcionarios = null;
 
 		if (Boolean.TRUE.equals(empresaExistente.getPrimeiroImportacaoFuncionarioSeniorSucesso())) {
+			//Pensar num jeito de não rodar sempre para os mesmos funcionarios
+			//OBS: a data não tem hora
 			funcionarios = buscaFuncionariosAtualizadosNoDia(empresaExistente.getCodEmpresaSenior(), cliente);
 		} else {
 			funcionarios = buscaTodosOsFuncioriosDaEmpresa(empresaExistente.getCodEmpresaSenior(), cliente);
@@ -1310,24 +1319,122 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 
 			PedestreEntity pedestre = null;
 			
+			boolean permissaoAlterada = true;
 			if (pedestreExistente.isPresent()) {
 				pedestre = pedestreExistente.get();
+				permissaoAlterada = isPermissaoAlterada(pedestre, funcionario);
+				
+				if(permissaoAlterada) {
+					System.out.println(pedestre.getId());
+				}
+				
 				pedestre.updateFuncionarioSenior(funcionario, empresaExistente);
+				pedestre.setExistente(true);
+				
+				try {
+					pedestre = (PedestreEntity) gravaObjeto(pedestre)[0];
+				} catch (Exception e) {
+					e.printStackTrace();
+					throw new RuntimeException();
+				}
 
 			} else {
 				pedestre = new PedestreEntity(funcionario, empresaExistente);
+				try {
+					pedestre = (PedestreEntity) gravaObjeto(pedestre)[0];
+					
+				} catch (Exception e) {
+					e.printStackTrace();
+					throw new RuntimeException();
+				}
 			}
 			
+			
+	        // Associa o pedestre ao equipamento
+			// Encontrar uma forma de não ficar criando varios equipamentos para o mesmo pedestre sem que buscar 
+			// Os atualizados do dia
+			// obs : tem um campo de Obervação do que foi atualizado pode ser que de pra usar
+			if(permissaoAlterada) {
+				apagaTodosPedetreEquipamentos(pedestre);
+				
+				Permissoes permissao = Permissoes.valueOf("_" + pedestre.getCodigoPermissao());
+
+				for (String nomeEquipamento : permissao.getEquipamentos()) {
+					EquipamentoEntity equipamento = buscaEquipamentoPeloNome(nomeEquipamento, cliente);
+
+					PedestreEquipamentoEntity pedestreEquipamento = new PedestreEquipamentoEntity();
+					pedestreEquipamento.setPedestre(pedestre);
+					pedestreEquipamento.setEquipamento(equipamento);
+					
+					try {
+						gravaObjeto(pedestreEquipamento);
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
+				}
+			}
 			try {
 				pedestre = (PedestreEntity) gravaObjeto(pedestre)[0];
-				
 			} catch (Exception e) {
+				// TODO Auto-generated catch block
 				e.printStackTrace();
-				throw new RuntimeException();
 			}
 		});
 	}
 	
+	private void apagaTodosPedetreEquipamentos(PedestreEntity pedestre) {
+		if(Objects.isNull(pedestre.getEquipamentos()) || pedestre.getEquipamentos().isEmpty()) {
+			return;
+		}
+		
+		for(PedestreEquipamentoEntity pedestreEquipamento : pedestre.getEquipamentos()) {
+			try {
+				pedestreEquipamento.setDataRemovido(new Date());
+				pedestreEquipamento.setRemovido(true);
+				
+				gravaObjeto(pedestreEquipamento);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private EquipamentoEntity buscaEquipamentoPeloNome(String nomeEquipamento, ClienteEntity cliente) {
+		Map<String, Object> args = new HashMap<String, Object>();
+		args.put("NOME_EQUIPAMENTO", nomeEquipamento);
+		args.put("ID_CLIENTE", cliente.getId());
+
+		try {
+			List<EquipamentoEntity> listaEquipamentos = (List<EquipamentoEntity>) pesquisaArgFixos(EquipamentoEntity.class,
+					"findByNomeEquipamento", args);
+			
+			if (listaEquipamentos != null && !listaEquipamentos.isEmpty()) {
+				return listaEquipamentos.get(0);
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return null;
+	}
+
+	private boolean isPermissaoAlterada(final PedestreEntity pedestre, final FuncionarioSeniorDto funcionario) {
+		if(Objects.isNull(pedestre.getCodigoPermissao()) || pedestre.getCodigoPermissao().isEmpty()) {
+			return true;
+		}
+		
+		return !pedestre.getCodigoPermissao().equals(funcionario.getCodPrm());
+	}
+	
+//	private void associarEquipamentos(PedestreEntity pedestre) {
+//		// TODO Auto-generated method stub
+//		  PedestreEquipamentoEntity pedestreEquipamento = new PedestreEquipamentoEntity();
+//	            pedestreEquipamentoService.adicionaPedestreEquipamentoSenior(pedestreEquipamento, pedestre, pedestre.getPermissao());
+//		
+//	}
+
 	private List<FuncionarioSeniorDto> buscaTodosOsFuncioriosDaEmpresa(final String numEmp, final ClienteEntity cliente) {
 		System.out.println("buscando todos funcionarios da empresa :" + numEmp );
 		IntegracaoSeniorService integracaoSeniorService = new IntegracaoSeniorService(
@@ -1337,11 +1444,16 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 	}
 
 	private List<FuncionarioSeniorDto> buscaFuncionariosAtualizadosNoDia(String numEmp, final ClienteEntity cliente) {
-		System.out.println("buscando todos funcionarios atualizados do dia");
+		System.out.println("buscando todos funcionarios atualizados");
+		
+		LocalDate data = LocalDate.now();
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+		String dataString = data.format(formatter);
+
 		IntegracaoSeniorService integracaoSeniorService = new IntegracaoSeniorService(
 				cliente.getIntegracaoSenior().getUsuario(), cliente.getIntegracaoSenior().getSenha());
-
-		return integracaoSeniorService.buscarFuncionariosAtualizadosNoDia(numEmp);
+		
+		return integracaoSeniorService.buscarFuncionariosAtualizadosNoDia(numEmp, dataString);
 	}
 
 	@SuppressWarnings("unchecked")

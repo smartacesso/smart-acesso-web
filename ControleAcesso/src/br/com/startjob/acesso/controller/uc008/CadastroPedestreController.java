@@ -109,6 +109,7 @@ public class CadastroPedestreController extends CadastroBaseController {
 	private List<EquipamentoEntity> equipamentos;
 	private Long idEquipamentoSelecionado;
 	
+	
 	private BiometriaEntity biometria;
 	private StreamedContent imagemBiometria;
 	
@@ -694,12 +695,15 @@ public class CadastroPedestreController extends CadastroBaseController {
 				}
 			});
 		}
+		
+		
 			
 		pedestreEquipamento.setPedestre(getPedestreAtual());
 		listaPedestresEquipamentos.add(pedestreEquipamento);
 		pedestreEquipamento = new PedestreEquipamentoEntity();
 		idEquipamentoSelecionado = null;
 	}
+	
 	
 	public void removerPedestreEquipamento(PedestreEquipamentoEntity pedestreEquipamento) {
 		if(pedestreEquipamento != null)

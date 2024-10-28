@@ -106,11 +106,6 @@ public class IntegracaoSeniorService {
 		String soapBodyEmpresas = gerarSoapBodySemEmpresa(SoapOperation.EMPRESA);
 		String responseXml = enviarSoapRequest(soapBodyEmpresas);
 		if (responseXml != null) {
-
-			// List<EmpresaSeniorDto> empresas = parseEmpresasFromXml(responseXml);
-			// for (EmpresaSeniorDto empresa : empresas) {
-			// System.out.println(empresa.getNomEmp());
-			// }
 			return parseEmpresasFromXml(responseXml);
 		}
 		return null;
@@ -121,18 +116,17 @@ public class IntegracaoSeniorService {
 		String soapBodyFuncionarios = gerarSoapBodyComEmpresa(SoapOperation.PEDESTRE, numEmp);
 		String responseXml = enviarSoapRequest(soapBodyFuncionarios);
 		if (responseXml != null) {
-
-			List<FuncionarioSeniorDto> funcionarios = parseFuncionariosFromXml(responseXml);
-			// retornando o parsing da resposta
-			for (FuncionarioSeniorDto funcionario : funcionarios) {
-				System.out.println(funcionario.getNome());
-			}
 			return parseFuncionariosFromXml(responseXml);
 		}
 		return null;
 	}
 	
-	public List<FuncionarioSeniorDto> buscarFuncionariosAtualizadosNoDia(String numEmp) {
+	public List<FuncionarioSeniorDto> buscarFuncionariosAtualizadosNoDia(String numEmp, String d) {
+		String soapBodyFuncionarios = gerarSoapBodyComEmpresa(SoapOperation.PEDESTRE, numEmp);
+		String responseXml = enviarSoapRequest(soapBodyFuncionarios);
+		if (responseXml != null) {
+			return parseFuncionariosFromXml(responseXml);
+		}
 		return null;
 	}
 
@@ -141,12 +135,6 @@ public class IntegracaoSeniorService {
 		String soapBodyFuncionarios = gerarSoapBodyComData(SoapOperation.PEDESTRE_ADMITIDOS, numEmp, data);
 		String responseXml = enviarSoapRequest(soapBodyFuncionarios);
 		if (responseXml != null) {
-
-			List<FuncionarioSeniorDto> funcionarios = parseFuncionariosFromXml(responseXml);
-			// retornando o parsing da resposta
-			for (FuncionarioSeniorDto funcionario : funcionarios) {
-				System.out.println(funcionario.getNome());
-			}
 			return parseFuncionariosFromXml(responseXml);
 		}
 		return null;
@@ -157,12 +145,6 @@ public class IntegracaoSeniorService {
 		String soapBodyFuncionarios = gerarSoapBodyComData(SoapOperation.PEDESTRE_DEMITIDOS, numEmp, data);
 		String responseXml = enviarSoapRequest(soapBodyFuncionarios);
 		if (responseXml != null) {
-
-			List<FuncionarioSeniorDto> funcionarios = parseFuncionariosFromXml(responseXml);
-			// retornando o parsing da resposta
-			for (FuncionarioSeniorDto funcionario : funcionarios) {
-				System.out.println(funcionario.getNome());
-			}
 			return parseFuncionariosFromXml(responseXml);
 		}
 		return null;
@@ -183,12 +165,6 @@ public class IntegracaoSeniorService {
 		String soapBodyCentroDeCusto = gerarSoapBodyComEmpresa(SoapOperation.CENTRO_CUSTO, numEmp);
 		String responseXml = enviarSoapRequest(soapBodyCentroDeCusto);
 		if (responseXml != null) {
-
-			List<CentroDeCustoSeniorDto> centroDeCustos = parseCentroCustoFromXml(responseXml);
-			// retornando o parsing da resposta
-			for (CentroDeCustoSeniorDto centroCusto : centroDeCustos) {
-				System.out.println(centroCusto.getCentroCusto());
-			}
 			return parseCentroCustoFromXml(responseXml);
 		}
 		return null;
