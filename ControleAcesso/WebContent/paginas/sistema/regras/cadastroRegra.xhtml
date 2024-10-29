@@ -145,7 +145,13 @@
 											<p:calendar id="horarioInicioTurno" value="#{cadastroRegraAcessoController.entidade.horarioInicioTurno}" 
 												timeOnly="true" pattern="HH:mm" mask="99:99" size="10" navigator="true"/>
 										</p:column>
-  			
+  										
+  										<p:column rendered="#{cadastroRegraAcessoController.tipoRegra == 'ACESSO_ESCALA_3_3'}">
+											<p:outputLabel value="#{msgs['label.uc006.data.inicio']}" indicateRequired="true"/>
+											<br />
+											<p:calendar id="dataInicio3_3" value="#{cadastroRegraAcessoController.entidade.dataInicioPeriodo}" 
+													pattern="dd/MM/yyyy" mask="99/99/9999" size="10" navigator="true"/>
+										</p:column>
 
 									
 									</p:panelGrid>
