@@ -62,14 +62,14 @@
 			<p:calendar id="dataFim" value="#{cadastroPedestreController.pedestreRegra.regra.dataFimPeriodo}"
 					pattern="dd/MM/yyyy" mask="99/99/9999" size="10"/>
 		</p:column>
-		
+		<!-- 
 		<p:column rendered="#{cadastroPedestreController.pedestreRegra.regra.tipo == 'ACESSO_ESCALA_3_3'}">
 			<p:outputLabel value="#{msgs['label.uc006.data.inicio']}" indicateRequired="true"/>
 			<br />
 			<p:calendar id="dataInicioEscala3_3" value="#{cadastroPedestreController.pedestreRegra.dataInicioEscala3_3}" 
 					pattern="dd/MM/yyyy" mask="99/99/9999" size="10"/>
 		</p:column>
-		
+		Este é um comentário em XHTML -->
 		<p:column>
 			<br />
 			<p:commandButton id="adicionarRegra" action="#{cadastroPedestreController.adicionarRegra()}" 
