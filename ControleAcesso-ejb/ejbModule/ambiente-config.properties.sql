@@ -24,11 +24,11 @@ config.ambiente.noreply.email=noreply@startjobtec.com.br
 config.ambiente.site=https://www.smartempresarial.com.br/
 
 # Configura��o de academia gestora
-# as configurações "include" e "exclude" n�o
+# as configurações "include" e "exclude" nao
 # podem ser setadas juntas, elas funcionando 
 # separadamente.
 # - include: ID da academia gestora quando h� um path indicado
-# - exclude: ID's das academias gestoras existentes quendo n�o h� um 
+# - exclude: ID's das academias gestoras existentes quendo nao h� um 
 #			 path indicado
 #config.management.academy.path=/flavours/xxxx
 #config.management.academy.include.id=1
