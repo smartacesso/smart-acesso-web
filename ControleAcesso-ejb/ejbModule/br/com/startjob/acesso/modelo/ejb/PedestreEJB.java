@@ -503,6 +503,8 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 					importaSulacap(dadosArquivo, dados);
 				} else if ("gasmig".equals(dadosArquivo[0])) {
 					importagasmig(dadosArquivo, dados);
+				}else if("actech".equals(dadosArquivo[0])) {
+					importaActech(dadosArquivo, dados);
 				}
 
 //				PedestreEntity pedestreLeftZero = null;
@@ -550,6 +552,68 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		pedestre.setCodigoCartaoAcesso(numeroCartao);
 		pedestre.setNome(nomePedestre);
 		pedestre.setMatricula(null);
+		pedestre.setCpf(cpf);
+		pedestre.setRg(rg);
+		pedestre.setObservacoes("Importado : " + LocalDate.now());
+
+		pedestre.setExistente(true);
+		pedestre.setSempreLiberado(true);
+		pedestre.setStatus(Status.ATIVO);
+		pedestre.setTipo(TipoPedestre.PEDESTRE);
+		pedestre.setCliente(dados.getCliente());
+
+		pedestre.setExistente(true);
+		pedestre.setDataRemovido(null);
+		pedestre.setRemovido(null);
+
+//        if (regra != null) {
+//            PedestreRegraEntity pedestreRegra = new PedestreRegraEntity();
+//            pedestreRegra.setRegra(regra);
+//            pedestreRegra.setPedestre(pedestre);
+//
+//            if (pedestre.getRegras() == null) {            	
+//            	pedestre.setRegras(new ArrayList<>());
+//            }else {
+//            	for(PedestreRegraEntity removeRegra: pedestre.getRegras()) {
+//            		removeRegra.setRemovido(true);
+//            		removeRegra.setDataRemovido(new Date());
+//            	}
+//            	pedestre.getRegras().add(pedestreRegra);
+//            }
+//            
+//        }
+
+//        if (regra != null) {
+//            salvarObjeto(regra);
+//        }
+
+		if (pedestre != null) {
+			salvarObjeto(pedestre);
+		}
+
+	}
+	
+	public void importaActech(String[] dadosArquivo, ImportacaoEntity dados) {
+
+		String numeroCartao = "";
+		String nomePedestre = "";
+		String rg = "";
+		String cpf = "";
+		String nomeRegra = null;
+
+		PedestreEntity pedestre = null;
+
+		numeroCartao = dadosArquivo[1];
+		nomePedestre = dadosArquivo[2];
+		rg = dadosArquivo[3]; 
+		cpf = dadosArquivo[4]; 
+
+		pedestre = buscaPedestrePorNome(nomePedestre);
+		if (pedestre == null)
+			pedestre = new PedestreEntity();
+//        RegraEntity regra = buscarRegraPeloNome(nomeRegra, dados.getCliente().getId());
+		pedestre.setCodigoCartaoAcesso(numeroCartao);
+		pedestre.setNome(nomePedestre);
 		pedestre.setCpf(cpf);
 		pedestre.setRg(rg);
 		pedestre.setObservacoes("Importado : " + LocalDate.now());
@@ -1540,6 +1604,9 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 			}
 
 			for (FuncionarioResult funcionario : funcionarios) {
+				if(funcionario.CPF.equals("10803915330")) {
+					System.out.println("teste");
+				}
 
 				ClienteEntity clienteFromFuncionario = getClienteFromFuncionario(funcionario.CCUSTO, clientes);
 
@@ -1689,6 +1756,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 			if (Status.ATIVO.equals(pedestre.getStatus())) {
 				pedestre.setStatus(Status.INATIVO);
 				pedestre.setObservacoes("Situação indicada: " + funcionario.SITUACAO);
+				System.out.println("situação : " + funcionario.SITUACAO);
 			}
 
 			inativo = true;

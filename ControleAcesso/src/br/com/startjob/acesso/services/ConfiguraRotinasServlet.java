@@ -112,7 +112,8 @@ public class ConfiguraRotinasServlet extends BaseServlet {
 	
 	private Calendar getInicio(final String hourOfDay) {
 		Calendar inicio = Calendar.getInstance();
-		inicio.set(Calendar.DAY_OF_MONTH, inicio.get(Calendar.DAY_OF_MONTH) + 1);
+//		inicio.set(Calendar.DAY_OF_MONTH, inicio.get(Calendar.DAY_OF_MONTH) + 1);
+		inicio.set(Calendar.DAY_OF_MONTH, inicio.get(Calendar.DAY_OF_MONTH));
 		inicio.set(Calendar.HOUR_OF_DAY, Integer.parseInt(hourOfDay));
 		inicio.set(Calendar.MINUTE, 0);
 		inicio.set(Calendar.SECOND, 0);
