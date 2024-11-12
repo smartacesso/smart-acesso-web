@@ -108,7 +108,7 @@ public class ClienteEntity extends BaseEntity {
 	@Fetch(FetchMode.SUBSELECT)
 	private List<PlanoEntity> planos;
 	
-	@OneToOne(cascade={CascadeType.ALL}, fetch=FetchType.LAZY)
+	@OneToOne(cascade={CascadeType.ALL}, fetch=FetchType.EAGER)
 	@JoinColumn(name="ID_INTEGRACAO_SOC", nullable=true)
 	private IntegracaoSOCEntity integracaoSoc;
 	

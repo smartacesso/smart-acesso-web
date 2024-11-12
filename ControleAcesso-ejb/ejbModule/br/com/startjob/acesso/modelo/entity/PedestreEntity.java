@@ -31,7 +31,6 @@ import javax.persistence.Transient;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 
-import com.senior.services.PedestreEquipamentoService;
 import com.senior.services.dto.FuncionarioSeniorDto;
 
 import br.com.startjob.acesso.modelo.entity.base.ClienteBaseEntity;
