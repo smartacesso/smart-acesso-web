@@ -20,6 +20,7 @@ public class FuncionarioSeniorDto {
     String numEmpresa; // 1</numEmp>
     String tipCol; // <tipCol>Empregado</tipCol>
     String cargo; // <titRed>DIRETOR</titRed>
+    String obs; // <titRed>DIRETOR</titRed>
 	public String getCodPrm() {
 		return codPrm;
 	}
@@ -121,6 +122,12 @@ public class FuncionarioSeniorDto {
 	}
 	public void setNumFisicoCracha(String numFisicoCracha) {
 		this.numFisicoCracha = numFisicoCracha;
+	}
+	public String getObs() {
+		return obs;
+	}
+	public void setObs(String obs) {
+		this.obs = obs;
 	}
     
 	
