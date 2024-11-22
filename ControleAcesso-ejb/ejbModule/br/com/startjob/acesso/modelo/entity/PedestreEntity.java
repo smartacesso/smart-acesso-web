@@ -2,6 +2,7 @@ package br.com.startjob.acesso.modelo.entity;
 
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
+import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -284,18 +285,22 @@ public class PedestreEntity extends ClienteBaseEntity {
 	}
 
 	public PedestreEntity(final FuncionarioSeniorDto funcionarioSeniorDto, final EmpresaEntity empresaEntity) {
+		
+		LocalDate hoje = LocalDate.now();
+		
 		this.nome = funcionarioSeniorDto.getNome();
 		this.matricula = funcionarioSeniorDto.getNumeroMatricula();
 		this.telefone = funcionarioSeniorDto.getDddtelefone() + funcionarioSeniorDto.getNumtelefone();
 		this.codigoCartaoAcesso =  funcionarioSeniorDto.getNumCracha();
-		// this.dataNascimento = funcionarioSeniorDto.getDatNas(); //05/02/1997
 		this.rg = funcionarioSeniorDto.getRg();
 		
 		if (Objects.nonNull(funcionarioSeniorDto.getDatAdm())) {
-			this.observacoes = "Data admissão: " + funcionarioSeniorDto.getDatAdm();
+			this.observacoes = "Data admissão: " + funcionarioSeniorDto.getDatAdm()
+			+ " | ALTERAÇÃO : " + hoje + " | " + funcionarioSeniorDto.getObs();
 			this.status = Status.ATIVO;
 		} else if (Objects.nonNull(funcionarioSeniorDto.getDatDem())) {
-			this.observacoes = "Data demissão: " + funcionarioSeniorDto.getDatDem();
+			this.observacoes = "Data demissão: " + funcionarioSeniorDto.getDatDem()
+			+ " | ALTERAÇÃO : " + hoje + " | " + funcionarioSeniorDto.getObs();
 			this.status = Status.INATIVO;
 		}
 		
@@ -306,24 +311,29 @@ public class PedestreEntity extends ClienteBaseEntity {
 		this.sempreLiberado = true;
    }
 
-	public void updateFuncionarioSenior(final FuncionarioSeniorDto funcionarioSeniorDto,
-			final EmpresaEntity empresaEntity) {
+	public void updateFuncionarioSenior(final FuncionarioSeniorDto funcionarioSeniorDto, final EmpresaEntity empresaEntity) {
+		
+		LocalDate hoje = LocalDate.now();
+		
 		this.nome = funcionarioSeniorDto.getNome();
 		this.matricula = funcionarioSeniorDto.getNumeroMatricula();
 		this.telefone = funcionarioSeniorDto.getDddtelefone() + funcionarioSeniorDto.getNumtelefone();
 		this.codigoCartaoAcesso =  funcionarioSeniorDto.getNumCracha();
-		// this.dataNascimento = funcionarioSeniorDto.getDatNas(); //05/02/1997
 		this.rg = funcionarioSeniorDto.getRg();
+		this.sempreLiberado = true;
 
 		if (Objects.nonNull(funcionarioSeniorDto.getDatAdm())) {
-			this.observacoes = "Data admissão: " + funcionarioSeniorDto.getDatAdm();
+			this.observacoes = "Data admissão: " + funcionarioSeniorDto.getDatAdm()
+			+ " | ALTERAÇÃO : " + hoje + " | " + funcionarioSeniorDto.getObs();
 			this.status = Status.ATIVO;
 		} else if (Objects.nonNull(funcionarioSeniorDto.getDatDem())) {
-			this.observacoes = "Data demissão: " + funcionarioSeniorDto.getDatDem();
+			this.observacoes = "Data demissão: " + funcionarioSeniorDto.getDatDem()
+			+ " | ALTERAÇÃO : " + hoje + " | " + funcionarioSeniorDto.getObs();
 			this.status = Status.INATIVO;
 		}
 		
 		this.codigoPermissao = funcionarioSeniorDto.getCodPrm(); //codigo permissao
+		this.setDataAlteracao(new Date());
 	}
 
 	public String getAllPhonesFormatted() {
