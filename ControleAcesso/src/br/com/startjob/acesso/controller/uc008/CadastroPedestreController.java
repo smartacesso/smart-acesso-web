@@ -779,7 +779,6 @@ public class CadastroPedestreController extends CadastroBaseController {
 		byte[] imagem = event.getFile().getContent();
 		fileNameTemp = event.getFile().getFileName();
 		fileNameTemp = fileNameTemp.replaceAll(" ", "_");
-		
 		exibeCrop = true;
 		
 		criarArquivo(imagem, fileNameTemp);
@@ -818,13 +817,14 @@ public class CadastroPedestreController extends CadastroBaseController {
 	}
 	
 	public void crop() {
+		System.out.println(croppedImage);
 		if(croppedImage == null) {
 			return;
 		}
 		PedestreEntity pedestre = (PedestreEntity) getEntidade();
 		pedestre.setFoto(croppedImage.getBytes());
 		pedestre.setDataAlteracaoFoto(new Date());
-		exibeCrop = false;
+		exibeCrop = true;
 		
 		removerArquivo(caminhoCompleto);
 	}
@@ -849,18 +849,22 @@ public class CadastroPedestreController extends CadastroBaseController {
 	}
 	
 	private void criarArquivo(byte[] imagem, String nomeArquivo) {
-		caminhoCompleto = AppAmbienteUtils.getResourcesFolder() + "upload/" + nomeArquivo;
-		
-		FileImageOutputStream fileImageOutputStream;
-		
-		try {
-			fileImageOutputStream = new FileImageOutputStream(new File(caminhoCompleto));
-			fileImageOutputStream.write(imagem, 0, imagem.length);
-			fileImageOutputStream.close();
-			
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+	    String caminhoCompleto = AppAmbienteUtils.getResourcesFolder() + "upload/" + nomeArquivo;
+	    System.out.println(caminhoCompleto);
+	    try {
+	        // Ensure the directory exists
+	        File diretorio = new File(AppAmbienteUtils.getResourcesFolder() + "upload/");
+	        if (!diretorio.exists()) {
+	            diretorio.mkdirs(); // Create directory structure if it doesn't exist
+	        }
+
+	        // Write the image file
+	        FileImageOutputStream fileImageOutputStream = new FileImageOutputStream(new File(caminhoCompleto));
+	        fileImageOutputStream.write(imagem, 0, imagem.length);
+	        fileImageOutputStream.close();
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
 	}
 	
 	private String getRandomImageName() {
