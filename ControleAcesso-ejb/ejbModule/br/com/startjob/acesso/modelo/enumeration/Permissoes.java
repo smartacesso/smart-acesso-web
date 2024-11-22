@@ -6,27 +6,27 @@ import java.util.List;
 
 public enum Permissoes {
 	_0(new ArrayList<>(Arrays.asList())),
-	_1(new ArrayList<>(Arrays.asList("ADMINISTRATIVO"))),
-	_2(new ArrayList<>(Arrays.asList("PRODUÇÃO"))),
-	_3(new ArrayList<>(Arrays.asList("EXPEDIÇÃO"))),
-	_4(new ArrayList<>(Arrays.asList("UBV EXPEDIÇÃO"))),
-	_5(new ArrayList<>(Arrays.asList("UBV FATURAMENTO"))),
-	_6(new ArrayList<>(Arrays.asList("CD JUIZ DE FORA"))),
-	_18(new ArrayList<>(Arrays.asList("PORTARIA UBV"))),
+	_1(new ArrayList<>(Arrays.asList("MATRIZ"))), //ADMINISTRATIVO
+	_2(new ArrayList<>(Arrays.asList("BELA VISTA"))), //PRODUÇÃO
+	_3(new ArrayList<>(Arrays.asList("MATRIZ"))), //EXPEDICAO
+	_4(new ArrayList<>(Arrays.asList("BELA VISTA"))), //UBV EXPEDICAO 
+	_5(new ArrayList<>(Arrays.asList("BELA VISTA"))), //UBV FATURAMENTO
+	_6(new ArrayList<>(Arrays.asList())), //CD JUIZ DE FORA
+	_12(new ArrayList<>(Arrays.asList("MATRIZ"))), //PORTARIA
+	_18(new ArrayList<>(Arrays.asList("BELA VISTA"))), //PORTARIA UBV
 	
-	_7(new ArrayList<>(Arrays.asList("ADMINISTRATIVO", "UBV EXPEDIÇÃO"))),
-	_8(new ArrayList<>(Arrays.asList("ADMINISTRATIVO", "PRODUÇÃO"))),
-	_9(new ArrayList<>(Arrays.asList("ADMINISTRATIVO", "PRODUÇÃO","EXPEDIÇÃO","UBV EXPEDIÇÃO","UBV FATURAMENTO"))),
-	_10(new ArrayList<>(Arrays.asList("ADMINISTRATIVO", "PRODUÇÃO","EXPEDIÇÃO","UBV EXPEDIÇÃO","UBV FATURAMENTO","CD JUIZ DE FORA"))),
-	_11(new ArrayList<>(Arrays.asList("PRODUÇÃO","EXPEDIÇÃO"))),
-	_12(new ArrayList<>(Arrays.asList("PORTARIA"))),
-	_13(new ArrayList<>(Arrays.asList("EXPEDIÇÃO", "UBV EXPEDIÇÃO"))),
-	_14(new ArrayList<>(Arrays.asList("UBV EXPEDIÇÃO", "UBV FATURAMENTO","EXPEDIÇÃO"))),
-	_15(new ArrayList<>(Arrays.asList("UBV EXPEDIÇÃO", "UBV FATURAMENTO","PRODUÇÃO"))),
-	_16(new ArrayList<>(Arrays.asList("ADMINISTRATIVO", "EXPEDIÇÃO"))),
-	_17(new ArrayList<>(Arrays.asList("UBV EXPEDIÇÃO", "UBV FATURAMENTO"))),
-	_19(new ArrayList<>(Arrays.asList("PORTARIA", "PORTARIA UBV"))), //ESTA UBV PORTARIA 1 MAS NAO TEM ESSE INDIVIDUAL
-	_20(new ArrayList<>(Arrays.asList("UBV FATURAMENTO", "UBV EXPEDIÇÃO","ADMINISTRATIVO")));
+	_7(new ArrayList<>(Arrays.asList("MATRIZ", "BELA VISTA"))),
+	_8(new ArrayList<>(Arrays.asList("MATRIZ", "BELA VISTA"))),
+	_9(new ArrayList<>(Arrays.asList("MATRIZ", "BELA VISTA"))),
+	_10(new ArrayList<>(Arrays.asList("MATRIZ", "BELA VISTA"))),
+	_11(new ArrayList<>(Arrays.asList("MATRIZ","BELA VISTA"))),
+	_13(new ArrayList<>(Arrays.asList("MATRIZ", "BELA VISTA"))),
+	_14(new ArrayList<>(Arrays.asList("MATRIZ", "BELA VISTA"))),
+	_15(new ArrayList<>(Arrays.asList("BELA VISTA"))),
+	_16(new ArrayList<>(Arrays.asList("MATRIZ"))),
+	_17(new ArrayList<>(Arrays.asList("BELA VISTA"))),
+	_19(new ArrayList<>(Arrays.asList("MATRIZ", "BELA VISTA"))), //ESTA UBV PORTARIA 1 MAS NAO TEM ESSE INDIVIDUAL
+	_20(new ArrayList<>(Arrays.asList("MATRIZ", "BELA VISTA")));
 	
 	
 	private List<String> equipamentos;
