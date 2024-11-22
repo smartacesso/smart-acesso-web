@@ -122,7 +122,7 @@ public class IntegracaoSeniorService {
 	}
 	
 	public List<FuncionarioSeniorDto> buscarFuncionariosAtualizadosNoDia(String numEmp, String d) {
-		String soapBodyFuncionarios = gerarSoapBodyComEmpresa(SoapOperation.PEDESTRE, numEmp);
+		String soapBodyFuncionarios = gerarSoapBodyComData(SoapOperation.PEDESTRE, numEmp, d);
 		String responseXml = enviarSoapRequest(soapBodyFuncionarios);
 		if (responseXml != null) {
 			return parseFuncionariosFromXml(responseXml);
