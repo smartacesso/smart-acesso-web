@@ -40,7 +40,7 @@ import br.com.startjob.acesso.modelo.enumeration.Status;
 					  + "where obj.regra.id = :ID_REGRA "
 					  + "order by obj.id asc")
 })
-@FilterDef(name="horarioValido", defaultCondition="(removido = 'F' or removido is null)")
+@FilterDef(name="horarioValido", defaultCondition="(removido = 0 or removido is null)")
 @SuppressWarnings("serial")
 public class HorarioEntity extends BaseEntity {
 	
