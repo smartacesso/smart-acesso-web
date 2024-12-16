@@ -131,21 +131,24 @@ xmlns:p="http://primefaces.org/ui">
 	</h:form>
 	 
 	<p:dialog id="dialogCropImage" widgetVar="cropImage" header="#{msgs['label.uc008.cortar.imagem']}" modal="true" closable="false"
-		width="370" position="top" resizable="false" positionType="absolute">
+		width="370" position="top" resizable="true" positionType="absolute">
 		
 		<h:panelGrid columns="2">
 			<p:imageCropper id="imageCroppedTemp" value="#{cadastroPedestreController.croppedImage}"  
 					rendered="#{cadastroPedestreController.exibeCrop}" 
 					image="#{menuController.urlMain}/resources/upload/#{cadastroPedestreController.fileNameTemp}" 
-					initialCoords="0,0,150,150" aspectRatio="1.0" guides="true" minSize="150,150"/>
+					initialCoords="0,0,150,150" aspectRatio="1.0" guides="true" minSize="150,150"
+					onerror="console.error('Erro ao carregar imagem no cropper');"
+   					onsuccess="console.log('Cropper inicializado com sucesso');" />
 
 		</h:panelGrid>
 		
 	 	<p:commandButton value="#{msgs['label.uc008.cortar']}" action="#{cadastroPedestreController.crop}" process="dialogCropImage" update="painelFoto" icon="pi pi-clone" 
-	 			oncomplete="PF('cropImage').hide(); return false;" style="margin-top: 10px; margin-right: 10px;" styleClass="whiteIcon"/>
+	 			oncomplete="PF('cropImage').hide(); console.log('Imagem cortada com sucesso:', '#{cadastroPedestreController.croppedImage}'); return false;"
+				 style="margin-top: 10px; margin-right: 10px;" styleClass="whiteIcon"/>
 	 	
 	 	<p:commandButton value="#{msgs['alt.acao.cancelar']}" action="#{cadastroPedestreController.cancelaCrop}" process="@this"
-	 			oncomplete="PF('cropImage').hide(); PF('escolherFoto').show(); return false;"/>
+	 			oncomplete="PF('cropImage').hide(); PF('escolherFoto').show(); console.log('Corte cancelado'); return false;"/>
 		
 	</p:dialog>
 	
