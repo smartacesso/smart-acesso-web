@@ -7,8 +7,8 @@
 	     
 	      <validation-mode>CALLBACK</validation-mode>
 	      <properties>
-	      		 <property name="hibernate.dialect" value="org.hibernate.dialect.SQLServer2008Dialect"/>
-		         <property name="hibernate.default_schema" value="controle_acesso"/>
+	      		 <property name="hibernate.dialect" value="org.hibernate.dialect.SQLServer2012Dialect"/>
+		         <property name="hibernate.default_schema" value="dbo"/>
 		         <property name="hibernate.transaction.manager_lookup_class" value="org.hibernate.transaction.JBossTransactionManagerLookup"/>
 		         
 		         <!-- configuração de cache -->
@@ -23,8 +23,8 @@
 				 	         
 		         <property name="hibernate.hbm2ddl.auto" value="update"/>
 				 
-				 <!-- <property name="hibernate.show_sql" value="false"/> -->
-		         <!-- <property name="hibernate.format_sql" value="false"/> -->
+				 <property name="hibernate.show_sql" value="false"/> 
+		         <property name="hibernate.format_sql" value="false"/>
 		         
 		         
 	      </properties>
