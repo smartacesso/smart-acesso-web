@@ -497,13 +497,20 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 					continue;
 
 				if ("centaurus".equals(dadosArquivo[0])) {
-					importaCentaurus(dadosArquivo, dados);
+					System.out.println("Padrao centaurus");
+					importaCentaurus(dadosArquivo, dados);	
 				} else if ("CST".equals(dadosArquivo[0])) {
+					System.out.println("Padrao CST");
 					importaSulacap(dadosArquivo, dados);
 				} else if ("gasmig".equals(dadosArquivo[0])) {
+					System.out.println("Padrao GASMIG");
 					importagasmig(dadosArquivo, dados);
 				}else if("actech".equals(dadosArquivo[0])) {
+					System.out.println("Padrao ACTECH");
 					importaActech(dadosArquivo, dados);
+				}else if("sesi".equals(dadosArquivo[0])) {
+					System.out.println("Padrao SESI");
+					importaSesi(dadosArquivo, dados);
 				}
 
 //				PedestreEntity pedestreLeftZero = null;
@@ -592,6 +599,44 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 
 	}
 	
+	public void importaSesi(String[] dadosArquivo, ImportacaoEntity dados) {
+
+		String numeroCartao = "";
+		String nomePedestre = "";
+		String rg = "";
+		String cpf = "";
+		String nomeRegra = null;
+
+		PedestreEntity pedestre = null;
+
+		nomePedestre = dadosArquivo[1];
+		numeroCartao = dadosArquivo[2];
+
+		pedestre = buscaPedestrePorNome(nomePedestre);
+		if (pedestre == null)
+			pedestre = new PedestreEntity();
+		pedestre.setCodigoCartaoAcesso(numeroCartao);
+		pedestre.setNome(nomePedestre);
+		pedestre.setCpf(cpf);
+		pedestre.setRg(rg);
+		pedestre.setObservacoes("Importado : " + LocalDate.now());
+
+		pedestre.setExistente(true);
+		pedestre.setSempreLiberado(true);
+		pedestre.setStatus(Status.ATIVO);
+		pedestre.setTipo(TipoPedestre.PEDESTRE);
+		pedestre.setCliente(dados.getCliente());
+
+		pedestre.setExistente(true);
+		pedestre.setDataRemovido(null);
+		pedestre.setRemovido(null);
+
+		if (pedestre != null) {
+			salvarObjeto(pedestre);
+		}
+
+	}
+	
 	public void importaActech(String[] dadosArquivo, ImportacaoEntity dados) {
 
 		String numeroCartao = "";
@@ -604,8 +649,6 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 
 		numeroCartao = dadosArquivo[1];
 		nomePedestre = dadosArquivo[2];
-		rg = dadosArquivo[3]; 
-		cpf = dadosArquivo[4]; 
 
 		pedestre = buscaPedestrePorNome(nomePedestre);
 		if (pedestre == null)
@@ -1363,20 +1406,29 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 
 	private void importaFuncionariosSenior(final EmpresaEntity empresaExistente, final ClienteEntity cliente) {
 		List<FuncionarioSeniorDto> funcionarios = null;
+		List<FuncionarioSeniorDto> funcionariosDemitidos = null;
 
 		if (Boolean.TRUE.equals(empresaExistente.getPrimeiroImportacaoFuncionarioSeniorSucesso())) {
 			//Pensar num jeito de não rodar sempre para os mesmos funcionarios
 			//OBS: a data não tem hora
-			funcionarios = buscaFuncionariosAtualizadosNoDia(empresaExistente.getCodEmpresaSenior(), cliente);
-		} else {
+			System.out.println("Atualizando apenas");
 			funcionarios = buscaTodosOsFuncioriosDaEmpresa(empresaExistente.getCodEmpresaSenior(), cliente);
+			funcionariosDemitidos = buscarFuncionariosDemitidos(empresaExistente.getCodEmpresaSenior(), cliente);
+		} else {
+			System.out.println("Primeira importação");
+			funcionarios = buscaTodosOsFuncioriosDaEmpresa(empresaExistente.getCodEmpresaSenior(), cliente);	
 		}
 
 		if (Objects.isNull(funcionarios) || funcionarios.isEmpty()) {
 			return;
 		}
+		
 
-		funcionarios.forEach(funcionario -> {
+		if (Objects.isNull(funcionariosDemitidos) || funcionariosDemitidos.isEmpty()) {
+			return;
+		}
+
+		funcionarios.forEach(funcionario -> {			
 			Optional<PedestreEntity> pedestreExistente = buscaPedestreExistente(
 					funcionario.getNumeroMatricula(), empresaExistente);
 
@@ -1388,14 +1440,14 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 				permissaoAlterada = isPermissaoAlterada(pedestre, funcionario);
 				
 				if(permissaoAlterada) {
-					System.out.println(pedestre.getId());
+					System.out.println("Permissao alterada : " + pedestre.getNome());
 				}
 				
 				pedestre.updateFuncionarioSenior(funcionario, empresaExistente);
 				pedestre.setExistente(true);
 				
 				try {
-					pedestre = (PedestreEntity) gravaObjeto(pedestre)[0];
+					pedestre = (PedestreEntity) alteraObjeto(pedestre)[0];
 				} catch (Exception e) {
 					e.printStackTrace();
 					throw new RuntimeException();
@@ -1434,6 +1486,43 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 					} catch (Exception e) {
 						e.printStackTrace();
 					}
+				}
+			}
+			try {
+				pedestre = (PedestreEntity) gravaObjeto(pedestre)[0];
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		});
+		
+		//funcionarios demitidos
+		funcionariosDemitidos.forEach(funcionario -> {			
+			Optional<PedestreEntity> pedestreExistente = buscaPedestreExistente(
+					funcionario.getNumeroMatricula(), empresaExistente);
+
+			PedestreEntity pedestre = null;
+			
+			if (pedestreExistente.isPresent()) {
+				pedestre = pedestreExistente.get();			
+				pedestre.updateFuncionarioSenior(funcionario, empresaExistente);
+				pedestre.setExistente(true);
+				
+				try {
+					pedestre = (PedestreEntity) gravaObjeto(pedestre)[0];
+				} catch (Exception e) {
+					e.printStackTrace();
+					throw new RuntimeException();
+				}
+
+			} else {
+				pedestre = new PedestreEntity(funcionario, empresaExistente);
+				try {
+					pedestre = (PedestreEntity) gravaObjeto(pedestre)[0];
+					
+				} catch (Exception e) {
+					e.printStackTrace();
+					throw new RuntimeException();
 				}
 			}
 			try {
@@ -1505,9 +1594,9 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 
 		return integracaoSeniorService.buscarFuncionarios(numEmp);
 	}
-
-	private List<FuncionarioSeniorDto> buscaFuncionariosAtualizadosNoDia(String numEmp, final ClienteEntity cliente) {
-		System.out.println("buscando todos funcionarios atualizados");
+	
+	private List<FuncionarioSeniorDto> buscarFuncionariosDemitidos(String numEmp, final ClienteEntity cliente) {
+		System.out.println("buscando todos funcionarios demitidos no dia no empresa" + numEmp );
 		
 		LocalDate data = LocalDate.now();
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
@@ -1516,9 +1605,9 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		IntegracaoSeniorService integracaoSeniorService = new IntegracaoSeniorService(
 				cliente.getIntegracaoSenior().getUsuario(), cliente.getIntegracaoSenior().getSenha());
 		
-		return integracaoSeniorService.buscarFuncionariosAtualizadosNoDia(numEmp, dataString);
+		return integracaoSeniorService.buscarFuncionariosDemitidos(numEmp, dataString);
 	}
-
+	
 	@SuppressWarnings("unchecked")
 	private Optional<PedestreEntity> buscaPedestreExistente(String numeroMatricula, EmpresaEntity empresa) {
 		Map<String, Object> args = new HashMap<String, Object>();
@@ -1603,7 +1692,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 			}
 
 			for (FuncionarioResult funcionario : funcionarios) {
-				if(funcionario.CPF.equals("10803915330")) {
+				if(funcionario.CPF.equals("70896644499")) {
 					System.out.println("teste");
 				}
 

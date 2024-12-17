@@ -18,7 +18,7 @@ config.ambiente.main.link=https://www.smartacesso.com.br/
 config.ambiente.nome.app=sistema
 
 
-# Configura��es de identificação
+# Configuracoes de identificação
 config.ambiente.support.email=suporte@startjobtec.com.br
 config.ambiente.noreply.email=noreply@startjobtec.com.br
 config.ambiente.site=https://www.smartempresarial.com.br/
@@ -40,5 +40,5 @@ config.resources.folder.dev=/home/gustavo/ambiente/servers/wildfly-20.0.0.Final/
 
 config.tempo.dispositivo=10
 config.sgdb.utilizado=plsql
-config.schema.name=controle_acesso.
+config.schema.name=dbo.
 config.sqlserver.version=2012
