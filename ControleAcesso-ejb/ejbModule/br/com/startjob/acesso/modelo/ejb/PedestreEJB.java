@@ -1412,7 +1412,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 			//Pensar num jeito de não rodar sempre para os mesmos funcionarios
 			//OBS: a data não tem hora
 			System.out.println("Atualizando apenas");
-			funcionarios = buscaTodosOsFuncioriosDaEmpresa(empresaExistente.getCodEmpresaSenior(), cliente);
+			funcionarios = buscarFuncionariosAdmitidos(empresaExistente.getCodEmpresaSenior(), cliente);
 			funcionariosDemitidos = buscarFuncionariosDemitidos(empresaExistente.getCodEmpresaSenior(), cliente);
 		} else {
 			System.out.println("Primeira importação");
@@ -1606,6 +1606,19 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 				cliente.getIntegracaoSenior().getUsuario(), cliente.getIntegracaoSenior().getSenha());
 		
 		return integracaoSeniorService.buscarFuncionariosDemitidos(numEmp, dataString);
+	}
+	
+	private List<FuncionarioSeniorDto> buscarFuncionariosAdmitidos(String numEmp, final ClienteEntity cliente) {
+		System.out.println("buscando todos funcionarios demitidos no dia no empresa" + numEmp );
+		
+		LocalDate data = LocalDate.now();
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+		String dataString = data.format(formatter);
+
+		IntegracaoSeniorService integracaoSeniorService = new IntegracaoSeniorService(
+				cliente.getIntegracaoSenior().getUsuario(), cliente.getIntegracaoSenior().getSenha());
+		
+		return integracaoSeniorService.buscarFuncionariosAdmitidos(numEmp, dataString);
 	}
 	
 	@SuppressWarnings("unchecked")
