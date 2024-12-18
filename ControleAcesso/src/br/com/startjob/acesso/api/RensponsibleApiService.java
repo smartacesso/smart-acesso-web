@@ -1,9 +1,14 @@
 package br.com.startjob.acesso.api;
 
 import java.util.Optional;
+import java.util.TimeZone;
 import java.util.stream.Collectors;
+import java.util.Date;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -29,13 +34,17 @@ import javax.ws.rs.core.Response.Status;
 
 import br.com.startjob.acesso.modelo.ejb.ResponsibleEJBRemote;
 import br.com.startjob.acesso.modelo.entity.AcessoEntity;
+import br.com.startjob.acesso.modelo.entity.NewsLetterEntity;
 import br.com.startjob.acesso.modelo.entity.PedestreEntity;
 import br.com.startjob.acesso.modelo.entity.ResponsibleEntity;
+import br.com.startjob.acesso.modelo.entity.TokenNotificationEntity;
 import br.com.startjob.acesso.modelo.utils.EncryptionUtils;
 import br.com.startjob.acesso.to.PedestrianAccessTO;
 import br.com.startjob.acesso.to.AccessTO;
+import br.com.startjob.acesso.to.responsible.NewsLetterOutput;
 import br.com.startjob.acesso.to.responsible.ResponsibleLoginInput;
 import br.com.startjob.acesso.to.responsible.ResponsibleLoginOutput;
+import br.com.startjob.acesso.to.responsible.TokenNotificationOutput;
 import br.com.startjob.acesso.to.responsible.TokenOutput;
 import br.com.startjob.acesso.modelo.utils.*;
 
@@ -49,6 +58,8 @@ public class RensponsibleApiService extends BaseService {
 	
 	CriptografiaAES cript = new CriptografiaAES();
 	
+	private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+	
 	@POST
 	@Path("/login")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -56,7 +67,7 @@ public class RensponsibleApiService extends BaseService {
 	public Response login(final ResponsibleLoginInput responsibleInput) throws Exception {
 		ResponsibleEJBRemote responsibleEJB = (ResponsibleEJBRemote) getEjb("ResponsibleEJB");
 		
-		Optional<ResponsibleEntity> responsible = responsibleEJB.findResponsibleByLoginAndPassword(
+ 		Optional<ResponsibleEntity> responsible = responsibleEJB.findResponsibleByLoginAndPassword(
 				responsibleInput.getLogin(), EncryptionUtils.encrypt(responsibleInput.getPassword()));
 		
 		if(!responsible.isPresent()) {
@@ -108,7 +119,6 @@ public class RensponsibleApiService extends BaseService {
 	}
 	
 	private List<PedestrianAccessTO> convertPedestrianTO(List<PedestreEntity> dependencies) throws ParseException {
-		List<PedestrianAccessTO> pedestresTO = new ArrayList<>();
 		
 		return dependencies.stream()
 			.map(pedestre -> PedestrianAccessTO.convertPedestrianAccess(pedestre))
@@ -122,23 +132,124 @@ public class RensponsibleApiService extends BaseService {
 			@HeaderParam("page") int page) throws Exception {
 		ResponsibleEJBRemote responsibleEJB = (ResponsibleEJBRemote) getEjb("ResponsibleEJB");
 		
+		TokenOutput tokenResponse =(TokenOutput) decriptToken(token);
+		if(Objects.isNull(tokenResponse)) {
+			return Response.status(Status.UNAUTHORIZED).build();
+		}
+		
 		List<AcessoEntity> accessList = responsibleEJB.findAllAccessPageable(
-				"Teste", "8D969EEF6ECAD3C29A3A629280E686CF0C3F5D5A86AFF3CA12020C923ADC6C92", size, page);
+				tokenResponse.getLogin(), tokenResponse.getSenha(), size, page);
 		
 		List<AccessTO> accessTOList = new ArrayList<>();
 		AccessTO accessTO = new AccessTO();
 		
-		accessList.forEach(aacess -> {
-			try {
-				accessTOList.add(accessTO.convertToAccessTO(aacess));
-			} catch (ParseException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+		if(accessList.size() > 0) {
+			accessList.forEach(aacess -> {
+				try {
+					accessTOList.add(accessTO.convertToAccessTO(aacess));
+				} catch (ParseException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			});
+			
+			return Response.ok(accessTOList).build();
+		}
+		
+		return Response.status(Status.NOT_FOUND).build();
+		
+	} 
+	
+	@GET
+	@Path("/token")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getNotificationToken (@HeaderParam("token") String token) throws Exception {
+		ResponsibleEJBRemote responsibleEJB = (ResponsibleEJBRemote) getEjb("ResponsibleEJB");
+		
+		Optional<TokenNotificationEntity> tokenNotification = responsibleEJB.findTokenNotification();
+		TokenNotificationOutput tokenOutput = new TokenNotificationOutput();
+		if(tokenNotification.isPresent()) {
+			tokenOutput.setToken(tokenNotification.get().getToken());
+			return Response.ok(tokenOutput).build();
+		}
+ 
+		return Response.noContent().build();
+	} 
+	
+	@POST
+	@Path("/token")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response createNotificationToken (final TokenNotificationOutput tokenNotification) throws Exception {
+		ResponsibleEJBRemote responsibleEJB = (ResponsibleEJBRemote) getEjb("ResponsibleEJB");
+		
+		TokenNotificationEntity tokenNotificationPersist = new TokenNotificationEntity();
+		tokenNotificationPersist.setToken(tokenNotification.getToken());
+		responsibleEJB.gravaObjeto(tokenNotificationPersist);
+
+		return Response.status(Status.CREATED).build();
+	}
+	
+	@POST
+	@Path("/news")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response newsLetter (@HeaderParam("token") String token, @HeaderParam("description") String description, 
+			@HeaderParam("title") String title, @HeaderParam("eventDate") String eventDate, byte[] image) throws Exception {
+		ResponsibleEJBRemote responsibleEJB = (ResponsibleEJBRemote) getEjb("ResponsibleEJB");
+		
+		
+		TokenOutput tokenResponse =(TokenOutput) decriptToken(token);
+		
+		if(Objects.isNull(tokenResponse)) {
+			return Response.status(Status.UNAUTHORIZED).build();
+		}
+		
+		Date date = (Date) sdf.parse(eventDate);
+	
+		responsibleEJB.createNewsLetter(tokenResponse.getIdResponsible(), description, title, image, date);
+
+		return Response.status(Status.CREATED).build();
+	}
+	
+	@GET
+	@Path("/news")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getNewsLetter (@HeaderParam("token") String token) throws Exception {
+		ResponsibleEJBRemote responsibleEJB = (ResponsibleEJBRemote) getEjb("ResponsibleEJB");
+		
+		TokenOutput tokenResponse =(TokenOutput) decriptToken(token);
+		if(Objects.isNull(tokenResponse)) {
+			return Response.status(Status.UNAUTHORIZED).build();
+		}
+		
+		List<NewsLetterEntity> newsLetterList = responsibleEJB.findNewsLetter(tokenResponse.getIdResponsible());
+		if(newsLetterList.size() > 0) {
+			return assembleNewsLetterOutput(newsLetterList);
+		}
+		return Response.status(Status.NOT_FOUND).build();
+	
+		
+	}
+
+	private Response assembleNewsLetterOutput(List<NewsLetterEntity> newsLetterList) {
+		
+		List<NewsLetterOutput> newsLetterOutList = new ArrayList <NewsLetterOutput>();
+		newsLetterList.forEach(news -> {
+			NewsLetterOutput newsLetterOut = new NewsLetterOutput();
+			
+			newsLetterOut.setDescription(news.getDescricao());
+			newsLetterOut.setImage(news.getImage());
+			newsLetterOut.setTitle(news.getTitle());
+			
+			newsLetterOutList.add(newsLetterOut);
 		});
 		
-		return Response.ok(accessTOList).build();
-	} 
-
+		return Response.ok(newsLetterOutList).build();
+	}
+	
 
 }
+	
+	
+
+
+

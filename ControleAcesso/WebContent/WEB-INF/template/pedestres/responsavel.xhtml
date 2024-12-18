@@ -3,81 +3,97 @@
 	xmlns:f="http://java.sun.com/jsf/core"
 	xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:p="http://primefaces.org/ui">
-	
+
 	<style>
-		.whiteIcon .ui-icon{
-			color: #fff;
-		}
-	</style>
-	
-	<p:panelGrid columns="5" id="painelCadastroResponsavel">
-		
+.whiteIcon .ui-icon {
+	color: #fff;
+}
+</style>
+
+	<p:panelGrid columns="2" id="painelCadastroResponsavel">
+
 		<p:column>
-			<p:outputLabel value="#{msgs['label.uc016.responsavel']}" for="findResponsibleAutoFill"/>
+			<p:outputLabel value="#{msgs['label.uc016.responsavel']}"
+				for="findResponsibleAutoComplete" />
 			<br />
-			<p:autoComplete id="findResponsibleAutoFill" value="#{cadastroPedestreController.responsaveis}" 
-				var="regra" itemLabel="#{responsavel.nome}" itemValue="#{responsavel}" forceSelection="true" queryDelay="800" cache="true"
-				minQueryLength="2" maxResults="10" completeMethod="#{cadastroResponsavelControllerfindResponsibleAutoFill}">
-				
-				<p:ajax event="itemSelect" update="painelCadastroResponsavel"/>
+			<p:autoComplete id="findResponsibleAutoComplete"
+				value="#{cadastroPedestreController.responsavel}" var="responsavel"
+				itemLabel="#{responsavel.nome}" itemValue="#{responsavel}"
+				forceSelection="true" queryDelay="800" cache="true"
+				minQueryLength="2" maxResults="10"
+				>
+
+				<p:ajax event="itemSelect" update="painelCadastroResponsavel" />
 			</p:autoComplete>
-			
-			<p:commandButton id="buscarResponsavel"
-				 	icon="pi pi-search" update="form:dialogEscolherResponsavel" oncomplete="PF('escolherResponsavel').show(); return false;"
-				 	styleClass="whiteIcon" process="@this"/>
+
+			<p:commandButton id="buscarResponsavel" icon="pi pi-search"
+				update="form:dialogEscolherResponsavel"
+				oncomplete="PF('escolherResponsavel').show(); return false;"
+				styleClass="whiteIcon" process="@this" />
 		</p:column>
-		
+
 		<p:column>
-			<p:outputLabel value="#{msgs['label.uc016.dataNascimento']}" for="dataNascimento"/>
-			<br />
-			<p:calendar id="dataNascimentoResponsavel" value="#{cadastroPedestreController.responsaveis.dataNascimento}" 
-					pattern="dd/MM/yyyy" mask="99/99/9999"/>
+			<p:commandButton id="vincularReponsavel"
+				action="#{cadastroPedestreController.bindDependencies()}"
+				value="#{msgs['alt.acao.vincular']}"
+				process="painelCadastroResponsavel"
+				update="painelCadastroResponsavel responsaveis form:dialogEscolherResponsavel" />
 		</p:column>
 
 	</p:panelGrid>
-	
+
 	<br />
-	
-	<p:panelGrid columns="2" id="responsavel" style="width: 100%;">
-							
-		<h:outputText value="#{msgs['msg.nenhum.item.encontrato.adicionar']}" escape="false"
-					  rendered="#{empty cadastroPedestreController.listaPedestreRegra}" />
-	
-		<p:dataTable id="tableResponsaveis" value="#{cadastroPedestreController.responsaveis}" 
-			var="responsavel" paginator="true" rows="5" 
+
+	<p:panelGrid columns="2" id="responsaveis" style="width: 100%;">
+
+		<h:outputText value="#{msgs['msg.nenhum.item.encontrado.adicionar']}"
+			escape="false"
+			rendered="#{empty cadastroPedestreController.responsaveis}" />
+
+		<p:dataTable id="tableResponsavel"
+			value="#{cadastroPedestreController.responsaveis}"
+			var="responsavel" paginator="true" rows="3"
 			paginatorPosition="bottom" paginatorAlwaysVisible="false"
-			rendered="#{not empty cadastroPedestreController.listaPedestreRegra}">
-			
-			<p:column headerText="#{msgs['label.uc016.nome']}" style="text-align: center;">
-				<h:outputText id="nomeResponsavel" value="#{responsavel.nome}"/>
-						
-				<h:button id="ajudaResponsavel" title="#{msgs[alt.label.ajuda]}" 
-					image="#{menuController.path}/tema/img/bt_helper.png" 
-					style="height: 20px; margin-left: 2px" 
-					onclick="return false;">
+			rendered="#{not empty cadastroPedestreController.responsaveis}">
+
+			<p:column headerText="#{msgs['label.uc008.nome']}"
+				style="text-align: center;">
+				<h:outputText id="nomeResponsavel" value="#{responsavel.nome}" />
+					
+
+				<h:button id="ajudaResponsavel" title="#{msgs[alt.label.ajuda]}"
+					image="#{menuController.path}/tema/img/bt_helper.png"
+					style="height: 20px; margin-left: 2px" onclick="return false;">
 				</h:button>
-				</p:column>
-					<p:tooltip id="dicaMostraDadosResponsavel" for="nomeResponsavel ajudaResponsavel" position="bottom">
+				
+				<p:tooltip id="dicaMostraDadosResponsavel" for="nomeResponsavel ajudaResponsavel"
+						position="bottom">
 						<p:column>
-					        <h:outputText value="#{msgs['label.uc016.nome']}: " style="font-weight: bold; color: #fff"/>
-					        <h:outputText value="#{responsavel.nome}" />
+							<h:outputText value="#{msgs['label.uc008.nome']}: "
+								style="font-weight: bold; color: #fff" />
+							<h:outputText value="#{responsavel.nome}" />
 						</p:column>
 						<br />
-						
 						<p:column>
-							<p:outputLabel value="#{msgs['label.uc016.dataNascimento']}" for="dataNascimento"/>
-							<br />
-							<p:calendar id="dataNascimento" value="#{cadastroPedestreController.responsaveis.dataNascimento}" 
-									pattern="dd/MM/yyyy" mask="99/99/9999"/>
-						</p:column>	
-						
-						<p:column>
-						<br/>
-						<p:commandButton id="vincularResponsavel" action="#{cadastroPedestreController.adicionarResponsavel()}" 
-								value="#{msgs['alt.acao.adicionar']}" process="painelCadastroResponsavel" 
-								update="painelCadastroResponsavel responsavel form:dialogEscolherResponsavel"/>
+							<h:outputText value="#{msgs['label.uc008.dataNascimento']}: "
+								style="font-weight: bold; color: #fff" />
+							<h:outputText value="#{responsavel.dataNascimento}">
+								<f:convertDateTime pattern="dd/MM/yyyy" />
+							</h:outputText>
+						</p:column>
+			  </p:tooltip>
+			</p:column>		
+					<p:column headerText="#{msgs['alt.acao.excluir']}"
+						style="text-align: center;">
+						<h:commandButton
+							image="#{menuController.path}/tema/img/bt_remove_min.png"
+							title="#{msgs['alt.acao.excluir']}"
+							action="#{cadastroPedestreController.removeResponsible()}">
+							<p:ajax process="@this"
+								update="form:cadastroPedestreTab:tableResponsavel form:cadastroPedestreTab:responsaveis" />
+						</h:commandButton>
 					</p:column>
-				</p:tooltip>	
 		</p:dataTable>
 	</p:panelGrid>
+
 </ui:composition>

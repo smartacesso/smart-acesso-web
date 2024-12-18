@@ -5,8 +5,6 @@ import javax.inject.Named;
 
 import br.com.startjob.acesso.annotations.UseCase;
 import br.com.startjob.acesso.controller.BaseController;
-import br.com.startjob.acesso.modelo.entity.PedestreEntity;
-import br.com.startjob.acesso.modelo.entity.RegraEntity;
 import br.com.startjob.acesso.modelo.entity.ResponsibleEntity;
 
 
@@ -24,10 +22,4 @@ public class BuscarResponsavelController extends BaseController{
 		return super.buscar();
 	}
 	
-	public void bindDependencies(PedestreEntity pedestrian, ResponsibleEntity responsible) {
-		
-		
-	}
-	
-
 }

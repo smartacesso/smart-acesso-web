@@ -48,7 +48,7 @@ public class CriptografiaAES {
 	}
 
 	public static void main(String[] args) throws Exception {
-	String teste = "TokenOutput [idResponsible=" + 1 + ", login=" + 1 + ", senha=" + 2 + "]";;
+	String teste = "TokenOutput [idResponsible=" + 1 + ", login=" + 1 + ", senha=" + 2 + "]";
 		
 		CriptografiaAES criptografiaAES = new CriptografiaAES();
 		byte[] encrypt = criptografiaAES.encrypt(teste, criptografiaAES.chaveencriptacao);

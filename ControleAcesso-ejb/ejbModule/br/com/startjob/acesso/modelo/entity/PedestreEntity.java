@@ -44,11 +44,18 @@ import br.com.startjob.acesso.modelo.utils.EncryptionUtils;
 		@NamedQuery(name = "PedestreEntity.findById", query = "select obj from PedestreEntity obj "
 				+ "where obj.id = :ID order by obj.id asc"),
 		@NamedQuery(name = "PedestreEntity.findByIdComplete", query = "select obj from PedestreEntity obj "
-				+ " left join fetch obj.endereco en " + " left join fetch obj.empresa emp "
-				+ " left join fetch obj.departamento dep " + " left join fetch obj.centroCusto cec "
-				+ " left join fetch obj.cargo ca " + " left join fetch obj.cliente cli " + " left join obj.regras re "
-				+ " left join obj.equipamentos eq " + " left join obj.documentos doc "
-				+ " left join obj.biometrias bio " + " left join obj.mensagensPersonalizadas men "
+				+ " left join fetch obj.endereco en " 
+				+ " left join fetch obj.empresa emp "
+				+ " left join fetch obj.departamento dep " 
+				+ " left join fetch obj.centroCusto cec "
+				+ " left join fetch obj.cargo ca " 
+				+ " left join fetch obj.cliente cli " 
+				+ " left join obj.regras re "
+				+ " left join obj.equipamentos eq " 
+				+ " left join obj.documentos doc "
+				+ " left join obj.biometrias bio " 
+				+ " left join obj.mensagensPersonalizadas men "
+				+ " left join obj.responsavel res "
 				+ "where obj.id = :ID order by obj.id asc"),
 		@NamedQuery(name = "PedestreEntity.findAllComEmpresa", query = "select obj from PedestreEntity obj "
 				+ " left join fetch obj.empresa e " + "where (obj.removido = false or obj.removido is null) "
@@ -180,19 +187,19 @@ public class PedestreEntity extends ClienteBaseEntity {
 	@JoinColumn(name = "ID_ENDERECO", nullable = true)
 	private EnderecoEntity endereco;
 
-	@ManyToOne(cascade = {}, fetch = FetchType.LAZY)
+	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@JoinColumn(name = "ID_EMPRESA", nullable = true)
 	private EmpresaEntity empresa;
 
-	@ManyToOne(cascade = {}, fetch = FetchType.LAZY)
+	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@JoinColumn(name = "ID_DEPARTAMENTO", nullable = true)
 	private DepartamentoEntity departamento;
 
-	@ManyToOne(cascade = {}, fetch = FetchType.LAZY)
+	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@JoinColumn(name = "ID_CENTRO_CUSTO", nullable = true)
 	private CentroCustoEntity centroCusto;
 
-	@ManyToOne(cascade = {}, fetch = FetchType.LAZY)
+	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@JoinColumn(name = "ID_CARGO", nullable = true)
 	private CargoEntity cargo;
 
@@ -246,7 +253,7 @@ public class PedestreEntity extends ClienteBaseEntity {
 	@Column(name = "CODIGO_EXTERNO", nullable = true, length = 100)
 	private String codigoExterno;
 	
-	@ManyToOne(cascade = {}, fetch = FetchType.LAZY)
+	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
 	@JoinColumn(name = "ID_RESPONSAVEL", nullable = true)
 	private ResponsibleEntity responsavel;
 	

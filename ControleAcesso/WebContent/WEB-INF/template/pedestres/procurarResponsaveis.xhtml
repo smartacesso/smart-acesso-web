@@ -7,7 +7,7 @@
 	<p:dialog id="dialogEscolherResponsavel" header="#{msgs['title.uc016.consulta.responsavel']}" widgetVar="escolherResponsavel" 
 			modal="true" resizable="false">
 		
-		<p:panelGrid id="gridEscolherResponsavel" columns="4">
+		<p:panelGrid id="gridEscolherResponsavel" columns="3">
 			<p:column>
 				<p:outputLabel value="#{msgs['label.uc016.nome']}" for="inputNomeResponsavel"/>
 				<br />
@@ -15,6 +15,7 @@
 			</p:column>
 
 			<p:column>
+				<br />
 				<p:commandButton id="buscarResponsavelButton" value="#{msgs['alt.acao.buscar']}"
 				action="#{buscarResponsavelController.findResponsiblebyName()}"
 					update="gridEscolherResponsavel responsaveis" process="gridEscolherResponsavel"/>
@@ -24,32 +25,29 @@
 		
 		<br />
 		
-		<p:panelGrid columns="4" id="responsaveis" style="width: 700px">
+		<p:panelGrid columns="2" id="responsaveis" style="width: 700px">
 		
-			<h:outputText value="#{msgs['msg.nenhum.item.encontrato.buscar']}" escape="false"
+			<h:outputText value="#{msgs['msg.nenhum.item.encontrado.buscar']}" escape="false"
 											  rendered="#{empty buscarResponsavelController.result}" />
 		
 			<p:dataTable id="tableEscolherResponsavel" value="#{buscarResponsavelController.result}" var="responsavel"
 					rendered="#{not empty buscarResponsavelController.result}" paginator="true"
 					rows="#{buscarResponsavelController.quantPorPagina}" paginatorPosition="bottom"
 					paginatorAlwaysVisible="false" selectionMode="single" rowKey="#{responsavel.id}"
-					selection="#{cadastroPedestreController.responsaveis}">
+					selection="#{cadastroPedestreController.responsavel}">
 				
-				<p:ajax event="rowSelect" update="form:cadastroPedestreTab:painelCadastroResponsaveis" 
+				<p:ajax event="rowSelect" update="form:cadastroPedestreTab:painelCadastroResponsavel" 
 					oncomplete="PF('escolherResponsavel').hide(); return false;" />
-				
-				<p:column headerText="#{msgs['label.uc016.codigo']}" style="text-align: center">
-					<h:outputText value="#{responsavel.id}" />
-				</p:column>
 				
 				<p:column headerText="#{msgs['label.uc016.nome']}" style="text-align: center">
 					<h:outputText value="#{responsavel.nome}" />
 				</p:column>
 				
 				<p:column headerText="#{msgs['label.uc016.dataNascimento']}" style="text-align: center">
-					<h:outputText value="#{responsavel.dataNascimento}" />
+					<h:outputText value="#{responsavel.dataNascimento}">
+					<f:convertDateTime dateStyle="long" pattern="dd/MM/yyyy" />
+					</h:outputText>
 				</p:column>
-				
 				
 			</p:dataTable>
 		

@@ -1,9 +1,12 @@
 package br.com.startjob.acesso.to.responsible;
 
+import com.google.gson.annotations.SerializedName;
+
 public class TokenOutput {
 	
-	
+	@SerializedName("LOGIN")
 	private String login;
+	@SerializedName("SENHA")
 	private String senha;
 	private Long idResponsible;
 	public String getLogin() {

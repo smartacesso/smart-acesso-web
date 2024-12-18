@@ -3,9 +3,7 @@ package br.com.startjob.acesso.controller.uc016;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.faces.model.SelectItem;
@@ -36,23 +34,6 @@ public class CadastroResponsavelController extends BaseController {
 		ResponsibleEntity responsavel = (ResponsibleEntity) getEntidade();
 		
 		montaListaStatus();
-	}
-	
-	@SuppressWarnings("unchecked")
-	public List<ResponsibleEntity> findResponsibleAutoFill(final String nome) {
-		List<ResponsibleEntity> responsible = null;
-		
-		try {
-			Map<String, Object> args = new HashMap<String, Object>();
-			args.put("NOME", "%"+nome+"%");
-			args.put("ID_CLIENTE", getUsuarioLogado().getCliente().getId());
-			
-			responsible = (List<ResponsibleEntity>) baseEJB.pesquisaArgFixos(ResponsibleEntity.class, "findAllByNome", args);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-		return responsible;
 	}
 	
 	@Override

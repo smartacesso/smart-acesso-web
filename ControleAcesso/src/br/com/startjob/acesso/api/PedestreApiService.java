@@ -20,7 +20,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import com.google.gson.Gson;
-import com.itextpdf.text.pdf.codec.Base64;
 
 import br.com.startjob.acesso.modelo.BaseConstant;
 import br.com.startjob.acesso.modelo.ejb.BaseEJBRemote;

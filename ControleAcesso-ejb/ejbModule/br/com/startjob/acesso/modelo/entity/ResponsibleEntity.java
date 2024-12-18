@@ -12,6 +12,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Lob;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
@@ -32,7 +33,7 @@ import br.com.startjob.acesso.modelo.enumeration.Status;
 	@NamedQuery(name= "ResponsibleEntity.findAll",
 			query = "select obj "
 				      + "from ResponsibleEntity obj "
-				      + "order by obj.nome "),
+				      + "order by obj.id "),
 	@NamedQuery(name= "ResponsibleEntity.findAllNaoRemovido",
 			query = "select obj "
 				      + "from ResponsibleEntity obj "
@@ -46,17 +47,28 @@ import br.com.startjob.acesso.modelo.enumeration.Status;
 				      + "from ResponsibleEntity obj "
 					  + "where (lower(obj.login) = lower(:LOGIN) and obj.password = :PASSWORD) "),
 	@NamedQuery(name= "ResponsibleEntity.findAllDependentsPageable",
-			query = "select obj.pedestre "
-                    + "from ResponsibleEntity obj "
-                    + "left join obj.pedestre p "
-                    + "where obj.id = :ID_RESPONSIBLE "),
-	@NamedQuery(name = "ResponsibleEntity.findByIdComplete", 
+	query = "select obj.pedestre "
+            + "from ResponsibleEntity obj "
+            + "left join obj.pedestre p "
+            + "where obj.id = :ID_RESPONSIBLE "),
+	@NamedQuery(name = "ResponsibleEntity.findByIDResposible", 
 			query = "select obj from ResponsibleEntity obj "
-					+ "left join fetch obj.pedestre p "
-					+ "where obj.id = :ID order by obj.id asc"),
+					+ "where obj.id = :ID_RESPONSIBLE "
+					+ "order by obj.id asc"),
+	@NamedQuery(name = "ResponsibleEntity.findByIdComplete", 
+	query = "select obj from ResponsibleEntity obj "
+			+ "left join fetch obj.pedestre p "
+			+ "where obj.id = :ID order by obj.id asc"),
 	@NamedQuery(name = "ResponsibleEntity.findAllResponsaveis",
 	query = "select obj from ResponsibleEntity obj "
 		  + "where (obj.removido = false or obj.removido is null) "
+		  + "order by obj.id asc"),
+	@NamedQuery(name = "ResponsibleEntity.findAllByNome",
+	query = "select obj from ResponsibleEntity obj "
+		  + "where obj.nome like :NOME "
+		  + " and (obj.removido = false or obj.removido is null) "
+		  + " and obj.status = 'ATIVO' "
+		  + " and obj.cliente.id = :ID_CLIENTE "
 		  + "order by obj.id asc")
 })
 public class ResponsibleEntity extends ClienteBaseEntity {
@@ -101,6 +113,8 @@ public class ResponsibleEntity extends ClienteBaseEntity {
 	
 	@Column(name="DESCRICAO", nullable=true, length=255)
 	private String descricao;
+	
+
 	
 	public ResponsibleEntity () {
 	}
@@ -190,6 +204,10 @@ public class ResponsibleEntity extends ClienteBaseEntity {
 		this.celular = celular;
 	}
 
+	public void setId(Long id) {
+		this.id = id;
+	}
+
 	public String getDescricao() {
 		return descricao;
 	}
@@ -198,8 +216,6 @@ public class ResponsibleEntity extends ClienteBaseEntity {
 		this.descricao = descricao;
 	}
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+
 
 }

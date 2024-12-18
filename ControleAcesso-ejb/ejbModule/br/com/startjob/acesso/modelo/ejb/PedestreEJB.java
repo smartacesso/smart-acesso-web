@@ -116,6 +116,10 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 
 				if (pedestre.getCargo() != null)
 					pedestre.getCargo();
+				
+				if(pedestre.getResponsavel() != null) {
+					pedestre.getResponsavel();
+				}
 			}
 
 			return pedestres;
