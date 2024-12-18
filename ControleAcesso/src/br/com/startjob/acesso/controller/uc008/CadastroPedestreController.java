@@ -14,6 +14,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -630,6 +631,10 @@ public class CadastroPedestreController extends CadastroBaseController {
 			pedestreRegra.setDataInicioPeriodo(pedestreRegra.getRegra().getDataInicioPeriodo());
 		if(pedestreRegra.getRegra().getDataFimPeriodo() != null)
 			pedestreRegra.setDataFimPeriodo(pedestreRegra.getRegra().getDataFimPeriodo());
+		
+		if(Objects.nonNull(pedestreRegra.getRegra().getHorarios()) && !pedestreRegra.getRegra().getHorarios().isEmpty()) {
+			pedestreRegra.setHorarios(pedestreRegra.getRegra().getHorarios());
+		}
 		
 		if(pedestreRegra.getRegra().getTipo().equals(TipoRegra.ACESSO_CREDITO)
 				&& pedestreRegra.getQtdeDeCreditos() == null) {

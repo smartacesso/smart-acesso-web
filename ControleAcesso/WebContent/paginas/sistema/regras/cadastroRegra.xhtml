@@ -266,6 +266,11 @@
 									<p:column headerText="#{msgs['label.uc006.horario.fim']}" style="text-align: center;">
 										<p:calendar value="#{horario.horarioFim}" timeOnly="true" pattern="HH:mm" mask="99:99" navigator="true"/>
 									</p:column>
+
+									<p:column headerText="#{msgs['label.uc008.qtde.creditos']}" style="text-align: center;">
+											<p:inputNumber id="qtdeCreditos" value="#{horario.qtdeDeCreditos}" 
+													minValue="0" decimalPlaces="0" size="6"/>
+									</p:column>
 							        
 							        <p:column headerText="#{msgs['alt.acao.excluir']}" style="text-align: center; width: 35px;">
 										<h:commandButton image="#{menuController.path}/tema/img/bt_remove_min.png" 
