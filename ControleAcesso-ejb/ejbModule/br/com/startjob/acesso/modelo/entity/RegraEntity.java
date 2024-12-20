@@ -139,7 +139,7 @@ public class RegraEntity extends ClienteBaseEntity {
 	@Column(name="DIAS_VALIDADE_CREDITO", nullable=true, length=10)
 	private Long diasValidadeCredito;
 	
-	@OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, 
+	@OneToMany(cascade=CascadeType.ALL, fetch=FetchType.EAGER, 
 			   orphanRemoval=false, targetEntity=HorarioEntity.class,
 			   mappedBy="regra")
 	@Fetch(FetchMode.SUBSELECT)

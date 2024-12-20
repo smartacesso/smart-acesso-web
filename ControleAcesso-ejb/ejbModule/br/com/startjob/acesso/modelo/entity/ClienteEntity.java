@@ -60,6 +60,11 @@ import br.com.startjob.acesso.modelo.enumeration.Status;
 					  + "join fetch obj.integracaoSenior i "
 					  + "where (obj.removido = false or obj.removido is null) "
 					  + "order by obj.id asc"),
+	@NamedQuery(name = "ClienteEntity.findComFilialTeknisa",
+				query = "select obj from ClienteEntity obj "
+					  + "where (obj.removido = false or obj.removido is null) "
+					  + "and obj.organizacaoTeknisa = :ORGANIZACAO_TEKNISA and obj.filialTeknisa = :FILIAL_TEKNISA "
+					  + "order by obj.id asc"),
 })
 @SuppressWarnings("serial")
 public class ClienteEntity extends BaseEntity {
@@ -115,6 +120,12 @@ public class ClienteEntity extends BaseEntity {
 	@OneToOne(cascade={CascadeType.ALL}, fetch=FetchType.LAZY)
 	@JoinColumn(name="ID_INTEGRACAO_SENIOR", nullable=true)
 	private IntegracaoSeniorEntity integracaoSenior;
+	
+	@Column(name="ORGANIZACAO_TEKNISA", nullable=true, length=60)
+	private String organizacaoTeknisa;
+	
+	@Column(name="FILIAL_TEKNISA", nullable=true, length=60)
+	private String filialTeknisa;
 
 	public String getNome() {
 		return nome;
@@ -199,6 +210,18 @@ public class ClienteEntity extends BaseEntity {
 	}
 	public void setIntegracaoSenior(IntegracaoSeniorEntity integracaoSenior) {
 		this.integracaoSenior = integracaoSenior;
+	}
+	public String getOrganizacaoTeknisa() {
+		return organizacaoTeknisa;
+	}
+	public void setOrganizacaoTeknisa(String organizacaoTeknisa) {
+		this.organizacaoTeknisa = organizacaoTeknisa;
+	}
+	public String getFilialTeknisa() {
+		return filialTeknisa;
+	}
+	public void setFilialTeknisa(String filialTeknisa) {
+		this.filialTeknisa = filialTeknisa;
 	}
 	
 }

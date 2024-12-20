@@ -1,5 +1,6 @@
 package br.com.startjob.acesso.to.teknisa;
 
+
 public class TeknisaToken {
 	private String nome;
 	private String senha;
@@ -24,5 +25,9 @@ public class TeknisaToken {
 	}
 	public void setClient(String client) {
 		this.client = client;
+	}
+	
+	public String toString() {
+		return "{'nome': '"+ nome + "', 'senha' : '"+ senha + "', 'client' : '"+ client +"' }";
 	}
 }

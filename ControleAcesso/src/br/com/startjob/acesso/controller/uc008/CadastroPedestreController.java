@@ -26,6 +26,7 @@ import javax.faces.model.SelectItem;
 import javax.faces.view.ViewScoped;
 import javax.imageio.stream.FileImageOutputStream;
 import javax.inject.Named;
+import javax.transaction.Transactional;
 
 import org.primefaces.PrimeFaces;
 import org.primefaces.event.CaptureEvent;
@@ -609,6 +610,7 @@ public class CadastroPedestreController extends CadastroBaseController {
 		
 		return;
 	}
+	
 	
 	public void adicionarRegra() {
 		for(PedestreRegraEntity p : listaPedestreRegra) {
