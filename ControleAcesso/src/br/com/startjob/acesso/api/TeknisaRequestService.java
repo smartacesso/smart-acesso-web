@@ -17,15 +17,12 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
 import br.com.startjob.acesso.modelo.ejb.BaseEJBRemote;
 import br.com.startjob.acesso.modelo.ejb.TeknisaEJBRemote;
 import br.com.startjob.acesso.modelo.entity.ClienteEntity;
 import br.com.startjob.acesso.modelo.to.TeknisaTO;
 import br.com.startjob.acesso.modelo.utils.CriptografiaAES;
-import br.com.startjob.acesso.to.teknisa.TeknisaToken;
+
 
 @SuppressWarnings("unchecked")
 @Path("/teknisa")
@@ -40,18 +37,6 @@ public class TeknisaRequestService extends BaseService {
 	private HttpServletResponse response;
 	
 	CriptografiaAES cript = new CriptografiaAES();
-	
-	@GET
-	@Path("/login")
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response login(@HeaderParam("nome") String nome, @HeaderParam("senha") String senha,
-			@HeaderParam("cliente") String cliente) {
-		
-		String token = encriptToken(nome, senha, cliente);
-		// converter em token
-		// com o cliente achado, fazer o de para no banco com a filial
-		return Response.status(Status.OK).entity(token).build();
-	}
 	
 	@GET
 	@Path("/access")
@@ -91,6 +76,20 @@ public class TeknisaRequestService extends BaseService {
 		List<TeknisaTO> acessos = teknisaRemote.findAccessByClientId(idCliente);
 		return Response.status(Status.OK).entity(acessos).build();
 	}
+}	
+	/*
+	 
+	@GET
+	@Path("/login")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response login(@HeaderParam("nome") String nome, @HeaderParam("senha") String senha,
+			@HeaderParam("cliente") String cliente) {
+		
+		String token = encriptToken(nome, senha, cliente);
+		// converter em token
+		// com o cliente achado, fazer o de para no banco com a filial
+		return Response.status(Status.OK).entity(token).build();
+	}
 	
 	private String encriptToken(final String nome, final String senha, final String cliente) {
 		//trocar nome por login
@@ -110,5 +109,6 @@ public class TeknisaRequestService extends BaseService {
 		TeknisaToken tokenResponse = gson.fromJson(tokenR, TeknisaToken.class); 
 		return tokenResponse;
 	}
+	}
+	*/
 
-}
