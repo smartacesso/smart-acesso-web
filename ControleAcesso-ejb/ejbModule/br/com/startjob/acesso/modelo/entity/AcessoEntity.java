@@ -142,6 +142,9 @@ public class AcessoEntity extends ClienteBaseEntity {
 	@Column(name="CARTAO_ACESSO_RECEBIDO", nullable=true, length=100)
 	private String cartaoAcessoRecebido;
 	
+	@Column(name="IS_SINCRONIZADO", nullable = true)
+	private Boolean isSincronizado;
+	
 	@Transient
 	private Long qtdePedestresHora;
 	
@@ -315,6 +318,14 @@ public class AcessoEntity extends ClienteBaseEntity {
 
 	public void setCartaoAcessoRecebido(String cartaoAcessoRecebido) {
 		this.cartaoAcessoRecebido = cartaoAcessoRecebido;
+	}
+
+	public Boolean getIsSincronizado() {
+		return isSincronizado;
+	}
+
+	public void setIsSincronizado(Boolean isSincronizado) {
+		this.isSincronizado = isSincronizado;
 	}
 	
 }

@@ -60,6 +60,10 @@ public class HorarioEntity extends BaseEntity {
 	@JoinColumn(name="ID_REGRA", nullable=true)
 	private RegraEntity regra;
 	
+	@ManyToOne(cascade={}, fetch=FetchType.LAZY)
+	@JoinColumn(name="ID_PEDESTRE_REGRA", nullable=true)
+	private PedestreRegraEntity pedestreRegra;
+	
 	@Column(name="DIAS_SEMANA", nullable=true, length=100)
 	private String diasSemana;
 	
@@ -70,6 +74,9 @@ public class HorarioEntity extends BaseEntity {
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name="HORARIO_FIM", nullable=true, length=11)
 	private Date horarioFim;
+	
+	@Column(name="QTDE_CREDITOS", nullable=true, length=10)
+	private Long qtdeDeCreditos;
 	
 	@Transient
 	private Boolean sunday;
@@ -206,6 +213,12 @@ public class HorarioEntity extends BaseEntity {
 		}
 		else
 			diasSemana = diasSemana.replaceAll(dia.toString(), "");
+	}
+	public Long getQtdeDeCreditos() {
+		return qtdeDeCreditos;
+	}
+	public void setQtdeDeCreditos(Long qtdeDeCreditos) {
+		this.qtdeDeCreditos = qtdeDeCreditos;
 	}
 
 }

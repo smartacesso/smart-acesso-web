@@ -14,6 +14,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -25,6 +26,7 @@ import javax.faces.model.SelectItem;
 import javax.faces.view.ViewScoped;
 import javax.imageio.stream.FileImageOutputStream;
 import javax.inject.Named;
+import javax.transaction.Transactional;
 
 import org.primefaces.PrimeFaces;
 import org.primefaces.event.CaptureEvent;
@@ -609,6 +611,7 @@ public class CadastroPedestreController extends CadastroBaseController {
 		return;
 	}
 	
+	
 	public void adicionarRegra() {
 		for(PedestreRegraEntity p : listaPedestreRegra) {
 			if(p.getDataRemovido() == null) {
@@ -630,6 +633,10 @@ public class CadastroPedestreController extends CadastroBaseController {
 			pedestreRegra.setDataInicioPeriodo(pedestreRegra.getRegra().getDataInicioPeriodo());
 		if(pedestreRegra.getRegra().getDataFimPeriodo() != null)
 			pedestreRegra.setDataFimPeriodo(pedestreRegra.getRegra().getDataFimPeriodo());
+		
+		if(Objects.nonNull(pedestreRegra.getRegra().getHorarios()) && !pedestreRegra.getRegra().getHorarios().isEmpty()) {
+			pedestreRegra.setHorarios(pedestreRegra.getRegra().getHorarios());
+		}
 		
 		if(pedestreRegra.getRegra().getTipo().equals(TipoRegra.ACESSO_CREDITO)
 				&& pedestreRegra.getQtdeDeCreditos() == null) {

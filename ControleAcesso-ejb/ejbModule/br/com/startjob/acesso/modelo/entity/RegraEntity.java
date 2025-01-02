@@ -54,6 +54,7 @@ import br.com.startjob.acesso.modelo.enumeration.TipoRegra;
 					  + "order by obj.id asc"),
 	@NamedQuery(name = "RegraEntity.findAllByNome",
 				query = "select obj from RegraEntity obj "
+					  + "left join fetch obj.horarios "
 					  + "where obj.nome like :NOME "
 					  + " and (obj.removido = false or obj.removido is null) "
 					  + " and obj.status = 'ATIVO' "
@@ -138,7 +139,7 @@ public class RegraEntity extends ClienteBaseEntity {
 	@Column(name="DIAS_VALIDADE_CREDITO", nullable=true, length=10)
 	private Long diasValidadeCredito;
 	
-	@OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, 
+	@OneToMany(cascade=CascadeType.ALL, fetch=FetchType.EAGER, 
 			   orphanRemoval=false, targetEntity=HorarioEntity.class,
 			   mappedBy="regra")
 	@Fetch(FetchMode.SUBSELECT)

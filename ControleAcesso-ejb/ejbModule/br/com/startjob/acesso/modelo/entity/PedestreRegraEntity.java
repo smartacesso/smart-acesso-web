@@ -1,7 +1,9 @@
 package br.com.startjob.acesso.modelo.entity;
 
 import java.util.Date;
+import java.util.List;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -12,9 +14,14 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
+import org.hibernate.annotations.Filter;
 
 import br.com.startjob.acesso.modelo.entity.base.BaseEntity;
 
@@ -79,6 +86,12 @@ public class PedestreRegraEntity extends BaseEntity {
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name="DATA_INICIO_ESCALA_3_3", nullable=true, length=11)
 	private Date dataInicioEscala3_3;
+	
+	@OneToMany(cascade=CascadeType.ALL, fetch=FetchType.LAZY, 
+			   orphanRemoval=false, targetEntity=HorarioEntity.class,
+			   mappedBy="pedestreRegra")
+	@Fetch(FetchMode.SUBSELECT)
+	private List<HorarioEntity> horarios;
 	
 	public Long getId() {
 		return id;
@@ -146,6 +159,12 @@ public class PedestreRegraEntity extends BaseEntity {
 	}
 	public void setDataInicioEscala3_3(Date dataInicioEscala3_3) {
 		this.dataInicioEscala3_3 = dataInicioEscala3_3;
+	}
+	public List<HorarioEntity> getHorarios() {
+		return horarios;
+	}
+	public void setHorarios(List<HorarioEntity> horarios) {
+		this.horarios = horarios;
 	}
 	
 }
