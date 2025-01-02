@@ -1,11 +1,10 @@
 package br.com.startjob.acesso.api;
 
 import java.awt.Graphics2D;
-import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -27,7 +26,7 @@ import br.com.startjob.acesso.modelo.ejb.PedestreEJBRemote;
 import br.com.startjob.acesso.to.PedestrianPhotoTO;
 
 /**
- * ServiÃ§o para atualizar lista de acesso de atletas nas catracas
+ * Serviço para atualizar lista de acesso de atletas nas catracas
  * 
  */
 @Path("/photo")
@@ -95,16 +94,15 @@ public class PhotoService extends BaseService {
 	@Path("/request")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response request(@QueryParam("ids")String ids,
+							@QueryParam("type")String tipo,
 							@QueryParam("resize")Boolean resize,
-							@QueryParam("imageSize")Integer imageSize,
-							@QueryParam("targetWidth")Integer targetWidth,
-							@QueryParam("targetHeight")Integer targetHeight) {
-
+							@QueryParam("imageSize")Integer imageSize) {
 		if(Objects.isNull(ids) || ids.isEmpty() || Objects.isNull(resize)) {
 			return Response.status(Status.BAD_REQUEST).entity(new ArrayList<>()).build();
 		}
 		
 		List<PedestrianPhotoTO> returnList = new ArrayList<>();
+		Status statusResponse = Status.NOT_FOUND;
 		
 		try {
 			List<Long> listaIds = new ArrayList<>();
@@ -119,48 +117,30 @@ public class PhotoService extends BaseService {
 			List<Object[]> list = (List<Object[]>) ((PedestreEJBRemote) 
 						getEjb("PedestreEJB")).buscaFotoListaPedestre(listaIds);
 			
-			if(Objects.isNull(list) || list.isEmpty()) {
-				Response.status(Status.NOT_FOUND).entity(returnList).build();
-			}
-			
-			for (Object[] objects : list) {
-				Long id = Long.valueOf(objects[0].toString());
-				byte[] fotoOriginal = (byte[]) objects[1];
-				String fotoBase64 = null;
-				if (fotoOriginal != null) {
-					byte[] bytes = getPhotoAsByteArray(fotoOriginal, resize, imageSize, targetWidth, targetHeight);
-					fotoBase64 = org.apache.commons.codec.binary.Base64.encodeBase64String(bytes);
+			if (list != null && !list.isEmpty()) {
+				for (Object[] objects : list) {
+					Long id = ((BigInteger) objects[0]).longValue();
+					byte[] fotoOriginal = (byte[]) objects[1];
+					String fotoBase64 = null;
+					if (fotoOriginal != null) {
+						byte[] bytes = resize ? resizeImage(fotoOriginal, imageSize) : fotoOriginal;
+						fotoBase64 = org.apache.commons.codec.binary.Base64.encodeBase64String(bytes);
+					}
+					PedestrianPhotoTO to = new PedestrianPhotoTO(id, fotoBase64);
+					returnList.add(to);
 				}
-				PedestrianPhotoTO to = new PedestrianPhotoTO(id, fotoBase64);
-				returnList.add(to);
+				statusResponse = Status.OK;
 			}
 
 		} catch(Exception e) {
-			Response.status(Status.INTERNAL_SERVER_ERROR).entity(returnList).build();
+			statusResponse = Status.INTERNAL_SERVER_ERROR;
 			e.printStackTrace();
 		}
 		
-		return Response.status(Status.OK).entity(returnList).build();
+		return Response.status(statusResponse).entity(returnList).build();
 	}
 	
-	private byte[] getPhotoAsByteArray(final byte[] fotoOriginal, final Boolean resize, final Integer imageSize, 
-			final Integer targetWidth, final Integer targetHeight) {
-		
-		if(Boolean.TRUE.equals(resize)
-				&& Objects.nonNull(targetWidth) 
-				&& Objects.nonNull(targetWidth)) {
-			return resizeImageScaledInstance(fotoOriginal, targetWidth, targetHeight);
-		}
-		
-		if(Boolean.TRUE.equals(resize)
-				&& Objects.nonNull(imageSize)) {
-			return resizeImage(fotoOriginal, imageSize);
-		}
-		
-		return fotoOriginal;
-	}
-
-	private byte[] resizeImage(byte[] originalBytes, Integer imageSize) {
+	private byte[] resizeImage(byte[] originalBytes, Integer imageSize){
 		try {
 			if (imageSize == null) {
 				imageSize = DEFAULT_IMG_SIZE;
@@ -174,30 +154,10 @@ public class PhotoService extends BaseService {
 			ByteArrayOutputStream bos = new ByteArrayOutputStream();
 			ImageIO.write(resizedImage, "jpg", bos);
 			return bos.toByteArray();
-		
-		} catch (Exception e) {
+		}
+		catch (Exception e){
 			e.printStackTrace();
 		}
-		return originalBytes;
-	}
-	
-	private byte[] resizeImageScaledInstance(byte[] originalBytes, final int targetWidth, final int targetHeight) {
-		try (ByteArrayInputStream originalImageInputStream = new ByteArrayInputStream(originalBytes);
-				ByteArrayOutputStream resizedImageOutputStream = new ByteArrayOutputStream();){
-			
-			final BufferedImage originalImage = ImageIO.read(originalImageInputStream);
-			final Image resultingImage = originalImage.getScaledInstance(targetWidth, targetHeight, Image.SCALE_DEFAULT);
-			final BufferedImage outputImage = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_RGB);
-			outputImage.getGraphics().drawImage(resultingImage, 0, 0, null);
-			
-			
-			ImageIO.write(outputImage, "jpg", resizedImageOutputStream);
-			return resizedImageOutputStream.toByteArray();
-			
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		
 		return originalBytes;
 	}
 

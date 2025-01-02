@@ -1,5 +1,6 @@
 package br.com.startjob.acesso.api;
 
+import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -131,11 +132,11 @@ public class DesktopApiService extends BaseService {
 			PedestrianAccessTO to = null;
 
 			for (Object[] objects : pedestreList) {
-				if (id != Long.valueOf(objects[0].toString())) {
+				if (id != ((BigInteger) objects[0]).longValue()) {
 					// cria um TO com os dados
 					to = new PedestrianAccessTO(objects, version);
 					pedestrianAccessList.add(to);
-					id = Long.valueOf(objects[0].toString());
+					id = ((BigInteger) objects[0]).longValue();
 
 				} else {
 					// atualiza dados do TO
@@ -480,7 +481,7 @@ public class DesktopApiService extends BaseService {
 			}
 
 			if (!logs.isEmpty()) {
-				sendLogs(logs);
+				getEjb("BaseEJB").saveRegisterLogs(logs);
 			}
 
 		} catch (Exception e) {
@@ -489,18 +490,6 @@ public class DesktopApiService extends BaseService {
 		}
 
 		return Response.status(statusResponse).entity("See status code.").build();
-	}
-	
-	private void sendLogs(final List<AcessoEntity> logs) {
-		for(AcessoEntity log : logs) {
-			try {
-				getEjb("BaseEJB").saveRegisterLogs(log);
-				
-			} catch (Exception e) {
-				System.out.println("Falha ao enviar log: id_pedestre: " + log.getIdPedestre());
-			}
-			
-		}
 	}
 
 	private String getLocation(JSONObject jsonObject) throws JSONException {
@@ -575,57 +564,53 @@ public class DesktopApiService extends BaseService {
 	@Produces(MediaType.TEXT_PLAIN)
 	@Consumes(MediaType.APPLICATION_JSON)
 	public Response saveBiometry(String parans) {
+
 		Status statusResponse = Status.OK;
+
+		// System.out.println("BIOMETRIA: " + parans);
 
 		try {
 			JSONArray jsonArray = new JSONArray(parans);
-			if (jsonArray.length() <= 0) {
-				return Response.status(Status.BAD_REQUEST).entity("See status code.").build();
+			if (jsonArray.length() > 0) {
+				for (int i = 0; i < jsonArray.length(); i++) {
+					JSONObject jsonObject = jsonArray.getJSONObject(i);
+					if (jsonObject != null && jsonObject.getLong("idUser") != 0
+							&& !jsonObject.getString("finger").isEmpty()
+							&& !jsonObject.getString("template").isEmpty()) {
+
+						// procura o usuário da biometria
+						PedestreEntity user = (PedestreEntity) getEjb("BaseEJB").recuperaObjeto(PedestreEntity.class,
+								jsonObject.getLong("idUser"));
+						if (user != null) {
+
+							if (user.getBiometrias() == null)
+								user.setBiometrias(new ArrayList<BiometriaEntity>());
+
+							// boolean fingerAlreadyCollected = false;
+							Dedo finger = Dedo.valueFromImport(jsonObject.getString("finger"));
+							byte[] template = Base64.decodeBase64(jsonObject.getString("template"));
+							byte[] sample = Base64.decodeBase64(
+									jsonObject.isNull("sample") ? "null" : jsonObject.getString("sample"));
+
+							BiometriaEntity b = (BiometriaEntity) getEjb("BaseEJB")
+									.gravaObjeto(new BiometriaEntity(user, finger, template, sample))[0];
+
+							// caso sucesso, atualiza data de alteração do pedestre/visitante
+							try {
+								getEjb("BaseEJB").updateDataAlteracao(PedestreEntity.class, new Date(), user.getId());
+							} catch (Exception e) {
+								e.printStackTrace();
+							}
+						}
+					}
+				}
+			} else {
+				statusResponse = Status.BAD_REQUEST;
 			}
-			
-			final BaseEJBRemote baseEjb = getEjb("BaseEJB");
-			
-			for (int i = 0; i < jsonArray.length(); i++) {
-				JSONObject jsonObject = jsonArray.getJSONObject(i);
-				
-				if(Objects.isNull(jsonObject)
-						|| jsonObject.getLong("idUser") == 0
-						|| jsonObject.getString("finger").isEmpty()
-						|| jsonObject.getString("template").isEmpty()) {
-					continue;
-				}
-
-				PedestreEntity user = (PedestreEntity) baseEjb.recuperaObjeto(PedestreEntity.class, jsonObject.getLong("idUser"));
-				
-				if(Objects.isNull(user)) {
-					continue;
-				}
-				
-				if (user.getBiometrias() == null) {
-					user.setBiometrias(new ArrayList<BiometriaEntity>());
-				}
-
-				// boolean fingerAlreadyCollected = false;
-				Dedo finger = Dedo.valueFromImport(jsonObject.getString("finger"));
-				byte[] template = Base64.decodeBase64(jsonObject.getString("template"));
-				byte[] sample = Base64.decodeBase64(
-						jsonObject.isNull("sample") ? "null" : jsonObject.getString("sample"));
-
-				baseEjb.gravaObjeto(new BiometriaEntity(user, finger, template, sample));
-
-				try {
-					baseEjb.updateDataAlteracao(PedestreEntity.class, new Date(), user.getId());
-				
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-
 		} catch (Exception e) {
 			statusResponse = Status.INTERNAL_SERVER_ERROR;
 			e.printStackTrace();
 		}
-		
 		return Response.status(statusResponse).entity("See status code.").build();
 	}
 
@@ -667,7 +652,7 @@ public class DesktopApiService extends BaseService {
 						Long idCliente = Long.parseLong(jsonObject.getString("idCliente"));
 						PedestreEntity pedestreExistente = null;
 
-						// tenta buscar por visitante jÃ¡ existente
+						// tenta buscar por visitante já existente
 						try {
 							Long idTempVisitante = Long.valueOf(jsonObject.getString("idTemp"));
 							pedestreExistente = buscaPedestrePorIdTemp(idTempVisitante, idCliente);
@@ -711,9 +696,8 @@ public class DesktopApiService extends BaseService {
 	}
 
 	private PedestreEntity buscaPedestrePorIdTemp(Long idTemp, Long idCliente) {
-		if (idTemp == null || idCliente == null) {
+		if (idTemp == null || idCliente == null)
 			return null;
-		}
 
 		Map<String, Object> args = new HashMap<>();
 		args.put("ID_TEMP", idTemp);
@@ -724,9 +708,8 @@ public class DesktopApiService extends BaseService {
 		try {
 			visitantes = (List<PedestreEntity>) getEjb("PedestreEJB").pesquisaArgFixos(PedestreEntity.class,
 					"findByIdTemp", args);
-			if (visitantes != null) {
+			if (visitantes != null)
 				return visitantes.stream().findFirst().orElse(null);
-			}
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -744,9 +727,8 @@ public class DesktopApiService extends BaseService {
 		try {
 			visitantes = (List<PedestreEntity>) getEjb("PedestreEJB").pesquisaArgFixos(PedestreEntity.class,
 					"findByIdComplete", args);
-			if (visitantes != null) {
+			if (visitantes != null)
 				return visitantes.stream().findFirst().orElse(null);
-			}
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -808,7 +790,7 @@ public class DesktopApiService extends BaseService {
 
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.out.println("Visitante nÃ£o possui regras.");
+			System.out.println("Visitante não possui regras.");
 		}
 	}
 
@@ -831,7 +813,7 @@ public class DesktopApiService extends BaseService {
 				}
 			}
 
-			// caso sucesso, atualiza data de alteraÃ§Ã£o do pedestre/visitante
+			// caso sucesso, atualiza data de alteração do pedestre/visitante
 			try {
 				getEjb("BaseEJB").updateDataAlteracao(PedestreEntity.class, new Date(), idPedestrian);
 			} catch (Exception e) {
@@ -865,7 +847,7 @@ public class DesktopApiService extends BaseService {
 
 			if (lista != null && !lista.isEmpty()) {
 
-				// monta de grava configuraÃ§Ãµes
+				// monta de grava configurações
 				ClienteEntity cliente = lista.get(0);
 				JSONObject jsonObject = new JSONObject(parans);
 				if (cliente.getConfiguracoesDesktop() == null)
@@ -888,7 +870,7 @@ public class DesktopApiService extends BaseService {
 
 					if (equipamentos != null && !equipamentos.isEmpty()) {
 
-						// novos e ediÃ§Ã£o
+						// novos e edição
 						for (DeviceTO d : devices) {
 							EquipamentoEntity eq = null;
 							for (EquipamentoEntity e : equipamentos) {
@@ -918,7 +900,8 @@ public class DesktopApiService extends BaseService {
 							}
 						}
 						// atualiza para excluir
-						equipamentos = (List<EquipamentoEntity>) baseEJB.pesquisaSimples(EquipamentoEntity.class, "findAll", args);
+						equipamentos = (List<EquipamentoEntity>) baseEJB.pesquisaSimples(EquipamentoEntity.class,
+								"findAll", args);
 
 						for (EquipamentoEntity e : equipamentos) {
 							boolean encontrou = false;
@@ -1010,7 +993,7 @@ public class DesktopApiService extends BaseService {
 				return Response.status(statusResponse).entity("See status code.").build();
 			}
 
-			// monta de grava configuraÃ§Ãµes
+			// monta de grava configurações
 			UsuarioEntity usuario = lista.get(0);
 			JSONObject jsonObject = new JSONObject(parans);
 			if (usuario.getConfiguracoesDesktop() == null) {
@@ -1183,13 +1166,12 @@ public class DesktopApiService extends BaseService {
 		try {
 			visitante.setGenero(Genero.valueOf(jsonObject.getString("genero")));
 		} catch (Exception e) {
-			// se nÃ£o tiver o campo, nÃ£o faz nada
+			// se não tiver o campo, não faz nada
 		}
 		visitante.setRg(jsonObject.getString("rg"));
 		visitante.setTelefone(jsonObject.getString("telefone"));
 		visitante.setCelular(jsonObject.getString("celular"));
 		visitante.setObservacoes(jsonObject.getString("observacoes"));
-		visitante.setResponsavel(jsonObject.getString("responsavel"));
 
 		// Dados da empresa
 		if (jsonObject.getString("idEmpresa") != null && !jsonObject.getString("idEmpresa").isEmpty())
@@ -1231,7 +1213,7 @@ public class DesktopApiService extends BaseService {
 		try {
 			visitante.setLuxandIdentifier(jsonObject.getString("luxandIdentifier"));
 		} catch (Exception e) {
-			/* se nÃ£o tiver o campo, nÃ£o faz nada */ }
+			/* se não tiver o campo, não faz nada */ }
 
 		try {
 			visitante.setQtdAcessoAntesSinc(Integer.valueOf(jsonObject.getString("qtdeAcessosAntesSinc")));

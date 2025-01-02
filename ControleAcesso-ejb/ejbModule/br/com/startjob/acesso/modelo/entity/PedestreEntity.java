@@ -50,11 +50,18 @@ import br.com.startjob.acesso.modelo.utils.EncryptionUtils;
 		@NamedQuery(name = "PedestreEntity.findById", query = "select obj from PedestreEntity obj "
 				+ "where obj.id = :ID order by obj.id asc"),
 		@NamedQuery(name = "PedestreEntity.findByIdComplete", query = "select obj from PedestreEntity obj "
-				+ " left join fetch obj.endereco en " + " left join fetch obj.empresa emp "
-				+ " left join fetch obj.departamento dep " + " left join fetch obj.centroCusto cec "
-				+ " left join fetch obj.cargo ca " + " left join fetch obj.cliente cli " + " left join obj.regras re "
-				+ " left join obj.equipamentos eq " + " left join obj.documentos doc "
-				+ " left join obj.biometrias bio " + " left join obj.mensagensPersonalizadas men "
+				+ " left join fetch obj.endereco en " 
+				+ " left join fetch obj.empresa emp "
+				+ " left join fetch obj.departamento dep " 
+				+ " left join fetch obj.centroCusto cec "
+				+ " left join fetch obj.cargo ca " 
+				+ " left join fetch obj.cliente cli " 
+				+ " left join obj.regras re "
+				+ " left join obj.equipamentos eq " 
+				+ " left join obj.documentos doc "
+				+ " left join obj.biometrias bio " 
+				+ " left join obj.mensagensPersonalizadas men "
+				+ " left join obj.responsavel res "
 				+ "where obj.id = :ID order by obj.id asc"),
 		@NamedQuery(name = "PedestreEntity.findAllComEmpresa", query = "select obj from PedestreEntity obj "
 				+ " left join fetch obj.empresa e " + "where (obj.removido = false or obj.removido is null) "
@@ -99,6 +106,7 @@ import br.com.startjob.acesso.modelo.utils.EncryptionUtils;
 							+ "and e.id = :ID_EMPRESA "
 							+ "and obj.cliente.id = :ID_CLIENTE ")
 })
+
 @SuppressWarnings("serial")
 public class PedestreEntity extends ClienteBaseEntity {
 
@@ -140,9 +148,6 @@ public class PedestreEntity extends ClienteBaseEntity {
 
 	@Column(name = "OBSERVACOES", nullable = true, length = 300)
 	private String observacoes;
-
-	@Column(name = "RESPONSAVEL", nullable = true, length = 1000)
-	private String responsavel;
 
 	@Enumerated(EnumType.STRING)
 	@Column(name = "TIPO_QRCODE", nullable = true, length = 100)
@@ -197,19 +202,19 @@ public class PedestreEntity extends ClienteBaseEntity {
 	@JoinColumn(name = "ID_ENDERECO", nullable = true)
 	private EnderecoEntity endereco;
 
-	@ManyToOne(cascade = {}, fetch = FetchType.LAZY)
+	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@JoinColumn(name = "ID_EMPRESA", nullable = true)
 	private EmpresaEntity empresa;
 
-	@ManyToOne(cascade = {}, fetch = FetchType.LAZY)
+	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@JoinColumn(name = "ID_DEPARTAMENTO", nullable = true)
 	private DepartamentoEntity departamento;
 
-	@ManyToOne(cascade = {}, fetch = FetchType.LAZY)
+	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@JoinColumn(name = "ID_CENTRO_CUSTO", nullable = true)
 	private CentroCustoEntity centroCusto;
 
-	@ManyToOne(cascade = {}, fetch = FetchType.LAZY)
+	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@JoinColumn(name = "ID_CARGO", nullable = true)
 	private CargoEntity cargo;
 
@@ -224,11 +229,11 @@ public class PedestreEntity extends ClienteBaseEntity {
 
 	@Column(name = "SENHA", nullable = true, length = 255)
 	private String senha;
-
+	
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name = "DATA_CADASTRO_FOTO_HIKIVISION", nullable = true, length = 30)
+	@Column(name="DATA_CADASTRO_FOTO_HIKIVISION", nullable=true, length=30)
 	private Date dataCadastroFotoNaHikivision;
-
+	
 	@Transient
 	private String senhaLivre;
 
@@ -266,6 +271,10 @@ public class PedestreEntity extends ClienteBaseEntity {
 	@Column(name = "CODIGO_PERMISSAO", nullable = true, length = 15)
 	private String codigoPermissao;
 
+	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+	@JoinColumn(name = "ID_RESPONSAVEL", nullable = true)
+	private ResponsibleEntity responsavel;
+
 	@Transient
 	private String token;
 
@@ -277,7 +286,6 @@ public class PedestreEntity extends ClienteBaseEntity {
 
 	@Transient
 	private CadastroExternoEntity facialAtual;
-
 
 
 	public PedestreEntity() {
@@ -335,6 +343,7 @@ public class PedestreEntity extends ClienteBaseEntity {
 		this.codigoPermissao = funcionarioSeniorDto.getCodPrm(); //codigo permissao
 		this.setDataAlteracao(new Date());
 	}
+
 
 	public String getAllPhonesFormatted() {
 		String tel = getTelefone();
@@ -438,14 +447,6 @@ public class PedestreEntity extends ClienteBaseEntity {
 
 	public void setObservacoes(String observacoes) {
 		this.observacoes = observacoes;
-	}
-
-	public String getResponsavel() {
-		return responsavel;
-	}
-
-	public void setResponsavel(String responsavel) {
-		this.responsavel = responsavel;
 	}
 
 	public byte[] getFoto() {
@@ -774,12 +775,22 @@ public class PedestreEntity extends ClienteBaseEntity {
 		this.dataCadastroFotoNaHikivision = dataCadastroFotoNaHikivision;
 	}
 
+
 	public String getCodigoPermissao() {
 		return codigoPermissao;
 	}
 
 	public void setCodigoPermissao(String codigoPermissao) {
 		this.codigoPermissao = codigoPermissao;
+	}
+
+	public ResponsibleEntity getResponsavel() {
+		return responsavel;
+	}
+
+	public void setResponsavel(ResponsibleEntity responsavel) {
+		this.responsavel = responsavel;
+
 	}
 	
 }

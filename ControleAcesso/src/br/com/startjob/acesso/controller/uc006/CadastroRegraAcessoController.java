@@ -2,7 +2,6 @@
 package br.com.startjob.acesso.controller.uc006;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -63,7 +62,6 @@ public class CadastroRegraAcessoController extends BaseController {
 			tipoRegra = regra.getTipo();
 			tipoPedestre = regra.getTipoPedestre();
 			listaHorarios = regra.getHorarios();
-			tipoPedestre = regra.getTipoPedestre();
 			
 			if(regra.getEmpresa() != null)
 				idEmpresaSelecionada = regra.getEmpresa().getId();
@@ -302,10 +300,11 @@ public class CadastroRegraAcessoController extends BaseController {
 	public void montaListaTipoRegra() {
 		listaTipoRegra = new ArrayList<SelectItem>();
 		listaTipoRegra.add(new SelectItem(null, "Selecione"));
-		
-		Arrays
-			.asList(TipoRegra.values())
-			.forEach(tipoRegra -> listaTipoRegra.add(new SelectItem(tipoRegra, tipoRegra.getDescricao())));
+		listaTipoRegra.add(new SelectItem(TipoRegra.ACESSO_UNICO, TipoRegra.ACESSO_UNICO.getDescricao()));
+		listaTipoRegra.add(new SelectItem(TipoRegra.ACESSO_CREDITO, TipoRegra.ACESSO_CREDITO.getDescricao()));
+		listaTipoRegra.add(new SelectItem(TipoRegra.ACESSO_ESCALA, TipoRegra.ACESSO_ESCALA.getDescricao()));
+		listaTipoRegra.add(new SelectItem(TipoRegra.ACESSO_HORARIO, TipoRegra.ACESSO_HORARIO.getDescricao()));
+		listaTipoRegra.add(new SelectItem(TipoRegra.ACESSO_PERIODO, TipoRegra.ACESSO_PERIODO.getDescricao()));
 	}
 	
 	public void eventoAlteraListaTipoRegra(ValueChangeEvent event) {

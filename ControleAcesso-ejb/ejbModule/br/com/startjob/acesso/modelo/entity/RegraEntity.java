@@ -114,11 +114,11 @@ public class RegraEntity extends ClienteBaseEntity {
 	@Column(name="DESCRICAO", nullable=true, length=255)
 	private String descricao;
 	
-	@Temporal(TemporalType.TIMESTAMP)
+	@Temporal(TemporalType.DATE)
 	@Column(name="DATA_INICIO_PERIODO", nullable=true, length=11)
 	private Date dataInicioPeriodo;
 	
-	@Temporal(TemporalType.TIMESTAMP)
+	@Temporal(TemporalType.DATE)
 	@Column(name="DATA_FIM_PERIODO", nullable=true, length=11)
 	private Date dataFimPeriodo;
 	
@@ -129,7 +129,7 @@ public class RegraEntity extends ClienteBaseEntity {
 	@Column(name="PERMITE_BLOQUEIO", nullable=true, length=30)
 	private Boolean permiteBloqueio;
 	
-	@Temporal(TemporalType.TIMESTAMP)
+	@Temporal(TemporalType.TIME)
 	@Column(name="HORARIO_INICIO_TURNO", nullable=true, length=11)
 	private Date horarioInicioTurno;
 	

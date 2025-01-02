@@ -165,9 +165,8 @@ public class MenuController extends BaseController {
 	private void criaMenuAdministracao() {
 		
 		if(!"smartponto".equals(usuarioLogado.getCliente().getNomeUnidadeOrganizacional())
-				&& !"startjob".equals(usuarioLogado.getCliente().getNomeUnidadeOrganizacional())) {
+				&& !"startjob".equals(usuarioLogado.getCliente().getNomeUnidadeOrganizacional()))
 			return;
-		}
 		
 		
 		DefaultSubMenu adm = DefaultSubMenu.builder()
@@ -307,6 +306,13 @@ public class MenuController extends BaseController {
                 .styleClass("ui-simple-menu")
                 .build();
         cadastros.getElements().add(visitantes);
+        
+        DefaultMenuItem responsaveis = DefaultMenuItem.builder()
+        		.value(resource.recuperaChave("menu.cadastro.responsavel", getFacesContext()))
+                .url(BaseConstant.URL_APLICACAO + "/paginas/sistema/responsaveis/pesquisaResponsavel.xhtml")
+                .styleClass("ui-simple-menu")
+                .build();
+        cadastros.getElements().add(responsaveis);
         
         //para admins ou gerentes
         if(PerfilAcesso.ADMINISTRADOR.equals(usuarioLogado.getPerfil()) 

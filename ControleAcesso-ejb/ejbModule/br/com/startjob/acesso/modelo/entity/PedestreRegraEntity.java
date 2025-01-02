@@ -75,11 +75,11 @@ public class PedestreRegraEntity extends BaseEntity {
 	@Column(name="BLOQUEADO", nullable=true, length=30)
 	private Boolean bloqueado;
 	
-	@Temporal(TemporalType.TIMESTAMP)
+	@Temporal(TemporalType.DATE)
 	@Column(name="DATA_INICIO_PERIODO", nullable=true, length=11)
 	private Date dataInicioPeriodo;
 	
-	@Temporal(TemporalType.TIMESTAMP)
+	@Temporal(TemporalType.DATE)
 	@Column(name="DATA_FIM_PERIODO", nullable=true, length=11)
 	private Date dataFimPeriodo;
 	
@@ -93,6 +93,7 @@ public class PedestreRegraEntity extends BaseEntity {
 	@Fetch(FetchMode.SUBSELECT)
 	private List<HorarioEntity> horarios;
 	
+
 	public Long getId() {
 		return id;
 	}
@@ -154,6 +155,7 @@ public class PedestreRegraEntity extends BaseEntity {
 		this.qtdeDeCreditos = qtdeTotalDeCreditos;
 		this.qtdeTotalDeCreditos = qtdeTotalDeCreditos;
 	}
+
 	public Date getDataInicioEscala3_3() {
 		return dataInicioEscala3_3;
 	}
@@ -166,5 +168,6 @@ public class PedestreRegraEntity extends BaseEntity {
 	public void setHorarios(List<HorarioEntity> horarios) {
 		this.horarios = horarios;
 	}
+
 	
 }

@@ -262,7 +262,7 @@
 							
 							<p:panelGrid columns="4" id="planos" style="width: 100%;">
 							
-								<h:outputText value="#{msgs['msg.nenhum.item.encontrato.adicionar']}" escape="false"
+								<h:outputText value="#{msgs['msg.nenhum.item.encontrado.adicionar']}" escape="false"
 											  rendered="#{empty cadastroClienteController.listaPlanos}" />
 							
 								<p:dataTable id="tablePlanos" value="#{cadastroClienteController.listaPlanos}" 
@@ -385,21 +385,21 @@
 								<p:column >
 									<p:outputLabel value="#{msgs['label.uc001.codigo.externo']}" for="codigoExterno" indicateRequired="false"/>
 									<br />
-									<p:inputText id="codigoExterno" value="#{cadastroClienteController.entidade.integracaoSoc.codigoExterno}" 
+									<p:inputText id="codigoExterno" value="#{cadastroClienteController.entidade.codigoExterno}" 
 												 required="false"/>
 								</p:column>
 								
 								<p:column >
 									<p:outputLabel value="#{msgs['label.uc001.usuario.externo']}" for="usuarioSoc" indicateRequired="false"/>
 									<br />
-									<p:inputText id="usuarioSoc" value="#{cadastroClienteController.entidade.integracaoSoc.usuarioSoc}" 
+									<p:inputText id="usuarioSoc" value="#{cadastroClienteController.entidade.usuarioSoc}" 
 												 required="false"/>
 								</p:column>
 								
 								<p:column >
 									<p:outputLabel value="#{msgs['label.uc001.senha.externo']}" for="senhaSoc" indicateRequired="false"/>
 									<br />
-									<p:inputText id="senhaSoc" value="#{cadastroClienteController.entidade.integracaoSoc.senhaSoc}" 
+									<p:inputText id="senhaSoc" value="#{cadastroClienteController.entidade.senhaSoc}" 
 												 required="false"/>
 								</p:column>
 								

@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
@@ -49,7 +48,7 @@ import br.com.startjob.acesso.utils.ResourceBundleUtils;
 
 
 /**
- * Classe base para os Controladores/ManagedBeans aplicaÃ§Ã£o.
+ * Classe base para os Controladores/ManagedBeans aplicação.
  * 
  * @author Gustavo Diniz
  * @since 01/02/2013
@@ -59,12 +58,12 @@ import br.com.startjob.acesso.utils.ResourceBundleUtils;
 public abstract class BaseController implements Serializable {
 	
 	/**
-	 * Quantidade padrÃ£o de registros que serÃ£o apresentados na tela de pesquisa
+	 * Quantidade padrão de registros que serão apresentados na tela de pesquisa
 	 */
 	protected static final Integer QUANTIDADE_REGISTROS_PADRAO = new Integer(10);
 
 	/**
-	 * Sufixo das telas de operaÃ§Ãµes
+	 * Sufixo das telas de operações
 	 */
 	protected static final String SUFIXO_TELAS_OPERACAO = "Oper";
 	
@@ -75,7 +74,7 @@ public abstract class BaseController implements Serializable {
 	private String funcionalidade;
 	
 	/**
-	 * Entidade padrÃ£o do ManagedBean
+	 * Entidade padrão do ManagedBean
 	 */
 	private BaseEntity entidade;
 
@@ -91,7 +90,7 @@ public abstract class BaseController implements Serializable {
 	private Map<String, Object> parans;
 	
 	/**
-	 * Map com ordenaÃ§Ã£o da pesquisa
+	 * Map com ordenação da pesquisa
 	 */
 	private Map<String, String> orders;
 
@@ -101,7 +100,7 @@ public abstract class BaseController implements Serializable {
 	private List<BaseEntity> result;
 	
 	/**
-	 * NamedQuery padrÃ£o para uso nas pesquisas
+	 * NamedQuery padrão para uso nas pesquisas
 	 */
 	private String namedQueryPesquisa;
 
@@ -111,7 +110,7 @@ public abstract class BaseController implements Serializable {
 	private Integer quantPorPagina = QUANTIDADE_REGISTROS_PADRAO;
 	
 	/**
-	 * Exibe mensagem padrÃ£o para o caso de uso.
+	 * Exibe mensagem padrão para o caso de uso.
 	 */
 	private boolean exibeMensagensPadrao = true;
 	
@@ -121,13 +120,13 @@ public abstract class BaseController implements Serializable {
 	private Object [] listaFilhosExclusao;
 	
 	/**
-	 * EJB para tarefas bÃ¡sicas
+	 * EJB para tarefas básicas
 	 */
 	@EJB
 	protected BaseEJBRemote baseEJB;
 	
 	/**
-	 * Query para ediÃ§Ã£o dos dados
+	 * Query para edição dos dados
 	 */
 	protected String queryEdicao;
 	
@@ -149,9 +148,9 @@ public abstract class BaseController implements Serializable {
 	
 	/**
 	 * 
-	 * Construtor para configuraÃ§Ã£o do Caso de Uso.
-	 * Os dados fornecidos para esse construtor vÃ£o ser usados
-	 * para processamento de um fluxo padrÃ£o de aÃ§Ãµes como CRUD's.
+	 * Construtor para configuração do Caso de Uso.
+	 * Os dados fornecidos para esse construtor vão ser usados
+	 * para processamento de um fluxo padrão de ações como CRUD's.
 	 *
 	 * @author: Gustavo Diniz
 	 * 
@@ -165,12 +164,12 @@ public abstract class BaseController implements Serializable {
 			//System.out.println(this.getClass().getName());
 			
 			/*
-			 * Configura "Caso de Uso" pela anotaÃ§Ã£o
+			 * Configura "Caso de Uso" pela anotação
 			 */
 			confCasoUso = this.getClass().getAnnotation(
 					UseCase.class);
 			if (confCasoUso != null) {
-				// seta atritutos necessÃ¡rios
+				// seta atritutos necessários
 				this.classEntidade = confCasoUso.classEntidade();
 				this.quantPorPagina = confCasoUso.quantPorPagina();
 				this.namedQueryPesquisa = confCasoUso.namedQueryPesquisa();
@@ -183,7 +182,7 @@ public abstract class BaseController implements Serializable {
 				this.parans = new HashMap<String, Object>();
 				
 			} else {
-				// nÃ£o deixa entidade nula
+				// não deixa entidade nula
 				this.entidade = new BaseEntity();
 			}
 		
@@ -211,7 +210,7 @@ public abstract class BaseController implements Serializable {
 			montaTourAjuda(this.funcionalidade);
 
 		} catch (Exception e) {
-			mensagemFatal("", "#Erro na configuraÃ§Ã£o do ManagedBean "
+			mensagemFatal("", "#Erro na configuração do ManagedBean "
 					+ this.getClass().getName() + ": " + e.getMessage());
 			e.printStackTrace();
 		}
@@ -224,7 +223,7 @@ public abstract class BaseController implements Serializable {
 			String id = getRequest().getParameter("id");
 			
 			if(id != null) {
-				//recupera registro para ediÃ§Ã£o usando o id
+				//recupera registro para edição usando o id
 				if(queryEdicao != null && !"".equals(queryEdicao)){
 					Map<String, Object> args = new HashMap<String, Object>();
 					args.put("ID", Long.valueOf(id));
@@ -264,7 +263,7 @@ public abstract class BaseController implements Serializable {
 	 * Salva entidade presente no atributo "entidade" e executa outras tarefas de salvamento. 
 	 * 
 	 * @author: Gustavo Diniz 
-	 * @return navegaÃ§Ã£o
+	 * @return navegação
 	 */
 	public String salvar() {
 
@@ -316,7 +315,7 @@ public abstract class BaseController implements Serializable {
 							// se mensagem for de sucesso
 							mensagemInfo("", msg);
 						} else {
-							// senÃ£o Ã© de erro
+							// senão é de erro
 							mensagemFatal("", msg);
 							retornoStr = "e";
 						}
@@ -372,7 +371,7 @@ public abstract class BaseController implements Serializable {
 			
 		}
 		
-		//roda carbage collector para nÃ£o deixar lixo para traz
+		//roda carbage collector para não deixar lixo para traz
 		
 
 		return retornoStr;
@@ -382,14 +381,14 @@ public abstract class BaseController implements Serializable {
 	/**
 	 * 
 	 * Preenche lista "result" com a classe definida em "classeEntidade".
-	 * Busca com paginaÃ§Ã£o e sem paginaÃ§Ã£o.
+	 * Busca com paginação e sem paginação.
 	 *
 	 * @author: Gustavo Diniz
-	 * @return navegaÃ§Ã£o
+	 * @return navegação
 	 */
 	public String buscar() {
 		
-		//salva parametros na sessÃ£o
+		//salva parametros na sessão
 		parametrosSessao();
 		
 		if(confCasoUso.lazyLoad()){
@@ -411,7 +410,7 @@ public abstract class BaseController implements Serializable {
 //			orders = new LinkedHashMap<String, String>();
 //		orders.put(sort.getColumnName(), 
 //				"asc".equals(orders.get(sort.getColumnName())) ? "desc" : "asc" );
-//		//reorganiza para nova ordenaÃ§Ã£o
+//		//reorganiza para nova ordenação
 //		List<String> keys = new ArrayList<String>();
 //		for (String key : orders.keySet()) {
 //			if(!key.equals(sort.getColumnName()))
@@ -427,7 +426,7 @@ public abstract class BaseController implements Serializable {
 //	}
 
 	/**
-	 * Organiza parametros na sessÃ£o do usuÃ¡rio.
+	 * Organiza parametros na sessão do usuário.
 	 */
 	protected void parametrosSessao() {
 		if(getParans() != null 
@@ -483,10 +482,10 @@ public abstract class BaseController implements Serializable {
 	/**
 	 * 
 	 * Preenche lista "result" com a classe definida em "classeEntidade".
-	 * Busca com paginaÃ§Ã£o e sem paginaÃ§Ã£o.
+	 * Busca com paginação e sem paginação.
 	 *
 	 * @author: Gustavo Diniz
-	 * @return navegaÃ§Ã£o
+	 * @return navegação
 	 */
 	@SuppressWarnings("unchecked")
 	public String buscarPaginado() {
@@ -515,19 +514,18 @@ public abstract class BaseController implements Serializable {
 	 * Prepara argumentos para pesquisa
 	 */
 	private void preparaArgumentos() {
+		
 		if(parans.containsKey("id") 
 				&& parans.get("id") != null
-				&& (parans.get("id") instanceof BigDecimal || parans.get("id") instanceof BigInteger)) {
-			parans.put("id", Long.valueOf(parans.get("id").toString()));
-		}
-		
-		
+				&& parans.get("id") instanceof BigDecimal){
+			parans.put("id", Long.valueOf(((BigDecimal)parans.get("id")).longValue()));
+		}	
 	}
 
 	/**
 	 * 
-	 * Verifica se a tela de operaÃ§Ãµes serÃ¡ exibida no modo de ediÃ§Ã£o
-	 * ou no modo de adiÃ§Ã£o.
+	 * Verifica se a tela de operações será exibida no modo de edição
+	 * ou no modo de adição.
 	 *
 	 * @author: Gustavo Diniz
 	 * @param event evento da tela
@@ -543,7 +541,7 @@ public abstract class BaseController implements Serializable {
 				entidade = (BaseEntity) classEntidade.newInstance();
 				entidade.setExistente(Boolean.FALSE);
 			} else {
-				// ediÃ§Ã£o do registro jÃ¡ existente
+				// edição do registro já existente
 				entidade = (BaseEntity) baseEJB.recuperaObjeto(
 						classEntidade, id);
 				entidade.setExistente(true);
@@ -560,20 +558,20 @@ public abstract class BaseController implements Serializable {
 
 	/**
 	 * 
-	 * DescriÃ§Ã£o: Exclui objeto presente no atributo "entidade"
-	 * Projeto/RequisiÃ§Ã£o: MESFlorestal/Arquitetura
+	 * Descrição: Exclui objeto presente no atributo "entidade"
+	 * Projeto/Requisição: MESFlorestal/Arquitetura
 	 *
 	 * @author: Gustavo Diniz
 	 * Fornecedor: Stefanini IT Solutions
-	 * Data alteraÃ§Ã£o: 28/02/2012
+	 * Data alteração: 28/02/2012
 	 * @param id - Id da entidade
-	 * @return navegaÃ§Ã£o
+	 * @return navegação
 	 */
 	public String excluir(Object id) {
 
 		try {
 			if (id != null) {
-				// ediÃ§Ã£o do registro jÃ¡ existente
+				// edição do registro já existente
 				entidade = baseEJB.recuperaObjeto(classEntidade, id);
 				entidade.setExistente(true);
 			}
@@ -581,7 +579,7 @@ public abstract class BaseController implements Serializable {
 			
 			if(confCasoUso.logicalRemove()) {
 				
-				//exclusÃ£o lÃ³gica
+				//exclusão lógica
 				entidade.setRemovido(true);
 				entidade.setDataRemovido(new Date());
 				
@@ -612,7 +610,7 @@ public abstract class BaseController implements Serializable {
 				// se mensagem for de sucesso
 				mensagemInfo("", msg);
 			} else {
-				// senÃ£o Ã© de erro
+				// senão é de erro
 				mensagemFatal("", msg);
 			}
 			
@@ -654,7 +652,7 @@ public abstract class BaseController implements Serializable {
 	 *
 	 * @author: Gustavo Diniz 
 	 * @param exclui - se "true" retira item da lista
-	 * @param atualiza - objeto para atualizaÃ§Ã£o
+	 * @param atualiza - objeto para atualização
 	 */
 	@SuppressWarnings("rawtypes")
 	protected void atualizaListaResultados(BaseEntity atualiza, boolean exclui) {
@@ -663,7 +661,7 @@ public abstract class BaseController implements Serializable {
 			//atualiza buscando novamente os dados
 			buscar();
 		}else{
-			//atualiza retirando o dado especÃ­fico da lista
+			//atualiza retirando o dado específico da lista
 			if (result != null && !result.isEmpty()) {
 				for (Iterator iter = result.iterator(); iter.hasNext();) {
 					BaseEntity entity = (BaseEntity) iter.next();
@@ -681,14 +679,14 @@ public abstract class BaseController implements Serializable {
 
 	/**
 	 * 
-	 * DescriÃ§Ã£o: Limpa tela por completo (o comportamento de limpa Ã© novo Ã©
+	 * Descrição: Limpa tela por completo (o comportamento de limpa é novo é
 	 * 			  considerado o mesmo)
-	 * Projeto/RequisiÃ§Ã£o: MESFlorestal/Arquitetura
+	 * Projeto/Requisição: MESFlorestal/Arquitetura
 	 *
 	 * @author: Gustavo Diniz
 	 * Fornecedor: Stefanini IT Solutions
-	 * Data alteraÃ§Ã£o: 28/02/2012
-	 * @return navegaÃ§Ã£o
+	 * Data alteração: 28/02/2012
+	 * @return navegação
 	 */
 	public String limpar() {
 
@@ -700,7 +698,7 @@ public abstract class BaseController implements Serializable {
 				parans = new HashMap<String, Object>();
 				setSessioAtrribute("parans_"+funcionalidade, null);
 			} else {
-				//limpa telas de operaÃ§Ã£o
+				//limpa telas de operação
 				entidade = (BaseEntity) classEntidade.newInstance();
 			}
 
@@ -717,7 +715,7 @@ public abstract class BaseController implements Serializable {
 	 * Imprimi tela em PDF
 	 *
 	 * @author: Gustavo Diniz
-	 * @return navegaÃ§Ã£o
+	 * @return navegação
 	 * @throws Exception - e 
 	 */
 	public String imprimirPdf() throws Exception {
@@ -740,7 +738,7 @@ public abstract class BaseController implements Serializable {
 	 * Imprimi tela em Excel
 	 *
 	 * @author: Gustavo Diniz
-	 * @return navegaÃ§Ã£o
+	 * @return navegação
 	 * @throws IOException - e 
 	 */
 	public String imprimirExcel() throws IOException {
@@ -760,7 +758,7 @@ public abstract class BaseController implements Serializable {
 	
 	/**
 	 * 
-	 * Retorna request da aplicaÃ§Ã£o
+	 * Retorna request da aplicação
 	 *
 	 * @author: Gustavo Diniz
 	 * @return request
@@ -775,7 +773,7 @@ public abstract class BaseController implements Serializable {
 	
 	/**
 	 * 
-	 * Retorna request da aplicaÃ§Ã£o
+	 * Retorna request da aplicação
 	 *
 	 * @author: Gustavo Diniz
 	 * @return request
@@ -825,7 +823,7 @@ public abstract class BaseController implements Serializable {
 	
 	/**
 	 * 
-	 * LanÃ§a mensagem de erro fatal do JSF
+	 * Lança mensagem de erro fatal do JSF
 	 *
 	 * @author: Gustavo Diniz
 	 * @param campo - campo
@@ -837,7 +835,7 @@ public abstract class BaseController implements Serializable {
 
 	/**
 	 * 
-	 * DescriÃ§Ã£o: LanÃ§a mensagem de informacao do JSF
+	 * Descrição: Lança mensagem de informacao do JSF
 	 *
 	 * @author: Gustavo Diniz
 	 * @param campo - campo
@@ -849,7 +847,7 @@ public abstract class BaseController implements Serializable {
 	
 	/**
 	 * 
-	 * DescriÃ§Ã£o: LanÃ§a mensagem de erro do JSF
+	 * Descrição: Lança mensagem de erro do JSF
 	 *
 	 * @author: Gustavo Diniz
 	 * @param campo - campo
@@ -861,7 +859,7 @@ public abstract class BaseController implements Serializable {
 	
 	/**
 	 * 
-	 * DescriÃ§Ã£o: LanÃ§a mensagem de erro do JSF
+	 * Descrição: Lança mensagem de erro do JSF
 	 *
 	 * @author: Gustavo Diniz
 	 * @param key - chave
@@ -873,7 +871,7 @@ public abstract class BaseController implements Serializable {
 	
 	/**
 	 * 
-	 * DescriÃ§Ã£o: LanÃ§a mensagem de erro do JSF
+	 * Descrição: Lança mensagem de erro do JSF
 	 *
 	 * @author: Gustavo Diniz
 	 * @param key - chave
@@ -889,7 +887,7 @@ public abstract class BaseController implements Serializable {
 
 	/**
 	 * 
-	 * DescriÃ§Ã£o: LanÃ§a mensagem
+	 * Descrição: Lança mensagem
 	 *
 	 * @author: Gustavo Diniz
 	 * @param campo - campo
@@ -937,7 +935,7 @@ public abstract class BaseController implements Serializable {
 
 	/**
 	 * 
-	 * DescriÃ§Ã£o: Retorna parametro do facesContext
+	 * Descrição: Retorna parametro do facesContext
 	 *
 	 * @author: Gustavo Diniz
 	 * @param fc - faces context atual
@@ -958,8 +956,8 @@ public abstract class BaseController implements Serializable {
 	 * 
 	 * @author: Gustavo Diniz
 	 * @param entitys  - Lista de objetos a ser convertida
-	 * @param nomeValue - nome do atributo que serÃ¡ o value
-	 * @param nomeLabel - nome do atributo que serÃ¡ o label
+	 * @param nomeValue - nome do atributo que será o value
+	 * @param nomeLabel - nome do atributo que será o label
 	 * @return List - List<SelectItem>
 	 */
 	@SuppressWarnings("rawtypes")
@@ -1004,8 +1002,8 @@ public abstract class BaseController implements Serializable {
 	 * 
 	 * @author: Gustavo Diniz
 	 * @param entitys - Lista de objetos a ser convertida
-	 * @param nomeValue - nome do atributo que serÃ¡ o value
-	 * @param nomeLabel - array nome do atributo que serÃ¡ o label
+	 * @param nomeValue - nome do atributo que será o value
+	 * @param nomeLabel - array nome do atributo que será o label
 	 * @return List - List<SelectItem>
 	 */
 	@SuppressWarnings("rawtypes")
@@ -1054,7 +1052,7 @@ public abstract class BaseController implements Serializable {
 	
 	/**
 	 * 
-	 * DescriÃ§Ã£o: Seta atributo na sessÃ£o Projeto/RequisiÃ§Ã£o:
+	 * Descrição: Seta atributo na sessão Projeto/Requisição:
 	 * 
 	 * @author: Gustavo Diniz 
 	 * @param nome - nome do atributo
@@ -1066,7 +1064,7 @@ public abstract class BaseController implements Serializable {
 
 	/**
 	 * 
-	 * DescriÃ§Ã£o: Retorna atributo na sessÃ£o
+	 * Descrição: Retorna atributo na sessão
 	 *
 	 * @author: Gustavo Diniz
 	 * @param nome - nome do atributo
@@ -1077,7 +1075,7 @@ public abstract class BaseController implements Serializable {
 	}
 	
 	/**
-	 * DescriÃ§Ã£o: Seta atributo no request
+	 * Descrição: Seta atributo no request
 	 *
 	 * @author: Gustavo Diniz
 	 * @param nome - nome do atributo
@@ -1102,7 +1100,7 @@ public abstract class BaseController implements Serializable {
 	 * @throws 
 	 */
 	public void novo() throws Exception{
-		//createLogUserAction("MÃ©todo: BaseController.novo /");
+		//createLogUserAction("Método: BaseController.novo /");
 		
 		if(urlNovoRegistro != null 
 				&& !"".equals(urlNovoRegistro)){
@@ -1145,7 +1143,7 @@ public abstract class BaseController implements Serializable {
 	}
 	
 	/**
-	 * Retorna usuÃ¡rio logado 
+	 * Retorna usuário logado 
 	 * 
 	 * @return
 	 */
@@ -1160,7 +1158,7 @@ public abstract class BaseController implements Serializable {
 	}
 
 	/**
-	 * Retorna URL que a aplicaÃ§Ã£o esta rodando
+	 * Retorna URL que a aplicação esta rodando
 	 * 
 	 * @return
 	 */
@@ -1185,7 +1183,7 @@ public abstract class BaseController implements Serializable {
 	
 	public void verificaTipoAcesso() {
 		
-		//verifica se Ã© mobile ou desktop
+		//verifica se é mobile ou desktop
 		if(getRequest() != null && getRequest().getHeaderNames() != null){
 			if(getRequest().getHeader("user-agent").toUpperCase().contains("ANDROID") 
 					|| getRequest().getHeader("user-agent").toUpperCase().contains("IOS")
@@ -1405,7 +1403,7 @@ public abstract class BaseController implements Serializable {
 
 	public Boolean getMobile() {
 		
-		//verifica se Ã© mobile ou desktop
+		//verifica se é mobile ou desktop
 		if(getRequest() != null && getRequest().getHeaderNames() != null){
 			if(getRequest().getHeader("user-agent").toUpperCase().contains("ANDROID") 
 					|| getRequest().getHeader("user-agent").toUpperCase().contains("IOS")

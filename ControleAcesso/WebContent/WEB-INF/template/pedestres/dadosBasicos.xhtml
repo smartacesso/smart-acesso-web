@@ -75,13 +75,7 @@
 			<p:inputTextarea id="observacoes" value="#{cadastroPedestreController.entidade.observacoes}" cols="50" rows="4" maxlength="300"
 					required="#{cadastroPedestreController.verificaObrigatorio('observacoes')}"/>
 		</p:column>
-		
-		<p:column>
-			<p:outputLabel value="#{msgs['label.uc008.responsavel']}" for="responsavel"/>
-			<br />
-			<p:inputText id="responsavel" value="#{cadastroPedestreController.entidade.responsavel}" size="40" 
-					required="#{cadastroPedestreController.verificaObrigatorio('responsavel')}"/>
-		</p:column>
+	
 		
 		<h:outputText value="#{msgs['label.uc001.dados.empresa']}" style="font-weight: bold; font-size: 15px"/>
 		

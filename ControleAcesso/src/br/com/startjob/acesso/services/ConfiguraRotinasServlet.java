@@ -40,7 +40,6 @@ public class ConfiguraRotinasServlet extends BaseServlet {
 		log.info("Registra rotinas recorrentes...");
 
 		registraTimersParaSOC();
-		registraTimersParaSenior();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -86,7 +85,6 @@ public class ConfiguraRotinasServlet extends BaseServlet {
 		ActivatedTasks.getInstancia().timers.put("exportacaoSOC_cliente", timer);
 	}
 	
-	
 	@SuppressWarnings("unchecked")
 	private void registraTimersParaSenior() {
 	    log.info("Registra Integração Senior");
@@ -110,6 +108,7 @@ public class ConfiguraRotinasServlet extends BaseServlet {
 	}
 
 	
+
 	private Calendar getInicio(final String hourOfDay) {
 		Calendar inicio = Calendar.getInstance();
 		inicio.set(Calendar.DAY_OF_MONTH, inicio.get(Calendar.DAY_OF_MONTH) + 1);

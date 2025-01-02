@@ -24,7 +24,6 @@ public final class EncryptionUtils {
 	 * @throws UnsupportedEncodingException
 	 */
 	public static String encrypt(String value) throws NoSuchAlgorithmException, UnsupportedEncodingException{
-		
 		MessageDigest algorithm = MessageDigest.getInstance("SHA-256");
 		byte messageDigest[] = algorithm.digest(value.getBytes("UTF-8"));
 		 
@@ -34,7 +33,6 @@ public final class EncryptionUtils {
 		}
 		
 		return hexString.toString();
-		
 	}
 	
 	/**

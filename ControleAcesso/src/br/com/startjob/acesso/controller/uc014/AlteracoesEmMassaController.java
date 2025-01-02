@@ -247,7 +247,6 @@ public class AlteracoesEmMassaController extends BaseController{
 		listaTipoRegra.add(new SelectItem(TipoRegra.ACESSO_HORARIO, TipoRegra.ACESSO_HORARIO.getDescricao()));
 		listaTipoRegra.add(new SelectItem(TipoRegra.ACESSO_PERIODO, TipoRegra.ACESSO_PERIODO.getDescricao()));
 		listaTipoRegra.add(new SelectItem(TipoRegra.ACESSO_UNICO, TipoRegra.ACESSO_UNICO.getDescricao()));
-		listaTipoRegra.add(new SelectItem(TipoRegra.ACESSO_ESCALA_3_3, TipoRegra.ACESSO_ESCALA_3_3.getDescricao()));
 	}
 
 	public List<SelectItem> getListaEmpresas() {

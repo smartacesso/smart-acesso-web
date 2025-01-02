@@ -7,7 +7,7 @@ public enum TipoRegra {
 	ACESSO_ESCALA("Acesso por turno/escala"),
 	ACESSO_CREDITO("Acesso via crédito"),
 	ACESSO_UNICO("Acesso único"),
-	ACESSO_ESCALA_3_3("Acesso escala 3/3 3/3");
+	ACESSO_ESCALA_3_3("Acesso escala 3/3");
 	
 	private String descricao;
 	

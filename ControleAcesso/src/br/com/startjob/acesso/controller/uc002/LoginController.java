@@ -17,8 +17,6 @@ import javax.inject.Named;
 
 import org.primefaces.PrimeFaces;
 
-
-
 import br.com.startjob.acesso.controller.BaseController;
 import br.com.startjob.acesso.modelo.BaseConstant;
 import br.com.startjob.acesso.modelo.ejb.LoginEJBRemote;
@@ -62,6 +60,7 @@ public class LoginController extends BaseController {
 	public void login() {
 		
 		try {
+
 			UsuarioEntity u = loginEJB.validaUsuario(unidadeOrganizacional, usuario, EncryptionUtils.encrypt(senha),
 					BaseConstant.ACCESS_TYPES.WEB,
 					getDeviceType(getRequest()));
@@ -71,7 +70,6 @@ public class LoginController extends BaseController {
 				
 				//verifica se está na estrutura principal
 				//ou em outro servidor
-
 				String urlAtual = getRequest().getRemoteHost();
 				System.out.println(urlAtual);
 //				if(AppAmbienteUtils.isProdution() 
@@ -110,7 +108,6 @@ public class LoginController extends BaseController {
 				redirect("/paginas/principal.xhtml");
 				
 			} else {
-				
 				mensagemFatal("", "msg.usuario.nao.entrado");
 			}
 			

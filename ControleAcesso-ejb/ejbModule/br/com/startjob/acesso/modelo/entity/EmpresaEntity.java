@@ -66,13 +66,7 @@ import br.com.startjob.acesso.modelo.enumeration.Status;
 				query = "select obj from EmpresaEntity obj "
 					  + "where obj.cliente.id = :ID_CLIENTE "
 					  + "and obj.dataAlteracao >= :LAST_SYNC "
-					  + "order by obj.id asc"),
-	@NamedQuery(name = "EmpresaEntity.findByCodSeniorAndIdCliente",
-				query = "select obj from EmpresaEntity obj "
-						+ "left join fetch obj.cliente c "
-						+ "where obj.codEmpresaSenior = :COD_EMPRESA_SENIOR "
-						+ "and obj.cliente.id = :ID_CLIENTE "
-						+ "order by obj.id asc")
+					  + "order by obj.id asc")
 })
 @SuppressWarnings("serial")
 public class EmpresaEntity extends ClienteBaseEntity {
@@ -224,15 +218,18 @@ public class EmpresaEntity extends ClienteBaseEntity {
 	public void setCodigoExterno(String codigoExterno) {
 		this.codigoExterno = codigoExterno;
 	}
+	
 	public Boolean getPrimeiroImportacaoFuncionarioSeniorSucesso() {
 		return primeiroImportacaoFuncionarioSeniorSucesso;
 	}
 	public void setPrimeiroImportacaoFuncionarioSeniorSucesso(Boolean primeiroImportacaoFuncionarioSeniorSucesso) {
 		this.primeiroImportacaoFuncionarioSeniorSucesso = primeiroImportacaoFuncionarioSeniorSucesso;
 	}
+
 	public String getCodEmpresaSenior() {
 		return codEmpresaSenior;
 	}
+
 	public void setCodEmpresaSenior(String codEmpresaSenior) {
 		this.codEmpresaSenior = codEmpresaSenior;
 	}

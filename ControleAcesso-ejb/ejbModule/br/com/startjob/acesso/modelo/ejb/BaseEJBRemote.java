@@ -351,7 +351,7 @@ public interface BaseEJBRemote {
 	 * @param logs
 	 * @throws Exception
 	 */
-	public void saveRegisterLogs(final AcessoEntity log) throws Exception;
+	public void saveRegisterLogs(List<AcessoEntity> logs) throws Exception;
 	
 	/**
 	 * 

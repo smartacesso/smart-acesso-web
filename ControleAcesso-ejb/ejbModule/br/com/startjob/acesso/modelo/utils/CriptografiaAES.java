@@ -1,10 +1,21 @@
 package br.com.startjob.acesso.modelo.utils;
 
+
 import java.util.Base64;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.SecretKeySpec;
 import javax.crypto.spec.IvParameterSpec;
+
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.crypto.Cipher;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
+
 
 public class CriptografiaAES {
 	private final String IV = "0000000000000000";
@@ -51,6 +62,7 @@ public class CriptografiaAES {
 		
 		//String encoded = java.util.Base64.getEncoder().encodeToString(encrypt);
 		String encoded ="5qi50XnwqKUqQPG+M/PYb8BQJcW6/7TnY7NmrexP8fR3rS2eL7JTRcKJkS0XE+YV1bbwJNtZIvhI2Z3TG1e9mA==";
+
 		System.out.println("Resposta: " + encoded);
 		byte[] decoded = java.util.Base64.getDecoder().decode(encoded);
 		

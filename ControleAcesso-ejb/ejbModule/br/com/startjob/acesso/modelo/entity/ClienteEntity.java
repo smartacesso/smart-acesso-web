@@ -64,7 +64,8 @@ import br.com.startjob.acesso.modelo.enumeration.Status;
 				query = "select obj from ClienteEntity obj "
 					  + "where (obj.removido = false or obj.removido is null) "
 					  + "and obj.organizacaoTeknisa = :ORGANIZACAO_TEKNISA and obj.filialTeknisa = :FILIAL_TEKNISA "
-					  + "order by obj.id asc"),
+					  + "order by obj.id asc")
+
 })
 @SuppressWarnings("serial")
 public class ClienteEntity extends BaseEntity {
@@ -126,6 +127,7 @@ public class ClienteEntity extends BaseEntity {
 	
 	@Column(name="FILIAL_TEKNISA", nullable=true, length=60)
 	private String filialTeknisa;
+
 
 	public String getNome() {
 		return nome;
@@ -223,5 +225,6 @@ public class ClienteEntity extends BaseEntity {
 	public void setFilialTeknisa(String filialTeknisa) {
 		this.filialTeknisa = filialTeknisa;
 	}
+
 	
 }

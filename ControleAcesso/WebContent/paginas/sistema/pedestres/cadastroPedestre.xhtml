@@ -370,6 +370,10 @@
 									<ui:include src="/WEB-INF/template/pedestres/documentos.xhtml" />
 								</p:tab>
 								
+								<p:tab title="#{msgs['label.uc016.responsavel']}">
+									<ui:include src="/WEB-INF/template/pedestres/responsavel.xhtml" />
+								</p:tab>
+								
 								<p:tab title="#{msgs['label.uc008.biometrias']}" rendered="#{not empty cadastroPedestreController.entidade.biometrias}" >
 									<ui:include src="/WEB-INF/template/pedestres/biometrias.xhtml" />
 								</p:tab>
@@ -383,6 +387,8 @@
 							<ui:include src="/WEB-INF/template/pedestres/escolherArquivoDocumento.xhtml" />
 							
 							<ui:include src="/WEB-INF/template/pedestres/procurarRegras.xhtml" />
+							
+							<ui:include src="/WEB-INF/template/pedestres/procurarResponsaveis.xhtml" />
 						
 						</div>
 					</div>
