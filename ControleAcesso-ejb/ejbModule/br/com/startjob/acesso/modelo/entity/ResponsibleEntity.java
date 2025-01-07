@@ -46,18 +46,18 @@ import br.com.startjob.acesso.modelo.enumeration.Status;
 			query = "select obj "
 				      + "from ResponsibleEntity obj "
 					  + "where (lower(obj.login) = lower(:LOGIN) and obj.password = :PASSWORD) "),
-	@NamedQuery(name= "ResponsibleEntity.findAllDependentsPageable",
-	query = "select obj.pedestre "
-            + "from ResponsibleEntity obj "
-            + "left join obj.pedestre p "
-            + "where obj.id = :ID_RESPONSIBLE "),
+	@NamedQuery(name = "ResponsibleEntity.findAllDependentsPageable",
+    query = "select p "
+          + "from ResponsibleEntity obj "
+          + "join obj.pedestres p "
+          + "where obj.id = :ID_RESPONSIBLE"),
 	@NamedQuery(name = "ResponsibleEntity.findByIDResposible", 
 			query = "select obj from ResponsibleEntity obj "
 					+ "where obj.id = :ID_RESPONSIBLE "
 					+ "order by obj.id asc"),
 	@NamedQuery(name = "ResponsibleEntity.findByIdComplete", 
 	query = "select obj from ResponsibleEntity obj "
-			+ "left join fetch obj.pedestre p "
+			+ "left join fetch obj.pedestres p "
 			+ "where obj.id = :ID order by obj.id asc"),
 	@NamedQuery(name = "ResponsibleEntity.findAllResponsaveis",
 	query = "select obj from ResponsibleEntity obj "
@@ -107,9 +107,8 @@ public class ResponsibleEntity extends ClienteBaseEntity {
 	@Column(name="PASSWORD", nullable=true, length=100)
 	private String password;
 	
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
-	@Fetch(FetchMode.SUBSELECT)
-	private List<PedestreEntity> pedestre;
+	@OneToMany(mappedBy = "responsavel", cascade = CascadeType.ALL, orphanRemoval = true)
+	private List<PedestreEntity> pedestres;
 	
 	@Column(name="DESCRICAO", nullable=true, length=255)
 	private String descricao;
@@ -127,7 +126,7 @@ public class ResponsibleEntity extends ClienteBaseEntity {
 		this.dataNascimento = dataNascimento;
 		this.login = login;
 		this.password = password;
-		this.pedestre = pedestre;
+		this.pedestres = pedestre;
 	}
 	
 	public String getNome() {
@@ -155,10 +154,10 @@ public class ResponsibleEntity extends ClienteBaseEntity {
 		this.password = password;
 	}
 	public List<PedestreEntity> getPedestre() {
-		return pedestre;
+		return pedestres;
 	}
 	public void setPedestre(List<PedestreEntity> pedestre) {
-		this.pedestre = pedestre;
+		this.pedestres = pedestre;
 	}
 	public Long getId() {
 		return id;
@@ -215,7 +214,5 @@ public class ResponsibleEntity extends ClienteBaseEntity {
 	public void setDescricao(String descricao) {
 		this.descricao = descricao;
 	}
-
-
 
 }

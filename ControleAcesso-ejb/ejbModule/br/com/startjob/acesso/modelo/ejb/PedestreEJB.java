@@ -223,7 +223,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 				"		pd.RG as rg, " + // 26
 				"		pd.TELEFONE as telefone, " + // 27
 				"		pd.CELULAR as celular, " + // 28
-				"		pd.RESPONSAVEL as responsavel, " + // 29
+				"		pd.ID_RESPONSAVEL as responsavel, " + // 29
 				"		pd.OBSERVACOES as observacoes, " + // 30
 				"		e.CEP as cep, " + // 31
 				"		e.LOGRADOURO as logradouro, " + // 32
@@ -321,7 +321,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 				"		pd.RG as rg, " + // 26
 				"		pd.TELEFONE as telefone, " + // 27
 				"		pd.CELULAR as celular, " + // 28
-				"		pd.RESPONSAVEL as responsavel, " + // 29
+				"		pd.ID_RESPONSAVEL as responsavel, " + // 29
 				"		pd.OBSERVACOES as observacoes, " + // 30
 				"		e.CEP as cep, " + // 31
 				"		e.LOGRADOURO as logradouro, " + // 32

@@ -112,6 +112,8 @@ public class RensponsibleApiService extends BaseService {
 		
 		List<PedestreEntity> dependencies = responsibleEJB.findAllDependentsPageable(tokenResponse.getIdResponsible(), page, size);
 		
+		
+		
 		List<PedestrianAccessTO> pedestres = convertPedestrianTO(dependencies);
 		
 		GenericEntity <List<PedestrianAccessTO>> list =new GenericEntity<List<PedestrianAccessTO>>(pedestres) {};
@@ -119,6 +121,9 @@ public class RensponsibleApiService extends BaseService {
 	}
 	
 	private List<PedestrianAccessTO> convertPedestrianTO(List<PedestreEntity> dependencies) throws ParseException {
+		if(Objects.isNull(dependencies)) {
+			return new ArrayList<PedestrianAccessTO>();
+		}
 		
 		return dependencies.stream()
 			.map(pedestre -> PedestrianAccessTO.convertPedestrianAccess(pedestre))
@@ -143,7 +148,7 @@ public class RensponsibleApiService extends BaseService {
 		List<AccessTO> accessTOList = new ArrayList<>();
 		AccessTO accessTO = new AccessTO();
 		
-		if(accessList.size() > 0) {
+		if(Objects.nonNull(accessList) && accessList.size() > 0) {
 			accessList.forEach(aacess -> {
 				try {
 					accessTOList.add(accessTO.convertToAccessTO(aacess));
@@ -196,15 +201,17 @@ public class RensponsibleApiService extends BaseService {
 			@HeaderParam("title") String title, @HeaderParam("eventDate") String eventDate, byte[] image) throws Exception {
 		ResponsibleEJBRemote responsibleEJB = (ResponsibleEJBRemote) getEjb("ResponsibleEJB");
 		
-		
 		TokenOutput tokenResponse =(TokenOutput) decriptToken(token);
 		
 		if(Objects.isNull(tokenResponse)) {
 			return Response.status(Status.UNAUTHORIZED).build();
 		}
+		Date date = new Date();
 		
-		Date date = (Date) sdf.parse(eventDate);
-	
+		if(Objects.nonNull(eventDate)) {
+			date = (Date) sdf.parse(eventDate);
+		}
+		
 		responsibleEJB.createNewsLetter(tokenResponse.getIdResponsible(), description, title, image, date);
 
 		return Response.status(Status.CREATED).build();

@@ -14,13 +14,15 @@
 
 		<p:column>
 			<p:outputLabel value="#{msgs['label.uc016.responsavel']}"
-				for="findResponsibleAutoComplete" />
+				for="findResponsibleAutoComplete"/>
 			<br />
 			<p:autoComplete id="findResponsibleAutoComplete"
 				value="#{cadastroPedestreController.responsavel}" var="responsavel"
 				itemLabel="#{responsavel.nome}" itemValue="#{responsavel}"
 				forceSelection="true" queryDelay="800" cache="true"
 				minQueryLength="2" maxResults="10"
+				
+				completeMethod="#{cadastroPedestreController.findResponsibleAutoFill}"
 				>
 
 				<p:ajax event="itemSelect" update="painelCadastroResponsavel" />
@@ -33,7 +35,7 @@
 		</p:column>
 
 		<p:column>
-			<p:commandButton id="vincularReponsavel"
+			<p:commandButton id="bindDependencies"
 				action="#{cadastroPedestreController.bindDependencies()}"
 				value="#{msgs['alt.acao.vincular']}"
 				process="painelCadastroResponsavel"

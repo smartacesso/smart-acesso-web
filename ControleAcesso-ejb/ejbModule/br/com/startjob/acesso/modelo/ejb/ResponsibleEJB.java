@@ -50,14 +50,14 @@ public class ResponsibleEJB extends BaseEJB implements ResponsibleEJBRemote {
 	@Override
 	public List<PedestreEntity> findAllDependentsPageable(long idResponsible, int page, int size) {
 		Map<String, Object> args = new HashMap<String, Object>();
-		args.put("ID_RESPONSIBLE", idResponsible);
+		args.put("ID", idResponsible);
 		
 		try {
 			@SuppressWarnings("unchecked")
-			List<PedestreEntity> responblibleList = (List<PedestreEntity>) this.pesquisaArgFixos(ResponsibleEntity.class, "findAllDependentsPageable", args);
+			List<ResponsibleEntity> responblibleList = (List<ResponsibleEntity>) this.pesquisaArgFixos(ResponsibleEntity.class, "findByIdComplete", args);
 			
 			if(responblibleList.size() > 0)
-				return responblibleList;
+				return responblibleList.get(0).getPedestre();
 			
 			
 		} catch (Exception e) {

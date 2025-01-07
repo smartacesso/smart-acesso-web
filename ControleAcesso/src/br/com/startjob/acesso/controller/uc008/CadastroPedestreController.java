@@ -544,7 +544,11 @@ public class CadastroPedestreController extends CadastroBaseController {
 		} else {
 			pedestre.setEquipamentos(new ArrayList<>());
 		}
-		
+		if (responsaveis != null && !responsaveis.isEmpty()) {
+			pedestre.setResponsavel(responsaveis.get(0));	
+		} else {
+			pedestre.setResponsavel(responsavel);
+		}
 		if (listaPedestreRegra != null && !listaPedestreRegra.isEmpty()) {
 			pedestre.setRegras(listaPedestreRegra);
 

@@ -30,7 +30,6 @@ public class RegraConverter implements Converter {
 				@SuppressWarnings("unchecked")
 				List<RegraEntity> regras = (List<RegraEntity>) getEjb("BaseEJB")
 					.pesquisaArgFixos(RegraEntity.class, "findById", args);
-				
 				regra = regras.get(0);
 			
 			} catch (Exception e) {
