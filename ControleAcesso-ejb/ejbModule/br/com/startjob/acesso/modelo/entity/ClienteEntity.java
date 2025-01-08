@@ -22,6 +22,8 @@ import javax.persistence.Table;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import br.com.startjob.acesso.modelo.entity.base.BaseEntity;
 import br.com.startjob.acesso.modelo.enumeration.Status;
 
@@ -114,10 +116,12 @@ public class ClienteEntity extends BaseEntity {
 	@Fetch(FetchMode.SUBSELECT)
 	private List<PlanoEntity> planos;
 	
+	@JsonIgnore
 	@OneToOne(cascade={CascadeType.ALL}, fetch=FetchType.EAGER)
 	@JoinColumn(name="ID_INTEGRACAO_SOC", nullable=true)
 	private IntegracaoSOCEntity integracaoSoc;
 	
+	@JsonIgnore
 	@OneToOne(cascade={CascadeType.ALL}, fetch=FetchType.LAZY)
 	@JoinColumn(name="ID_INTEGRACAO_SENIOR", nullable=true)
 	private IntegracaoSeniorEntity integracaoSenior;
