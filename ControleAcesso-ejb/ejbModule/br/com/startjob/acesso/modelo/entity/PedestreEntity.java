@@ -173,7 +173,7 @@ public class PedestreEntity extends ClienteBaseEntity {
 	private Boolean fotosForamExcluidas;
 
 	@Lob
-	@Column(name = "FOTO", nullable = true, length = 10)
+	@Column(name = "FOTO", nullable = true)
 	private byte[] foto;
 
 	@Temporal(TemporalType.TIMESTAMP)
@@ -308,12 +308,15 @@ public class PedestreEntity extends ClienteBaseEntity {
 		this.sempreLiberado = true;
 		
 		if (Objects.nonNull(funcionarioSeniorDto.getDatDem())) {
-			this.observacoes = "ALTERACAO : " + funcionarioSeniorDto.getDatDem()
+			this.observacoes = "DATA DEMISSAO : " + funcionarioSeniorDto.getDatDem()
 			+ " | MOTIVO : DEMISSAO" ;
 			this.status = Status.INATIVO;
 		}else if(Objects.nonNull(funcionarioSeniorDto.getDatAfa())) {
-			this.observacoes = "ALTERACAO : " + funcionarioSeniorDto.getDatAfa()
-			+ " | MOTIVO : AFASTAMENTO" ;
+			this.observacoes = "DATA AFASTAMENTO: " + funcionarioSeniorDto.getDatAfa()
+			+ " | MOTIVO: afastamento | " ;
+			if(Objects.nonNull(funcionarioSeniorDto.getDesAfa())) {
+				this.observacoes += " DESCRICAO: " + funcionarioSeniorDto.getDesAfa();
+			}
 			this.status = Status.INATIVO;
 		}else {
 			this.status = Status.ATIVO;
@@ -332,14 +335,18 @@ public class PedestreEntity extends ClienteBaseEntity {
 		this.setDataAlteracao(new Date());
 		
 		if (Objects.nonNull(funcionarioSeniorDto.getDatDem())) {
-			this.observacoes = "ALTERACAO : " + funcionarioSeniorDto.getDatDem()
+			this.observacoes = "DATA DEMISSAO : " + funcionarioSeniorDto.getDatDem()
 			+ " | MOTIVO : DEMISSAO" ;
 			this.status = Status.INATIVO;
 		}else if(Objects.nonNull(funcionarioSeniorDto.getDatAfa())) {
-			this.observacoes = "ALTERACAO : " + funcionarioSeniorDto.getDatAfa()
-			+ " | MOTIVO : AFASTAMENTO" ;
+			this.observacoes = "DATA AFASTAMENTO: " + funcionarioSeniorDto.getDatAfa()
+			+ " | MOTIVO: afastamento | " ;
+			if(Objects.nonNull(funcionarioSeniorDto.getDesAfa())) {
+				this.observacoes += " DESCRICAO: " + funcionarioSeniorDto.getDesAfa();
+			}
 			this.status = Status.INATIVO;
 		}else {
+			this.observacoes = "STATUS : ATIVO";
 			this.status = Status.ATIVO;
 		}
 	}

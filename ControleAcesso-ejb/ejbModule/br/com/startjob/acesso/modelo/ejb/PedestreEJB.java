@@ -9,6 +9,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
+import java.sql.Blob;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -35,6 +36,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.xml.ws.soap.MTOMFeature;
 
+import org.hibernate.proxy.HibernateProxy;
 import org.jboss.ejb3.annotation.TransactionTimeout;
 
 import com.age.soc.services.exportaDados.ExportaDadosWs;
@@ -399,6 +401,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 
 	private String formataHora(String sgdb, String campo) {
 		String hora = " DATE_FORMAT(" + campo + ", '%H:%i')";
+
 		if (sgdb.equals("plsql")) {
 			String sqlServerVersion = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SQL_SERVER_VESION);
 
@@ -408,6 +411,8 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 				hora = " CONVERT(VARCHAR(5), " + campo + ", 108)";
 			}
 
+		} else if ("oracle".equals(sgdb)) {
+			hora = " TO_CHAR(TO_DATE(" + campo + ", N'HH:mm'))";
 		}
 
 		return hora;
@@ -442,21 +447,49 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 	@Override
 	public List<Object[]> buscaFotoListaPedestre(List<Long> listaIds) throws Exception {
 
-		String sgdb = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SGDB);
-		String schema = "";
-		if (sgdb == null || "".equals(sgdb)) {
-			sgdb = "mysql";
-		}
+	    String sgdb = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SGDB);
+	    String schema = "";
+	    if (sgdb == null || "".equals(sgdb)) {
+	        sgdb = "mysql"; // padrão se o SGBD não for especificado
+	    }
 
-		if ("plsql".equals(sgdb)) {
-			schema = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SCHEMA);
-		}
+	    if ("plsql".equals(sgdb)) {
+	        schema = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SCHEMA);
+	    }
 
-		Query q = getEntityManager().createNativeQuery("select p.ID_PEDESTRE, p.FOTO " + "from " + schema
-				+ "TB_PEDESTRE p " + "where p.ID_PEDESTRE in ( :ID_PEDESTRE ) " + "order by p.ID_PEDESTRE asc ");
-		q.setParameter("ID_PEDESTRE", listaIds);
-		return q.getResultList();
+	    Query q = getEntityManager().createNativeQuery(
+	            "SELECT p.ID_PEDESTRE, p.FOTO " + 
+	            "FROM " + schema + "TB_PEDESTRE p " + 
+	            "WHERE p.ID_PEDESTRE IN (:ID_PEDESTRE) " + 
+	            "ORDER BY p.ID_PEDESTRE ASC");
+	    q.setParameter("ID_PEDESTRE", listaIds);
+
+	    List<Object[]> resultList = q.getResultList();
+
+	    // Converte Blob para byte[] antes de retornar
+	    for (Object[] result : resultList) {
+	        Object fotoObj = result[1];
+
+	        if (fotoObj instanceof Blob) {
+	            Blob fotoBlob = (Blob) fotoObj;
+	            byte[] fotoBytes = fotoBlob.getBytes(1, (int) fotoBlob.length()); // Extrai os bytes do Blob
+	            result[1] = fotoBytes; // Substitui o Blob por byte[]
+	        } else if (fotoObj instanceof HibernateProxy) {
+	            HibernateProxy proxy = (HibernateProxy) fotoObj;
+	            Object realObject = proxy.getHibernateLazyInitializer().getImplementation();
+	            if (realObject instanceof Blob) {
+	                Blob fotoBlob = (Blob) realObject;
+	                byte[] fotoBytes = fotoBlob.getBytes(1, (int) fotoBlob.length());
+	                result[1] = fotoBytes;
+	            }
+	        } else if (fotoObj != null && !(fotoObj instanceof byte[])) {
+	            throw new IllegalStateException("Tipo inesperado para o campo FOTO: " + fotoObj.getClass());
+	        }
+	    }
+
+	    return resultList;
 	}
+
 
 	@Override
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
@@ -1502,8 +1535,6 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 			// OBS: a data não tem hora
 			System.out.println("Atualizando apenas");
 			funcionarios = buscaTodosOsFuncioriosDaEmpresa(empresaExistente.getCodEmpresaSenior(), cliente);
-//			funcionarios = buscarFuncionariosAdmitidos(empresaExistente.getCodEmpresaSenior(), cliente);
-//			funcionariosDemitidos = buscarFuncionariosDemitidos(empresaExistente.getCodEmpresaSenior(), cliente);
 		} else {
 			System.out.println("Primeira importação");
 			funcionarios = buscaTodosOsFuncioriosDaEmpresa(empresaExistente.getCodEmpresaSenior(), cliente);
@@ -1512,11 +1543,10 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		if (Objects.isNull(funcionarios) || funcionarios.isEmpty()) {
 			return;
 		}
-
+		System.out.println("quantidade de funcionarios " + funcionarios.size());
 		funcionarios.forEach(funcionario -> {
 			Optional<PedestreEntity> pedestreExistente = buscaPedestreExistente(funcionario.getNumeroMatricula(),
 					empresaExistente);
-
 			PedestreEntity pedestre = null;
 
 			boolean permissaoAlterada = true;
@@ -1525,7 +1555,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 				permissaoAlterada = isPermissaoAlterada(pedestre, funcionario);
 
 				if (permissaoAlterada) {
-					System.out.println("Permissao alterada : " + pedestre.getNome());
+					//System.out.println("Permissao alterada : " + pedestre.getNome());
 				}
 
 				pedestre.updateFuncionarioSenior(funcionario, empresaExistente);
@@ -1555,6 +1585,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 			// Os atualizados do dia
 			// obs : tem um campo de Obervação do que foi atualizado pode ser que de pra
 			// usar
+			
 			if (permissaoAlterada) {
 				apagaTodosPedetreEquipamentos(pedestre);
 
