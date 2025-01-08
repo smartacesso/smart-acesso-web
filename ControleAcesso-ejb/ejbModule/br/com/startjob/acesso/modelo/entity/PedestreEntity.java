@@ -301,47 +301,47 @@ public class PedestreEntity extends ClienteBaseEntity {
 		this.telefone = funcionarioSeniorDto.getDddtelefone() + funcionarioSeniorDto.getNumtelefone();
 		this.codigoCartaoAcesso =  funcionarioSeniorDto.getNumCracha();
 		this.rg = funcionarioSeniorDto.getRg();
-		
-		if (Objects.nonNull(funcionarioSeniorDto.getDatAdm())) {
-			this.observacoes = "Data admissão: " + funcionarioSeniorDto.getDatAdm()
-			+ " | ALTERAÇÃO : " + hoje + " | " + funcionarioSeniorDto.getObs();
-			this.status = Status.ATIVO;
-		} else if (Objects.nonNull(funcionarioSeniorDto.getDatDem())) {
-			this.observacoes = "Data demissão: " + funcionarioSeniorDto.getDatDem()
-			+ " | ALTERAÇÃO : " + hoje + " | " + funcionarioSeniorDto.getObs();
-			this.status = Status.INATIVO;
-		}
-		
 		this.codigoPermissao = funcionarioSeniorDto.getCodPrm(); //codigo permissao
 		this.cliente = empresaEntity.getCliente();
 		this.empresa = empresaEntity;
 		this.tipo = TipoPedestre.PEDESTRE;
 		this.sempreLiberado = true;
+		
+		if (Objects.nonNull(funcionarioSeniorDto.getDatDem())) {
+			this.observacoes = "ALTERACAO : " + funcionarioSeniorDto.getDatDem()
+			+ " | MOTIVO : DEMISSAO" ;
+			this.status = Status.INATIVO;
+		}else if(Objects.nonNull(funcionarioSeniorDto.getDatAfa())) {
+			this.observacoes = "ALTERACAO : " + funcionarioSeniorDto.getDatAfa()
+			+ " | MOTIVO : AFASTAMENTO" ;
+			this.status = Status.INATIVO;
+		}else {
+			this.status = Status.ATIVO;
+		}
    }
 
 	public void updateFuncionarioSenior(final FuncionarioSeniorDto funcionarioSeniorDto, final EmpresaEntity empresaEntity) {
-		
-		LocalDate hoje = LocalDate.now();
-		
+
 		this.nome = funcionarioSeniorDto.getNome();
 		this.matricula = funcionarioSeniorDto.getNumeroMatricula();
 		this.telefone = funcionarioSeniorDto.getDddtelefone() + funcionarioSeniorDto.getNumtelefone();
 		this.codigoCartaoAcesso =  funcionarioSeniorDto.getNumCracha();
 		this.rg = funcionarioSeniorDto.getRg();
-		this.sempreLiberado = true;
-
-		if (Objects.nonNull(funcionarioSeniorDto.getDatAdm())) {
-			this.observacoes = "Data admissão: " + funcionarioSeniorDto.getDatAdm()
-			+ " | ALTERAÇÃO : " + hoje + " | " + funcionarioSeniorDto.getObs();
-			this.status = Status.ATIVO;
-		} else if (Objects.nonNull(funcionarioSeniorDto.getDatDem())) {
-			this.observacoes = "Data demissão: " + funcionarioSeniorDto.getDatDem()
-			+ " | ALTERAÇÃO : " + hoje + " | " + funcionarioSeniorDto.getObs();
-			this.status = Status.INATIVO;
-		}
-		
 		this.codigoPermissao = funcionarioSeniorDto.getCodPrm(); //codigo permissao
+		this.sempreLiberado = true;
 		this.setDataAlteracao(new Date());
+		
+		if (Objects.nonNull(funcionarioSeniorDto.getDatDem())) {
+			this.observacoes = "ALTERACAO : " + funcionarioSeniorDto.getDatDem()
+			+ " | MOTIVO : DEMISSAO" ;
+			this.status = Status.INATIVO;
+		}else if(Objects.nonNull(funcionarioSeniorDto.getDatAfa())) {
+			this.observacoes = "ALTERACAO : " + funcionarioSeniorDto.getDatAfa()
+			+ " | MOTIVO : AFASTAMENTO" ;
+			this.status = Status.INATIVO;
+		}else {
+			this.status = Status.ATIVO;
+		}
 	}
 
 

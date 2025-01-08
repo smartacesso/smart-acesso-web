@@ -86,10 +86,9 @@ import br.com.startjob.acesso.modelo.utils.AppAmbienteUtils;
 @Stateless
 @TransactionAttribute(TransactionAttributeType.REQUIRED)
 public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
-	
+
 	private static final ObjectMapper mapper = new ObjectMapper()
 			.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
@@ -128,8 +127,8 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 
 				if (pedestre.getCargo() != null)
 					pedestre.getCargo();
-				
-				if(pedestre.getResponsavel() != null) {
+
+				if (pedestre.getResponsavel() != null) {
 					pedestre.getResponsavel();
 				}
 			}
@@ -184,11 +183,11 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 	public List<Object[]> recuperaPedestresControleAcesso(List<Long> ids, Date time) throws Exception {
 
 		String sgdb = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SGDB);
-		
+
 		if (sgdb == null || "".equals(sgdb)) {
 			sgdb = "mysql";
 		}
-		
+
 		String schema = "";
 		if ("plsql".equals(sgdb)) {
 			schema = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SCHEMA);
@@ -285,9 +284,9 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		String sgdb = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SGDB);
 		String schema = "";
 		if (sgdb == null || "".equals(sgdb)) {
-			sgdb = "mysql";			
+			sgdb = "mysql";
 		}
-		
+
 		if ("plsql".equals(sgdb)) {
 			schema = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SCHEMA);
 		}
@@ -356,12 +355,12 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 				"		rp.VALIDADE as validadeRegra, " + // 61
 				"		rp.QTDE_TOTAL_CREDITOS as qtdeTotalCreditos, " + // 62
 				"		pd.QUANTIDADE_ACESSO_ANTES_SINC as qtdeAcessosAntesSinc, " + // 63
-				"		usuario.ID_USUARIO as idUsuario, " + 						// 64
-				" 		rp.BLOQUEADO AS bloqueioRegra, " + //65
+				"		usuario.ID_USUARIO as idUsuario, " + // 64
+				" 		rp.BLOQUEADO AS bloqueioRegra, " + // 65
 				"       pd.senha as senha, " + // 66
 				"       pd.TIPO_ACESSO as tipoAcesso, " + // 67
 				"       pd.TIPO_QRCODE as tipoQRCode, " + // 68
-				"		pd.DATA_CADASTRO_FOTO_HIKIVISION as dataCadastroFotoHikivision " + //69
+				"		pd.DATA_CADASTRO_FOTO_HIKIVISION as dataCadastroFotoHikivision " + // 69
 				"from " + schema + "TB_PEDESTRE pd " + "		left join " + schema
 				+ "TB_ENDERECO e on e.ID_ENDERECO = pd.ID_ENDERECO " + "		left join " + schema
 				+ "TB_EMPRESA emp on emp.ID_EMPRESA = pd.ID_EMPRESA " + "		left join " + schema
@@ -402,15 +401,15 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		String hora = " DATE_FORMAT(" + campo + ", '%H:%i')";
 		if (sgdb.equals("plsql")) {
 			String sqlServerVersion = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SQL_SERVER_VESION);
-			
-			if(Integer.valueOf(sqlServerVersion) >= 2012) {
+
+			if (Integer.valueOf(sqlServerVersion) >= 2012) {
 				hora = " FORMAT(" + campo + ", N'HH:mm')";
 			} else {
 				hora = " CONVERT(VARCHAR(5), " + campo + ", 108)";
 			}
-			
+
 		}
-		
+
 		return hora;
 	}
 
@@ -419,11 +418,11 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 	public List<Object> buscaListaPedestresComAtualizacaoDeFoto(List<Long> ids, Date lastSync) throws Exception {
 		String sgdb = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SGDB);
 		String schema = "";
-		
+
 		if (sgdb == null || "".equals(sgdb)) {
 			sgdb = "mysql";
 		}
-		
+
 		if ("plsql".equals(sgdb)) {
 			schema = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SCHEMA);
 		}
@@ -446,9 +445,9 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		String sgdb = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SGDB);
 		String schema = "";
 		if (sgdb == null || "".equals(sgdb)) {
-			sgdb = "mysql";			
+			sgdb = "mysql";
 		}
-		
+
 		if ("plsql".equals(sgdb)) {
 			schema = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SCHEMA);
 		}
@@ -458,8 +457,6 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		q.setParameter("ID_PEDESTRE", listaIds);
 		return q.getResultList();
 	}
-	
-	
 
 	@Override
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
@@ -474,14 +471,14 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 				dados.getCliente().getId());
 		if (param != null) {
 			formatoData = param.getValor();
-			
+
 		}
 		param = getParametroSistema(BaseConstant.PARAMETERS_NAME.FORMATO_HORA_PARA_IMPORTACAO,
 				dados.getCliente().getId());
 		if (param != null) {
 			formatoHora = param.getValor();
 		}
-		
+
 //		removepedestresSenai();
 		String linha = null;
 		try (BufferedReader bf = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
@@ -495,27 +492,26 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 					dadosArquivo = linha.replace("\"", "").split(",");
 				System.out.println("importação do cliente : " + dados.getCliente().getNome());
 				System.out.println("Importando linha: " + i);
-				
+
 				if (dadosArquivo.length <= 1)
 					continue;
 
 				if ("centaurus".equals(dadosArquivo[0])) {
 					System.out.println("Padrao centaurus");
-					importaCentaurus(dadosArquivo, dados);	
+					importaCentaurus(dadosArquivo, dados);
 				} else if ("CST".equals(dadosArquivo[0])) {
 					System.out.println("Padrao CST");
 					importaSulacap(dadosArquivo, dados);
 				} else if ("gasmig".equals(dadosArquivo[0])) {
 					System.out.println("Padrao GASMIG");
-			
-				}else if("actech".equals(dadosArquivo[0])) {
+
+				} else if ("actech".equals(dadosArquivo[0])) {
 					System.out.println("Padrao ACTECH");
 					importaActech(dadosArquivo, dados);
-				}else if("sesi".equals(dadosArquivo[0])) {
+				} else if ("sesi".equals(dadosArquivo[0])) {
 					System.out.println("Padrao SESI");
 					importaSesi(dadosArquivo, dados);
 				}
-
 
 //				PedestreEntity pedestreLeftZero = null;
 //
@@ -534,7 +530,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 //					pedestre = pedestreLeftZero;
 //				}
 				// trocar para busca pedestre por matricula
-                
+
 				i++;
 			}
 		} catch (IOException e) {
@@ -542,14 +538,14 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		}
 	}
 
-	public void importaCentaurus(String [] dadosArquivo, ImportacaoEntity dados) {
-	
+	public void importaCentaurus(String[] dadosArquivo, ImportacaoEntity dados) {
+
 		String numeroCartao = "";
 		String nomePedestre = "";
 		String rg = "";
 		String cpf = "";
 		String nomeRegra = null;
-	
+
 		PedestreEntity pedestre = null;
 		numeroCartao = dadosArquivo[1];
 		nomePedestre = dadosArquivo[2];
@@ -601,7 +597,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		}
 
 	}
-	
+
 	public void importaSesi(String[] dadosArquivo, ImportacaoEntity dados) {
 
 		String numeroCartao = "";
@@ -639,7 +635,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		}
 
 	}
-	
+
 	public void importaActech(String[] dadosArquivo, ImportacaoEntity dados) {
 
 		String numeroCartao = "";
@@ -700,19 +696,17 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 
 	}
 
+	public void importaSulacap(String[] dadosArquivo, ImportacaoEntity dados) throws ParseException {
 
-
-	public void importaSulacap(String [] dadosArquivo, ImportacaoEntity dados) throws ParseException {
-		
 		SimpleDateFormat formatadorData = new SimpleDateFormat();
 		SimpleDateFormat formatadorDataSemHora = new SimpleDateFormat("dd/MM/yyyy");
 		SimpleDateFormat formatadorHora = new SimpleDateFormat();
-				
+
 		EmpresaEntity empresa = new EmpresaEntity();
 		String nomePedestre = "";
 		String rg = "";
 		String cpf = "";
-		
+
 //		DepartamentoEntity departamento = new DepartamentoEntity();
 //		CentroCustoEntity centroCusto = new CentroCustoEntity();
 //		CargoEntity cargo = new CargoEntity();
@@ -725,7 +719,6 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 //		String cidade = "";
 //		String uf = "";
 //		String cep = "";
-
 
 //		String telefone = "";
 
@@ -750,14 +743,12 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		cpf = dadosArquivo[4];
 		empresa = buscarEmpresaPeloNome(dadosArquivo[5]);
 		regra = buscarRegraPeloNome("LIVRE", dados.getCliente().getId());
-		
-		
-		
+
 		pedestre = buscaPedestrePorNome(nomePedestre);
-		if(pedestre == null) {
+		if (pedestre == null) {
 			pedestre = new PedestreEntity();
 		}
-		
+
 		pedestre.setNome(nomePedestre);
 		pedestre.setMatricula(null);
 		pedestre.setRg(rg);
@@ -773,14 +764,14 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		pedestre.setDataRemovido(null);
 		pedestre.setRemovido(null);
 		pedestre.setEmpresa(empresa);
-		
-        if (regra != null) {
-            salvarObjeto(regra);
-        }
 
-        if(pedestre != null){
-            salvarObjeto(pedestre);
-        }
+		if (regra != null) {
+			salvarObjeto(regra);
+		}
+
+		if (pedestre != null) {
+			salvarObjeto(pedestre);
+		}
 	}
 
 	public BaseEntity salvarObjeto(BaseEntity entidade) {
@@ -865,12 +856,10 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 
 		return empresa;
 	}
-	
-	
+
 	@SuppressWarnings("unchecked")
 	private List<RegraEntity> buscarTodosRegras() {
-		List<RegraEntity>  regras = null;
-
+		List<RegraEntity> regras = null;
 
 		try {
 			Map<String, Object> args = new HashMap<String, Object>();
@@ -960,11 +949,11 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		String sgdb = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SGDB);
 		String schema = "";
 		if (sgdb == null || "".equals(sgdb)) {
-			sgdb = "mysql";			
+			sgdb = "mysql";
 		}
-		
+
 		if ("plsql".equals(sgdb)) {
-			schema = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SCHEMA);			
+			schema = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SCHEMA);
 		}
 		query.append("update " + schema + "TB_PEDESTRE ").append("set ALTERAR_EM_MASSA = ").append(marcado ? "1" : "0")
 				.append(" ").append("where ID_CLIENTE = ").append(idCliente).append(" and TIPO_PEDESTRE = 'PEDESTRE' ")
@@ -1039,9 +1028,9 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		String sgdb = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SGDB);
 		String schema = "";
 		if (sgdb == null || "".equals(sgdb)) {
-			sgdb = "mysql";			
+			sgdb = "mysql";
 		}
-		
+
 		if ("plsql".equals(sgdb)) {
 			schema = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SCHEMA);
 		}
@@ -1072,9 +1061,9 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		String sgdb = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SGDB);
 		String schema = "";
 		if (sgdb == null || "".equals(sgdb)) {
-			sgdb = "mysql";			
+			sgdb = "mysql";
 		}
-		
+
 		if ("plsql".equals(sgdb)) {
 			schema = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SCHEMA);
 		}
@@ -1113,11 +1102,11 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 			String sgdb = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SGDB);
 			String schema = "";
 			if (sgdb == null || "".equals(sgdb)) {
-				sgdb = "mysql";				
+				sgdb = "mysql";
 			}
-			
+
 			if ("plsql".equals(sgdb)) {
-				schema = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SCHEMA);				
+				schema = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SCHEMA);
 			}
 
 			query.append(
@@ -1174,13 +1163,13 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		String sgdb = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SGDB);
 		String schema = "";
 		if (sgdb == null || "".equals(sgdb)) {
-			sgdb = "mysql";			
+			sgdb = "mysql";
 		}
-		
+
 		if ("plsql".equals(sgdb)) {
 			schema = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SCHEMA);
 		}
-		
+
 		query.append("update " + schema + "TB_PEDESTRE set ALTERAR_EM_MASSA = NULL ").append("where ID_CLIENTE = ")
 				.append(idCliente);
 
@@ -1192,13 +1181,13 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		String sgdb = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SGDB);
 		String schema = "";
 		if (sgdb == null || "".equals(sgdb)) {
-			sgdb = "mysql";			
+			sgdb = "mysql";
 		}
-		
+
 		if ("plsql".equals(sgdb)) {
 			schema = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SCHEMA);
 		}
-		
+
 		query.append("update " + schema + "TB_PEDESTRE set DATA_ALTERACAO = current_timestamp() ")
 				.append("where ID_CLIENTE = ").append(idCliente).append(" and TIPO_PEDESTRE = 'PEDESTRE' ")
 				.append(" and (ALTERAR_EM_MASSA IS NULL OR ALTERAR_EM_MASSA = 1) ");
@@ -1264,7 +1253,205 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 
 		return null;
 	}
-	
+
+	private boolean isPermissaoAlterada(final PedestreEntity pedestre, final FuncionarioSeniorDto funcionario) {
+		if (Objects.isNull(pedestre.getCodigoPermissao()) || pedestre.getCodigoPermissao().isEmpty()) {
+			return true;
+		}
+
+		return !pedestre.getCodigoPermissao().equals(funcionario.getCodPrm());
+	}
+
+//	private void associarEquipamentos(PedestreEntity pedestre) {
+//		// TODO Auto-generated method stub
+//		  PedestreEquipamentoEntity pedestreEquipamento = new PedestreEquipamentoEntity();
+//	            pedestreEquipamentoService.adicionaPedestreEquipamentoSenior(pedestreEquipamento, pedestre, pedestre.getPermissao());
+//		
+//	}
+
+	private List<FuncionarioSeniorDto> buscaTodosOsFuncioriosDaEmpresa(final String numEmp,
+			final ClienteEntity cliente) {
+		System.out.println("buscando todos funcionarios da empresa :" + numEmp);
+		IntegracaoSeniorService integracaoSeniorService = new IntegracaoSeniorService(
+				cliente.getIntegracaoSenior().getUsuario(), cliente.getIntegracaoSenior().getSenha());
+
+		return integracaoSeniorService.buscarFuncionarios(numEmp);
+	}
+
+	private List<FuncionarioSeniorDto> buscarFuncionariosDemitidos(String numEmp, final ClienteEntity cliente) {
+		System.out.println("buscando todos funcionarios demitidos no dia no empresa" + numEmp);
+
+		LocalDate data = LocalDate.now();
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+		String dataString = data.format(formatter);
+
+		IntegracaoSeniorService integracaoSeniorService = new IntegracaoSeniorService(
+				cliente.getIntegracaoSenior().getUsuario(), cliente.getIntegracaoSenior().getSenha());
+
+		return integracaoSeniorService.buscarFuncionariosDemitidos(numEmp, dataString);
+	}
+
+	private List<FuncionarioSeniorDto> buscarFuncionariosAdmitidos(String numEmp, final ClienteEntity cliente) {
+		System.out.println("buscando todos funcionarios demitidos no dia no empresa" + numEmp);
+
+		LocalDate data = LocalDate.now();
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+		String dataString = data.format(formatter);
+
+		IntegracaoSeniorService integracaoSeniorService = new IntegracaoSeniorService(
+				cliente.getIntegracaoSenior().getUsuario(), cliente.getIntegracaoSenior().getSenha());
+
+		return integracaoSeniorService.buscarFuncionariosAdmitidos(numEmp, dataString);
+	}
+
+	@SuppressWarnings("unchecked")
+	private Optional<PedestreEntity> buscaPedestreExistente(String numeroMatricula, EmpresaEntity empresa) {
+		Map<String, Object> args = new HashMap<String, Object>();
+		args.put("MATRICULA", numeroMatricula);
+		args.put("ID_EMPRESA", empresa.getId());
+		args.put("ID_CLIENTE", empresa.getCliente().getId());
+
+		try {
+			List<PedestreEntity> listaPedestres = (List<PedestreEntity>) pesquisaArgFixos(PedestreEntity.class,
+					"findByMatriculaAndIdEmpresaAndIdCliente", args);
+
+			if (listaPedestres != null && !listaPedestres.isEmpty()) {
+				return Optional.of(listaPedestres.get(0));
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return Optional.empty();
+	}
+
+	@SuppressWarnings("unchecked")
+	private Optional<EmpresaEntity> buscaEmpresaExistente(String numEmp, Long idCliente) {
+		Map<String, Object> args = new HashMap<String, Object>();
+		args.put("COD_EMPRESA_SENIOR", numEmp);
+		args.put("ID_CLIENTE", idCliente);
+
+		try {
+			List<EmpresaEntity> listaEmpresas = (List<EmpresaEntity>) pesquisaArgFixos(EmpresaEntity.class,
+					"findByCodSeniorAndIdCliente", args);
+
+			if (listaEmpresas != null && !listaEmpresas.isEmpty()) {
+				return Optional.of(listaEmpresas.get(0));
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return Optional.empty();
+	}
+
+	private List<EmpresaSeniorDto> buscaTodasEmpresasSenior(final ClienteEntity cliente) {
+		// IntegracaoSeniorService integracaoSeniorService = new
+		// IntegracaoSeniorService("smartwsintegra", "Sm4rt@s3n10r#");
+		IntegracaoSeniorService integracaoSeniorService = new IntegracaoSeniorService(
+				cliente.getIntegracaoSenior().getUsuario(), cliente.getIntegracaoSenior().getSenha());
+
+		return integracaoSeniorService.buscarEmpresas();
+	}
+
+	private static Object createObject(String json) throws JsonProcessingException {
+		List<FuncionarioResult> result = null;
+		TypeReference<FuncionarioResult> funcionario = new TypeReference<FuncionarioResult>() {
+		};
+		// json = json.equals("[]") ? "" : json;
+		/*
+		 * 
+		 * try { //result = mapper.readValue(json, new
+		 * TypeReference<List<FuncionarioResult>>() {});
+		 * 
+		 * @SuppressWarnings("unchecked") List<FuncionarioResult> readValue =
+		 * (List<FuncionarioResult>) mapper.readValue(json, new
+		 * TypeReference<List<FuncionarioResult>>() {}); result = readValue; } catch
+		 * (JsonMappingException e) { e.printStackTrace(); }
+		 * 
+		 */
+		try {
+			result = mapper.readValue(json, new TypeReference<List<FuncionarioResult>>() {
+			});
+		} catch (JsonMappingException e) {
+			e.printStackTrace();
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+		}
+		return result;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	@TransactionAttribute(TransactionAttributeType.REQUIRED)
+	@TransactionTimeout(unit = TimeUnit.HOURS, value = 4)
+	public void importarSOC() throws Exception {
+		List<ClienteEntity> clientes = (List<ClienteEntity>) pesquisaSimples(ClienteEntity.class,
+				"findAllComIntegracaoSOC", new HashMap<>());
+		List<ParametroEntity> configs = (List<ParametroEntity>) pesquisaSimples(ParametroEntity.class,
+				"findClienteIdPreencherCartao", new HashMap<>());
+
+		if (clientes == null || clientes.isEmpty()) {
+			System.out.println("Não existem clientes com integração SOC");
+			return;
+		}
+
+		List<EmpresaResult> empresasSoc = getEmpresasSoc();
+
+		if (empresasSoc == null || empresasSoc.isEmpty()) {
+			System.out.println("Nenhuma empresa SOC foi encontrada");
+			return;
+		}
+
+		System.out.println("Empresas SOC encontradas: " + empresasSoc.size());
+
+		for (EmpresaResult empresa : empresasSoc) {
+
+			List<FuncionarioResult> funcionarios = getFuncionariosEmpresaSoc(empresa.CODIGO);
+
+			if (funcionarios == null || funcionarios.isEmpty()) {
+				continue;
+			}
+
+			for (FuncionarioResult funcionario : funcionarios) {
+				if (funcionario.CPF.equals("70896644499")) {
+					System.out.println("teste");
+				}
+
+				ClienteEntity clienteFromFuncionario = getClienteFromFuncionario(funcionario.CCUSTO, clientes);
+
+				if (clienteFromFuncionario != null) {
+					System.out.println(String.format("Gravando funcionario: %s, %s, %s", funcionario.NOME,
+							funcionario.NOMEEMPRESA, funcionario.CCUSTO));
+					salvarFuncionario(funcionario, clienteFromFuncionario, configs);
+					System.out.println("salvou no cliente : " + clienteFromFuncionario.getNomeUnidadeOrganizacional()
+							+ "iD :" + clienteFromFuncionario.getId());
+				}
+			}
+
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	@TransactionAttribute(TransactionAttributeType.REQUIRED)
+	@TransactionTimeout(unit = TimeUnit.HOURS, value = 4)
+	public void importarSenior() throws Exception {
+		final List<ClienteEntity> clientes = (List<ClienteEntity>) pesquisaSimples(ClienteEntity.class,
+				"findAllComIntegracaoSenior", new HashMap<>());
+
+		if (Objects.isNull(clientes) || clientes.isEmpty()) {
+			System.out.println("Não existem clientes com integração Senior");
+			return;
+		}
+
+		clientes.forEach(cliente -> {
+			importarEmpresasSenior(cliente);
+		});
+	}
+
 	private void importarEmpresasSenior(final ClienteEntity cliente) {
 		List<EmpresaSeniorDto> empresasSenior = buscaTodasEmpresasSenior(cliente);
 		if (Objects.isNull(empresasSenior) || empresasSenior.isEmpty()) {
@@ -1284,12 +1471,13 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 				empresaExistente = new EmpresaEntity(empresaSenior, false, cliente);
 				try {
 					empresaExistente = (EmpresaEntity) gravaObjeto(empresaExistente)[0];
-					
+
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}
-			System.out.println("Importando empresa : " + empresaSenior.getNumEmp());
+			System.out.println(
+					"Importando empresa : " + empresaSenior.getNumEmp() + ", nome :" + empresaSenior.getNomEmp());
 			importaFuncionariosSenior(empresaExistente, cliente);
 
 			if (Objects.isNull(empresaExistente.getPrimeiroImportacaoFuncionarioSeniorSucesso())
@@ -1297,7 +1485,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 				empresaExistente.setPrimeiroImportacaoFuncionarioSeniorSucesso(true);
 				try {
 					empresaExistente = (EmpresaEntity) gravaObjeto(empresaExistente)[0];
-					
+
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -1307,46 +1495,42 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 
 	private void importaFuncionariosSenior(final EmpresaEntity empresaExistente, final ClienteEntity cliente) {
 		List<FuncionarioSeniorDto> funcionarios = null;
-		List<FuncionarioSeniorDto> funcionariosDemitidos = null;
+		// List<FuncionarioSeniorDto> funcionariosDemitidos = null;
 
 		if (Boolean.TRUE.equals(empresaExistente.getPrimeiroImportacaoFuncionarioSeniorSucesso())) {
-			//Pensar num jeito de não rodar sempre para os mesmos funcionarios
-			//OBS: a data não tem hora
+			// Pensar num jeito de não rodar sempre para os mesmos funcionarios
+			// OBS: a data não tem hora
 			System.out.println("Atualizando apenas");
-			funcionarios = buscarFuncionariosAdmitidos(empresaExistente.getCodEmpresaSenior(), cliente);
-			funcionariosDemitidos = buscarFuncionariosDemitidos(empresaExistente.getCodEmpresaSenior(), cliente);
+			funcionarios = buscaTodosOsFuncioriosDaEmpresa(empresaExistente.getCodEmpresaSenior(), cliente);
+//			funcionarios = buscarFuncionariosAdmitidos(empresaExistente.getCodEmpresaSenior(), cliente);
+//			funcionariosDemitidos = buscarFuncionariosDemitidos(empresaExistente.getCodEmpresaSenior(), cliente);
 		} else {
 			System.out.println("Primeira importação");
-			funcionarios = buscaTodosOsFuncioriosDaEmpresa(empresaExistente.getCodEmpresaSenior(), cliente);	
+			funcionarios = buscaTodosOsFuncioriosDaEmpresa(empresaExistente.getCodEmpresaSenior(), cliente);
 		}
 
 		if (Objects.isNull(funcionarios) || funcionarios.isEmpty()) {
 			return;
 		}
-		
 
-		if (Objects.isNull(funcionariosDemitidos) || funcionariosDemitidos.isEmpty()) {
-			return;
-		}
-
-		funcionarios.forEach(funcionario -> {			
-			Optional<PedestreEntity> pedestreExistente = buscaPedestreExistente(
-					funcionario.getNumeroMatricula(), empresaExistente);
+		funcionarios.forEach(funcionario -> {
+			Optional<PedestreEntity> pedestreExistente = buscaPedestreExistente(funcionario.getNumeroMatricula(),
+					empresaExistente);
 
 			PedestreEntity pedestre = null;
-			
+
 			boolean permissaoAlterada = true;
 			if (pedestreExistente.isPresent()) {
 				pedestre = pedestreExistente.get();
 				permissaoAlterada = isPermissaoAlterada(pedestre, funcionario);
-				
-				if(permissaoAlterada) {
+
+				if (permissaoAlterada) {
 					System.out.println("Permissao alterada : " + pedestre.getNome());
 				}
-				
+
 				pedestre.updateFuncionarioSenior(funcionario, empresaExistente);
 				pedestre.setExistente(true);
-				
+
 				try {
 					pedestre = (PedestreEntity) alteraObjeto(pedestre)[0];
 				} catch (Exception e) {
@@ -1358,21 +1542,22 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 				pedestre = new PedestreEntity(funcionario, empresaExistente);
 				try {
 					pedestre = (PedestreEntity) gravaObjeto(pedestre)[0];
-					
+
 				} catch (Exception e) {
 					e.printStackTrace();
 					throw new RuntimeException();
 				}
 			}
-			
-			
-	        // Associa o pedestre ao equipamento
-			// Encontrar uma forma de não ficar criando varios equipamentos para o mesmo pedestre sem que buscar 
+
+			// Associa o pedestre ao equipamento
+			// Encontrar uma forma de não ficar criando varios equipamentos para o mesmo
+			// pedestre sem que buscar
 			// Os atualizados do dia
-			// obs : tem um campo de Obervação do que foi atualizado pode ser que de pra usar
-			if(permissaoAlterada) {
+			// obs : tem um campo de Obervação do que foi atualizado pode ser que de pra
+			// usar
+			if (permissaoAlterada) {
 				apagaTodosPedetreEquipamentos(pedestre);
-				
+
 				Permissoes permissao = Permissoes.valueOf("_" + pedestre.getCodigoPermissao());
 
 				for (String nomeEquipamento : permissao.getEquipamentos()) {
@@ -1381,7 +1566,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 					PedestreEquipamentoEntity pedestreEquipamento = new PedestreEquipamentoEntity();
 					pedestreEquipamento.setPedestre(pedestre);
 					pedestreEquipamento.setEquipamento(equipamento);
-					
+
 					try {
 						gravaObjeto(pedestreEquipamento);
 					} catch (Exception e) {
@@ -1396,55 +1581,18 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 				e.printStackTrace();
 			}
 		});
-		
-		//funcionarios demitidos
-		funcionariosDemitidos.forEach(funcionario -> {			
-			Optional<PedestreEntity> pedestreExistente = buscaPedestreExistente(
-					funcionario.getNumeroMatricula(), empresaExistente);
-
-			PedestreEntity pedestre = null;
-			
-			if (pedestreExistente.isPresent()) {
-				pedestre = pedestreExistente.get();			
-				pedestre.updateFuncionarioSenior(funcionario, empresaExistente);
-				pedestre.setExistente(true);
-				
-				try {
-					pedestre = (PedestreEntity) gravaObjeto(pedestre)[0];
-				} catch (Exception e) {
-					e.printStackTrace();
-					throw new RuntimeException();
-				}
-
-			} else {
-				pedestre = new PedestreEntity(funcionario, empresaExistente);
-				try {
-					pedestre = (PedestreEntity) gravaObjeto(pedestre)[0];
-					
-				} catch (Exception e) {
-					e.printStackTrace();
-					throw new RuntimeException();
-				}
-			}
-			try {
-				pedestre = (PedestreEntity) gravaObjeto(pedestre)[0];
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		});
 	}
-	
+
 	private void apagaTodosPedetreEquipamentos(PedestreEntity pedestre) {
-		if(Objects.isNull(pedestre.getEquipamentos()) || pedestre.getEquipamentos().isEmpty()) {
+		if (Objects.isNull(pedestre.getEquipamentos()) || pedestre.getEquipamentos().isEmpty()) {
 			return;
 		}
-		
-		for(PedestreEquipamentoEntity pedestreEquipamento : pedestre.getEquipamentos()) {
+
+		for (PedestreEquipamentoEntity pedestreEquipamento : pedestre.getEquipamentos()) {
 			try {
 				pedestreEquipamento.setDataRemovido(new Date());
 				pedestreEquipamento.setRemovido(true);
-				
+
 				gravaObjeto(pedestreEquipamento);
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -1459,13 +1607,13 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		args.put("ID_CLIENTE", cliente.getId());
 
 		try {
-			List<EquipamentoEntity> listaEquipamentos = (List<EquipamentoEntity>) pesquisaArgFixos(EquipamentoEntity.class,
-					"findByNomeEquipamento", args);
-			
+			List<EquipamentoEntity> listaEquipamentos = (List<EquipamentoEntity>) pesquisaArgFixos(
+					EquipamentoEntity.class, "findByNomeEquipamento", args);
+
 			if (listaEquipamentos != null && !listaEquipamentos.isEmpty()) {
 				return listaEquipamentos.get(0);
 			}
-			
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -1473,183 +1621,6 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		return null;
 	}
 
-	private boolean isPermissaoAlterada(final PedestreEntity pedestre, final FuncionarioSeniorDto funcionario) {
-		if(Objects.isNull(pedestre.getCodigoPermissao()) || pedestre.getCodigoPermissao().isEmpty()) {
-			return true;
-		}
-		
-		return !pedestre.getCodigoPermissao().equals(funcionario.getCodPrm());
-	}
-	
-//	private void associarEquipamentos(PedestreEntity pedestre) {
-//		// TODO Auto-generated method stub
-//		  PedestreEquipamentoEntity pedestreEquipamento = new PedestreEquipamentoEntity();
-//	            pedestreEquipamentoService.adicionaPedestreEquipamentoSenior(pedestreEquipamento, pedestre, pedestre.getPermissao());
-//		
-//	}
-
-	private List<FuncionarioSeniorDto> buscaTodosOsFuncioriosDaEmpresa(final String numEmp, final ClienteEntity cliente) {
-		System.out.println("buscando todos funcionarios da empresa :" + numEmp );
-		IntegracaoSeniorService integracaoSeniorService = new IntegracaoSeniorService(
-				cliente.getIntegracaoSenior().getUsuario(), cliente.getIntegracaoSenior().getSenha());
-
-		return integracaoSeniorService.buscarFuncionarios(numEmp);
-	}
-	
-	private List<FuncionarioSeniorDto> buscarFuncionariosDemitidos(String numEmp, final ClienteEntity cliente) {
-		System.out.println("buscando todos funcionarios demitidos no dia no empresa" + numEmp );
-		
-		LocalDate data = LocalDate.now();
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-		String dataString = data.format(formatter);
-
-		IntegracaoSeniorService integracaoSeniorService = new IntegracaoSeniorService(
-				cliente.getIntegracaoSenior().getUsuario(), cliente.getIntegracaoSenior().getSenha());
-		
-		return integracaoSeniorService.buscarFuncionariosDemitidos(numEmp, dataString);
-	}
-	
-	private List<FuncionarioSeniorDto> buscarFuncionariosAdmitidos(String numEmp, final ClienteEntity cliente) {
-		System.out.println("buscando todos funcionarios demitidos no dia no empresa" + numEmp );
-		
-		LocalDate data = LocalDate.now();
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-		String dataString = data.format(formatter);
-
-		IntegracaoSeniorService integracaoSeniorService = new IntegracaoSeniorService(
-				cliente.getIntegracaoSenior().getUsuario(), cliente.getIntegracaoSenior().getSenha());
-		
-		return integracaoSeniorService.buscarFuncionariosAdmitidos(numEmp, dataString);
-	}
-	
-	@SuppressWarnings("unchecked")
-	private Optional<PedestreEntity> buscaPedestreExistente(String numeroMatricula, EmpresaEntity empresa) {
-		Map<String, Object> args = new HashMap<String, Object>();
-		args.put("MATRICULA", numeroMatricula);
-		args.put("ID_EMPRESA", empresa.getId());
-		args.put("ID_CLIENTE", empresa.getCliente().getId());
-
-		try {
-			List<PedestreEntity> listaPedestres = (List<PedestreEntity>) pesquisaArgFixos(PedestreEntity.class,
-					"findByMatriculaAndIdEmpresaAndIdCliente", args);
-			
-			if (listaPedestres != null && !listaPedestres.isEmpty()) {
-				return Optional.of(listaPedestres.get(0));
-			}
-			
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		return Optional.empty();
-	}
-
-	@SuppressWarnings("unchecked")
-	private Optional<EmpresaEntity> buscaEmpresaExistente(String numEmp, Long idCliente) {
-		Map<String, Object> args = new HashMap<String, Object>();
-		args.put("COD_EMPRESA_SENIOR", numEmp);
-		args.put("ID_CLIENTE", idCliente);
-
-		try {
-			List<EmpresaEntity> listaEmpresas = (List<EmpresaEntity>) pesquisaArgFixos(EmpresaEntity.class,
-					"findByCodSeniorAndIdCliente", args);
-			
-			if (listaEmpresas != null && !listaEmpresas.isEmpty()) {
-				return Optional.of(listaEmpresas.get(0));
-			}
-			
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		return Optional.empty();
-	}
-
-	private List<EmpresaSeniorDto> buscaTodasEmpresasSenior(final ClienteEntity cliente) {
-		// IntegracaoSeniorService integracaoSeniorService = new IntegracaoSeniorService("smartwsintegra", "Sm4rt@s3n10r#");
-		IntegracaoSeniorService integracaoSeniorService = new IntegracaoSeniorService(
-				cliente.getIntegracaoSenior().getUsuario(), cliente.getIntegracaoSenior().getSenha());
-
-		return integracaoSeniorService.buscarEmpresas();
-	}
-
-    private static Object createObject(String json) throws JsonProcessingException {
-        List<FuncionarioResult> result = null;
-        TypeReference<FuncionarioResult> funcionario = new TypeReference<FuncionarioResult>() {
-        };
-        // json = json.equals("[]") ? "" : json;
-        /*
-         * 
-         * try { //result = mapper.readValue(json, new
-         * TypeReference<List<FuncionarioResult>>() {});
-         * 
-         * @SuppressWarnings("unchecked") List<FuncionarioResult> readValue =
-         * (List<FuncionarioResult>) mapper.readValue(json, new
-         * TypeReference<List<FuncionarioResult>>() {}); result = readValue; } catch
-         * (JsonMappingException e) { e.printStackTrace(); }
-         * 
-         */
-        try {
-            result = mapper.readValue(json, new TypeReference<List<FuncionarioResult>>() {
-            });
-        } catch (JsonMappingException e) {
-            e.printStackTrace();
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
-        return result;
-    }
-    
-
-
-	@SuppressWarnings("unchecked")
-	@Override
-	@TransactionAttribute(TransactionAttributeType.REQUIRED)
-	@TransactionTimeout(unit = TimeUnit.HOURS, value = 4)
-	public void importarSOC() throws Exception {
-		List<ClienteEntity> clientes = (List<ClienteEntity>) pesquisaSimples(ClienteEntity.class, "findAllComIntegracaoSOC", new HashMap<>());		
-		List<ParametroEntity> configs = (List<ParametroEntity>) pesquisaSimples(ParametroEntity.class, "findClienteIdPreencherCartao", new HashMap<>());
-		
-		if(clientes == null || clientes.isEmpty()) {
-			System.out.println("Não existem clientes com integração SOC");
-			return;
-		}
-		
-		List<EmpresaResult> empresasSoc = getEmpresasSoc();
-		
-		if(empresasSoc == null || empresasSoc.isEmpty()) {
-			System.out.println("Nenhuma empresa SOC foi encontrada");
-			return;
-		}
-
-		System.out.println("Empresas SOC encontradas: " + empresasSoc.size());
-		
-		for(EmpresaResult empresa : empresasSoc ) {
-			
-			List<FuncionarioResult> funcionarios = getFuncionariosEmpresaSoc(empresa.CODIGO);
-		
-			if(funcionarios == null || funcionarios.isEmpty()) {
-				continue;
-			}
-
-
-			for (FuncionarioResult funcionario : funcionarios) {
-				if(funcionario.CPF.equals("70896644499")) {
-					System.out.println("teste");
-				}
-
-
-				ClienteEntity clienteFromFuncionario = getClienteFromFuncionario(funcionario.CCUSTO, clientes);
-		
-				if(clienteFromFuncionario != null) {
-					System.out.println(String.format("Gravando funcionario: %s, %s, %s", funcionario.NOME, funcionario.NOMEEMPRESA, funcionario.CCUSTO));
-					salvarFuncionario(funcionario, clienteFromFuncionario, configs);
-					System.out.println("salvou no cliente : " + clienteFromFuncionario.getNomeUnidadeOrganizacional() + "iD :" + clienteFromFuncionario.getId());
-				}
-			}
-			
-		}
-}
 	private static Object createEmpresa(String json) throws JsonProcessingException {
 		try {
 			return mapper.readValue(json, new TypeReference<List<EmpresaResult>>() {
@@ -1663,9 +1634,9 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 
 		return null;
 	}
-	
-	//criar outro importaSOC, com os mesmos parametros, retornando empresa
-	
+
+	// criar outro importaSOC, com os mesmos parametros, retornando empresa
+
 	@SuppressWarnings("unchecked")
 	private List<EmpresaResult> getEmpresasSoc() throws Exception {
 		ExportaDadosWsService service1 = new ExportaDadosWsService();
@@ -1680,14 +1651,14 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 			if (!dados.isErro()) {
 				return (List<EmpresaResult>) createEmpresa(dados.getRetorno());
 			}
-			
+
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();
 		}
-		
+
 		return null;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	private List<FuncionarioResult> getFuncionariosEmpresaSoc(final String codigoEmpresa) {
 		try {
@@ -1695,14 +1666,14 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 			ExportaDadosWs port1 = service1.getExportaDadosWsPort();
 
 			ExportaDadosWsVo parans = new ExportaDadosWsVo();
-			
+
 			parans.setParametros(createJSON(new FuncionarioParam(codigoEmpresa, "158145", "1529604199704dc79b48")));
 
 			ExportaDadosWsVo dados = port1.exportaDadosWs(parans);
-			
+
 			if (!dados.isErro()) {
 				return (List<FuncionarioResult>) createFuncionario(dados.getRetorno());
-				
+
 			} else {
 				System.out.println("Erro na chamada do WebService SOC: " + dados.getMensagemErro());
 			}
@@ -1710,49 +1681,47 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 		return null;
 	}
 
-
 	@SuppressWarnings("unused")
-	private void salvarFuncionario(FuncionarioResult funcionario, ClienteEntity cliente, List<ParametroEntity> configs){
+	private void salvarFuncionario(FuncionarioResult funcionario, ClienteEntity cliente,
+			List<ParametroEntity> configs) {
 		SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 
 		if (funcionario.CPF == null || "".equals(funcionario.CPF)) {
 			return;
 		}
-		
-	    boolean facialHabilitado = false;
+
+		boolean facialHabilitado = false;
 //	    boolean cartaoNuloOuVazio = false;
-	    
 
 		for (ParametroEntity paramtro : configs) {
 			if (paramtro.getCliente().getId() == cliente.getId()) {
-				facialHabilitado = true;                
-	            break; // Saia do loop, já que encontramos o ID
-	            }
+				facialHabilitado = true;
+				break; // Saia do loop, já que encontramos o ID
 			}
-		
+		}
+
 		PedestreEntity pedestre = recuperaPedestrePorCPF(funcionario.CPF, cliente.getId());
-		
-		
+
 		if (pedestre == null) {
 			pedestre = new PedestreEntity();
 			pedestre.setTipo(TipoPedestre.PEDESTRE);
 			pedestre.setNome(funcionario.NOME);
 			pedestre.setCliente(cliente);
 			pedestre.setCpf(funcionario.CPF);
-			
-			if(facialHabilitado == true) {		
+
+			if (facialHabilitado == true) {
 				pedestre.setCodigoCartaoAcesso(removeNaoNumeros(funcionario.CPF));
 			}
-		
-			
+
 			try {
 				pedestre.setDataNascimento(sdf.parse(funcionario.DATA_NASCIMENTO));
-			} catch (ParseException e) {}
-			
+			} catch (ParseException e) {
+			}
+
 			pedestre.setObservacoes("Admissão em: " + funcionario.DATA_ADMISSAO);
 			pedestre.setCodigoExterno(funcionario.CODIGO);
 
@@ -1766,20 +1735,18 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		} else {
 			// se pedestre existe mas não tem
 			/*
-			if(pedestre.getCodigoCartaoAcesso() == null 
-					|| pedestre.getCodigoCartaoAcesso().equals("")
-					|| pedestre.getCodigoCartaoAcesso().isEmpty()) {
-				cartaoNuloOuVazio = true;
-			}
-			*/
+			 * if(pedestre.getCodigoCartaoAcesso() == null ||
+			 * pedestre.getCodigoCartaoAcesso().equals("") ||
+			 * pedestre.getCodigoCartaoAcesso().isEmpty()) { cartaoNuloOuVazio = true; }
+			 */
 			if (pedestre.getCodigoExterno() == null || "".equals(pedestre.getCodigoExterno())) {
 				pedestre.setCodigoExterno(funcionario.CODIGO);
 			}
-			
-			if(facialHabilitado) {
+
+			if (facialHabilitado) {
 				pedestre.setCodigoCartaoAcesso(removeNaoNumeros(funcionario.CPF));
 			}
-			
+
 		}
 
 		// verifica situação
@@ -1790,7 +1757,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 				pedestre.setObservacoes("Situação indicada: " + funcionario.SITUACAO);
 				System.out.println("situação : " + funcionario.SITUACAO);
 			}
-			
+
 			inativo = true;
 		}
 
@@ -1817,31 +1784,32 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		}
 
 	}
+
 	private String removeNaoNumeros(String matriculaFuncionario) {
 		String numeroCartao = "";
-		
-		if(matriculaFuncionario.isEmpty() || matriculaFuncionario == null) {
+
+		if (matriculaFuncionario.isEmpty() || matriculaFuncionario == null) {
 			return numeroCartao;
 		}
-		
-		numeroCartao =  matriculaFuncionario.replaceAll("[^0-9]", ""); 
-		
-		if(numeroCartao.length() > 8) {
-			numeroCartao = numeroCartao.substring(0,8);
+
+		numeroCartao = matriculaFuncionario.replaceAll("[^0-9]", "");
+
+		if (numeroCartao.length() > 8) {
+			numeroCartao = numeroCartao.substring(0, 8);
 		}
 		return numeroCartao;
 	}
-	
+
 	private ClienteEntity getClienteFromFuncionario(String centroDeCusto, List<ClienteEntity> clientes) {
-		/*String CentroDeCustoCorrigido = centroDeCusto.replaceAll("\\t$", "");*/
+		/* String CentroDeCustoCorrigido = centroDeCusto.replaceAll("\\t$", ""); */
 		String CentroDeCustoCorrigido = centroDeCusto.replaceAll("\\t+$", "").replaceAll("^0+", "");
 
-		for(ClienteEntity cliente : clientes) {
-			if(CentroDeCustoCorrigido.equals(cliente.getIntegracaoSoc().getEmpresa())) {
+		for (ClienteEntity cliente : clientes) {
+			if (CentroDeCustoCorrigido.equals(cliente.getIntegracaoSoc().getEmpresa())) {
 				return cliente;
 			}
 		}
-		
+
 		return null;
 	}
 
@@ -1881,7 +1849,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 		return null;
 	}
 
@@ -1995,7 +1963,8 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 			args.put("cpf_equals", cpf);
 			args.put("cliente.id", idCliente);
 
-			List<PedestreEntity> pedestres = (List<PedestreEntity>) pesquisaSimplesLimitado(PedestreEntity.class, "findAll", args, 0, 1);
+			List<PedestreEntity> pedestres = (List<PedestreEntity>) pesquisaSimplesLimitado(PedestreEntity.class,
+					"findAll", args, 0, 1);
 
 			if (pedestres != null && !pedestres.isEmpty()) {
 				return pedestres.get(0);
@@ -2004,7 +1973,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 		return null;
 	}
 
@@ -2013,7 +1982,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 	@TransactionTimeout(unit = TimeUnit.HOURS, value = 4)
 	public void exportaSOC(ClienteEntity cliente) throws Exception {
 		System.out.println("Iniciando rotina de exportação: idClient = " + cliente.getId());
-		
+
 		ImportacaoEntity log = new ImportacaoEntity();
 		log.setData(new Date());
 		log.setTipoImportacao("SOCGED");
@@ -2081,29 +2050,31 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 			e.printStackTrace();
 			log.setObservacao("Erro inesperado ao gerar log de acesso diário: ");
 		}
-		
-		if(log.getArquivo() == null) {
+
+		if (log.getArquivo() == null) {
 			log.setArquivo(new byte[1]);
 		}
 
 		// finaliza exportação
 		log.setDataFim(new Date());
-		gravaObjeto(log);		
+		gravaObjeto(log);
 	}
 
 	@SuppressWarnings("unchecked")
 	private List<AcessoEntity> recuperaAcessosDoDia(ClienteEntity cliente) throws Exception {
 		Map<String, Object> args = new HashMap<String, Object>();
-		
+
 		LocalDateTime lastDayAcessIni = LocalDate.now().minusDays(1).atStartOfDay();
 		LocalDateTime lastDayAcessFim = LocalDate.now().minusDays(1).atTime(23, 59, 59);
 
-		//args.put("data_maior_data", DateUtils.getInstance().ajustaDataIni(currentDate).getTime());
-		//args.put("data_menor_data", DateUtils.getInstance().ajustaDataFim(currentDate).getTime());
-		
+		// args.put("data_maior_data",
+		// DateUtils.getInstance().ajustaDataIni(currentDate).getTime());
+		// args.put("data_menor_data",
+		// DateUtils.getInstance().ajustaDataFim(currentDate).getTime());
+
 		args.put("data_maior_data", Date.from(lastDayAcessIni.atZone(ZoneId.systemDefault()).toInstant()));
 		args.put("data_menor_data", Date.from(lastDayAcessFim.atZone(ZoneId.systemDefault()).toInstant()));
-		
+
 		args.put("cliente.id", cliente.getId());
 		args.put("pedestre.tipo", TipoPedestre.PEDESTRE);
 
@@ -2125,7 +2096,6 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		String csv = "MATRICULA;" + "NUMERO CARTAO ACESSO;" + "NOME;" + "EMPRESA;" + "CARGO;" + "DATA NASCIMENTO;"
 				+ "DATA ACESSO;" + "EQUIPAMENTO;" + "TIPO ACESSO;" + "SENTIDO\n";
 
-
 		// colunas
 		for (AcessoEntity acesso : acessos) {
 			csv += (acesso.getPedestre().getMatricula() == null ? "" : acesso.getPedestre().getMatricula()) + ";";
@@ -2137,7 +2107,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 			csv += (acesso.getPedestre().getDataNascimento() == null ? ""
 					: sdfNascimento.format(acesso.getPedestre().getDataNascimento())) + ";";
 			csv += (acesso.getData() == null ? "" : sdfAcesso.format(acesso.getData().getTime())) + ";";
-			
+
 			csv += (acesso.getEquipamento() == null ? "" : acesso.getEquipamento()) + ";";
 			csv += (acesso.getTipo() == null ? ""
 					: (acesso.getTipo().equals("ATIVO") ? "LIBERADO" : "BLOQUEADO")
@@ -2150,7 +2120,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 
 		return csv.getBytes();
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	private PedestreEntity buscaPedestrePorNome(String nome) {
 		PedestreEntity atualizaPedestre = null;

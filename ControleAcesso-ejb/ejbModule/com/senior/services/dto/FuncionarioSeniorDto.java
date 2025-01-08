@@ -4,7 +4,9 @@ public class FuncionarioSeniorDto {
 	
     String codPrm;   // cod permissão
     String datAdm;
+    String datAfa;
     String datDem;
+    String datAlt;
     String datNas;
     String dddtelefone;
     String numtelefone;
@@ -129,6 +131,17 @@ public class FuncionarioSeniorDto {
 	public void setObs(String obs) {
 		this.obs = obs;
 	}
-    
-	
+	public String getDatAfa() {
+		return datAfa;
+	}
+	public void setDatAfa(String datAfa) {
+		this.datAfa = datAfa;
+	}
+	public String getDatAlt() {
+		return datAlt;
+	}
+	public void setDatAlt(String datAlt) {
+		this.datAlt = datAlt;
+	}
+   	
 }

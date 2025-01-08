@@ -66,6 +66,12 @@ import br.com.startjob.acesso.modelo.enumeration.Status;
 				query = "select obj from EmpresaEntity obj "
 					  + "where obj.cliente.id = :ID_CLIENTE "
 					  + "and obj.dataAlteracao >= :LAST_SYNC "
+					  + "order by obj.id asc"),
+	@NamedQuery(name = "EmpresaEntity.findByCodSeniorAndIdCliente",
+				query = "select obj from EmpresaEntity obj "
+					  + "left join fetch obj.cliente c "
+					  + "where obj.codEmpresaSenior = :COD_EMPRESA_SENIOR "
+					  + "and obj.cliente.id = :ID_CLIENTE "
 					  + "order by obj.id asc")
 })
 @SuppressWarnings("serial")

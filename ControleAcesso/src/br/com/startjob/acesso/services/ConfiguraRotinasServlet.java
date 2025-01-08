@@ -40,6 +40,7 @@ public class ConfiguraRotinasServlet extends BaseServlet {
 		log.info("Registra rotinas recorrentes...");
 
 		registraTimersParaSOC();
+		registraTimersParaSenior();
 	}
 
 	@SuppressWarnings("unchecked")
