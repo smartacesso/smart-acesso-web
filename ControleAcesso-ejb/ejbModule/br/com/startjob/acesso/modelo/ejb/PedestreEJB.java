@@ -1380,13 +1380,13 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		return Optional.empty();
 	}
 
-	private List<EmpresaSeniorDto> buscaTodasEmpresasSenior(final ClienteEntity cliente) {
+	private EmpresaSeniorDto buscaTodasEmpresasSenior(final ClienteEntity cliente) {
 		// IntegracaoSeniorService integracaoSeniorService = new
 		// IntegracaoSeniorService("smartwsintegra", "Sm4rt@s3n10r#");
 		IntegracaoSeniorService integracaoSeniorService = new IntegracaoSeniorService(
 				cliente.getIntegracaoSenior().getUsuario(), cliente.getIntegracaoSenior().getSenha());
 
-		return integracaoSeniorService.buscarEmpresas();
+		return integracaoSeniorService.buscarEmpresas().get(0);
 	}
 
 	private static Object createObject(String json) throws JsonProcessingException {
@@ -1486,12 +1486,12 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 	}
 
 	private void importarEmpresasSenior(final ClienteEntity cliente) {
-		List<EmpresaSeniorDto> empresasSenior = buscaTodasEmpresasSenior(cliente);
-		if (Objects.isNull(empresasSenior) || empresasSenior.isEmpty()) {
+		EmpresaSeniorDto empresaSenior = buscaTodasEmpresasSenior(cliente);
+		if (Objects.isNull(empresaSenior)) {
 			return;
 		}
 
-		empresasSenior.forEach(empresaSenior -> {
+		
 			Optional<EmpresaEntity> empresaExistenteOpt = buscaEmpresaExistente(empresaSenior.getNumEmp(),
 					cliente.getId());
 
@@ -1523,7 +1523,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 					e.printStackTrace();
 				}
 			}
-		});
+		;
 	}
 
 	private void importaFuncionariosSenior(final EmpresaEntity empresaExistente, final ClienteEntity cliente) {
