@@ -246,6 +246,7 @@ public class RensponsibleApiService extends BaseService {
 			newsLetterOut.setDescription(news.getDescricao());
 			newsLetterOut.setImage(news.getImage());
 			newsLetterOut.setTitle(news.getTitle());
+			newsLetterOut.setEventDate(news.getEventDate());
 			
 			newsLetterOutList.add(newsLetterOut);
 		});
