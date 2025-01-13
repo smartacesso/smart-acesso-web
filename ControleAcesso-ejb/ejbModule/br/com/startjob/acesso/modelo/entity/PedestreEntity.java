@@ -50,19 +50,12 @@ import br.com.startjob.acesso.modelo.utils.EncryptionUtils;
 		@NamedQuery(name = "PedestreEntity.findById", query = "select obj from PedestreEntity obj "
 				+ "where obj.id = :ID order by obj.id asc"),
 		@NamedQuery(name = "PedestreEntity.findByIdComplete", query = "select obj from PedestreEntity obj "
-				+ " left join fetch obj.endereco en " 
-				+ " left join fetch obj.empresa emp "
-				+ " left join fetch obj.departamento dep " 
-				+ " left join fetch obj.centroCusto cec "
-				+ " left join fetch obj.cargo ca " 
-				+ " left join fetch obj.cliente cli " 
-				+ " left join obj.regras re "
-				+ " left join obj.equipamentos eq " 
-				+ " left join obj.documentos doc "
-				+ " left join obj.biometrias bio " 
-				+ " left join obj.mensagensPersonalizadas men "
-				+ " left join obj.responsavel res "
-				+ "where obj.id = :ID order by obj.id asc"),
+				+ " left join fetch obj.endereco en " + " left join fetch obj.empresa emp "
+				+ " left join fetch obj.departamento dep " + " left join fetch obj.centroCusto cec "
+				+ " left join fetch obj.cargo ca " + " left join fetch obj.cliente cli " + " left join obj.regras re "
+				+ " left join obj.equipamentos eq " + " left join obj.documentos doc "
+				+ " left join obj.biometrias bio " + " left join obj.mensagensPersonalizadas men "
+				+ " left join obj.responsavel res " + "where obj.id = :ID order by obj.id asc"),
 		@NamedQuery(name = "PedestreEntity.findAllComEmpresa", query = "select obj from PedestreEntity obj "
 				+ " left join fetch obj.empresa e " + "where (obj.removido = false or obj.removido is null) "
 				+ "order by obj.id asc"),
@@ -98,14 +91,10 @@ import br.com.startjob.acesso.modelo.utils.EncryptionUtils;
 				+ " left join fetch obj.cliente c " + "where (obj.removido = false or obj.removido is null) "
 				+ "	   and lower(c.nomeUnidadeOrganizacional) = lower(:UNIDADE_ORGANIZACIONAL) "
 				+ "	   and obj.login = :LOGIN and obj.senha = :SENHA "),
-		@NamedQuery(name = "PedestreEntity.findByMatriculaAndIdEmpresaAndIdCliente",
-					query = "select obj from PedestreEntity obj "
-							+ "left join fetch obj.empresa e "
-							+ "left join fetch obj.equipamentos eq "
-							+ "where obj.matricula = :MATRICULA "
-							+ "and e.id = :ID_EMPRESA "
-							+ "and obj.cliente.id = :ID_CLIENTE ")
-})
+		@NamedQuery(name = "PedestreEntity.findByMatriculaAndIdEmpresaAndIdCliente", query = "select obj from PedestreEntity obj "
+				+ "left join fetch obj.empresa e " + "left join fetch obj.equipamentos eq "
+				+ "where obj.matricula = :MATRICULA " + "and e.id = :ID_EMPRESA "
+				+ "and obj.cliente.id = :ID_CLIENTE ") })
 
 @SuppressWarnings("serial")
 public class PedestreEntity extends ClienteBaseEntity {
@@ -229,11 +218,11 @@ public class PedestreEntity extends ClienteBaseEntity {
 
 	@Column(name = "SENHA", nullable = true, length = 255)
 	private String senha;
-	
+
 	@Temporal(TemporalType.TIMESTAMP)
-	@Column(name="DATA_CADASTRO_FOTO_HIKIVISION", nullable=true, length=30)
+	@Column(name = "DATA_CADASTRO_FOTO_HIKIVISION", nullable = true, length = 30)
 	private Date dataCadastroFotoNaHikivision;
-	
+
 	@Transient
 	private String senhaLivre;
 
@@ -267,7 +256,7 @@ public class PedestreEntity extends ClienteBaseEntity {
 
 	@Column(name = "CODIGO_EXTERNO", nullable = true, length = 100)
 	private String codigoExterno;
-	
+
 	@Column(name = "CODIGO_PERMISSAO", nullable = true, length = 15)
 	private String codigoPermissao;
 
@@ -287,70 +276,69 @@ public class PedestreEntity extends ClienteBaseEntity {
 	@Transient
 	private CadastroExternoEntity facialAtual;
 
-
 	public PedestreEntity() {
 
 	}
 
 	public PedestreEntity(final FuncionarioSeniorDto funcionarioSeniorDto, final EmpresaEntity empresaEntity) {
-		
+
 		LocalDate hoje = LocalDate.now();
-		
+
 		this.nome = funcionarioSeniorDto.getNome();
 		this.matricula = funcionarioSeniorDto.getNumeroMatricula();
 		this.telefone = funcionarioSeniorDto.getDddtelefone() + funcionarioSeniorDto.getNumtelefone();
-		this.codigoCartaoAcesso =  funcionarioSeniorDto.getNumCracha();
+		this.codigoCartaoAcesso = funcionarioSeniorDto.getNumCracha();
 		this.rg = funcionarioSeniorDto.getRg();
-		this.codigoPermissao = funcionarioSeniorDto.getCodPrm(); //codigo permissao
+		this.codigoPermissao = funcionarioSeniorDto.getCodPrm(); // codigo permissao
 		this.cliente = empresaEntity.getCliente();
 		this.empresa = empresaEntity;
 		this.tipo = TipoPedestre.PEDESTRE;
 		this.sempreLiberado = true;
-		
+
 		if (Objects.nonNull(funcionarioSeniorDto.getDatDem())) {
-			this.observacoes = "DATA DEMISSAO : " + funcionarioSeniorDto.getDatDem()
-			+ " | MOTIVO : DEMISSAO" ;
+			this.observacoes = "DATA DEMISSAO : " + funcionarioSeniorDto.getDatDem() + " | MOTIVO : DEMISSAO";
 			this.status = Status.INATIVO;
-		}else if(Objects.nonNull(funcionarioSeniorDto.getDatAfa())) {
-			this.observacoes = "DATA AFASTAMENTO: " + funcionarioSeniorDto.getDatAfa()
-			+ " | MOTIVO: afastamento | " ;
-			if(Objects.nonNull(funcionarioSeniorDto.getDesAfa())) {
-				this.observacoes += " DESCRICAO: " + funcionarioSeniorDto.getDesAfa();
+		} else if (Objects.nonNull(funcionarioSeniorDto.getDatAfa())) {
+			this.observacoes = "DATA AFASTAMENTO: " + funcionarioSeniorDto.getDatAfa() + " | MOTIVO: afastamento";
+			if (Objects.nonNull(funcionarioSeniorDto.getDesAfa())) {
+				this.observacoes += " | DESCRICAO: " + funcionarioSeniorDto.getDesAfa();
 			}
 			this.status = Status.INATIVO;
-		}else {
-			this.status = Status.ATIVO;
-		}
-   }
-
-	public void updateFuncionarioSenior(final FuncionarioSeniorDto funcionarioSeniorDto, final EmpresaEntity empresaEntity) {
-
-		this.nome = funcionarioSeniorDto.getNome();
-		this.matricula = funcionarioSeniorDto.getNumeroMatricula();
-		this.telefone = funcionarioSeniorDto.getDddtelefone() + funcionarioSeniorDto.getNumtelefone();
-		this.codigoCartaoAcesso =  funcionarioSeniorDto.getNumCracha();
-		this.rg = funcionarioSeniorDto.getRg();
-		this.codigoPermissao = funcionarioSeniorDto.getCodPrm(); //codigo permissao
-		this.sempreLiberado = true;
-		this.setDataAlteracao(new Date());
-		
-		if (Objects.nonNull(funcionarioSeniorDto.getDatDem())) {
-			this.observacoes = "DATA DEMISSAO : " + funcionarioSeniorDto.getDatDem()
-			+ " | MOTIVO : DEMISSAO" ;
-			this.status = Status.INATIVO;
-		}else if(Objects.nonNull(funcionarioSeniorDto.getDatAfa())) {
-			this.observacoes = "DATA AFASTAMENTO: " + funcionarioSeniorDto.getDatAfa()
-			+ " | MOTIVO: afastamento | " ;
-			if(Objects.nonNull(funcionarioSeniorDto.getDesAfa())) {
-				this.observacoes += " DESCRICAO: " + funcionarioSeniorDto.getDesAfa();
-			}
-			this.status = Status.INATIVO;
-		}else {
-			this.observacoes = "STATUS : ATIVO";
+		} else {
 			this.status = Status.ATIVO;
 		}
 	}
 
+	public void updateFuncionarioSenior(final FuncionarioSeniorDto funcionarioSeniorDto,
+			final EmpresaEntity empresaEntity) {
+
+		this.nome = funcionarioSeniorDto.getNome();
+		this.matricula = funcionarioSeniorDto.getNumeroMatricula();
+		this.telefone = funcionarioSeniorDto.getDddtelefone() + funcionarioSeniorDto.getNumtelefone();
+		this.codigoCartaoAcesso = funcionarioSeniorDto.getNumCracha();
+		this.rg = funcionarioSeniorDto.getRg();
+		this.codigoPermissao = funcionarioSeniorDto.getCodPrm(); // codigo permissao
+		this.sempreLiberado = true;
+		this.setDataAlteracao(new Date());
+
+		if (Objects.nonNull(funcionarioSeniorDto.getDatDem())) {
+			this.observacoes = "DATA DEMISSAO : " + funcionarioSeniorDto.getDatDem() + " | MOTIVO : DEMISSAO";
+			this.status = Status.INATIVO;
+		} else if (Objects.nonNull(funcionarioSeniorDto.getDatAfa())) {
+			this.observacoes = "DATA AFASTAMENTO: " + funcionarioSeniorDto.getDatAfa() + " | MOTIVO: afastamento";
+			if (Objects.nonNull(funcionarioSeniorDto.getDesAfa())) {
+				this.observacoes += " | DESCRICAO: " + funcionarioSeniorDto.getDesAfa();
+			}
+			this.status = Status.INATIVO;
+		} else {
+			// Atualiza para ativo somente se o status atual não for INATIVO
+			if (this.status != Status.INATIVO) {
+				this.observacoes = "STATUS : ATIVO";
+				this.status = Status.ATIVO;
+			}
+		}
+
+	}
 
 	public String getAllPhonesFormatted() {
 		String tel = getTelefone();
@@ -782,7 +770,6 @@ public class PedestreEntity extends ClienteBaseEntity {
 		this.dataCadastroFotoNaHikivision = dataCadastroFotoNaHikivision;
 	}
 
-
 	public String getCodigoPermissao() {
 		return codigoPermissao;
 	}
@@ -799,6 +786,5 @@ public class PedestreEntity extends ClienteBaseEntity {
 		this.responsavel = responsavel;
 
 	}
-	
-	
+
 }
