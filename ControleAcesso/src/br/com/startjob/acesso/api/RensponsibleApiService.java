@@ -4,6 +4,8 @@ import java.util.Optional;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
 import java.util.Date;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -20,6 +22,7 @@ import com.google.gson.GsonBuilder;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
@@ -31,6 +34,10 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.IOUtils;
+import org.glassfish.jersey.media.multipart.FormDataParam;
+import org.jboss.resteasy.annotations.providers.multipart.MultipartForm;
 
 import br.com.startjob.acesso.modelo.ejb.ResponsibleEJBRemote;
 import br.com.startjob.acesso.modelo.entity.AcessoEntity;
@@ -46,6 +53,7 @@ import br.com.startjob.acesso.to.responsible.ResponsibleLoginInput;
 import br.com.startjob.acesso.to.responsible.ResponsibleLoginOutput;
 import br.com.startjob.acesso.to.responsible.TokenNotificationOutput;
 import br.com.startjob.acesso.to.responsible.TokenOutput;
+import br.com.startjob.acesso.utils.FileUploadForm;
 import br.com.startjob.acesso.modelo.utils.*;
 
 @Path("/responsible")
@@ -197,25 +205,37 @@ public class RensponsibleApiService extends BaseService {
 	@POST
 	@Path("/news")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response newsLetter (@HeaderParam("token") String token, @HeaderParam("description") String description, 
-			@HeaderParam("title") String title, @HeaderParam("eventDate") String eventDate, byte[] image) throws Exception {
-		ResponsibleEJBRemote responsibleEJB = (ResponsibleEJBRemote) getEjb("ResponsibleEJB");
+	@Consumes(MediaType.MULTIPART_FORM_DATA)
+	public Response newsLetter(
+	    @HeaderParam("token") String token, @HeaderParam("description") String description, @HeaderParam("title") String title,
+	    @HeaderParam("eventDate") String eventDate,
+	    @MultipartForm FileUploadForm imageStream) throws Exception {
 		
-		TokenOutput tokenResponse =(TokenOutput) decriptToken(token);
+		byte ptext[] = description.getBytes("ISO-8859-1"); 
+		description = new String(ptext, "UTF-8"); 
 		
-		if(Objects.isNull(tokenResponse)) {
-			return Response.status(Status.UNAUTHORIZED).build();
-		}
-		Date date = new Date();
-		
-		if(Objects.nonNull(eventDate)) {
-			date = (Date) sdf.parse(eventDate);
-		}
-		
-		responsibleEJB.createNewsLetter(tokenResponse.getIdResponsible(), description, title, image, date);
+		byte ptext1[] = title.getBytes("ISO-8859-1"); 
+		title = new String(ptext1, "UTF-8"); 
 
-		return Response.status(Status.CREATED).build();
+	    ResponsibleEJBRemote responsibleEJB = (ResponsibleEJBRemote) getEjb("ResponsibleEJB");
+	    TokenOutput tokenResponse = (TokenOutput) decriptToken(token);
+
+	    if (Objects.isNull(tokenResponse)) {
+	        return Response.status(Status.UNAUTHORIZED).build();
+	    }
+
+	    Date date = new Date();
+	    if (Objects.nonNull(eventDate)) {
+	        date = (Date) sdf.parse(eventDate);
+	    }
+
+	    responsibleEJB.createNewsLetter(tokenResponse.getIdResponsible(), description, title, imageStream.getFileData(), date);
+
+	    return Response.status(Status.CREATED).build();
 	}
+
+
+
 	
 	@GET
 	@Path("/news")
@@ -244,7 +264,7 @@ public class RensponsibleApiService extends BaseService {
 			NewsLetterOutput newsLetterOut = new NewsLetterOutput();
 			
 			newsLetterOut.setDescription(news.getDescricao());
-			newsLetterOut.setImage(news.getImage());
+			newsLetterOut.setImage(Base64.encodeBase64String(news.getImage()));
 			newsLetterOut.setTitle(news.getTitle());
 			newsLetterOut.setEventDate(news.getEventDate());
 			

@@ -7,7 +7,7 @@ public class NewsLetterOutput {
 	
 	private String title;
 	private String description;
-	private byte[] image;
+	private String image;
 	private Date eventDate;
 	public String getTitle() {
 		return title;
@@ -22,10 +22,10 @@ public class NewsLetterOutput {
 	public void setDescription(String description) {
 		this.description = description;
 	}
-	public byte[] getImage() {
+	public String getImage() {
 		return image;
 	}
-	public void setImage(byte[] image) {
+	public void setImage(String image) {
 		this.image = image;
 	}
 	public Date getEventDate() {
