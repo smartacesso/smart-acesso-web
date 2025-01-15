@@ -99,6 +99,22 @@ public class HorarioEntity extends BaseEntity {
 	@Transient
 	private Boolean saturday;
 	
+	public HorarioEntity() {
+	}
+
+	public HorarioEntity newHorarioEntity(final PedestreRegraEntity pedestreRegraEntity) {
+		final HorarioEntity newHorarioEntity = new HorarioEntity();
+		newHorarioEntity.setNome(nome + " pedestre");
+		newHorarioEntity.setStatus(status);
+		newHorarioEntity.setPedestreRegra(pedestreRegraEntity);
+		newHorarioEntity.setDiasSemana(diasSemana);
+		newHorarioEntity.setHorarioInicio(horarioInicio);
+		newHorarioEntity.setHorarioFim(horarioFim);
+		newHorarioEntity.setQtdeDeCreditos(qtdeDeCreditos);
+		
+		return newHorarioEntity;
+	}
+	
 	public Long getId() {
 		return id;
 	}
@@ -219,6 +235,14 @@ public class HorarioEntity extends BaseEntity {
 	}
 	public void setQtdeDeCreditos(Long qtdeDeCreditos) {
 		this.qtdeDeCreditos = qtdeDeCreditos;
+	}
+
+	public PedestreRegraEntity getPedestreRegra() {
+		return pedestreRegra;
+	}
+
+	public void setPedestreRegra(PedestreRegraEntity pedestreRegra) {
+		this.pedestreRegra = pedestreRegra;
 	}
 
 }

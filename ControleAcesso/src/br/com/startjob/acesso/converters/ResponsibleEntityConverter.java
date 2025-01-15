@@ -24,7 +24,7 @@ public class ResponsibleEntityConverter implements Converter {
 
     @Override
     public Object getAsObject(FacesContext context, UIComponent component, String value) {
-        if (value == null || value.isEmpty()) {
+        if (value == null || value.trim().isEmpty() || "null".equalsIgnoreCase(value)) {
             return null;
         }
     	Map<String, Object> args = new HashMap<String, Object>();

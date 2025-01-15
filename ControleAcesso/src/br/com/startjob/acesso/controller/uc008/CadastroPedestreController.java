@@ -48,6 +48,7 @@ import br.com.startjob.acesso.modelo.entity.DocumentoEntity;
 import br.com.startjob.acesso.modelo.entity.EmpresaEntity;
 import br.com.startjob.acesso.modelo.entity.EnderecoEntity;
 import br.com.startjob.acesso.modelo.entity.EquipamentoEntity;
+import br.com.startjob.acesso.modelo.entity.HorarioEntity;
 import br.com.startjob.acesso.modelo.entity.MensagemEquipamentoEntity;
 import br.com.startjob.acesso.modelo.entity.ParametroEntity;
 import br.com.startjob.acesso.modelo.entity.PedestreEntity;
@@ -651,11 +652,15 @@ public class CadastroPedestreController extends CadastroBaseController {
 			pedestreRegra.setDataFimPeriodo(pedestreRegra.getRegra().getDataFimPeriodo());
 		
 		if(Objects.nonNull(pedestreRegra.getRegra().getHorarios()) && !pedestreRegra.getRegra().getHorarios().isEmpty()) {
-			pedestreRegra.setHorarios(pedestreRegra.getRegra().getHorarios());
+			List<HorarioEntity> horarios = pedestreRegra.getRegra().getHorarios()
+				.stream()
+				.map(pr -> pr.newHorarioEntity(pedestreRegra))
+				.collect(Collectors.toList());
+			
+			pedestreRegra.setHorarios(horarios);
 		}
 		
 		if(pedestreRegra.getRegra().getTipo().equals(TipoRegra.ACESSO_CREDITO)
-
 				&& pedestreRegra.getQtdeDeCreditos() == null) {
 			mensagemFatal("", "#A quantidade de créditos é obrigatória.");
 			return;
@@ -667,14 +672,15 @@ public class CadastroPedestreController extends CadastroBaseController {
 			return;
 		}
 
-		if (TipoRegra.ACESSO_UNICO.equals(pedestreRegra.getRegra().getTipo()))
+		if (TipoRegra.ACESSO_UNICO.equals(pedestreRegra.getRegra().getTipo())) {
 			pedestreRegra.setQtdeTotalDeCreditos(1l);
-
+		}
+		
 		pedestreRegra.setPedestre(getPedestreAtual());
 		listaPedestreRegra.add(0, pedestreRegra);
 		pedestreRegra = new PedestreRegraEntity();
 	}
-
+	
 	public void bindDependencies() {
 		PedestreEntity pedestre = getPedestreAtual();
 		pedestre.setResponsavel(responsavel);

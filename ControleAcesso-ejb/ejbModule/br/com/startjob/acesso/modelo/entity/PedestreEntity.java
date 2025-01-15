@@ -271,7 +271,7 @@ public class PedestreEntity extends ClienteBaseEntity {
 	@Column(name = "CODIGO_PERMISSAO", nullable = true, length = 15)
 	private String codigoPermissao;
 
-	@ManyToOne(fetch = FetchType.EAGER)
+	@ManyToOne(cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
 	@JoinColumn(name = "ID_RESPONSAVEL", nullable = true)
 	private ResponsibleEntity responsavel;
 
