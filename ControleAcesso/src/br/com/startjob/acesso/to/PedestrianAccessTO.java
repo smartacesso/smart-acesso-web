@@ -89,7 +89,7 @@ public class PedestrianAccessTO {
 	public PedestrianAccessTO(Object[] objects, String version) throws ParseException {
 	
 		//dados básicos
-		this.id 			= ((BigInteger)objects[0]).longValue();
+		this.id 			= Long.valueOf(objects[0].toString());
 		this.name 			= objects[1].toString();
 		this.cardNumber 	= objects[2] == null ? null : objects[2].toString();
 		this.status 		= objects[3] == null ? "ATIVO" : objects[3].toString();
@@ -108,7 +108,7 @@ public class PedestrianAccessTO {
 		this.removido		= objects[39] == null ? false : Boolean.valueOf(objects[39].toString());
 		this.sempreLiberado   = objects[40] == null ? false : Boolean.valueOf(objects[40].toString());
 		this.habilitarTeclado = objects[41] == null ? false : Boolean.valueOf(objects[41].toString());
-		this.idTemp			= objects[42] == null ? null : ((BigInteger)objects[42]).longValue();
+		this.idTemp			= objects[42] == null ? null : Long.valueOf(objects[42].toString());
 		this.qrCodeParaAcesso = objects[43] == null ? null : objects[43].toString();
 		this.cadastroFacialObrigatorio = objects[44] == null ? false : Boolean.valueOf(objects[44].toString());
 		
@@ -121,10 +121,10 @@ public class PedestrianAccessTO {
 		this.cidade			  = objects[36] == null ? null : objects[36].toString();
 		this.estado			  = objects[37] == null ? null : objects[37].toString();
 		
-		this.idEmpresa		  = objects[45] == null ? null : ((BigInteger)objects[45]).longValue();
-		this.idCargo 		  = objects[46] == null ? null : ((BigInteger)objects[46]).longValue();
-		this.idCentroCusto 	  = objects[47] == null ? null : ((BigInteger)objects[47]).longValue();
-		this.idDepartamento   = objects[48] == null ? null : ((BigInteger)objects[48]).longValue();
+		this.idEmpresa = objects[45] == null ? null : Long.valueOf(objects[45].toString());
+		this.idCargo = objects[46] == null ? null : Long.valueOf(objects[46].toString());
+		this.idCentroCusto = objects[47] == null ? null : Long.valueOf(objects[47].toString());
+		this.idDepartamento = objects[48] == null ? null : Long.valueOf(objects[48].toString());
 		this.luxandIdentifier = objects[50] == null ? null : objects[50].toString();
 		
 		this.enviaSmsAoPassarNaCatraca = objects[49] == null ? false : Boolean.valueOf(objects[49].toString());
@@ -132,13 +132,14 @@ public class PedestrianAccessTO {
 		//digitais cadastradas
 		adicionaBiometria(objects);
 		
-		this.idRegra 			= objects[8] == null ? null : ((BigInteger)objects[8]).longValue();
-		this.quantidadeCreditos = objects[9] == null ? null : ((BigInteger)objects[9]).longValue();
-		this.validadeCreditos 	= objects[10] == null ? null : montaValidadeCredito(((BigInteger)objects[10]).intValue());
-		this.tipoTurno 			= objects[11] == null ? null : objects[11].toString();
-		this.inicioTurno 		= objects[12] == null ? null : criaData(objects[12], sdf);
-		this.dataInicioPeriodo  = objects[21] == null ? null : criaData(objects[21], sdf);
-		this.dataFimPeriodo  	= objects[22] == null ? null : criaData(objects[22], sdf);
+		this.idRegra = objects[8] == null ? null : Long.valueOf(objects[8].toString());
+		this.quantidadeCreditos = objects[9] == null ? null : Long.valueOf(objects[9].toString());
+		this.validadeCreditos = objects[10] == null ? null
+				: montaValidadeCredito(Integer.valueOf(objects[10].toString()));
+		this.tipoTurno = objects[11] == null ? null : objects[11].toString();
+		this.inicioTurno = objects[12] == null ? null : criaData(objects[12], sdf);
+		this.dataInicioPeriodo = objects[21] == null ? null : criaData(objects[21], sdf);
+		this.dataFimPeriodo = objects[22] == null ? null : criaData(objects[22], sdf);
 		try {
 			this.qtdAcessoAntesSinc = objects[63] == null ? null : Integer.valueOf(objects[63].toString());
 		}catch (Exception e) {}
@@ -184,19 +185,19 @@ public class PedestrianAccessTO {
 			this.pedestreRegras = new ArrayList<>();
 		}
 		
-		Long id = ((BigInteger)objects[8]).longValue();
+		Long id = Long.valueOf(objects[8].toString());
 		Long idRegra = null;
 		Date validade = null;
 		Long qtdeTotalDeCreditos = null;
 		try {
-			idRegra = objects[60] == null ? null : ((BigInteger)objects[60]).longValue();
+			idRegra = objects[60] == null ? null : Long.valueOf(objects[60].toString());
 			validade = objects[61] == null ? null : criaData(objects[61], sdf);
-			qtdeTotalDeCreditos = objects[62] == null ? null : ((BigInteger)objects[62]).longValue();
+			qtdeTotalDeCreditos = objects[62] == null ? null : Long.valueOf(objects[62].toString());
 		}catch (Exception e) {
 		}
 
-		Long qtdeDeCreditos = objects[9] == null ? null : ((BigInteger)objects[9]).longValue();
-		Long diasValidadeCredito = objects[10] == null ? null : ((BigInteger)objects[10]).longValue();
+		Long qtdeDeCreditos = objects[9] == null ? null : Long.valueOf(objects[9].toString());
+		Long diasValidadeCredito = objects[10] == null ? null : Long.valueOf(objects[10].toString());
 		Date dataInicioPeriodo = objects[21] == null ? null : criaData(objects[21], sdf);
 		Date dataFimPeriodo = objects[22] == null ? null : criaData(objects[22], sdf);
 		
@@ -225,7 +226,7 @@ public class PedestrianAccessTO {
 		if(this.documentos == null)
 			this.documentos = new ArrayList<>();
 		
-		Long id = ((BigInteger)objects[57]).longValue();
+		Long id = Long.valueOf(objects[57].toString());
 		String nomeDoc = objects[58] == null ? null : objects[58].toString();
 		Date validadeDoc = objects[59] == null ? null : criaData(objects[59], sdf);
 		
@@ -249,9 +250,9 @@ public class PedestrianAccessTO {
 		if(this.mensagens == null)
 			this.mensagens = new ArrayList<PedestrianMessagesTO>();
 
-		Long id = ((BigInteger)objects[18]).longValue();
-		String message = objects[19].toString();
-		Long qtde = ((BigInteger)objects[20]).longValue();
+		Long id = Long.valueOf(objects[18].toString());
+		String message = objects[19] == null ? null : objects[19].toString();
+		Long qtde = objects[20] == null ? null : Long.valueOf(objects[20].toString());
 		String nome = objects[51] == null ? null : objects[51].toString();
 		String status = objects[52] == null ? null : objects[52].toString();
 		Date validade = objects[53] == null ? null : criaData(objects[53].toString(), sdf);
@@ -282,7 +283,7 @@ public class PedestrianAccessTO {
 		Date validadeEquipamento = null;
 		String nomeEquipamento = null;
 		try {
-			id = ((BigInteger)objects[54]).longValue();
+			id = Long.valueOf(objects[54].toString());
 			validadeEquipamento = objects[55] == null ? null : criaData(objects[55], sdf);
 			nomeEquipamento = objects[56] == null ? null : objects[56].toString();
 		}catch (Exception e) {

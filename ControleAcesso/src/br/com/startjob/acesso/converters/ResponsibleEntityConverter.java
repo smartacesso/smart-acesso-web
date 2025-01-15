@@ -3,6 +3,7 @@ package br.com.startjob.acesso.converters;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
@@ -24,7 +25,9 @@ public class ResponsibleEntityConverter implements Converter {
 
     @Override
     public Object getAsObject(FacesContext context, UIComponent component, String value) {
+
         if (value == null || value.trim().isEmpty() || "null".equalsIgnoreCase(value)) {
+
             return null;
         }
     	Map<String, Object> args = new HashMap<String, Object>();

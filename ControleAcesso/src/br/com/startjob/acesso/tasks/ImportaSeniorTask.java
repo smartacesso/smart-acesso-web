@@ -35,14 +35,11 @@ public class ImportaSeniorTask extends TimerTask {
 			
 			PedestreEJBRemote pedestreEJB = ((PedestreEJBRemote) BaseServlet.getEjb(PedestreEJBRemote.class));
 			try {
-				//pedestreEJB.importarSenior();
+				pedestreEJB.importarSenior();
 
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-
-			logger.info("Processo de importação do Senior finalizado...");
-
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

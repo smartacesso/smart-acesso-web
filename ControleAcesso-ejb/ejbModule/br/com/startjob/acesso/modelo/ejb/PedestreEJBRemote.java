@@ -100,6 +100,9 @@ public interface PedestreEJBRemote extends BaseEJBRemote {
 	 * @throws Exception
 	 */
 	public void exportaSOC(ClienteEntity cliente) throws Exception;
+	
+	
+	public void importarSenior() throws Exception;
 
 }
 

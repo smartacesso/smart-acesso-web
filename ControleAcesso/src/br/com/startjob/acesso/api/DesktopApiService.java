@@ -132,11 +132,11 @@ public class DesktopApiService extends BaseService {
 			PedestrianAccessTO to = null;
 
 			for (Object[] objects : pedestreList) {
-				if (id != ((BigInteger) objects[0]).longValue()) {
+				if (id != Long.valueOf(objects[0].toString())) {
 					// cria um TO com os dados
 					to = new PedestrianAccessTO(objects, version);
 					pedestrianAccessList.add(to);
-					id = ((BigInteger) objects[0]).longValue();
+					id = Long.valueOf(objects[0].toString());
 
 				} else {
 					// atualiza dados do TO

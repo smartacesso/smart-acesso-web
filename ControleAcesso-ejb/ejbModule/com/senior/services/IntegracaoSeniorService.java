@@ -237,8 +237,12 @@ public class IntegracaoSeniorService {
 				FuncionarioSeniorDto funcionario = new FuncionarioSeniorDto();
 				funcionario.setCodPrm(getTagValue("codPrm", retornoXml));
 				funcionario.setDatAdm(getTagValue("datAdm", retornoXml));
+				funcionario.setDatAfa(getTagValue("datAfa", retornoXml));
+				funcionario.setDatTer(getTagValue("datTer", retornoXml));
+				funcionario.setDatAlt(getTagValue("datAlt", retornoXml));
 				funcionario.setDatDem(getTagValue("datDem", retornoXml));
 				funcionario.setDatNas(getTagValue("datNas", retornoXml));
+				funcionario.setDesAfa(getTagValue("desAfa", retornoXml));
 				funcionario.setEmailComercial(getTagValue("emaCom", retornoXml));
 				funcionario.setEmailPessoal(getTagValue("emaPar", retornoXml));
 				funcionario.setNome(getTagValue("nomFun", retornoXml));
