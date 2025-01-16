@@ -106,7 +106,16 @@ import br.com.startjob.acesso.modelo.entity.base.ClienteBaseEntity;
 					  + "from AcessoEntity obj "
 					  + "	join obj.pedestre p "
 					  + "where p.id = :ID_PEDESTRE "
-					  + "and obj.data = :DATA ")
+					  + "and obj.data = :DATA "),
+	@NamedQuery(name = "AcessoEntity.findByCpfAndDateRange",
+			    query = "select obj "
+			          + "from AcessoEntity obj "
+			          + "join fetch obj.pedestre p "
+			          + "where (obj.removido = false or obj.removido is null) "
+			          + "and p.cpf = :CPF "
+			          + "and obj.data between :DATA_INICIO and :DATA_FIM "
+			          + "order by obj.data desc"),
+
 	/*,
 	@NamedQuery(name = "AcessoEntity.findAllAccessByResponsible",
 	query = "select obj "
