@@ -362,7 +362,15 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 				"       pd.senha as senha, " + // 66
 				"       pd.TIPO_ACESSO as tipoAcesso, " + // 67
 				"       pd.TIPO_QRCODE as tipoQRCode, " + // 68
-				"		pd.DATA_CADASTRO_FOTO_HIKIVISION as dataCadastroFotoHikivision " + // 69
+				"		pd.DATA_CADASTRO_FOTO_HIKIVISION as dataCadastroFotoHikivision, " + // 69
+				"		h2.ID_PEDESTRE_REGRA as idPedestreRegraPR, " + // 70
+				"		h2.ID_HORARIO as idHorarioPR, " + // 71
+				"		h2.QTDE_CREDITOS as qtdeCreditosPR, " + // 72
+				"		h2.DIAS_SEMANA diasSemanaPR, " + // 73
+				"		h2.NOME as nomeRegraPR, " + // 74
+				"		h2.HORARIO_INI as horarioInicioPR, " + // 75
+				"		h2.HORARIO_FIM as horarioFim,  " + // 76
+				"		h2.STATUS as statusPR " + // 77
 				"from " + schema + "TB_PEDESTRE pd " + "		left join " + schema
 				+ "TB_ENDERECO e on e.ID_ENDERECO = pd.ID_ENDERECO " + "		left join " + schema
 				+ "TB_EMPRESA emp on emp.ID_EMPRESA = pd.ID_EMPRESA " + "		left join " + schema
@@ -386,9 +394,11 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 				+ "			and (mp.REMOVIDO IS NULL or mp.REMOVIDO = 0) " + "			and mp.status = 'ATIVO' "
 				+ "           and (mp.VALIDADE IS NULL or mp.VALIDADE >= :DATA_ATUAL )  " + "		left join " + schema
 				+ "TB_USUARIO usuario " + "			on usuario.ID_USUARIO = pd.ID_USUARIO "
+				+ "left join " + schema
+				+ "TB_HORARIO h2 on rp.ID_PEDESTRE_REGRA = h2.ID_PEDESTRE_REGRA and (h2.REMOVIDO is null or h2.REMOVIDO = false) "
 				+ "where pd.ID_CLIENTE in ( :ID_CLIENTES )  " + "		  and pd.DATA_ALTERACAO >= :LAST_SYNC "
 				+ ("mysql".equals(sgdb)
-						? "group by pd.ID_PEDESTRE, r.ID_REGRA, rHorario.ID_HORARIO, b.TEMPLATE, ep.ID_EQUIPAMENTO, mp.ID_MENSAGEM_EQUIPAMENTO "
+						? "group by pd.ID_PEDESTRE, r.ID_REGRA, rHorario.ID_HORARIO, b.TEMPLATE, ep.ID_EQUIPAMENTO, mp.ID_MENSAGEM_EQUIPAMENTO, h2.ID_HORARIO "
 						: "")
 				+ "order by pd.ID_PEDESTRE asc ");
 

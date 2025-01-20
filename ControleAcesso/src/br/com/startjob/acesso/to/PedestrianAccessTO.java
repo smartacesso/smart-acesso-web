@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 import org.apache.commons.codec.binary.Base64;
 
@@ -173,6 +174,8 @@ public class PedestrianAccessTO {
 		adicionaDocumentos(objects);
 		
 		adicionaPedestreRegras(objects);
+		
+		adicionaHorarioPedestreRegra(objects);
 	}
 
 
@@ -212,6 +215,49 @@ public class PedestrianAccessTO {
 		
 		if(add) {
 			this.pedestreRegras.add(new PedestreRegraTO(id, idRegra, validade, qtdeDeCreditos, qtdeTotalDeCreditos, diasValidadeCredito, dataInicioPeriodo, dataFimPeriodo));
+		}
+	}
+	
+	public void adicionaHorarioPedestreRegra(Object[] objects) {
+		if(Objects.isNull(this.pedestreRegras) || pedestreRegras.isEmpty()) {
+			return;
+		}
+		
+		
+		if(Objects.isNull(objects[70])) {
+			return;
+		}
+		
+		final Long idPedestreRegra = Long.valueOf(objects[70].toString());
+		final Long idHorario = Long.valueOf(objects[71].toString());
+		final String diasSemana = objects[73].toString();
+		final Date horarioInicio = criaData(objects[75], sdf);
+		final Date horarioFim = criaData(objects[76], sdf);
+		final String nomeRegra = objects[74].toString();
+		final Long qtdeCreditos = Long.valueOf(objects[72].toString());
+		final String status = objects[77].toString();
+		
+		for(PedestreRegraTO pr : this.pedestreRegras) {
+			if(!pr.getId().equals(idPedestreRegra)) {
+				continue;
+			}
+			
+			if(Objects.isNull(pr.getHorarios())) {
+				pr.setHorarios(new ArrayList<HorarioTO>());
+			}
+			
+			boolean add = true;
+			
+			for(HorarioTO h : pr.getHorarios()) {
+				if(h.getId().equals(idHorario)) {
+					add = false;
+					break;
+				}
+			}
+			
+			if(add) {
+				pr.getHorarios().add(new HorarioTO(idHorario, nomeRegra, status, diasSemana, horarioInicio, horarioFim, qtdeCreditos, idPedestreRegra));
+			}
 		}
 	}
 	

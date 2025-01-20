@@ -17,6 +17,9 @@ public class HorarioTO {
 	private Boolean removed;
 	private Date dataRemovido;
 	
+	private Long qtdeDeCreditos;
+	private Long idPedestreRegra;
+	
 	public HorarioTO(HorarioEntity horario) {
 		this.id = horario.getId();
 		this.nome = horario.getNome();
@@ -27,6 +30,19 @@ public class HorarioTO {
 		
 		this.removed = horario.getRemovido();
 		this.dataRemovido = horario.getDataRemovido();
+		this.qtdeDeCreditos = horario.getQtdeDeCreditos();
+	}
+	
+	public HorarioTO(final Long idHorario, final String nome, final String status, final String diasSemna, final Date horarioInicio,
+			final Date horarioFim, final Long qtdeDeCreditos, final Long idPedestreRegra) {
+		this.id = idHorario;
+		this.nome = nome;
+		this.status = status;
+		this.diasSemana = diasSemna;
+		this.horarioInicio = horarioInicio;
+		this.horarioFim = horarioFim;
+		this.qtdeDeCreditos = qtdeDeCreditos;
+		this.idPedestreRegra = idPedestreRegra;
 	}
 	
 	public Long getId() {
@@ -82,6 +98,22 @@ public class HorarioTO {
 
 	public void setStatus(String status) {
 		this.status = status;
+	}
+
+	public Long getQtdeDeCreditos() {
+		return qtdeDeCreditos;
+	}
+
+	public void setQtdeDeCreditos(Long qtdeDeCreditos) {
+		this.qtdeDeCreditos = qtdeDeCreditos;
+	}
+
+	public Long getIdPedestreRegra() {
+		return idPedestreRegra;
+	}
+
+	public void setIdPedestreRegra(Long idPedestreRegra) {
+		this.idPedestreRegra = idPedestreRegra;
 	}
 	
 }

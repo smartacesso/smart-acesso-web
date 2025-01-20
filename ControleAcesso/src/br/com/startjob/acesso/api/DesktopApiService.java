@@ -147,6 +147,7 @@ public class DesktopApiService extends BaseService {
 					to.adicionaEquipamentos(objects);
 					to.adicionaDocumentos(objects);
 					to.adicionaPedestreRegras(objects);
+					to.adicionaHorarioPedestreRegra(objects);
 				}
 			}
 

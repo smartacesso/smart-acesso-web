@@ -1,6 +1,7 @@
 package br.com.startjob.acesso.to;
 
 import java.util.Date;
+import java.util.List;
 
 public class PedestreRegraTO {
 
@@ -12,6 +13,7 @@ public class PedestreRegraTO {
 	private Long diasValidadeCredito;
 	private Date dataInicioPeriodo;
 	private Date dataFimPeriodo;
+	private List<HorarioTO> horarios;
 	
 	public PedestreRegraTO() {}
 	
@@ -74,5 +76,13 @@ public class PedestreRegraTO {
 	}
 	public void setDataFimPeriodo(Date dataFimPeriodo) {
 		this.dataFimPeriodo = dataFimPeriodo;
+	}
+
+	public List<HorarioTO> getHorarios() {
+		return horarios;
+	}
+
+	public void setHorarios(List<HorarioTO> horarios) {
+		this.horarios = horarios;
 	}
 }
