@@ -228,14 +228,14 @@ public class PedestrianAccessTO {
 			return;
 		}
 		
-		final Long idPedestreRegra = Long.valueOf(objects[70].toString());
-		final Long idHorario = Long.valueOf(objects[71].toString());
-		final String diasSemana = objects[73].toString();
-		final Date horarioInicio = criaData(objects[75], sdf);
-		final Date horarioFim = criaData(objects[76], sdf);
-		final String nomeRegra = objects[74].toString();
-		final Long qtdeCreditos = Long.valueOf(objects[72].toString());
-		final String status = objects[77].toString();
+		final Long idPedestreRegra = Objects.isNull(objects[70]) ? null : Long.valueOf(objects[70].toString());
+		final Long idHorario = Objects.isNull(objects[71]) ? null : Long.valueOf(objects[71].toString());
+		final String diasSemana = Objects.isNull(objects[73]) ? null : objects[73].toString();
+		final Date horarioInicio = Objects.isNull(objects[75]) ? null : criaData(objects[75], sdf);
+		final Date horarioFim = Objects.isNull(objects[76]) ? null : criaData(objects[76], sdf);
+		final String nomeRegra = Objects.isNull(objects[74]) ? null : objects[74].toString();
+		final Long qtdeCreditos = Objects.isNull(objects[72]) ? null : Long.valueOf(objects[72].toString());
+		final String status = Objects.isNull(objects[77]) ? null : objects[77].toString();
 		
 		for(PedestreRegraTO pr : this.pedestreRegras) {
 			if(!pr.getId().equals(idPedestreRegra)) {
