@@ -9,26 +9,30 @@ import java.util.List;
 
 public class ActiveDirectoryService {
 	
-	private final static String url = "ldap://your-ad-server.com:389";
+	private final static String url = "ldap://192.168.15.99:389";
+	private static String baseDn;
 	private static String usuario;
 	private static String senha;
 
-	public ActiveDirectoryService(String usuario, String senha) {
+	public ActiveDirectoryService(String usuario, String senha, String baseDn) {
+		this.baseDn = baseDn;
 		this.usuario = usuario;
 		this.senha = senha;
 	}
 
 	
 	  // Configuração de conexão com o AD
-    private static DirContext connectToAD() throws Exception {
-        Hashtable<String, String> env = new Hashtable<>();
-        env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
-        env.put(Context.PROVIDER_URL, url); // URL do servidor AD
-        env.put(Context.SECURITY_AUTHENTICATION, "simple");
-        env.put(Context.SECURITY_PRINCIPAL, usuario); // Usuário (e.g., cn=admin,dc=empresa,dc=com)
-        env.put(Context.SECURITY_CREDENTIALS, senha); // Senha do usuário
-        return new InitialDirContext(env);
-    }
+	private static DirContext connectToAD() throws Exception {
+	    Hashtable<String, String> env = new Hashtable<>();
+	    env.put(Context.INITIAL_CONTEXT_FACTORY, "com.sun.jndi.ldap.LdapCtxFactory");
+	    env.put(Context.PROVIDER_URL, url); // URL do servidor AD
+	    env.put(Context.SECURITY_AUTHENTICATION, "simple");
+	    env.put(Context.SECURITY_PRINCIPAL, usuario); // Usuário (e.g., cn=admin,dc=empresa,dc=com)
+	    env.put(Context.SECURITY_CREDENTIALS, senha); // Senha do usuário
+	    env.put(Context.REFERRAL, "ignore"); // Ignora referências
+	    return new InitialDirContext(env);
+	}
+
 
     // Método para buscar usuários no AD
     public static List<String> buscarUsuarios(String url, String baseDn, String username, String password) throws Exception {
@@ -36,7 +40,9 @@ public class ActiveDirectoryService {
         DirContext context = connectToAD();
 
         // Configurando os critérios da busca
-        String filtroBusca = "(objectClass=user)"; // Busca apenas objetos do tipo "user"
+        // String filtroBusca = "(objectClass=user)"; // Busca apenas objetos do tipo "user"
+        String filtroBusca = "(&(objectCategory=person)(objectClass=user))";
+        // String filtroBusca = "(objectCategory=person)";
         String[] atributosDesejados = {"sAMAccountName", "displayName", "mail"}; // Campos que queremos buscar
 
         SearchControls searchControls = new SearchControls();
@@ -56,6 +62,7 @@ public class ActiveDirectoryService {
 
             // Adiciona ao resultado
             usuarios.add(String.format("Usuário: %s, Nome: %s, Email: %s", usernameAttr, displayName, email));
+            System.out.println("nome : " + usernameAttr);
         }
 
         context.close(); // Fecha a conexão com o AD
@@ -65,14 +72,15 @@ public class ActiveDirectoryService {
     public static void main(String[] args) {
         try {
             // Configurações do AD
-            String baseDn = "dc=empresa,dc=com";
-            String username = "cn=admin,dc=empresa,dc=com";
-            String password = "senha-secreta";
+            //String baseDn = "dc=smart,dc=local";
+        	String baseDn = "cn=Users,dc=smart,dc=local";
+            String username = "cn=Administrator,cn=Users,dc=smart,dc=local";
+            String password = "desenvolvimento@2024";
             
-            ActiveDirectoryService activeDirectoryService = new ActiveDirectoryService(usuario, password);
+            ActiveDirectoryService activeDirectoryService = new ActiveDirectoryService(baseDn,username, password);
 
             // Busca e exibe os usuários
-            List<String> usuarios = buscarUsuarios(url, baseDn, username, password);
+            List<String> usuarios = ActiveDirectoryService.buscarUsuarios(url, baseDn, username, password);
             usuarios.forEach(System.out::println);
 
         } catch (Exception e) {
