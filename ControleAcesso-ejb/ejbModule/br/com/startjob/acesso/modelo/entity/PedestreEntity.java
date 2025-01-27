@@ -191,7 +191,7 @@ public class PedestreEntity extends ClienteBaseEntity {
 	@JoinColumn(name = "ID_ENDERECO", nullable = true)
 	private EnderecoEntity endereco;
 
-	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@ManyToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
 	@JoinColumn(name = "ID_EMPRESA", nullable = true)
 	private EmpresaEntity empresa;
 
