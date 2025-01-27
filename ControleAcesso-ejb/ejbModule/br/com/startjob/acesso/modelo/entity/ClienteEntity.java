@@ -66,7 +66,12 @@ import br.com.startjob.acesso.modelo.enumeration.Status;
 				query = "select obj from ClienteEntity obj "
 					  + "where (obj.removido = false or obj.removido is null) "
 					  + "and obj.organizacaoTeknisa = :ORGANIZACAO_TEKNISA and obj.filialTeknisa = :FILIAL_TEKNISA "
-					  + "order by obj.id asc")
+					  + "order by obj.id asc"),
+	@NamedQuery(name = "ClienteEntity.findAllComIntegracaoAD",
+				query = "select obj from ClienteEntity obj "
+					  + "join fetch obj.integracaoAD i "
+					  + "where (obj.removido = false or obj.removido is null) "
+					  + "order by obj.id asc"),
 
 })
 @SuppressWarnings("serial")
@@ -125,6 +130,11 @@ public class ClienteEntity extends BaseEntity {
 	@OneToOne(cascade={CascadeType.ALL}, fetch=FetchType.LAZY)
 	@JoinColumn(name="ID_INTEGRACAO_SENIOR", nullable=true)
 	private IntegracaoSeniorEntity integracaoSenior;
+	
+	@JsonIgnore
+	@OneToOne(cascade={CascadeType.ALL}, fetch=FetchType.LAZY)
+	@JoinColumn(name="ID_INTEGRACAO_AD", nullable=true)
+	private IntegracaoSeniorEntity integracaoAD;
 	
 	@Column(name="ORGANIZACAO_TEKNISA", nullable=true, length=60)
 	private String organizacaoTeknisa;

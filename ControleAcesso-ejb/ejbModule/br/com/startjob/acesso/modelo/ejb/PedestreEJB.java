@@ -1494,6 +1494,30 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 			importarEmpresasSenior(cliente);
 		});
 	}
+	
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	@TransactionAttribute(TransactionAttributeType.REQUIRED)
+	@TransactionTimeout(unit = TimeUnit.HOURS, value = 4)
+	public void importarAD() throws Exception {
+		final List<ClienteEntity> clientes = (List<ClienteEntity>) pesquisaSimples(ClienteEntity.class,
+				"findAllComIntegracaoAD", new HashMap<>());
+
+		if (Objects.isNull(clientes) || clientes.isEmpty()) {
+			System.out.println("Não existem clientes com integração Senior");
+			return;
+		}
+
+		clientes.forEach(cliente -> {
+			importarFuncionariosAD(cliente);
+		});
+	}
+
+	private void importarFuncionariosAD(ClienteEntity cliente) {
+		// TODO Auto-generated method stub
+		
+	}
 
 	private void importarEmpresasSenior(final ClienteEntity cliente) {
 		EmpresaSeniorDto empresaSenior = buscaTodasEmpresasSenior(cliente);

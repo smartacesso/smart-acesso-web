@@ -35,7 +35,7 @@ public class ActiveDirectoryService {
 
 
     // Método para buscar usuários no AD
-    public static List<String> buscarUsuarios(String url, String baseDn, String username, String password) throws Exception {
+    public static List<String> buscarUsuarios() throws Exception {
         List<String> usuarios = new ArrayList<>();
         DirContext context = connectToAD();
 
@@ -62,7 +62,6 @@ public class ActiveDirectoryService {
 
             // Adiciona ao resultado
             usuarios.add(String.format("Usuário: %s, Nome: %s, Email: %s", usernameAttr, displayName, email));
-            System.out.println("nome : " + usernameAttr);
         }
 
         context.close(); // Fecha a conexão com o AD
@@ -77,10 +76,10 @@ public class ActiveDirectoryService {
             String username = "cn=Administrator,cn=Users,dc=smart,dc=local";
             String password = "desenvolvimento@2024";
             
-            ActiveDirectoryService activeDirectoryService = new ActiveDirectoryService(baseDn,username, password);
+            ActiveDirectoryService activeDirectoryService = new ActiveDirectoryService(username, password,baseDn);
 
             // Busca e exibe os usuários
-            List<String> usuarios = ActiveDirectoryService.buscarUsuarios(url, baseDn, username, password);
+            List<String> usuarios = ActiveDirectoryService.buscarUsuarios();
             usuarios.forEach(System.out::println);
 
         } catch (Exception e) {
