@@ -540,20 +540,22 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 					continue;
 
 				if ("centaurus".equals(dadosArquivo[0])) {
-					System.out.println("Padrao centaurus");
 					importaCentaurus(dadosArquivo, dados);
+					
 				} else if ("CST".equals(dadosArquivo[0])) {
-					System.out.println("Padrao CST");
 					importaSulacap(dadosArquivo, dados);
+					
 				} else if ("gasmig".equals(dadosArquivo[0])) {
-					System.out.println("Padrao GASMIG");
-
+					
 				} else if ("actech".equals(dadosArquivo[0])) {
-					System.out.println("Padrao ACTECH");
 					importaActech(dadosArquivo, dados);
+					
 				} else if ("sesi".equals(dadosArquivo[0])) {
-					System.out.println("Padrao SESI");
 					importaSesi(dadosArquivo, dados);
+					
+				}else if("smart".equals(dadosArquivo[0])){
+					System.out.println("Padrao smart");
+					importaSmart(dadosArquivo, dados);
 				}
 
 //				PedestreEntity pedestreLeftZero = null;
@@ -581,6 +583,48 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		}
 	}
 
+	private void importaSmart(String[] dadosArquivo, ImportacaoEntity dados) {
+		// TODO Auto-generated method stub
+
+		String numeroCartao = "";
+		String matricula = "";
+		String nomePedestre = "";
+		String rg = "";
+		String cpf = "";
+
+		PedestreEntity pedestre = null;
+
+		numeroCartao = dadosArquivo[1];
+		matricula = dadosArquivo[2];
+		nomePedestre = dadosArquivo[3];
+		rg = dadosArquivo[4];
+		cpf = dadosArquivo[5];
+
+		pedestre = buscaPedestrePorNome(nomePedestre);
+		if (pedestre == null)
+			pedestre = new PedestreEntity();
+		pedestre.setCodigoCartaoAcesso(numeroCartao);
+		pedestre.setMatricula(matricula);
+		pedestre.setNome(nomePedestre);
+		pedestre.setCpf(cpf);
+		pedestre.setRg(rg);
+		pedestre.setObservacoes("Importado : " + LocalDate.now());
+
+		pedestre.setExistente(true);
+		pedestre.setSempreLiberado(true);
+		pedestre.setStatus(Status.ATIVO);
+		pedestre.setTipo(TipoPedestre.PEDESTRE);
+		pedestre.setCliente(dados.getCliente());
+
+		pedestre.setExistente(true);
+		pedestre.setDataRemovido(null);
+		pedestre.setRemovido(null);
+
+		if (pedestre != null) {
+			salvarObjeto(pedestre);
+		}
+	}
+
 	public void importaCentaurus(String[] dadosArquivo, ImportacaoEntity dados) {
 
 		String numeroCartao = "";
@@ -596,7 +640,6 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		pedestre = buscaPedestrePorNome(nomePedestre);
 		if (pedestre == null)
 			pedestre = new PedestreEntity();
-//        RegraEntity regra = buscarRegraPeloNome(nomeRegra, dados.getCliente().getId());
 		pedestre.setCodigoCartaoAcesso(numeroCartao);
 		pedestre.setNome(nomePedestre);
 		pedestre.setMatricula(null);
@@ -613,27 +656,6 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		pedestre.setExistente(true);
 		pedestre.setDataRemovido(null);
 		pedestre.setRemovido(null);
-
-//        if (regra != null) {
-//            PedestreRegraEntity pedestreRegra = new PedestreRegraEntity();
-//            pedestreRegra.setRegra(regra);
-//            pedestreRegra.setPedestre(pedestre);
-//
-//            if (pedestre.getRegras() == null) {            	
-//            	pedestre.setRegras(new ArrayList<>());
-//            }else {
-//            	for(PedestreRegraEntity removeRegra: pedestre.getRegras()) {
-//            		removeRegra.setRemovido(true);
-//            		removeRegra.setDataRemovido(new Date());
-//            	}
-//            	pedestre.getRegras().add(pedestreRegra);
-//            }
-//            
-//        }
-
-//        if (regra != null) {
-//            salvarObjeto(regra);
-//        }
 
 		if (pedestre != null) {
 			salvarObjeto(pedestre);
@@ -695,7 +717,6 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		pedestre = buscaPedestrePorNome(nomePedestre);
 		if (pedestre == null)
 			pedestre = new PedestreEntity();
-//        RegraEntity regra = buscarRegraPeloNome(nomeRegra, dados.getCliente().getId());
 		pedestre.setCodigoCartaoAcesso(numeroCartao);
 		pedestre.setNome(nomePedestre);
 		pedestre.setCpf(cpf);
@@ -711,27 +732,6 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		pedestre.setExistente(true);
 		pedestre.setDataRemovido(null);
 		pedestre.setRemovido(null);
-
-//        if (regra != null) {
-//            PedestreRegraEntity pedestreRegra = new PedestreRegraEntity();
-//            pedestreRegra.setRegra(regra);
-//            pedestreRegra.setPedestre(pedestre);
-//
-//            if (pedestre.getRegras() == null) {            	
-//            	pedestre.setRegras(new ArrayList<>());
-//            }else {
-//            	for(PedestreRegraEntity removeRegra: pedestre.getRegras()) {
-//            		removeRegra.setRemovido(true);
-//            		removeRegra.setDataRemovido(new Date());
-//            	}
-//            	pedestre.getRegras().add(pedestreRegra);
-//            }
-//            
-//        }
-
-//        if (regra != null) {
-//            salvarObjeto(regra);
-//        }
 
 		if (pedestre != null) {
 			salvarObjeto(pedestre);
