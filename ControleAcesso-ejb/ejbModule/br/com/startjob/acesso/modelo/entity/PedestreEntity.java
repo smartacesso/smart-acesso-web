@@ -69,6 +69,8 @@ import br.com.startjob.acesso.modelo.utils.EncryptionUtils;
 				+ "where obj.matricula = :MATRICULA " + "order by obj.id desc"),
 		@NamedQuery(name = "PedestreEntity.findByNomePedestre", query = "select obj from PedestreEntity obj "
 				+ "where obj.nome = :NOME " + "order by obj.id desc"),
+		@NamedQuery(name = "PedestreEntity.findByCardNumber", query = "select obj from PedestreEntity obj "
+				+ "where obj.codigoCartaoAcesso = :CARD_NUMBER " + "order by obj.id desc"),
 		@NamedQuery(name = "PedestreEntity.findAllPedestresComEmpresa", query = "select obj from PedestreEntity obj "
 				+ " left join fetch obj.empresa e " + "where (obj.removido = false or obj.removido is null) "
 				+ "and obj.tipo = 'PEDESTRE' " + "order by obj.id asc"),
@@ -187,7 +189,7 @@ public class PedestreEntity extends ClienteBaseEntity {
 	@Column(name = "ALTERAR_EM_MASSA", nullable = true)
 	private Boolean alterarEmMassa = null;
 
-	@ManyToOne(cascade = { CascadeType.ALL }, fetch = FetchType.LAZY)
+	@ManyToOne(cascade = { CascadeType.PERSIST }, fetch = FetchType.LAZY)
 	@JoinColumn(name = "ID_ENDERECO", nullable = true)
 	private EnderecoEntity endereco;
 
@@ -195,15 +197,15 @@ public class PedestreEntity extends ClienteBaseEntity {
 	@JoinColumn(name = "ID_EMPRESA", nullable = true)
 	private EmpresaEntity empresa;
 
-	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@ManyToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
 	@JoinColumn(name = "ID_DEPARTAMENTO", nullable = true)
 	private DepartamentoEntity departamento;
 
-	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@ManyToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
 	@JoinColumn(name = "ID_CENTRO_CUSTO", nullable = true)
 	private CentroCustoEntity centroCusto;
 
-	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@ManyToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
 	@JoinColumn(name = "ID_CARGO", nullable = true)
 	private CargoEntity cargo;
 
