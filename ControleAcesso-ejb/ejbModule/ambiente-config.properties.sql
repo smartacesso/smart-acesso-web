@@ -40,5 +40,5 @@ config.resources.folder.dev=/home/gustavo/ambiente/servers/wildfly-20.0.0.Final/
 
 config.tempo.dispositivo=10
 config.sgdb.utilizado=plsql
-config.schema.name=dbo.
+config.schema.name=controle_acesso.
 config.sqlserver.version=2012
