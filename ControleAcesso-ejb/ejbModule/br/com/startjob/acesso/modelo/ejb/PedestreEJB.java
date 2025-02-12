@@ -546,6 +546,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 					importaSulacap(dadosArquivo, dados);
 					
 				} else if ("gasmig".equals(dadosArquivo[0])) {
+					importaGasmig(dadosArquivo, dados);
 					
 				} else if ("actech".equals(dadosArquivo[0])) {
 					importaActech(dadosArquivo, dados);
@@ -715,6 +716,45 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		nomePedestre = dadosArquivo[2];
 
 		pedestre = buscaPedestrePorNome(nomePedestre);
+		if (pedestre == null)
+			pedestre = new PedestreEntity();
+		pedestre.setCodigoCartaoAcesso(numeroCartao);
+		pedestre.setNome(nomePedestre);
+		pedestre.setCpf(cpf);
+		pedestre.setRg(rg);
+		pedestre.setObservacoes("Importado : " + LocalDate.now());
+
+		pedestre.setExistente(true);
+		pedestre.setSempreLiberado(true);
+		pedestre.setStatus(Status.ATIVO);
+		pedestre.setTipo(TipoPedestre.PEDESTRE);
+		pedestre.setCliente(dados.getCliente());
+
+		pedestre.setExistente(true);
+		pedestre.setDataRemovido(null);
+		pedestre.setRemovido(null);
+
+		if (pedestre != null) {
+			salvarObjeto(pedestre);
+		}
+
+	}
+	
+	
+	public void importaGasmig(String[] dadosArquivo, ImportacaoEntity dados) {
+
+		String numeroCartao = "";
+		String nomePedestre = "";
+		String rg = "";
+		String cpf = "";
+		String nomeRegra = null;
+
+		PedestreEntity pedestre = null;
+
+		numeroCartao = dadosArquivo[1];
+		nomePedestre = dadosArquivo[2];
+
+		pedestre = buscaPedestrePorCartao(numeroCartao);
 		if (pedestre == null)
 			pedestre = new PedestreEntity();
 		pedestre.setCodigoCartaoAcesso(numeroCartao);
@@ -2172,6 +2212,27 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 
 			List<PedestreEntity> listaPedestre = (List<PedestreEntity>) pesquisaArgFixos(PedestreEntity.class,
 					"findByNomePedestre", args);
+
+			if (listaPedestre != null && !listaPedestre.isEmpty()) {
+				atualizaPedestre = listaPedestre.get(0);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return atualizaPedestre;
+	}
+	
+	@SuppressWarnings("unchecked")
+	private PedestreEntity buscaPedestrePorCartao(String cartao) {
+		PedestreEntity atualizaPedestre = null;
+
+		try {
+			Map<String, Object> args = new HashMap<String, Object>();
+			args.put("CARD_NUMBER", cartao);
+
+			List<PedestreEntity> listaPedestre = (List<PedestreEntity>) pesquisaArgFixos(PedestreEntity.class,
+					"findByCardNumber", args);
 
 			if (listaPedestre != null && !listaPedestre.isEmpty()) {
 				atualizaPedestre = listaPedestre.get(0);
