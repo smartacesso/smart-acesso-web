@@ -32,6 +32,8 @@ public class RegraTO {
 	private Date horarioInicioTurno;
 	private Long qtdeDeCreditos;
 	private Long diasValidadeCredito;
+	private Integer idTemplate;
+	private Integer idPlano;
 	
 	private String status;
 	private Boolean removed;
@@ -56,6 +58,8 @@ public class RegraTO {
 		this.status = regra.getStatus().toString();
 		this.removed = regra.getRemovido();
 		this.dataRemovido = regra.getDataRemovido();
+		this.idTemplate = regra.getIdTemplate();
+		this.idPlano = regra.getIdPlano();
 		
 		if(regra.getHorarios() != null && !regra.getHorarios().isEmpty()) {
 			horarios = new ArrayList<>();
@@ -199,6 +203,22 @@ public class RegraTO {
 
 	public void setDataRemovido(Date dataRemovido) {
 		this.dataRemovido = dataRemovido;
+	}
+
+	public Integer getIdTemplate() {
+		return idTemplate;
+	}
+
+	public void setIdTemplate(Integer idTemplate) {
+		this.idTemplate = idTemplate;
+	}
+
+	public Integer getIdPlano() {
+		return idPlano;
+	}
+
+	public void setIdPlano(Integer idPlano) {
+		this.idPlano = idPlano;
 	}
 	
 }

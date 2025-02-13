@@ -1597,5 +1597,62 @@ public class DesktopApiService extends BaseService {
 
 		return entidade;
 	}
+	
+	@POST
+	@Path("/uploadRegras")
+	@Produces(MediaType.TEXT_PLAIN)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response updateRegras(String parans) {
+		JSONArray jsonArray = new JSONArray(parans);
+		if (jsonArray.length() <= 0) {
+			return Response.status(Status.BAD_REQUEST).entity("See status code.").build();
+		}
+
+		try {
+			for (int i = 0; i < jsonArray.length(); i++) {
+				JSONObject jsonObject = jsonArray.getJSONObject(i);
+				try {
+					if (Objects.nonNull(jsonObject.getLong("id"))) {
+						Long idRegra = jsonObject.getLong("id");
+
+						final RegraEntity regra = buscaRegraPeloId(idRegra);
+						regra.setIdPlano(jsonObject.getInt("idPlano"));
+						regra.setIdTemplate(jsonObject.getInt("idTemplate"));
+
+						getEjb("BaseEJB").alteraObjeto(regra);
+
+					}
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("See status code.").build();
+		}
+
+		return Response.status(Status.OK).entity("See status code.").build();
+	}
+	
+	private RegraEntity buscaRegraPeloId(Long idRegra) {
+		Map<String, Object> args = new HashMap<>();
+		args.put("ID", idRegra);
+
+		List<RegraEntity> regras = null;
+
+		try {
+			regras = (List<RegraEntity>) getEjb("BaseEJB")
+					.pesquisaArgFixos(RegraEntity.class, "findByIdComplete", args); ;
+			if (regras != null)
+				return regras.stream().findFirst().orElse(null);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return null;
+	}
+
 
 }

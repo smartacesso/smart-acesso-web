@@ -139,6 +139,12 @@ public class RegraEntity extends ClienteBaseEntity {
 	@Column(name="DIAS_VALIDADE_CREDITO", nullable=true, length=10)
 	private Long diasValidadeCredito;
 	
+	@Column(name="ID_TEMPLATE", nullable=true, length=10)
+	private Integer idTemplate;
+	
+	@Column(name="ID_PLANO", nullable=true, length=10)
+	private Integer idPlano;
+	
 	@OneToMany(cascade=CascadeType.ALL, fetch=FetchType.EAGER, 
 			   orphanRemoval=false, targetEntity=HorarioEntity.class,
 			   mappedBy="regra")
@@ -241,6 +247,18 @@ public class RegraEntity extends ClienteBaseEntity {
 	}
 	public void setDiasValidadeCredito(Long diasValidadeCredito) {
 		this.diasValidadeCredito = diasValidadeCredito;
+	}
+	public Integer getIdTemplate() {
+		return idTemplate;
+	}
+	public void setIdTemplate(Integer idTemplate) {
+		this.idTemplate = idTemplate;
+	}
+	public Integer getIdPlano() {
+		return idPlano;
+	}
+	public void setIdPlano(Integer idPlano) {
+		this.idPlano = idPlano;
 	}
 	
 }
