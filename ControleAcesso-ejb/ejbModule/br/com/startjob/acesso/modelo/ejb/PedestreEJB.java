@@ -395,7 +395,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 				+ "           and (mp.VALIDADE IS NULL or mp.VALIDADE >= :DATA_ATUAL )  " + "		left join " + schema
 				+ "TB_USUARIO usuario " + "			on usuario.ID_USUARIO = pd.ID_USUARIO "
 				+ "left join " + schema
-				+ "TB_HORARIO h2 on rp.ID_PEDESTRE_REGRA = h2.ID_PEDESTRE_REGRA and (h2.REMOVIDO is null or h2.REMOVIDO = false) "
+				+ "TB_HORARIO h2 on rp.ID_PEDESTRE_REGRA = h2.ID_PEDESTRE_REGRA and (h2.REMOVIDO is null or h2.REMOVIDO = 0) "
 				+ "where pd.ID_CLIENTE in ( :ID_CLIENTES )  " + "		  and pd.DATA_ALTERACAO >= :LAST_SYNC "
 				+ ("mysql".equals(sgdb)
 						? "group by pd.ID_PEDESTRE, r.ID_REGRA, rHorario.ID_HORARIO, b.TEMPLATE, ep.ID_EQUIPAMENTO, mp.ID_MENSAGEM_EQUIPAMENTO, h2.ID_HORARIO "
@@ -557,6 +557,8 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 				}else if("smart".equals(dadosArquivo[0])){
 					System.out.println("Padrao smart");
 					importaSmart(dadosArquivo, dados);
+				}else if("apvs".equals(dadosArquivo[0])){
+					importaApvs(dadosArquivo, dados);
 				}
 
 //				PedestreEntity pedestreLeftZero = null;
@@ -600,6 +602,45 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		nomePedestre = dadosArquivo[3];
 		rg = dadosArquivo[4];
 		cpf = dadosArquivo[5];
+
+		pedestre = buscaPedestrePorNome(nomePedestre);
+		if (pedestre == null)
+			pedestre = new PedestreEntity();
+		pedestre.setCodigoCartaoAcesso(numeroCartao);
+		pedestre.setMatricula(matricula);
+		pedestre.setNome(nomePedestre);
+		pedestre.setCpf(cpf);
+		pedestre.setRg(rg);
+		pedestre.setObservacoes("Importado : " + LocalDate.now());
+
+		pedestre.setExistente(true);
+		pedestre.setSempreLiberado(true);
+		pedestre.setStatus(Status.ATIVO);
+		pedestre.setTipo(TipoPedestre.PEDESTRE);
+		pedestre.setCliente(dados.getCliente());
+
+		pedestre.setExistente(true);
+		pedestre.setDataRemovido(null);
+		pedestre.setRemovido(null);
+
+		if (pedestre != null) {
+			salvarObjeto(pedestre);
+		}
+	}
+	
+	private void importaApvs(String[] dadosArquivo, ImportacaoEntity dados) {
+		// TODO Auto-generated method stub
+
+		String numeroCartao = "";
+		String matricula = "";
+		String nomePedestre = "";
+		String rg = "";
+		String cpf = "";
+
+		PedestreEntity pedestre = null;
+
+		matricula = dadosArquivo[1];
+		nomePedestre = dadosArquivo[2];
 
 		pedestre = buscaPedestrePorNome(nomePedestre);
 		if (pedestre == null)
