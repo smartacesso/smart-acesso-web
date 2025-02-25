@@ -1,0 +1,68 @@
+package com.totvs.dto;
+
+import br.com.startjob.acesso.modelo.entity.PedestreEntity;
+
+public class FuncionarioTotvsDto {
+
+	private String companyKey;
+	private String branch;
+	private String code;
+	private String id;
+	private String name;
+	private String fullName;
+	private String badgeNumber;
+	private String departamentCode;
+	private String departamentInternalId;
+	private String departmentDescription;
+	private String hiringDate;
+	private String demissionDate;
+	private String birthDate;
+	private String gender;
+	private String street;
+	private String streetNumber;
+	private String complement;
+	private String neighborhood;
+	private String homeState;
+	private String naturalCity;
+	private String employeeSituation;
+	private String city;
+	private String zipCode;
+	private String areaCode;
+	private String telephone;
+	private String areaCodeMobile;
+	private String mobileNumber;
+	private String socialIntegProgCode;
+	private String workCardNumber;
+	private String workCardSerie;
+	private String workCardStateIssuing;
+	private String costCenterCode;
+	private String costCenterInternalId;
+	private String costCenterDescription;
+	private String employeePositionCode;
+	private String employeePositionCodeInternalId;
+	private String employeePositionDescription;
+	private String salaryCategory;
+	private String workShiftCode;
+	private String workShiftInternalId;
+	private String workshiftDescription;
+	private String workShiftSequence;
+	private String roleCode;
+	private String roleInternalId;
+	private String roleDescription;
+	private String contractEnd;
+	private String email;
+	private String employeeCpf;
+	private String esocialCategoryCode;
+	// Getters and Setters
+
+	public PedestreEntity toPedestreEntity() {
+		PedestreEntity pedestre = new PedestreEntity();
+		pedestre.setNome(fullName);
+		pedestre.setMatricula(code);
+		pedestre.setCpf(employeeCpf);
+		pedestre.setEmail(email);
+		
+
+		return pedestre;
+	}
+}
