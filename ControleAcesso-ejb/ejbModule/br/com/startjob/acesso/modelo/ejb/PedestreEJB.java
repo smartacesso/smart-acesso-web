@@ -785,6 +785,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 	public void importaGasmig(String[] dadosArquivo, ImportacaoEntity dados) {
 
 		String numeroCartao = "";
+		String matricula = "";
 		String nomePedestre = "";
 		String rg = "";
 		String cpf = "";
@@ -792,13 +793,15 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 
 		PedestreEntity pedestre = null;
 
-		numeroCartao = dadosArquivo[1];
-		nomePedestre = dadosArquivo[2];
+		matricula = dadosArquivo[1];
+		numeroCartao = dadosArquivo[2];
+		nomePedestre = dadosArquivo[3];
 
 		pedestre = buscaPedestrePorCartao(numeroCartao);
 		if (pedestre == null)
 			pedestre = new PedestreEntity();
 		pedestre.setCodigoCartaoAcesso(numeroCartao);
+		pedestre.setMatricula(matricula);
 		pedestre.setNome(nomePedestre);
 		pedestre.setCpf(cpf);
 		pedestre.setRg(rg);
