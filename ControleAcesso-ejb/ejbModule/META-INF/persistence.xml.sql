@@ -20,11 +20,10 @@
 		         <property name="hibernate.order_updates" value="true"/>
 		         <property name="hibernate.default_batch_fetch_size" value="4"/>
 		         <property name="hibernate.max_fetch_depth" value="0"/>
-				 	         
 		         <property name="hibernate.hbm2ddl.auto" value="update"/>
 				 
-				 <property name="hibernate.show_sql" value="false"/> 
-		         <property name="hibernate.format_sql" value="false"/>
+				 <!-- <property name="hibernate.show_sql" value="false"/> -->
+		         <!-- <property name="hibernate.format_sql" value="false"/> --> 
 		         
 		         
 	      </properties>
