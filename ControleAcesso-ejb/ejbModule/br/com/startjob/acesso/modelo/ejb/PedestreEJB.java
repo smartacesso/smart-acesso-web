@@ -1399,8 +1399,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 	private List<FuncionarioSeniorDto> buscaTodosOsFuncioriosDaEmpresa(final String numEmp,
 			final ClienteEntity cliente) {
 		System.out.println("buscando todos funcionarios da empresa :" + numEmp);
-		IntegracaoSeniorService integracaoSeniorService = new IntegracaoSeniorService(
-				cliente.getIntegracaoSenior().getUsuario(), cliente.getIntegracaoSenior().getSenha());
+		IntegracaoSeniorService integracaoSeniorService = new IntegracaoSeniorService(cliente);
 
 		return integracaoSeniorService.buscarFuncionarios(numEmp);
 	}
@@ -1412,8 +1411,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 		String dataString = data.format(formatter);
 
-		IntegracaoSeniorService integracaoSeniorService = new IntegracaoSeniorService(
-				cliente.getIntegracaoSenior().getUsuario(), cliente.getIntegracaoSenior().getSenha());
+		IntegracaoSeniorService integracaoSeniorService = new IntegracaoSeniorService(cliente);
 
 		return integracaoSeniorService.buscarFuncionariosDemitidos(numEmp, dataString);
 	}
@@ -1425,8 +1423,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 		String dataString = data.format(formatter);
 
-		IntegracaoSeniorService integracaoSeniorService = new IntegracaoSeniorService(
-				cliente.getIntegracaoSenior().getUsuario(), cliente.getIntegracaoSenior().getSenha());
+		IntegracaoSeniorService integracaoSeniorService = new IntegracaoSeniorService(cliente);
 
 		return integracaoSeniorService.buscarFuncionariosAdmitidos(numEmp, dataString);
 	}
@@ -1477,8 +1474,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 	private EmpresaSeniorDto buscaTodasEmpresasSenior(final ClienteEntity cliente) {
 		// IntegracaoSeniorService integracaoSeniorService = new
 		// IntegracaoSeniorService("smartwsintegra", "Sm4rt@s3n10r#");
-		IntegracaoSeniorService integracaoSeniorService = new IntegracaoSeniorService(
-				cliente.getIntegracaoSenior().getUsuario(), cliente.getIntegracaoSenior().getSenha());
+		IntegracaoSeniorService integracaoSeniorService = new IntegracaoSeniorService(cliente);
 
 		return integracaoSeniorService.buscarEmpresas().get(0);
 	}
@@ -1539,7 +1535,10 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 			List<PedestreEntity> pedestres = (List<PedestreEntity>) pesquisaArgFixos(PedestreEntity.class, "findById_matricula", null);
 			
 			//buscar empresa e cargo e vincular no funcionario
-			//empresa vai ser sempre fixa
+			//empresa vai ser sempre 
+
+			EmpresaEntity empresa = null;
+			
 			
 			if(Objects.isNull(pedestres) || pedestres.isEmpty()) {
 				PedestreEntity novoPedestre = funcionarioTotvsDto.toPedestreEntity();

@@ -55,17 +55,17 @@ import br.com.startjob.acesso.modelo.enumeration.Status;
 	@NamedQuery(name = "ClienteEntity.findAllComIntegracaoSOC",
 				query = "select obj from ClienteEntity obj "
 					  + "join fetch obj.integracaoSoc i "
-					  + "where ((obj.removido = false or obj.removido is null) and i.empresa is not null) "
+					  + "where ((obj.removido = false or obj.removido is null) and (i.empresa is not null or i.empresa = '')) "
 					  + "order by obj.id asc"),
 	@NamedQuery(name = "ClienteEntity.findAllComIntegracaoSenior",
 				query = "select obj from ClienteEntity obj "
 					  + "join fetch obj.integracaoSenior i "
-					  + "where ((obj.removido = false or obj.removido is null) and i.usuario is not null) "
+					  + "where ((obj.removido = false or obj.removido is null) and (i.usuario is not null or i.usuario = '')) "
 					  + "order by obj.id asc"),
 	@NamedQuery(name = "ClienteEntity.findAllComIntegracaoTotvs",
 				query = "select obj from ClienteEntity obj "
 					  + "join fetch obj.integracaoTotvs i "
-					  + "where ((obj.removido = false or obj.removido is null) and i.usuario is not null) "
+					  + "where ((obj.removido = false or obj.removido is null) and (i.usuario is not null or i.usuario = '')) "
 					  + "order by obj.id asc"),
 	@NamedQuery(name = "ClienteEntity.findComFilialTeknisa",
 				query = "select obj from ClienteEntity obj "

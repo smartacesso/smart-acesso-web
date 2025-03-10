@@ -17,6 +17,7 @@ import br.com.startjob.acesso.controller.CadastroBaseController;
 import br.com.startjob.acesso.modelo.entity.ClienteEntity;
 import br.com.startjob.acesso.modelo.entity.EnderecoEntity;
 import br.com.startjob.acesso.modelo.entity.IntegracaoSOCEntity;
+import br.com.startjob.acesso.modelo.entity.IntegracaoSeniorEntity;
 import br.com.startjob.acesso.modelo.entity.IntegracaoTotvsEntity;
 import br.com.startjob.acesso.modelo.entity.PlanoEntity;
 import br.com.startjob.acesso.modelo.entity.UsuarioEntity;
@@ -59,6 +60,11 @@ public class CadastroClienteController extends CadastroBaseController {
         if (cliente.getIntegracaoSoc() == null) {
             cliente.setIntegracaoSoc(new IntegracaoSOCEntity()); // Substitua por sua classe específica
         }
+        
+        if (cliente.getIntegracaoSenior() == null) {
+            cliente.setIntegracaoSenior(new IntegracaoSeniorEntity()); // Substitua por sua classe específica
+        }
+        
         
         // Inicialize integracaoSoc se estiver nulo
         if (cliente.getIntegracaoTotvs() == null) {

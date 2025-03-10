@@ -15,15 +15,18 @@ import com.senior.services.dto.CentroDeCustoSeniorDto;
 import com.senior.services.dto.EmpresaSeniorDto;
 import com.senior.services.dto.FuncionarioSeniorDto;
 
+import br.com.startjob.acesso.modelo.entity.ClienteEntity;
+
 public class IntegracaoSeniorService {
 
-	private final static String url = "http://10.1.1.228:8080/g5-senior-services/rubi_Synccom_senior_g5_rh_fp_customSmart";
+	private String url;
 	private String usuario;
 	private String senha;
 
-	public IntegracaoSeniorService(String usuario, String senha) {
-		this.usuario = usuario;
-		this.senha = senha;
+	public IntegracaoSeniorService(ClienteEntity cliente) {
+		this.url = cliente.getIntegracaoSenior().getUrl();
+		this.usuario = cliente.getIntegracaoSenior().getUsuario();
+		this.senha = cliente.getIntegracaoSenior().getSenha();
 	}
 
 	// Método comum para realizar a requisição SOAP

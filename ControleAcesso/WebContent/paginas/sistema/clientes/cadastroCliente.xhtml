@@ -405,8 +405,37 @@
 								
 							</p:panelGrid>
 						
+						</p:tab>
+						
+						<p:tab title="#{msgs['label.uc001.integracao.senior']}">
+						
+							<p:panelGrid columns="2" style="width: 100%;">
+							
+								<p:column >
+									<p:outputLabel value="#{msgs['label.uc001.url.senior']}" for="urlSenior" indicateRequired="false"/>
+									<br />
+									<p:inputText id="urlSenior" value="#{cadastroClienteController.entidade.integracaoSenior.url}" 
+												 required="false"/>
+								</p:column>
+								
+								<p:column >
+									<p:outputLabel value="#{msgs['label.uc001.usuario.senior']}" for="usuarioSenior" indicateRequired="false"/>
+									<br />
+									<p:inputText id="usuarioSenior" value="#{cadastroClienteController.entidade.integracaoSenior.usuario}" 
+												 required="false"/>
+								</p:column>
+								
+								<p:column >
+									<p:outputLabel value="#{msgs['label.uc001.senha.senior']}" for="senhaSenior" indicateRequired="false"/>
+									<br />
+									<p:password id="senhaSenior" value="#{cadastroClienteController.entidade.integracaoSenior.senha}" 
+												 required="false"/>
+								</p:column>
+								
+							</p:panelGrid>
 						
 						</p:tab>
+						
 						<p:tab title="#{msgs['label.uc001.integracao.totvs']}">
 						
 							<p:panelGrid columns="5" style="width: 100%;">
@@ -428,7 +457,7 @@
 								<p:column >
 									<p:outputLabel value="#{msgs['label.uc001.senha.totvs']}" for="senhaTovs" indicateRequired="false"/>
 									<br />
-									<p:inputText id="senhaTovs" value="#{cadastroClienteController.entidade.integracaoTotvs.senha}" 
+									<p:password id="senhaTovs" value="#{cadastroClienteController.entidade.integracaoTotvs.senha}" 
 												 required="false"/>
 								</p:column>
 								
