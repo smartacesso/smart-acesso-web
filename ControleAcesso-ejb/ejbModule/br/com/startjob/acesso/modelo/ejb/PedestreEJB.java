@@ -60,6 +60,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.senior.services.IntegracaoSeniorService;
 import com.senior.services.dto.EmpresaSeniorDto;
 import com.senior.services.dto.FuncionarioSeniorDto;
+import com.totvs.dto.FuncionarioTotvsDto;
+import com.totvs.services.IntegracaoTotvsService;
 
 import br.com.startjob.acesso.modelo.BaseConstant;
 import br.com.startjob.acesso.modelo.entity.AcessoEntity;
@@ -73,6 +75,7 @@ import br.com.startjob.acesso.modelo.entity.EquipamentoEntity;
 import br.com.startjob.acesso.modelo.entity.HorarioEntity;
 import br.com.startjob.acesso.modelo.entity.ImportacaoEntity;
 import br.com.startjob.acesso.modelo.entity.IntegracaoSOCEntity;
+import br.com.startjob.acesso.modelo.entity.IntegracaoTotvsEntity;
 import br.com.startjob.acesso.modelo.entity.ParametroEntity;
 import br.com.startjob.acesso.modelo.entity.PedestreEntity;
 import br.com.startjob.acesso.modelo.entity.PedestreEquipamentoEntity;
@@ -1505,6 +1508,75 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 			e.printStackTrace();
 		}
 		return result;
+	}
+
+	@SuppressWarnings("unchecked")
+	@Override
+	@TransactionAttribute(TransactionAttributeType.REQUIRED)
+	@TransactionTimeout(unit = TimeUnit.HOURS, value = 4)
+	public void importarTotvs() throws Exception {
+		final List<ClienteEntity> clientes = (List<ClienteEntity>) pesquisaSimples(ClienteEntity.class,
+				"findAllComIntegracaoTotvs", new HashMap<>());
+
+		if (Objects.isNull(clientes) || clientes.isEmpty()) {
+			System.out.println("Não existem clientes com integração totvs");
+			return;
+		}
+
+		clientes.forEach(cliente -> {
+			//realizar importacao
+			cliente.getIntegracaoTotvs().setUltimaImportacao(new Date());
+
+			List<FuncionarioTotvsDto> funcionariosTotvs = buscaTodosOsFuncioriosDaTotvs(cliente);
+			funcionariosTotvs.forEach(funcionario -> salvarOuAtualizarFuncionario(funcionario));
+
+		});
+	}
+	
+	@SuppressWarnings("unchecked")
+	private void salvarOuAtualizarFuncionario(final FuncionarioTotvsDto funcionarioTotvsDto) {
+		try {
+			List<PedestreEntity> pedestres = (List<PedestreEntity>) pesquisaArgFixos(PedestreEntity.class, "findById_matricula", null);
+			
+			//buscar empresa e cargo e vincular no funcionario
+			//empresa vai ser sempre fixa
+			
+			if(Objects.isNull(pedestres) || pedestres.isEmpty()) {
+				PedestreEntity novoPedestre = funcionarioTotvsDto.toPedestreEntity();
+
+				// salva o novoPedestre
+				try {
+					novoPedestre = (PedestreEntity) gravaObjeto(novoPedestre)[0];
+
+				} catch (Exception e) {
+					e.printStackTrace();
+					throw new RuntimeException();
+				}
+				
+				return;
+			}
+			
+			PedestreEntity pedestreExistente = pedestres.get(0);			
+			pedestreExistente.updateFuncionarioTotvs(funcionarioTotvsDto);
+			// atualiza o pedestreExistente
+			try {
+				pedestreExistente = (PedestreEntity) alteraObjeto(pedestreExistente)[0];
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw new RuntimeException();
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	}
+	
+	private List<FuncionarioTotvsDto> buscaTodosOsFuncioriosDaTotvs(final ClienteEntity cliente) {
+		System.out.println("buscando todos funcionarios do cliente tovs :" + cliente.getId());
+		final IntegracaoTotvsService integracaoTotvsService = new IntegracaoTotvsService(cliente);
+
+		return integracaoTotvsService.buscarFuncionarios(cliente.getIntegracaoTotvs().getUltimaImportacao());
 	}
 
 	@SuppressWarnings("unchecked")

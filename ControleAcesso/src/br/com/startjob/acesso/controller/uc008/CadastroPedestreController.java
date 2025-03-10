@@ -423,9 +423,8 @@ public class CadastroPedestreController extends CadastroBaseController {
 			pedestre.setMatricula(matricula);
 		}
 
-		if (pedestre.getId() == null)
-			pedestre.setUsuario(getUsuarioLogado());
-
+		pedestre.setUsuario(getUsuarioLogado());
+			
 		validaListasPedestre(pedestre);
 		String retorno = super.salvar();
 

@@ -1,5 +1,7 @@
 package com.totvs.dto;
 
+import br.com.startjob.acesso.modelo.entity.CargoEntity;
+import br.com.startjob.acesso.modelo.entity.EmpresaEntity;
 import br.com.startjob.acesso.modelo.entity.PedestreEntity;
 
 public class FuncionarioTotvsDto {
@@ -62,7 +64,42 @@ public class FuncionarioTotvsDto {
 		pedestre.setCpf(employeeCpf);
 		pedestre.setEmail(email);
 		
+		pedestre.setEmpresa(null);
+		pedestre.setCargo(null);
 
 		return pedestre;
 	}
+
+	public String getCode() {
+		return code;
+	}
+
+	public void setCode(String code) {
+		this.code = code;
+	}
+
+	public String getFullName() {
+		return fullName;
+	}
+
+	public void setFullName(String fullName) {
+		this.fullName = fullName;
+	}
+
+	public String getEmail() {
+		return email;
+	}
+
+	public void setEmail(String email) {
+		this.email = email;
+	}
+
+	public String getEmployeeCpf() {
+		return employeeCpf;
+	}
+
+	public void setEmployeeCpf(String employeeCpf) {
+		this.employeeCpf = employeeCpf;
+	}
+	
 }

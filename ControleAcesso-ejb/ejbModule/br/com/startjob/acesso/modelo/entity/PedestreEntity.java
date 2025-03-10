@@ -33,6 +33,7 @@ import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 
 import com.senior.services.dto.FuncionarioSeniorDto;
+import com.totvs.dto.FuncionarioTotvsDto;
 
 import br.com.startjob.acesso.modelo.entity.base.ClienteBaseEntity;
 import br.com.startjob.acesso.modelo.enumeration.Genero;
@@ -283,7 +284,6 @@ public class PedestreEntity extends ClienteBaseEntity {
 	}
 
 	public PedestreEntity(final FuncionarioSeniorDto funcionarioSeniorDto, final EmpresaEntity empresaEntity) {
-
 		LocalDate hoje = LocalDate.now();
 
 		this.nome = funcionarioSeniorDto.getNome();
@@ -340,6 +340,13 @@ public class PedestreEntity extends ClienteBaseEntity {
 			}
 		}
 
+	}
+	
+	public void updateFuncionarioTotvs(final FuncionarioTotvsDto funcionarioTotvsDto) {
+		this.nome = funcionarioTotvsDto.getFullName();
+		this.matricula = funcionarioTotvsDto.getCode();
+		this.email = funcionarioTotvsDto.getEmail();
+		this.cpf = funcionarioTotvsDto.getEmployeeCpf();
 	}
 
 	public String getAllPhonesFormatted() {

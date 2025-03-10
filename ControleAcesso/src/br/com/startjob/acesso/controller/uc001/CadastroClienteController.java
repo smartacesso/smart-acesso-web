@@ -17,6 +17,7 @@ import br.com.startjob.acesso.controller.CadastroBaseController;
 import br.com.startjob.acesso.modelo.entity.ClienteEntity;
 import br.com.startjob.acesso.modelo.entity.EnderecoEntity;
 import br.com.startjob.acesso.modelo.entity.IntegracaoSOCEntity;
+import br.com.startjob.acesso.modelo.entity.IntegracaoTotvsEntity;
 import br.com.startjob.acesso.modelo.entity.PlanoEntity;
 import br.com.startjob.acesso.modelo.entity.UsuarioEntity;
 import br.com.startjob.acesso.modelo.enumeration.PerfilAcesso;
@@ -54,17 +55,23 @@ public class CadastroClienteController extends CadastroBaseController {
 			cliente.setEndereco(new EnderecoEntity());
 		}
 		
-		   
         // Inicialize integracaoSoc se estiver nulo
         if (cliente.getIntegracaoSoc() == null) {
             cliente.setIntegracaoSoc(new IntegracaoSOCEntity()); // Substitua por sua classe específica
         }
+        
+        // Inicialize integracaoSoc se estiver nulo
+        if (cliente.getIntegracaoTotvs() == null) {
+            cliente.setIntegracaoTotvs(new IntegracaoTotvsEntity()); // Substitua por sua classe específica
+        }
+        
 		
 		if(cliente.getPlanos() != null && !cliente.getPlanos().isEmpty()) {
 			listaPlanos = cliente.getPlanos();
 		} else {
 			listaPlanos = new ArrayList<>();
 		}
+
 		
 		if(cliente.getNomeUnidadeOrganizacional() != null) {
 			nomeUnidadeAnterior = cliente.getNomeUnidadeOrganizacional();
