@@ -11,15 +11,19 @@ import br.com.startjob.acesso.modelo.entity.ResponsibleEntity;
 import br.com.startjob.acesso.modelo.entity.TokenNotificationEntity;
 
 public interface ResponsibleEJBRemote extends BaseEJBRemote {
-	
+
 	Optional<ResponsibleEntity> findResponsibleByLoginAndPassword(final String login, final String password);
-	
+
 	List<PedestreEntity> findAllDependentsPageable(final long idResponsible, final int page, final int size);
-	
+
 	List<AcessoEntity> findAllAccessPageable(final String login, final String password, final int Page, final int size);
-	
-	 Optional<TokenNotificationEntity> findTokenNotification();
-	 
-	 void createNewsLetter(final long idResponsible, final String description, final String title, final byte [] image,  Date eventDate);
-	 List<NewsLetterEntity> findNewsLetter(final long idResponsible);
+
+	Optional<TokenNotificationEntity> findTokenNotification();
+
+	void createNewsLetter(final long idResponsible, final String description, final String title, final byte[] image,
+			Date eventDate);
+
+	List<NewsLetterEntity> findNewsLetter(final long idResponsible);
+
+	Optional<ResponsibleEntity> findResponsibleByID(final long idResponsible);
 }
