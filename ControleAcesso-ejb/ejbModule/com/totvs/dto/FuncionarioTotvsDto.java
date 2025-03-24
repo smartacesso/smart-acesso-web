@@ -1,8 +1,11 @@
 package com.totvs.dto;
 
+import java.time.LocalDate;
+
 import br.com.startjob.acesso.modelo.entity.CargoEntity;
 import br.com.startjob.acesso.modelo.entity.EmpresaEntity;
 import br.com.startjob.acesso.modelo.entity.PedestreEntity;
+import br.com.startjob.acesso.modelo.enumeration.Status;
 
 public class FuncionarioTotvsDto {
 
@@ -59,14 +62,25 @@ public class FuncionarioTotvsDto {
 
 	public PedestreEntity toPedestreEntity() {
 		PedestreEntity pedestre = new PedestreEntity();
-		pedestre.setNome(fullName);
+		pedestre.setNome(name);
 		pedestre.setMatricula(code);
 		pedestre.setCpf(employeeCpf);
 		pedestre.setEmail(email);
 		
 		pedestre.setEmpresa(null);
 		pedestre.setCargo(null);
+		
+		if(employeeSituation.trim().equals("")) {
+			pedestre.setObservacoes("Importado dia " + LocalDate.now().toString());
+			pedestre.setStatus(Status.ATIVO);
+			pedestre.setSempreLiberado(true);
 
+		}else {
+			pedestre.setStatus(Status.INATIVO);
+			pedestre.setSempreLiberado(false);
+			pedestre.setObservacoes("Funcionario com situação : " + employeeSituation);
+		}
+		
 		return pedestre;
 	}
 
@@ -100,6 +114,30 @@ public class FuncionarioTotvsDto {
 
 	public void setEmployeeCpf(String employeeCpf) {
 		this.employeeCpf = employeeCpf;
+	}
+
+	public String getRoleDescription() {
+		return roleDescription;
+	}
+
+	public void setRoleDescription(String roleDescription) {
+		this.roleDescription = roleDescription;
+	}
+
+	public String getName() {
+		return name.trim().replaceAll("\\s+", " ");
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getEmployeeSituation() {
+		return employeeSituation;
+	}
+
+	public void setEmployeeSituation(String employeeSituation) {
+		this.employeeSituation = employeeSituation;
 	}
 	
 }

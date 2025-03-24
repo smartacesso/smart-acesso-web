@@ -7,7 +7,9 @@ public enum SoapOperation {
     PEDESTRE_DEMITIDOS("pedestreDemitidos"),
     PEDESTRE_ADMITIDOS("pedestreAdmitidos"),
     CARGO("cargo"),
-    CENTRO_CUSTO("centroCusto");
+    CENTRO_CUSTO("centroCusto"),
+    HORARIOS("horarios"),
+    HORARIO_PEDESTRE("horarioPedestre");
 	
 
     private final String operation;

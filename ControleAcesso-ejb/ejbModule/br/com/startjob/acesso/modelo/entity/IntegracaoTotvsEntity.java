@@ -52,6 +52,9 @@ public class IntegracaoTotvsEntity extends BaseEntity{
 	@Column(name="BRANCH_ID", nullable=true, length=255)
 	private String branchId;
 	
+	@Column(name="EMPRESA", nullable=true, length=255)
+	private String empresa;
+	
 	@Column(name="ULTIMA_IMORTACAO", nullable=true, length=255)
 	private Date ultimaImportacao;
 	
@@ -117,6 +120,14 @@ public class IntegracaoTotvsEntity extends BaseEntity{
 
 	public void setBranchId(String branchId) {
 		this.branchId = branchId;
+	}
+
+	public String getEmpresa() {
+		return empresa;
+	}
+
+	public void setEmpresa(String empresa) {
+		this.empresa = empresa;
 	}
 	
 }

@@ -20,6 +20,7 @@ import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.persistence.EntityManager;
+import javax.persistence.LockModeType;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
@@ -335,7 +336,76 @@ public class BaseEJB implements BaseEJBRemote {
 		}
 	}
 	
+//	@TransactionAttribute(TransactionAttributeType.REQUIRED)
+//	public String excluiObjetoPorId(Class<? extends BaseEntity> clazz, Long id) throws Exception {
+//	    try {
+//	        if (id == null) {
+//	            throw new Exception("ID não pode ser nulo.");
+//	        }
+//
+//	        BaseEntity entidade = em.find(clazz, id);
+//
+//	        if (entidade == null) {
+//	            throw new Exception("Objeto não encontrado para exclusão.");
+//	        }
+//
+//	        logger.debug("Objeto encontrado para exclusão: " + entidade);
+//
+//	        // Se a entidade tiver um campo 'removido', tente forçar a exclusão real
+//	        em.createQuery("DELETE FROM " + clazz.getSimpleName() + " e WHERE e.id = :id")
+//	          .setParameter("id", id)
+//	          .executeUpdate();
+//	        
+//	        em.flush(); // Força a sincronização com o banco
+//
+//	        logger.debug("Objeto removido com sucesso!");
+//
+//	        return "Objeto excluído com sucesso.";
+//
+//	    } catch (Exception e) {
+//	        logger.error("Erro ao excluir objeto por ID.", e);
+//	        throw new Exception("Erro ao excluir objeto.", e);
+//	    }
+//	}
 	
+	@TransactionAttribute(TransactionAttributeType.REQUIRED)
+	public String excluiObjetoPorId(Class<? extends BaseEntity> clazz, Long id) throws Exception {
+	    try {
+	        if (id == null) {
+	            throw new Exception("ID não pode ser nulo.");
+	        }
+
+	        BaseEntity entidade = em.find(clazz, id);
+
+	        if (entidade == null) {
+	            throw new Exception("Objeto não encontrado para exclusão.");
+	        }
+
+	        logger.debug("Objeto encontrado para exclusão: " + entidade);
+
+	        // Se for um PedestreRegraEntity, excluir os registros filhos antes
+	        if (clazz.equals(PedestreRegraEntity.class)) {
+	            em.createQuery("DELETE FROM HorarioEntity h WHERE h.pedestreRegra.id = :id")
+	              .setParameter("id", id)
+	              .executeUpdate();
+	            em.flush();
+	        }
+
+	        em.createQuery("DELETE FROM " + clazz.getSimpleName() + " e WHERE e.id = :id")
+	          .setParameter("id", id)
+	          .executeUpdate();
+	        em.flush();
+
+	        logger.debug("Objeto removido com sucesso!");
+
+	        return "Objeto excluído com sucesso.";
+
+	    } catch (Exception e) {
+	        logger.error("Erro ao excluir objeto por ID.", e);
+	        throw new Exception("Erro ao excluir objeto.", e);
+	    }
+	}
+
 
 	/*
 	 * (non-Javadoc)

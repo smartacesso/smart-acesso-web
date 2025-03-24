@@ -438,7 +438,7 @@
 						
 						<p:tab title="#{msgs['label.uc001.integracao.totvs']}">
 						
-							<p:panelGrid columns="5" style="width: 100%;">
+							<p:panelGrid columns="6" style="width: 100%;">
 							
 								<p:column >
 									<p:outputLabel value="#{msgs['label.uc001.url.base']}" for="url" indicateRequired="false"/>
@@ -479,6 +479,14 @@
 									<p:outputLabel value="#{msgs['label.uc001.branchId.totvs']}" for="branchTotvs" indicateRequired="false"/>
 									<br />
 									<p:inputText id="branchTotvs" value="#{cadastroClienteController.entidade.integracaoTotvs.branchId}" 
+												 required="false"/>
+								</p:column>
+								
+								
+								<p:column >
+									<p:outputLabel value="#{msgs['label.uc001.empresa.totvs']}" for="Empresa" indicateRequired="false"/>
+									<br />
+									<p:inputText id="Empresa" value="#{cadastroClienteController.entidade.integracaoTotvs.empresa}" 
 												 required="false"/>
 								</p:column>
 								

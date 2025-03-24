@@ -14,7 +14,9 @@ import com.senior.services.dto.CargoSeniorDto;
 import com.senior.services.dto.CentroDeCustoSeniorDto;
 import com.senior.services.dto.EmpresaSeniorDto;
 import com.senior.services.dto.FuncionarioSeniorDto;
+import com.senior.services.dto.HorarioPedestreDto;
 
+import br.com.startjob.acesso.modelo.ejb.HorarioSeniorDto;
 import br.com.startjob.acesso.modelo.entity.ClienteEntity;
 
 public class IntegracaoSeniorService {
@@ -103,6 +105,37 @@ public class IntegracaoSeniorService {
 				"         </parameters>" + "      </ser:" + operation.getOperation() + ">" + "   </soapenv:Body>"
 				+ "</soapenv:Envelope>";
 	}
+	
+	
+	private String gerarSoapBodyComEscala(SoapOperation operation, String escala) {
+		return "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:ser=\"http://services.senior.com.br\">"
+				+ "   <soapenv:Header/>" + "   <soapenv:Body>" + "      <ser:" + operation.getOperation() + ">"
+				+ "         <user>" + usuario + "</user>" + "         <password>" + senha + "</password>"
+				+ "         <encryption>0</encryption>" + "         <parameters>" + "            <escala>" + escala
+				+ "</escala>" + "         </parameters>" + "      </ser:" + operation.getOperation() + ">"
+				+ "   </soapenv:Body>" + "</soapenv:Envelope>";
+	}
+	
+	
+	private String gerarSoapBodyComHorarioPedestre(SoapOperation operation, String data, String numCad, Integer numEmp, Integer tipCol) {
+	    return "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:ser=\"http://services.senior.com.br\">"
+	            + "   <soapenv:Header/>"
+	            + "   <soapenv:Body>"
+	            + "      <ser:" + operation.getOperation() + ">"
+	            + "         <user>" + usuario + "</user>"
+	            + "         <password>" + senha + "</password>"
+	            + "         <encryption>0</encryption>"
+	            + "         <parameters>"
+	            + "            <data>" + data + "</data>"
+	            + "            <numCad>" + numCad + "</numCad>"
+	            + "            <numEmp>" + numEmp + "</numEmp>"
+	            + "            <tipCol>" + tipCol + "</tipCol>"
+	            + "         </parameters>"
+	            + "      </ser:" + operation.getOperation() + ">"
+	            + "   </soapenv:Body>"
+	            + "</soapenv:Envelope>";
+	}
+
 
 	// busca empresas
 	public List<EmpresaSeniorDto> buscarEmpresas() {
@@ -163,12 +196,32 @@ public class IntegracaoSeniorService {
 		return null;
 	}
 
-	// bussca cargo
+	// bussca cerntro de custo
 	public List<CentroDeCustoSeniorDto> buscaCentroDeCusto(String numEmp) {
 		String soapBodyCentroDeCusto = gerarSoapBodyComEmpresa(SoapOperation.CENTRO_CUSTO, numEmp);
 		String responseXml = enviarSoapRequest(soapBodyCentroDeCusto);
 		if (responseXml != null) {
 			return parseCentroCustoFromXml(responseXml);
+		}
+		return null;
+	}
+	
+	// busca horarios
+	public List<HorarioSeniorDto> buscarHorarios(String escala) {
+		String soapBodyEmpresas = gerarSoapBodyComEscala(SoapOperation.HORARIOS, escala);
+		String responseXml = enviarSoapRequest(soapBodyEmpresas);
+		if (responseXml != null) {
+			return parseHorarioFromXml(responseXml);
+		}
+		return null;
+	}
+	
+	// busca horarios pedestre
+	public List<HorarioPedestreDto> buscarHorariosPedestre(String data, String numCad, Integer numEmp, Integer tipCol) {
+		String soapBodyEmpresas = gerarSoapBodyComHorarioPedestre(SoapOperation.HORARIO_PEDESTRE, data, numCad, numEmp, tipCol);
+		String responseXml = enviarSoapRequest(soapBodyEmpresas);
+		if (responseXml != null) {
+			return parseHorarioPedestreFromXml(responseXml);
 		}
 		return null;
 	}
@@ -264,6 +317,44 @@ public class IntegracaoSeniorService {
 			}
 		}
 		return funcionarios;
+	}
+	
+	
+	// Método para extrair horarios do XML de resposta
+	private List<HorarioSeniorDto> parseHorarioFromXml(String xml) {
+		// Implementação de parsing...
+		List<HorarioSeniorDto> horarios = new ArrayList<>();
+		String[] retornos = xml.split("<retorno>");
+		for (String retornoXml : retornos) {
+			if (retornoXml.contains("</retorno>")) {
+				HorarioSeniorDto horario = new HorarioSeniorDto();
+				horario.setIdEscala(getTagValue("escala", retornoXml));
+				horario.setIdHorario(getTagValue("horario", retornoXml));
+				horario.setDiaSemana(getTagValue("diasemana", retornoXml));
+				horario.setInicio(getTagValue("inicio", retornoXml));
+				horario.setFim(getTagValue("fim", retornoXml));
+				horario.setNome(getTagValue("nome", retornoXml));
+				horarios.add(horario);
+			}
+		}
+		return horarios;
+	}
+	
+	
+	// Método para extrair horarios do XML de resposta
+	private List<HorarioPedestreDto> parseHorarioPedestreFromXml(String xml) {
+		// Implementação de parsing...
+		List<HorarioPedestreDto> horariosPedestre = new ArrayList<>();
+		String[] retornos = xml.split("<retorno>");
+		for (String retornoXml : retornos) {
+			if (retornoXml.contains("</retorno>")) {
+				HorarioPedestreDto horarioPed = new HorarioPedestreDto();
+				horarioPed.setIdescala(getTagValue("escala", retornoXml));
+	
+				horariosPedestre.add(horarioPed);
+			}
+		}
+		return horariosPedestre;
 	}
 
 	// Método auxiliar para pegar o valor de uma tag XML

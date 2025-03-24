@@ -9,6 +9,7 @@
 	      <properties>
 	      		 <property name="hibernate.dialect" value="org.hibernate.dialect.SQLServer2012Dialect"/>
 		         <property name="hibernate.default_schema" value="controle_acesso"/>
+		         <!-- <property name="hibernate.default_schema" value="dbo"/> --> <!-- actech -->
 		         <property name="hibernate.transaction.manager_lookup_class" value="org.hibernate.transaction.JBossTransactionManagerLookup"/>
 		         
 		         <!-- configuração de cache -->

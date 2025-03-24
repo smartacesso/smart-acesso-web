@@ -3,6 +3,7 @@ package br.com.startjob.acesso.modelo.entity;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -32,6 +33,7 @@ import javax.persistence.Transient;
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 
+import com.fasterxml.jackson.databind.ser.std.AsArraySerializerBase;
 import com.senior.services.dto.FuncionarioSeniorDto;
 import com.totvs.dto.FuncionarioTotvsDto;
 
@@ -295,7 +297,6 @@ public class PedestreEntity extends ClienteBaseEntity {
 		this.cliente = empresaEntity.getCliente();
 		this.empresa = empresaEntity;
 		this.tipo = TipoPedestre.PEDESTRE;
-		this.sempreLiberado = true;
 
 		if (Objects.nonNull(funcionarioSeniorDto.getDatDem())) {
 			this.observacoes = "DATA DEMISSAO : " + funcionarioSeniorDto.getDatDem() + " | MOTIVO : DEMISSAO";
@@ -320,7 +321,6 @@ public class PedestreEntity extends ClienteBaseEntity {
 		this.codigoCartaoAcesso = funcionarioSeniorDto.getNumCracha();
 		this.rg = funcionarioSeniorDto.getRg();
 		this.codigoPermissao = funcionarioSeniorDto.getCodPrm(); // codigo permissao
-		this.sempreLiberado = true;
 		this.setDataAlteracao(new Date());
 
 		if (Objects.nonNull(funcionarioSeniorDto.getDatDem())) {
@@ -343,10 +343,22 @@ public class PedestreEntity extends ClienteBaseEntity {
 	}
 	
 	public void updateFuncionarioTotvs(final FuncionarioTotvsDto funcionarioTotvsDto) {
-		this.nome = funcionarioTotvsDto.getFullName();
+		this.nome = funcionarioTotvsDto.getName();
 		this.matricula = funcionarioTotvsDto.getCode();
 		this.email = funcionarioTotvsDto.getEmail();
 		this.cpf = funcionarioTotvsDto.getEmployeeCpf();
+		
+		
+		if(funcionarioTotvsDto.getEmployeeSituation().trim().equals("")) {
+			this.sempreLiberado = true;
+			this.status =  Status.ATIVO;
+			this.observacoes =  "Importado dia " + LocalDate.now().toString();
+
+		}else {
+			this.sempreLiberado = false;
+			this.status =  Status.INATIVO;
+			this.observacoes = "Funcionario com situação : " + funcionarioTotvsDto.getEmployeeSituation();
+		}		
 	}
 
 	public String getAllPhonesFormatted() {
