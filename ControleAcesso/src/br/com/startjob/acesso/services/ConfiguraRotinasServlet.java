@@ -96,7 +96,7 @@ public class ConfiguraRotinasServlet extends BaseServlet {
 	    ActivatedTasks.getInstancia().limpaTimersSenior();
 
 	    // Define o período para 30 minutos (30 * 60 * 1000 ms)
-	    Long period =  2 * 60 * 1000L;
+	    Long period =  15 * 60 * 1000L;
 	    Timer timer = new Timer();
 	    
 	    // Define a nova tarefa
@@ -119,7 +119,7 @@ public class ConfiguraRotinasServlet extends BaseServlet {
 	    ActivatedTasks.getInstancia().limpaTimersTovs();
 
 	    // Define o período para 30 minutos (30 * 60 * 1000 ms)
-	    Long period =  5 * 60 * 1000L;
+	    Long period =  15 * 60 * 1000L;
 	    Timer timer = new Timer();
 	    
 	    // Define a nova tarefa

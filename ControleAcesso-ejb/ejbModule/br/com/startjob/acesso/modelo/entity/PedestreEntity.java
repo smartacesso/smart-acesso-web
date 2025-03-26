@@ -297,6 +297,7 @@ public class PedestreEntity extends ClienteBaseEntity {
 		this.cliente = empresaEntity.getCliente();
 		this.empresa = empresaEntity;
 		this.tipo = TipoPedestre.PEDESTRE;
+		this.sempreLiberado = false;
 
 		if (Objects.nonNull(funcionarioSeniorDto.getDatDem())) {
 			this.observacoes = "DATA DEMISSAO : " + funcionarioSeniorDto.getDatDem() + " | MOTIVO : DEMISSAO";
@@ -322,6 +323,7 @@ public class PedestreEntity extends ClienteBaseEntity {
 		this.rg = funcionarioSeniorDto.getRg();
 		this.codigoPermissao = funcionarioSeniorDto.getCodPrm(); // codigo permissao
 		this.setDataAlteracao(new Date());
+		this.sempreLiberado = false;
 
 		if (Objects.nonNull(funcionarioSeniorDto.getDatDem())) {
 			this.observacoes = "DATA DEMISSAO : " + funcionarioSeniorDto.getDatDem() + " | MOTIVO : DEMISSAO";
@@ -347,12 +349,15 @@ public class PedestreEntity extends ClienteBaseEntity {
 		this.matricula = funcionarioTotvsDto.getCode();
 		this.email = funcionarioTotvsDto.getEmail();
 		this.cpf = funcionarioTotvsDto.getEmployeeCpf();
-		
+		this.tipo = TipoPedestre.PEDESTRE;
+		this.setCliente(cliente);
+		this.setDataAlteracao(new Date());
+		this.setExistente(true);
 		
 		if(funcionarioTotvsDto.getEmployeeSituation().trim().equals("")) {
 			this.sempreLiberado = true;
 			this.status =  Status.ATIVO;
-			this.observacoes =  "Importado dia " + LocalDate.now().toString();
+			this.observacoes =  "atualizado dia " + LocalDate.now().toString();
 
 		}else {
 			this.sempreLiberado = false;

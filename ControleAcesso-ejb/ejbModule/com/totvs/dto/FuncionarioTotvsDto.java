@@ -6,6 +6,7 @@ import br.com.startjob.acesso.modelo.entity.CargoEntity;
 import br.com.startjob.acesso.modelo.entity.EmpresaEntity;
 import br.com.startjob.acesso.modelo.entity.PedestreEntity;
 import br.com.startjob.acesso.modelo.enumeration.Status;
+import br.com.startjob.acesso.modelo.enumeration.TipoPedestre;
 
 public class FuncionarioTotvsDto {
 
@@ -66,9 +67,12 @@ public class FuncionarioTotvsDto {
 		pedestre.setMatricula(code);
 		pedestre.setCpf(employeeCpf);
 		pedestre.setEmail(email);
-		
 		pedestre.setEmpresa(null);
 		pedestre.setCargo(null);
+		
+		pedestre.setTipo(TipoPedestre.PEDESTRE);
+		pedestre.setExistente(true);
+		pedestre.setVersao(0);
 		
 		if(employeeSituation.trim().equals("")) {
 			pedestre.setObservacoes("Importado dia " + LocalDate.now().toString());

@@ -1632,7 +1632,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 	            }
 	            
 	            for (FuncionarioTotvsDto funcionario : funcionariosTotvs) {
-	                salvarOuAtualizarFuncionario(funcionario, empresaTotvs);
+	                salvarOuAtualizarFuncionario(funcionario, empresaTotvs, cliente);
 	            }
 	        } catch (Exception e) {
 	        	 throw new RuntimeException("Erro ao importar para cliente " + cliente.getId(), e);
@@ -1690,14 +1690,16 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 	}
 	
 
-	private void salvarOuAtualizarFuncionario(final FuncionarioTotvsDto funcionarioTotvsDto, EmpresaEntity empresa) {
+	private void salvarOuAtualizarFuncionario(final FuncionarioTotvsDto funcionarioTotvsDto, EmpresaEntity empresa, ClienteEntity cliente) {
 	    try {
+	    	System.out.println("code : " + funcionarioTotvsDto.getCode());
 	        Map<String, Object> args = new HashMap<>();
 	        args.put("MATRICULA", funcionarioTotvsDto.getCode());
 	        
 	        List<PedestreEntity> pedestres = (List<PedestreEntity>) pesquisaArgFixos(PedestreEntity.class, "findById_matricula", args);
 	        PedestreEntity pedestre = (pedestres == null || pedestres.isEmpty()) ? funcionarioTotvsDto.toPedestreEntity() : pedestres.get(0);
-	        
+	        pedestre.setCliente(cliente);
+	       
 	    //    CargoEntity cargo = buscaCargoTotvs(funcionarioTotvsDto.getRoleDescription(), empresa);
 	        
 	        // Verifica se a empresa já tem cargos, se não, inicializa a lista
@@ -1714,10 +1716,12 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 	  //      pedestre.setCargo(cargo);
 	        
 	        if (pedestres == null || pedestres.isEmpty()) {
-	            pedestre = (PedestreEntity) gravaObjeto(pedestre)[0];
+	        	pedestre = (PedestreEntity) gravaObjeto(pedestre)[0];
+	            System.out.println("salvando funcionario : " +  pedestre.getNome() + ", matricula : " + pedestre.getMatricula() + ", id : " + pedestre.getId());
 	        } else {
 	            pedestre.updateFuncionarioTotvs(funcionarioTotvsDto);
 	            pedestre = (PedestreEntity) alteraObjeto(pedestre)[0];
+	            System.out.println("atualizando funcionario : " +  pedestre.getNome() + ", matricula : " + pedestre.getMatricula() + ", id : " + pedestre.getId());
 	        }
 	    } catch (Exception e) {
 	        throw new RuntimeException("Erro ao processar funcionário TOTVS: " + funcionarioTotvsDto.getCode(), e);
