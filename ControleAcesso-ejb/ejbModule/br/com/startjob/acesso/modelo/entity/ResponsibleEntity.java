@@ -80,6 +80,9 @@ public class ResponsibleEntity extends ClienteBaseEntity {
 
 	@Column(name = "PASSWORD", nullable = true, length = 100)
 	private String password;
+	
+	@Column(name = "TOKEN", nullable = true, length = 100)
+	private String token;
 
 	@OneToMany(mappedBy = "responsavel", cascade = CascadeType.ALL, orphanRemoval = true)
 	private List<PedestreEntity> pedestres;

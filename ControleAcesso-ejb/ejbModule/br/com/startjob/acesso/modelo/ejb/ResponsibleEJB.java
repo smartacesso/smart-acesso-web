@@ -158,11 +158,11 @@ public class ResponsibleEJB extends BaseEJB implements ResponsibleEJBRemote {
 	public Optional<ResponsibleEntity> findResponsibleByID(long idResponsible) {
 		// TODO Auto-generated method stub
 		Map<String, Object> args = new HashMap<String, Object>();
-		args.put("ID_RESPONSIBLE", String.valueOf(idResponsible));
+		args.put("ID", String.valueOf(idResponsible));
 		try {
 			@SuppressWarnings("unchecked")
 			List<ResponsibleEntity> responblibleList = (List<ResponsibleEntity>) this
-					.pesquisaArgFixos(ResponsibleEntity.class, "findByIDResposible", args);
+					.pesquisaArgFixos(ResponsibleEntity.class, "findById", args);
 
 			if (Objects.nonNull(responblibleList) && responblibleList.size() > 0) {
 				return Optional.of(responblibleList.get(0));

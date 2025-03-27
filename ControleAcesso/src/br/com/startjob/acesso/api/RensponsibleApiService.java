@@ -39,6 +39,7 @@ import br.com.startjob.acesso.modelo.utils.CriptografiaAES;
 import br.com.startjob.acesso.modelo.utils.EncryptionUtils;
 import br.com.startjob.acesso.to.AccessTO;
 import br.com.startjob.acesso.to.PedestrianAccessTO;
+import br.com.startjob.acesso.to.responsible.DeviceKeyOutput;
 import br.com.startjob.acesso.to.responsible.NewsLetterOutput;
 import br.com.startjob.acesso.to.responsible.ResponsibleLoginInput;
 import br.com.startjob.acesso.to.responsible.ResponsibleLoginOutput;
@@ -267,15 +268,34 @@ public class RensponsibleApiService extends BaseService {
 		ResponsibleEJBRemote responsibleEJB = (ResponsibleEJBRemote) getEjb("ResponsibleEJB");
 
 		TokenOutput tokenResponse = (TokenOutput) decriptToken(token);
+		if (Objects.isNull(tokenResponse)) {
+			return Response.status(Status.UNAUTHORIZED).build();
+		}
 
-		return null;
+		Optional<ResponsibleEntity> responsibleOutPut = responsibleEJB
+				.findResponsibleByID(tokenResponse.getIdResponsible());
+		return Response.ok(responsibleOutPut.get().getDeviceKey()).build();
 
 	}
 
 	@POST
 	@Path("/deviceKey")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response postDeviceKey() {
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response postDeviceKey(@HeaderParam("token") String token, DeviceKeyOutput deviceOutput) throws Exception {
+
+		ResponsibleEJBRemote responsibleEJB = (ResponsibleEJBRemote) getEjb("ResponsibleEJB");
+
+		TokenOutput tokenResponse = (TokenOutput) decriptToken(token);
+		if (Objects.isNull(tokenResponse)) {
+			return Response.status(Status.UNAUTHORIZED).build();
+		}
+
+		Optional<ResponsibleEntity> responsibleOutPut = responsibleEJB
+				.findResponsibleByID(tokenResponse.getIdResponsible());
+
+		responsibleOutPut.get().setDeviceKey(deviceOutput.getDeviceKey());
+		responsibleEJB.gravaObjeto(responsibleOutPut.get());
 		return null;
 
 	}
