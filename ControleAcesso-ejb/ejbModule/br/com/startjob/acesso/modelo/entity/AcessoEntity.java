@@ -23,7 +23,10 @@ import br.com.startjob.acesso.modelo.entity.base.ClienteBaseEntity;
 @Entity
 @Table(name="TB_ACESSO", 
 indexes = {
-        @Index(name = "idx_pedestre_data", columnList = "ID_PEDESTRE, DATA")
+        @Index(name = "idx_pedestre_data", columnList = "ID_PEDESTRE, DATA"),
+        @Index(name = "idx_pedestre_tipo", columnList = "ID_PEDESTRE, TIPO"),
+        @Index(name = "idx_cliente_data", columnList = "ID_CLIENTE, DATA, SENTIDO, TIPO"),
+        @Index(name = "idx_pedestre_sentido_tipo", columnList = "ID_PEDESTRE, SENTIDO, TIPO, DATA")
     })
 @NamedQueries({
 	@NamedQuery(name  = "AcessoEntity.findAll", 
