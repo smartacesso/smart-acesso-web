@@ -112,6 +112,7 @@ public class IntegracaoTotvsService {
 
 	    if (reponse != null) {	        
 	        // Agora, desserializamos para a classe ApiResponse
+	    	System.out.println("Funcionarios buscados com sucesso");
 	        ApiResponse apiResponse = gson.fromJson(reponse, ApiResponse.class);
 
 	        // Retornamos a lista de Funcionarios
