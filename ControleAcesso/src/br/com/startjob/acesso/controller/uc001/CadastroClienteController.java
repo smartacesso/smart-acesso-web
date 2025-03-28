@@ -17,6 +17,8 @@ import br.com.startjob.acesso.controller.CadastroBaseController;
 import br.com.startjob.acesso.modelo.entity.ClienteEntity;
 import br.com.startjob.acesso.modelo.entity.EnderecoEntity;
 import br.com.startjob.acesso.modelo.entity.IntegracaoSOCEntity;
+import br.com.startjob.acesso.modelo.entity.IntegracaoSeniorEntity;
+import br.com.startjob.acesso.modelo.entity.IntegracaoTotvsEntity;
 import br.com.startjob.acesso.modelo.entity.PlanoEntity;
 import br.com.startjob.acesso.modelo.entity.UsuarioEntity;
 import br.com.startjob.acesso.modelo.enumeration.PerfilAcesso;
@@ -46,43 +48,49 @@ public class CadastroClienteController extends CadastroBaseController {
 	@PostConstruct
 	@Override
 	public void init() {
-		super.init();
-		
-		ClienteEntity cliente = (ClienteEntity) getEntidade();
-		
-		if(cliente != null && cliente.getEndereco() == null) {
-			cliente.setEndereco(new EnderecoEntity());
-		}
-		
-		   
-        // Inicialize integracaoSoc se estiver nulo
-        if (cliente.getIntegracaoSoc() == null) {
-            cliente.setIntegracaoSoc(new IntegracaoSOCEntity()); // Substitua por sua classe específica
-        }
-		
-		if(cliente.getPlanos() != null && !cliente.getPlanos().isEmpty()) {
-			listaPlanos = cliente.getPlanos();
-		} else {
-			listaPlanos = new ArrayList<>();
-		}
-		
-		if(cliente.getNomeUnidadeOrganizacional() != null) {
-			nomeUnidadeAnterior = cliente.getNomeUnidadeOrganizacional();
-		}
-		
-		if(cliente.getEmail() != null) {
-			emailAnterior = cliente.getEmail();
-		}
-		
-		if(cliente.getId() != null) {
-			buscaDadosUsuario();
-		} else {
-			usuarioParaEditar = new UsuarioEntity();
-			usuarioParaEditar.setLogin("");
-		}
-		
-		plano = new PlanoEntity();
-		montaListaStatus();
+	    super.init();
+	    
+	    ClienteEntity cliente = (ClienteEntity) getEntidade();
+	    
+	    if(cliente != null && cliente.getEndereco() == null) {
+	        cliente.setEndereco(new EnderecoEntity());
+	    }
+	    
+	    if (cliente.getIntegracaoSoc() == null) {
+	        cliente.setIntegracaoSoc(new IntegracaoSOCEntity());
+	    }
+	    
+	    if (cliente.getIntegracaoSenior() == null) {
+	        cliente.setIntegracaoSenior(new IntegracaoSeniorEntity());
+	    }
+	    
+	    if (cliente.getIntegracaoTotvs() == null) {
+	        cliente.setIntegracaoTotvs(new IntegracaoTotvsEntity());
+	    }
+
+	    if (cliente.getPlanos() != null && !cliente.getPlanos().isEmpty()) {
+	        listaPlanos = cliente.getPlanos();
+	    } else {
+	        listaPlanos = new ArrayList<>();
+	    }
+
+	    if (cliente.getNomeUnidadeOrganizacional() != null) {
+	        nomeUnidadeAnterior = cliente.getNomeUnidadeOrganizacional();
+	    }
+
+	    if (cliente.getEmail() != null) {
+	        emailAnterior = cliente.getEmail();
+	    }
+
+	    // Garante que usuarioParaEditar nunca seja nulo
+	    usuarioParaEditar = new UsuarioEntity();
+
+	    if (cliente.getId() != null) {
+	        buscaDadosUsuario(); // Esse método pode sobrescrever usuarioParaEditar se encontrar um usuário
+	    }
+
+	    plano = new PlanoEntity();
+	    montaListaStatus();
 	}
 	
 	private void montaListaStatus() {

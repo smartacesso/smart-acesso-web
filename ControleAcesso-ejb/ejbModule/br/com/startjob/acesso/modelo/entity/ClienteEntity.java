@@ -55,12 +55,21 @@ import br.com.startjob.acesso.modelo.enumeration.Status;
 	@NamedQuery(name = "ClienteEntity.findAllComIntegracaoSOC",
 				query = "select obj from ClienteEntity obj "
 					  + "join fetch obj.integracaoSoc i "
-					  + "where (obj.removido = false or obj.removido is null) "
+					  + "where ((obj.removido = false or obj.removido is null) and (i.empresa is not null or i.empresa = '')) "
 					  + "order by obj.id asc"),
 	@NamedQuery(name = "ClienteEntity.findAllComIntegracaoSenior",
 				query = "select obj from ClienteEntity obj "
 					  + "join fetch obj.integracaoSenior i "
-					  + "where (obj.removido = false or obj.removido is null) "
+					  + "where ((obj.removido = false or obj.removido is null) "
+					  + "and (i.usuario is not null or i.usuario = '') "
+					  + "and (i.senha is not null or i.senha = '') "
+					  + "and (i.url is not null or i.url = '')) "
+					  + "order by obj.id asc"),
+	@NamedQuery(name = "ClienteEntity.findAllComIntegracaoTotvs",
+				query = "select obj from ClienteEntity obj "
+					  + "join fetch obj.integracaoTotvs i "
+					  + "where ((obj.removido = false or obj.removido is null) "
+					  + "and (i.url is not null or i.url = '')) "
 					  + "order by obj.id asc"),
 	@NamedQuery(name = "ClienteEntity.findComFilialTeknisa",
 				query = "select obj from ClienteEntity obj "
@@ -122,9 +131,14 @@ public class ClienteEntity extends BaseEntity {
 	private IntegracaoSOCEntity integracaoSoc;
 	
 	@JsonIgnore
-	@OneToOne(cascade={CascadeType.ALL}, fetch=FetchType.LAZY)
+	@OneToOne(cascade={CascadeType.ALL}, fetch=FetchType.EAGER)
 	@JoinColumn(name="ID_INTEGRACAO_SENIOR", nullable=true)
 	private IntegracaoSeniorEntity integracaoSenior;
+	
+	@JsonIgnore
+	@OneToOne(cascade={CascadeType.ALL}, fetch=FetchType.EAGER)
+	@JoinColumn(name="ID_INTEGRACAO_TOTVS", nullable=true)
+	private IntegracaoTotvsEntity integracaoTotvs;
 	
 	@Column(name="ORGANIZACAO_TEKNISA", nullable=true, length=60)
 	private String organizacaoTeknisa;
@@ -228,6 +242,12 @@ public class ClienteEntity extends BaseEntity {
 	}
 	public void setFilialTeknisa(String filialTeknisa) {
 		this.filialTeknisa = filialTeknisa;
+	}
+	public IntegracaoTotvsEntity getIntegracaoTotvs() {
+		return integracaoTotvs;
+	}
+	public void setIntegracaoTotvs(IntegracaoTotvsEntity integracaoTotvs) {
+		this.integracaoTotvs = integracaoTotvs;
 	}
 
 	

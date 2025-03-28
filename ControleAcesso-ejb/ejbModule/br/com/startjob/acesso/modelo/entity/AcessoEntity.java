@@ -8,6 +8,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
@@ -20,7 +21,13 @@ import javax.persistence.Transient;
 import br.com.startjob.acesso.modelo.entity.base.ClienteBaseEntity;
 
 @Entity
-@Table(name="TB_ACESSO")
+@Table(name="TB_ACESSO", 
+indexes = {
+        @Index(name = "idx_pedestre_data", columnList = "ID_PEDESTRE, DATA"),
+        @Index(name = "idx_pedestre_tipo", columnList = "ID_PEDESTRE, TIPO"),
+        @Index(name = "idx_cliente_data", columnList = "ID_CLIENTE, DATA, SENTIDO, TIPO"),
+        @Index(name = "idx_pedestre_sentido_tipo", columnList = "ID_PEDESTRE, SENTIDO, TIPO, DATA")
+    })
 @NamedQueries({
 	@NamedQuery(name  = "AcessoEntity.findAll", 
 				query = "select obj "

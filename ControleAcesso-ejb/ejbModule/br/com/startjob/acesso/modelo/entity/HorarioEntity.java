@@ -21,6 +21,7 @@ import javax.persistence.Transient;
 
 import org.hibernate.annotations.FilterDef;
 
+import br.com.startjob.acesso.modelo.ejb.HorarioSeniorDto;
 import br.com.startjob.acesso.modelo.entity.base.BaseEntity;
 import br.com.startjob.acesso.modelo.enumeration.Status;
 
@@ -38,6 +39,11 @@ import br.com.startjob.acesso.modelo.enumeration.Status;
 	@NamedQuery(name  = "HorarioEntity.findAllWithRemovidosByIdRegra",
 				query = "select obj from HorarioEntity obj "
 					  + "where obj.regra.id = :ID_REGRA "
+					  + "order by obj.id asc"),
+	@NamedQuery(name  = "HorarioEntity.findAllWithRemovidosByIdRegraSenior",
+				query = "select obj from HorarioEntity obj "
+					  + "where obj.regra.id = :ID_REGRA "
+					  + "and obj.idHorarioSenior = :ID_HORARIO_SENIOR "
 					  + "order by obj.id asc")
 })
 @FilterDef(name="horarioValido", defaultCondition="(removido = 0 or removido is null)")
@@ -77,6 +83,9 @@ public class HorarioEntity extends BaseEntity {
 	
 	@Column(name="QTDE_CREDITOS", nullable=true, length=10)
 	private Long qtdeDeCreditos;
+	
+	@Column(name="ID_HORARIO_SENIOR", nullable=true, length=10)
+	private Integer idHorarioSenior;
 	
 	@Transient
 	private Boolean sunday;
@@ -243,6 +252,21 @@ public class HorarioEntity extends BaseEntity {
 
 	public void setPedestreRegra(PedestreRegraEntity pedestreRegra) {
 		this.pedestreRegra = pedestreRegra;
+	}
+
+	public void update(HorarioSeniorDto dto) {
+		// TODO Auto-generated method stub
+		this.horarioInicio = dto.getInicio();
+		this.horarioFim = dto.getFim();
+		
+	}
+
+	public Integer getIdHorarioSenior() {
+		return idHorarioSenior;
+	}
+
+	public void setIdHorarioSenior(Integer idHorarioSenior) {
+		this.idHorarioSenior = idHorarioSenior;
 	}
 
 }

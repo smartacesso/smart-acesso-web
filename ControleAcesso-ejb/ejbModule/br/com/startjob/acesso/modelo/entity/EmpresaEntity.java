@@ -152,6 +152,14 @@ public class EmpresaEntity extends ClienteBaseEntity {
 		this.cliente = cliente;
 	}
 	
+	public EmpresaEntity(String nomeEmpresa, final ClienteEntity cliente) {
+		this.nome = nomeEmpresa;
+		this.cnpj = "17.720.994/0001-13";
+		this.status = Status.ATIVO;
+
+		this.cliente = cliente;
+	}
+	
 	public String getNome() {
 		return nome;
 	}

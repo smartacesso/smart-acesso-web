@@ -39,10 +39,12 @@ import br.com.startjob.acesso.modelo.enumeration.Status;
 				query = "select obj from CargoEntity obj "
 					  + "where obj.empresa.id = :ID_EMPRESA "
 					  + "order by obj.id asc"),
-	@NamedQuery(name = "CargoEntity.findCargoByNome", 
-	query = "select obj from CargoEntity obj "
-		  + "where obj.nome = :NOME "
-		  + "order by obj.id asc")
+	@NamedQuery(name = "CargoEntity.findByNomeAndIdEmpresa",
+			    query = "select obj from CargoEntity obj "
+			          + "left join fetch obj.empresa e "
+			          + "where obj.nome = :NOME "
+			          + "and e.id = :ID_EMPRESA "
+			          + "order by obj.id asc")
 })
 @SuppressWarnings("serial")
 @FilterDef(name="cargoValido", defaultCondition="(removido = false or removido is null)")

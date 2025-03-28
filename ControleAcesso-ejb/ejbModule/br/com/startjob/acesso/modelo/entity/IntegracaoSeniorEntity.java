@@ -31,6 +31,9 @@ public class IntegracaoSeniorEntity extends BaseEntity {
 	@Column(name="ID_INTEGRACAO_SENIOR", nullable=false, length=4)
 	private Long id;
 	
+	@Column(name="URL", nullable=true, length=255)
+	private String url;
+	
 	@Column(name="USUARIO", nullable=true, length=255)
 	private String usuario;
 	
@@ -59,5 +62,13 @@ public class IntegracaoSeniorEntity extends BaseEntity {
 
 	public void setSenha(String senha) {
 		this.senha = senha;
+	}
+
+	public String getUrl() {
+		return url;
+	}
+
+	public void setUrl(String url) {
+		this.url = url;
 	}
 }

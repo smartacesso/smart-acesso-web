@@ -405,8 +405,98 @@
 								
 							</p:panelGrid>
 						
+						</p:tab>
+						
+						<p:tab title="#{msgs['label.uc001.integracao.senior']}">
+						
+							<p:panelGrid columns="2" style="width: 100%;">
+							
+								<p:column >
+									<p:outputLabel value="#{msgs['label.uc001.url.senior']}" for="urlSenior" indicateRequired="false"/>
+									<br />
+									<p:inputText id="urlSenior" value="#{cadastroClienteController.entidade.integracaoSenior.url}" 
+												 required="false"/>
+								</p:column>
+								
+								<p:column >
+									<p:outputLabel value="#{msgs['label.uc001.usuario.senior']}" for="usuarioSenior" indicateRequired="false"/>
+									<br />
+									<p:inputText id="usuarioSenior" value="#{cadastroClienteController.entidade.integracaoSenior.usuario}" 
+												 required="false"/>
+								</p:column>
+								
+								<p:column >
+									<p:outputLabel value="#{msgs['label.uc001.senha.senior']}" for="senhaSenior" indicateRequired="false"/>
+									<br />
+									<p:password id="senhaSenior" value="#{cadastroClienteController.entidade.integracaoSenior.senha}" 
+												 required="false"/>
+								</p:column>
+								
+							</p:panelGrid>
 						
 						</p:tab>
+						
+						<p:tab title="#{msgs['label.uc001.integracao.totvs']}">
+						
+							<p:panelGrid columns="6" style="width: 100%;">
+							
+								<p:column >
+									<p:outputLabel value="#{msgs['label.uc001.url.base']}" for="url" indicateRequired="false"/>
+									<br />
+									<p:inputText id="url" value="#{cadastroClienteController.entidade.integracaoTotvs.url}" 
+												 required="false"/>
+								</p:column>
+								
+								<p:column >
+									<p:outputLabel value="#{msgs['label.uc001.usuario.totvs']}" for="usuarioTotvs" indicateRequired="false"/>
+									<br />
+									<p:inputText id="usuarioTotvs" value="#{cadastroClienteController.entidade.integracaoTotvs.usuario}" 
+												 required="false"/>
+								</p:column>
+								
+								<p:column >
+									<p:outputLabel value="#{msgs['label.uc001.senha.totvs']}" for="senhaTovs" indicateRequired="false"/>
+									<br />
+									<p:password id="senhaTovs" value="#{cadastroClienteController.entidade.integracaoTotvs.senha}" 
+												 required="false"/>
+								</p:column>
+								
+																<p:column >
+									<p:outputLabel value="#{msgs['label.uc001.product.totvs']}" for="productTotvs" indicateRequired="false"/>
+									<br />
+									<p:inputText id="productTotvs" value="#{cadastroClienteController.entidade.integracaoTotvs.product}" 
+												 required="false"/>
+								</p:column>
+								
+																<p:column >
+									<p:outputLabel value="#{msgs['label.uc001.companyid.totvs']}" for="companyTotvs" indicateRequired="false"/>
+									<br />
+									<p:inputText id="companyTotvs" value="#{cadastroClienteController.entidade.integracaoTotvs.companyid}" 
+												 required="false"/>
+								</p:column>
+								
+																<p:column >
+									<p:outputLabel value="#{msgs['label.uc001.branchId.totvs']}" for="branchTotvs" indicateRequired="false"/>
+									<br />
+									<p:inputText id="branchTotvs" value="#{cadastroClienteController.entidade.integracaoTotvs.branchId}" 
+												 required="false"/>
+								</p:column>
+								
+								
+								<p:column >
+									<p:outputLabel value="#{msgs['label.uc001.empresa.totvs']}" for="Empresa" indicateRequired="false"/>
+									<br />
+									<p:inputText id="Empresa" value="#{cadastroClienteController.entidade.integracaoTotvs.empresa}" 
+												 required="false"/>
+								</p:column>
+								
+							</p:panelGrid>
+						
+						
+						</p:tab>
+						
+						
+						
 					</p:tabView>
 				</h:column>
 			</h:panelGrid>

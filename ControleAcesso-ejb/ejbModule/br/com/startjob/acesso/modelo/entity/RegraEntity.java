@@ -68,6 +68,13 @@ import br.com.startjob.acesso.modelo.enumeration.TipoRegra;
 					  + " and (obj.removido = false or obj.removido is null) "
 					  + " and obj.status = 'ATIVO' "
 					  + "order by obj.id asc"),
+	@NamedQuery(name = "RegraEntity.findByIdEscala", 
+				query = "select obj from RegraEntity obj "
+					  + "where obj.idEscala = :ID_ESCALA "
+					  + " and obj.cliente.id = :ID_CLIENTE "
+					  + " and (obj.removido = false or obj.removido is null) "
+					  + " and obj.status = 'ATIVO' "
+					  + "order by obj.id asc"),
 	@NamedQuery(name = "RegraEntity.findAllRegrasDePedestreComEmpresa",
 				query = "select obj from RegraEntity obj "
 					  + " left join fetch obj.empresa e "
@@ -144,6 +151,9 @@ public class RegraEntity extends ClienteBaseEntity {
 	
 	@Column(name="ID_PLANO", nullable=true, length=10)
 	private Integer idPlano;
+	
+	@Column(name="ID_ESCALA", nullable=true, length=10)
+	private Integer idEscala;
 	
 	@OneToMany(cascade=CascadeType.ALL, fetch=FetchType.EAGER, 
 			   orphanRemoval=false, targetEntity=HorarioEntity.class,
@@ -259,6 +269,12 @@ public class RegraEntity extends ClienteBaseEntity {
 	}
 	public void setIdPlano(Integer idPlano) {
 		this.idPlano = idPlano;
+	}
+	public Integer getIdEscala() {
+		return idEscala;
+	}
+	public void setIdEscala(Integer idEscala) {
+		this.idEscala = idEscala;
 	}
 	
 }

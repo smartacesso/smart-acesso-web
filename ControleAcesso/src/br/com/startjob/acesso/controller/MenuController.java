@@ -164,9 +164,9 @@ public class MenuController extends BaseController {
 	
 	private void criaMenuAdministracao() {
 		
-		if(!"smartponto".equals(usuarioLogado.getCliente().getNomeUnidadeOrganizacional())
-				&& !"startjob".equals(usuarioLogado.getCliente().getNomeUnidadeOrganizacional()))
-			return;
+		//if(!"smartponto".equals(usuarioLogado.getCliente().getNomeUnidadeOrganizacional())
+			//	&& !"startjob".equals(usuarioLogado.getCliente().getNomeUnidadeOrganizacional()))
+			//return;
 		
 		
 		DefaultSubMenu adm = DefaultSubMenu.builder()

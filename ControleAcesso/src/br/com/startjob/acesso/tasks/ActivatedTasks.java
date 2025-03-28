@@ -45,4 +45,12 @@ public class ActivatedTasks {
 			}
 		}
 	}
+	
+	public void limpaTimersTovs() {
+		for (String key : timers.keySet()) {
+			if(key.contains("TOTVS")) {
+				timers.get(key).cancel();
+			}
+		}
+	}
 }
