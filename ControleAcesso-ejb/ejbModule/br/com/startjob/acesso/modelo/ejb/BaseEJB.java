@@ -2018,7 +2018,7 @@ public class BaseEJB implements BaseEJBRemote {
 						apagaDadosCartaoAcessoVisitate(pedestre, pedestreRegra);
 					}
 
-					decrementaCreditoRegraPedestre(pedestreRegra);
+					//decrementaCreditoRegraPedestre(pedestreRegra);
 					
 					pedestre = (PedestreEntity) alteraObjeto(pedestre)[0];
 					

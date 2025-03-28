@@ -110,7 +110,7 @@ public class HorarioSeniorDto {
 		horario.setNome(nome);
 		horario.setIdHorarioSenior(Integer.parseInt(idHorario));
 		horario.setStatus(Status.ATIVO);
-		if(this.nome.equalsIgnoreCase("Refeicao") ||this.nome.equalsIgnoreCase("Lanche")) {
+		if(this.nome.equalsIgnoreCase("Refeicao") ||this.nome.equalsIgnoreCase("inicio")) {
 			horario.setQtdeDeCreditos(1L);
 		}
 		return horario;
@@ -124,7 +124,7 @@ public class HorarioSeniorDto {
 		horario.setNome(nome + " pedestre");
 		horario.setIdHorarioSenior(Integer.parseInt(idHorario));
 		horario.setStatus(Status.ATIVO);
-		if(this.nome.equalsIgnoreCase("Refeicao") ||this.nome.equalsIgnoreCase("Lanche")) {
+		if(this.nome.equalsIgnoreCase("Refeicao") ||this.nome.equalsIgnoreCase("inicio")) {
 			horario.setQtdeDeCreditos(1L);
 		}
 		return horario;
