@@ -271,11 +271,14 @@ public class MenuController extends BaseController {
 	}
 
 	private void criaMenuCadastro() {
+		//nao cria menu cadastro para responsavel
+		if(PerfilAcesso.RESPONSAVEL.equals(usuarioLogado.getPerfil()))
+			return;
 		
 		DefaultSubMenu cadastros = DefaultSubMenu.builder()
                 .label(resource.recuperaChave("menu.cadastro", getFacesContext()))
                 .build();
- 
+		
 		if(PerfilAcesso.ADMINISTRADOR.equals(usuarioLogado.getPerfil())
 				|| PerfilAcesso.GERENTE.equals(usuarioLogado.getPerfil())) {
 	        DefaultMenuItem usuarios = DefaultMenuItem.builder()

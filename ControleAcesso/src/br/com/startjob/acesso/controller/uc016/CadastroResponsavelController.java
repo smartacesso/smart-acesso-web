@@ -13,6 +13,8 @@ import javax.inject.Named;
 import br.com.startjob.acesso.annotations.UseCase;
 import br.com.startjob.acesso.controller.BaseController;
 import br.com.startjob.acesso.modelo.entity.ResponsibleEntity;
+import br.com.startjob.acesso.modelo.entity.UsuarioEntity;
+import br.com.startjob.acesso.modelo.enumeration.PerfilAcesso;
 import br.com.startjob.acesso.modelo.enumeration.Status;
 import br.com.startjob.acesso.modelo.utils.EncryptionUtils;
 
@@ -51,8 +53,31 @@ public class CadastroResponsavelController extends BaseController {
 		
 		responsavel.setPassword(passwordEncrypted);
 		responsavel.setCliente(getUsuarioLogado().getCliente());
-		
+
 		String retorno = super.salvar();
+		
+		
+		if (!"e".equals(retorno)) { // Verifica se não houve erro ao salvar o responsável
+			UsuarioEntity usuario = new UsuarioEntity();
+			usuario.setNome(responsavel.getNome());
+			usuario.setLogin(responsavel.getLogin());
+			usuario.setSenha(passwordEncrypted);
+			usuario.setEmail(responsavel.getEmail());
+			usuario.setCpf(responsavel.getCpf());
+			usuario.setRg(responsavel.getRg());
+			usuario.setCelular(responsavel.getCelular());
+			usuario.setDataNascimento(responsavel.getDataNascimento());
+			usuario.setPerfil(PerfilAcesso.RESPONSAVEL);
+			usuario.setCliente(responsavel.getCliente());
+			usuario.setStatus(Status.ATIVO);
+
+			try {
+				baseEJB.gravaObjeto(usuario); // Persistindo o usuário usando a mesma lógica
+			} catch (Exception e) {
+				e.printStackTrace();
+				return "e";
+			}
+		}
 		
 		redirect("/paginas/sistema/responsaveis/pesquisaResponsavel.xhtml?acao=OK");
 		return retorno;
