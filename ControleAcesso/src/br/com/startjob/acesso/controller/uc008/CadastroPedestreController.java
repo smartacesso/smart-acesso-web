@@ -37,6 +37,7 @@ import org.primefaces.model.StreamedContent;
 
 import br.com.startjob.acesso.annotations.UseCase;
 import br.com.startjob.acesso.controller.CadastroBaseController;
+import br.com.startjob.acesso.controller.MenuController;
 import br.com.startjob.acesso.modelo.BaseConstant;
 import br.com.startjob.acesso.modelo.ejb.PedestreEJBRemote;
 import br.com.startjob.acesso.modelo.entity.BiometriaEntity;
@@ -56,6 +57,7 @@ import br.com.startjob.acesso.modelo.entity.PedestreEquipamentoEntity;
 import br.com.startjob.acesso.modelo.entity.PedestreRegraEntity;
 import br.com.startjob.acesso.modelo.entity.RegraEntity;
 import br.com.startjob.acesso.modelo.entity.ResponsibleEntity;
+import br.com.startjob.acesso.modelo.entity.UsuarioEntity;
 import br.com.startjob.acesso.modelo.enumeration.Genero;
 import br.com.startjob.acesso.modelo.enumeration.PerfilAcesso;
 import br.com.startjob.acesso.modelo.enumeration.Status;
@@ -160,6 +162,8 @@ public class CadastroPedestreController extends CadastroBaseController {
 
 	private CadastroExternoEntity ultimoCadastroExterno;
 
+	private MenuController menuController = new MenuController();
+	
 	@PostConstruct
 	@Override
 	public void init() {
@@ -1510,7 +1514,55 @@ public class CadastroPedestreController extends CadastroBaseController {
 			urlLinks = urlLinks + AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_NOME_APP);
 		return urlLinks;
 	}
+	
+	public boolean usuarioTemPermissao() {
+	    // Lógica para verificar se o usuário pode ver os dados
+		UsuarioEntity usuarioLogado = menuController.getUsuarioLogado();
+		return !usuarioLogado.getPerfil().equals(PerfilAcesso.CUIDADOR);
+	}
 
+	public String getCpfMascarado() {
+	    if (usuarioTemPermissao() && getPedestreAtual() != null && getPedestreAtual().getCpf() != null) {
+	        return getPedestreAtual().getCpf();
+	    } else {
+	        return "XXX-XXX-XXX-XX";
+	    }
+	}
+
+	public String getRgMascarado() {
+	    if (usuarioTemPermissao() && getPedestreAtual() != null && getPedestreAtual().getRg() != null) {
+	        return getPedestreAtual().getRg();
+	    } else {
+	        return "XX-XXXXXXXX";
+	    }
+	}
+
+	public String getEmailMascarado() {
+	    if (usuarioTemPermissao() && getPedestreAtual() != null && getPedestreAtual().getEmail() != null) {
+	        return getPedestreAtual().getEmail();
+	    } else {
+	        return "XXXXX@XXXXX";
+	    }
+	}
+
+	public String getTelefoneMascarado() {
+	    if (usuarioTemPermissao() && getPedestreAtual() != null && getPedestreAtual().getTelefone() != null) {
+	        return getPedestreAtual().getTelefone();
+	    } else {
+	        return "(XX)XXXXXXXX";
+	    }
+	}
+
+	public String getCelularMascarado() {
+	    if (usuarioTemPermissao() && getPedestreAtual() != null && getPedestreAtual().getCelular() != null) {
+	        return getPedestreAtual().getCelular();
+	    } else {
+	        return "(XX)XXXXXXXXX";
+	    }
+	}
+
+	
+	
 	public void imprimirQRCode() {
 		PrimeFaces.current().executeScript("printSimpleDiv('imageQrCodeDiv');");
 	}

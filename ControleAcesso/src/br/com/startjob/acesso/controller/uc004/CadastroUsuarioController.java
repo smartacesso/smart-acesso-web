@@ -143,6 +143,8 @@ public class CadastroUsuarioController extends CadastroBaseController {
 		listaPerfilAcesso.add(new SelectItem(PerfilAcesso.GERENTE, PerfilAcesso.GERENTE.toString()));
 		listaPerfilAcesso.add(new SelectItem(PerfilAcesso.OPERADOR, PerfilAcesso.OPERADOR.toString()));
 		listaPerfilAcesso.add(new SelectItem(PerfilAcesso.PORTEIRO, PerfilAcesso.PORTEIRO.toString()));
+		listaPerfilAcesso.add(new SelectItem(PerfilAcesso.CUIDADOR, PerfilAcesso.CUIDADOR.toString()));
+		listaPerfilAcesso.add(new SelectItem(PerfilAcesso.RESPONSAVEL, PerfilAcesso.RESPONSAVEL.toString()));
 	}
 	
 	

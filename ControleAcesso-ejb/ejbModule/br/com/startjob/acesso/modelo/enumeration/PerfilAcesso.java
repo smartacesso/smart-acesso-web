@@ -6,6 +6,7 @@ public enum PerfilAcesso {
 	GERENTE,
 	OPERADOR,
 	PORTEIRO,
-	RESPONSAVEL;
+	RESPONSAVEL,
+	CUIDADOR;
 
 }

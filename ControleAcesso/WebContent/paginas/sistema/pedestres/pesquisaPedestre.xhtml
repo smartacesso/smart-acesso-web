@@ -254,15 +254,23 @@
 						<p:column headerText="#{msgs['label.uc008.contato']}" style="text-align: center">
 							<h:outputText value="#{pedestre.allPhonesFormatted}" />
 						</p:column>
-						
-						<p:column headerText="#{msgs['label.uc008.cpf']}" style="text-align: center">
-							<h:outputText value="#{pedestre.cpf}" >
-								<f:converter converterId="cpfConverter"/>
+
+						<p:column headerText="#{msgs['label.uc008.cpf']}"
+							style="text-align: center">
+							<h:outputText value="#{pedestre.cpf}"
+								rendered="#{consultaPedestreController.usuarioTemPermissao()}">
+								<f:converter converterId="cpfConverter" />
 							</h:outputText>
+
+							<!-- Exibir CPF mascarado se o usuário NÃO tiver permissão -->
+							<h:outputText value="xxx.xxx.xxx-xx"
+								rendered="#{not consultaPedestreController.usuarioTemPermissao()}" />
 						</p:column>
 
+
 						<p:column headerText="#{msgs['label.uc008.rg']}" style="text-align: center">
-							<h:outputText value="#{pedestre.rg}" />
+							<h:outputText value="#{pedestre.rg}" rendered="#{consultaPedestreController.usuarioTemPermissao()}"/>
+							<h:outputText value="xx-xxx-xxx" rendered="#{not consultaPedestreController.usuarioTemPermissao()}" />
 						</p:column>
 						
 						<p:column headerText="#{msgs['label.uc008.tipo']}" style="text-align: center">

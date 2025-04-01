@@ -20,6 +20,7 @@ import org.primefaces.model.file.UploadedFile;
 
 import br.com.startjob.acesso.annotations.UseCase;
 import br.com.startjob.acesso.controller.BaseController;
+import br.com.startjob.acesso.controller.MenuController;
 import br.com.startjob.acesso.modelo.BaseConstant;
 import br.com.startjob.acesso.modelo.ejb.EmpresaEJBRemote;
 import br.com.startjob.acesso.modelo.ejb.PedestreEJBRemote;
@@ -27,6 +28,8 @@ import br.com.startjob.acesso.modelo.entity.EmpresaEntity;
 import br.com.startjob.acesso.modelo.entity.ImportacaoEntity;
 import br.com.startjob.acesso.modelo.entity.ParametroEntity;
 import br.com.startjob.acesso.modelo.entity.PedestreEntity;
+import br.com.startjob.acesso.modelo.entity.UsuarioEntity;
+import br.com.startjob.acesso.modelo.enumeration.PerfilAcesso;
 import br.com.startjob.acesso.modelo.enumeration.Status;
 import br.com.startjob.acesso.modelo.enumeration.TipoArquivo;
 import br.com.startjob.acesso.modelo.enumeration.TipoPedestre;
@@ -66,6 +69,7 @@ public class ConsultaPedestreController extends BaseController {
 	
 	private boolean permiteCampoAdicionalCrachaMatricula = true;
 	private boolean habilitaAppPedestre = false;
+	private MenuController menuController = new MenuController();
 
 	@PostConstruct
 	@Override
@@ -347,6 +351,12 @@ public class ConsultaPedestreController extends BaseController {
 		for(TipoArquivo arquivo : TipoArquivo.values()) {
 			listaTipoArquivo.add(new SelectItem(arquivo, arquivo.getDescricao()));
 		}
+	}
+	
+	public boolean usuarioTemPermissao() {
+	    // Lógica para verificar se o usuário pode ver os dados
+		UsuarioEntity usuarioLogado = menuController.getUsuarioLogado();
+		return !usuarioLogado.getPerfil().equals(PerfilAcesso.CUIDADOR);
 	}
 
 	public PedestreEntity getPedestreSelecionado() {

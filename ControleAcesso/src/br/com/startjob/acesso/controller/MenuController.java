@@ -288,21 +288,26 @@ public class MenuController extends BaseController {
 	                .build();
 	        cadastros.getElements().add(usuarios);
 		}
-        
-        DefaultMenuItem empresas = DefaultMenuItem.builder()
-        		.value(resource.recuperaChave("menu.cadastro.empresa", getFacesContext()))
-                .url(BaseConstant.URL_APLICACAO + "/paginas/sistema/empresas/pesquisaEmpresa.xhtml")
-                .styleClass("ui-simple-menu")
-                .build();
-        cadastros.getElements().add(empresas);
-        
-        DefaultMenuItem pedestres = DefaultMenuItem.builder()
-        		.value(resource.recuperaChave("menu.cadastro.pedestre", getFacesContext()))
-                .url(BaseConstant.URL_APLICACAO + "/paginas/sistema/pedestres/pesquisaPedestre.xhtml?tipo=pe")
-                .styleClass("ui-simple-menu")
-                .build();
-        cadastros.getElements().add(pedestres);
-        
+		
+		if(!PerfilAcesso.PORTEIRO.equals(usuarioLogado.getPerfil()) &&
+				!PerfilAcesso.CUIDADOR.equals(usuarioLogado.getPerfil())){
+	        DefaultMenuItem empresas = DefaultMenuItem.builder()
+	        		.value(resource.recuperaChave("menu.cadastro.empresa", getFacesContext()))
+	                .url(BaseConstant.URL_APLICACAO + "/paginas/sistema/empresas/pesquisaEmpresa.xhtml")
+	                .styleClass("ui-simple-menu")
+	                .build();
+	        cadastros.getElements().add(empresas);
+		}
+
+		if (!PerfilAcesso.PORTEIRO.equals(usuarioLogado.getPerfil())) {
+			DefaultMenuItem pedestres = DefaultMenuItem.builder()
+					.value(resource.recuperaChave("menu.cadastro.pedestre", getFacesContext()))
+					.url(BaseConstant.URL_APLICACAO + "/paginas/sistema/pedestres/pesquisaPedestre.xhtml?tipo=pe")
+					.styleClass("ui-simple-menu")
+					.build();
+			cadastros.getElements().add(pedestres);
+		}
+		
         DefaultMenuItem visitantes = DefaultMenuItem.builder()
         		.value(resource.recuperaChave("menu.cadastro.visitante", getFacesContext()))
                 .url(BaseConstant.URL_APLICACAO + "/paginas/sistema/pedestres/pesquisaPedestre.xhtml?tipo=vi")
@@ -310,13 +315,16 @@ public class MenuController extends BaseController {
                 .build();
         cadastros.getElements().add(visitantes);
         
-        DefaultMenuItem responsaveis = DefaultMenuItem.builder()
-        		.value(resource.recuperaChave("menu.cadastro.responsavel", getFacesContext()))
-                .url(BaseConstant.URL_APLICACAO + "/paginas/sistema/responsaveis/pesquisaResponsavel.xhtml")
-                .styleClass("ui-simple-menu")
-                .build();
-        cadastros.getElements().add(responsaveis);
-        
+        if(!PerfilAcesso.CUIDADOR.equals(usuarioLogado.getPerfil())
+        		&& !PerfilAcesso.PORTEIRO.equals(usuarioLogado.getPerfil())) {
+            DefaultMenuItem responsaveis = DefaultMenuItem.builder()
+            		.value(resource.recuperaChave("menu.cadastro.responsavel", getFacesContext()))
+                    .url(BaseConstant.URL_APLICACAO + "/paginas/sistema/responsaveis/pesquisaResponsavel.xhtml")
+                    .styleClass("ui-simple-menu")
+                    .build();
+            cadastros.getElements().add(responsaveis);
+        }
+
         //para admins ou gerentes
         if(PerfilAcesso.ADMINISTRADOR.equals(usuarioLogado.getPerfil()) 
         		|| PerfilAcesso.GERENTE.equals(usuarioLogado.getPerfil())) {

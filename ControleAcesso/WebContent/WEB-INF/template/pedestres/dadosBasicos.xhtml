@@ -9,64 +9,89 @@
 		<p:column>
 			<p:outputLabel value="#{msgs['label.uc008.nome']}" for="nome" indicateRequired="true"/>
 			<br />
-			<p:inputText id="nome" value="#{cadastroPedestreController.entidade.nome}" size="40" required="true"/>
+			
+			<p:inputText id="nome" value="#{cadastroPedestreController.entidade.nome}" size="40" 
+			required="true" 
+			disabled="#{not cadastroPedestreController.usuarioTemPermissao()}" />
 		</p:column>
 		
 		<p:column>
 			<p:outputLabel value="#{msgs['label.uc008.data.nascimento']}" for="dataNascimento"/>
 			<br />
+			
 			<p:calendar id="dataNascimento" value="#{cadastroPedestreController.entidade.dataNascimento}" size="10" mask="99/99/9999" 
 					pattern="dd/MM/yyyy" required="#{cadastroPedestreController.verificaObrigatorio('data.nascimento')}"/>
 		</p:column>
 		
 		<p:column>
-			<p:outputLabel value="#{msgs['label.uc008.email']}" for="email"/>
+			<p:outputLabel value="#{msgs['label.uc008.email']}" for="email" />
 			<br />
-			<p:inputText id="email" value="#{cadastroPedestreController.entidade.email}" size="40" 
-					required="#{cadastroPedestreController.verificaObrigatorio('email')}"/>
+			
+			<p:inputText id="email"
+				value="#{cadastroPedestreController.entidade.email}" size="40"
+				required="#{cadastroPedestreController.verificaObrigatorio('email')}"
+				disabled="#{not cadastroPedestreController.usuarioTemPermissao()}" 
+				rendered="#{cadastroPedestreController.usuarioTemPermissao()}"/>
+
+			<h:outputText value="#{cadastroPedestreController.getEmailMascarado()}"
+				rendered="#{not cadastroPedestreController.usuarioTemPermissao()}" />
 		</p:column>
-		
+
 		<p:column>
-			<p:outputLabel value="#{msgs['label.uc008.cpf']}" for="cpf"/>
+			<p:outputLabel value="#{msgs['label.uc008.cpf']}" for="cpf" />
 			<br />
-			<p:inputMask id="cpf" value="#{cadastroPedestreController.entidade.cpf}" converter="cpfConverter" mask="999.999.999-99"
-					required="#{cadastroPedestreController.verificaObrigatorio('cpf')}"/>
+			
+			<p:inputMask id="cpf"
+				value="#{cadastroPedestreController.entidade.cpf}"
+				converter="cpfConverter" mask="999.999.999-99"
+				required="#{cadastroPedestreController.verificaObrigatorio('cpf')}"
+				disabled="#{not cadastroPedestreController.usuarioTemPermissao()}" 
+				rendered="#{cadastroPedestreController.usuarioTemPermissao()}"/>
+
+			<h:outputText value="#{cadastroPedestreController.getCpfMascarado()}"
+				rendered="#{not cadastroPedestreController.usuarioTemPermissao()}" />
 		</p:column>
-		
+
+
 		<p:column>
 			<p:outputLabel value="#{msgs['title.uc008.genero']}" for="genero"/>
 			<br />
+			
 			<p:selectOneMenu id="genero" value="#{cadastroPedestreController.entidade.genero}" 
 					required="#{cadastroPedestreController.verificaObrigatorio('genero')}">
 				<f:selectItems value="#{cadastroPedestreController.listaGenero}"/>
 			</p:selectOneMenu>
 		</p:column>
-		
+
 		<p:column>
-			<p:outputLabel value="#{msgs['label.uc008.rg']}" for="rg"/>
+			<p:outputLabel value="#{msgs['label.uc008.rg']}" for="rg" />
 			<br />
-			<!-- <p:inputMask id="rg" value="#{cadastroPedestreController.entidade.rg}" mask="aa-99.999.999"
-					required="#{cadastroPedestreController.verificaObrigatorio('rg')}"/> -->
-					
-			<p:inputText id="rg" value="#{cadastroPedestreController.entidade.rg}" size="20" 
-				required="#{cadastroPedestreController.verificaObrigatorio('rg')}" 
-				onkeyup="$(this).val($(this).val().replace(/[^0-9a-zA-Z]/g, ''));">
-				<!--onkeyup="$(this).val($(this).val().replace(/[^0-9]/g, ''));"  antigo-->
-			</p:inputText>
+
+			<p:inputText id="rg"
+				value="#{cadastroPedestreController.entidade.rg}" size="20"
+				required="#{cadastroPedestreController.verificaObrigatorio('rg')}"
+				disabled="#{not cadastroPedestreController.usuarioTemPermissao()}"
+				onkeyup="$(this).val($(this).val().replace(/[^0-9a-zA-Z]/g, ''));"
+			    rendered="#{cadastroPedestreController.usuarioTemPermissao()}"/>
+
+			<h:outputText value="#{cadastroPedestreController.getRgMascarado()}"
+				rendered="#{not cadastroPedestreController.usuarioTemPermissao()}" />
 		</p:column>
-		
+
 		<p:column>
 			<p:outputLabel value="#{msgs['label.uc008.telefone']}" for="telefone"/>
 			<br />
 			<p:inputMask id="telefone" value="#{cadastroPedestreController.entidade.telefone}" mask="(99) 9999-9999"
-					required="#{cadastroPedestreController.verificaObrigatorio('telefone')}"/>
+					required="#{cadastroPedestreController.verificaObrigatorio('telefone')}"
+					disabled="#{not cadastroPedestreController.usuarioTemPermissao()}"/>
 		</p:column>
 		
 		<p:column>
 			<p:outputLabel value="#{msgs['label.uc008.celular']}" for="celular"/>
 			<br />
 			<p:inputMask id="celular" value="#{cadastroPedestreController.entidade.celular}" mask="(99) 9 9999-9999"
-					required="#{cadastroPedestreController.verificaObrigatorio('celular')}"/>
+					required="#{cadastroPedestreController.verificaObrigatorio('celular')}"
+					disabled="#{not cadastroPedestreController.usuarioTemPermissao()}"/>
 		</p:column>
 		
 		<p:column>
