@@ -265,6 +265,13 @@ public class MenuController extends BaseController {
                 .url(BaseConstant.URL_APLICACAO + "/paginas/sistema/relatorios/liberacoesManuais.xhtml")
                 .build();
         relatorios.getElements().add(liberacoesManuais);
+        
+        DefaultMenuItem relatorioPermanencia = DefaultMenuItem.builder()
+                .value(resource.recuperaChave("menu.relatorio.permanencia", getFacesContext()))
+                .styleClass("ui-simple-menu")
+                .url(BaseConstant.URL_APLICACAO + "/paginas/sistema/relatorios/relatorioPermanencia.xhtml")
+                .build();
+        relatorios.getElements().add(relatorioPermanencia);
  
         menu.getElements().add(relatorios);
 		

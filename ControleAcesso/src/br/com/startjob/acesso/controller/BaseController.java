@@ -14,6 +14,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 import javax.annotation.Resource;
@@ -39,6 +41,8 @@ import br.com.startjob.acesso.modelo.BaseConstant;
 import br.com.startjob.acesso.modelo.collections.LazyLoadingList;
 import br.com.startjob.acesso.modelo.collections.LazyLoadingList.LazyLoadingItemListener;
 import br.com.startjob.acesso.modelo.ejb.BaseEJBRemote;
+import br.com.startjob.acesso.modelo.entity.CentroCustoEntity;
+import br.com.startjob.acesso.modelo.entity.HistoricoCotaEntity;
 import br.com.startjob.acesso.modelo.entity.ParametroEntity;
 import br.com.startjob.acesso.modelo.entity.UsuarioEntity;
 import br.com.startjob.acesso.modelo.entity.base.BaseEntity;
@@ -508,6 +512,29 @@ public abstract class BaseController implements Serializable {
 		}
 		
 		return "";
+	}
+	
+	@SuppressWarnings("unchecked")
+	public Long buscaCotasPedestre(Long idPedestre, int mes, int ano) {
+
+		List<Long> cota = null;
+
+		try {
+			Map<String, Object> args = new HashMap<>();
+			args.put("idPedestre", idPedestre);
+			args.put("mes", mes);
+			args.put("ano", ano);
+
+			cota = (List<Long>)baseEJB.pesquisaArgFixos(HistoricoCotaEntity.class, "findCotaByPedestreAndMesAno", args);
+			
+			if (Objects.isNull(cota) || cota.isEmpty()) {
+				return 0L;
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return cota.get(0);
 	}
 	
 	/**

@@ -268,7 +268,7 @@ public class PedestreEntity extends ClienteBaseEntity {
 	@ManyToOne(cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
 	@JoinColumn(name = "ID_RESPONSAVEL", nullable = true)
 	private ResponsibleEntity responsavel;
-
+	
 	@Transient
 	private String token;
 

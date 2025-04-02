@@ -1,0 +1,122 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui">
+
+<body>
+
+	<ui:composition template="/tema/templates/template.xhtml">
+		<ui:define name="titulo">
+            Relatório de Permanência dos Pedestres
+        </ui:define>
+
+		<ui:define name="breadcrumb">
+			<a target="_top"
+				href="/#{menuController.appName}/paginas/principal.xhtml"> <h:outputText
+					value="#{msgs['title.principal']}" />
+			</a> > <h:outputText value="#{msgs['title.uc009.relatorio.pedestres']}" />
+		</ui:define>
+
+		<ui:define name="tools">
+			<h:panelGrid columns="4" styleClass="conteudo_tools">
+
+				<h:commandButton id="acaoBuscar"
+					action="#{relatorioPermanenciaController.buscar()}"
+					title="#{msgs['alt.acao.buscar']}" alt="#{msgs['alt.acao.buscar']}"
+					image="#{menuController.path}/tema/img/bt_searcher.png">
+
+					<p:ajax process="@form" update="@form" />
+				</h:commandButton>
+
+				<h:commandButton id="acaoLimpar"
+					action="#{relatorioPermanenciaController.limpar()}"
+					title="#{msgs['alt.acao.limpar']}" alt="#{msgs['alt.acao.limpar']}"
+					image="#{menuController.path}/tema/img/bt_cleaner.png">
+
+					<p:ajax process="@this" update="@form" />
+				</h:commandButton>
+
+				<h:commandButton id="acaoExportar"
+					image="#{menuController.path}/tema/img/bt_exporter_xlsx.png"
+					title="#{msgs['alt.acao.exportar']}"
+					alt="#{msgs['alt.acao.exportar']}">
+
+					<p:dataExporter type="xlsx" target="form:pedestresTable"
+						fileName="pedestres" />
+				</h:commandButton>
+
+			</h:panelGrid>
+
+			<div style="float: right;">
+
+				<h:outputText
+					value="Total: #{relatorioPermanenciaController.result.size()}"
+					style="margin-right: 5px"
+					rendered="#{relatorioPermanenciaController.result.size() > 0}" />
+
+				<p:inputText id="filtro-nome" placeholder="Filtrar por nome"
+					style="width:200px;"
+					onblur="sincronizarFiltro(this, 'filtro-nome-sync');"
+					styleClass="filtro-nome filtro-nome-sync"
+					value="#{relatorioPermanenciaController.parans['pedestre.nome']}" />
+
+				<p:calendar id="filtro-data-inicio"
+					value="#{relatorioPedestresController.parans['data_maior_data']}"
+					pattern="dd/MM/yyyy HH:mm" mask="99/99/9999 99:99" size="20"
+					navigator="true"
+					valueChangeListener="#{relatorioPermanenciaController.alteraDataInicio}">
+
+
+					<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+				</p:calendar>
+				até
+				<p:calendar id="filtro-data-fim"
+					value="#{relatorioPedestresController.parans['data_menor_data']}"
+					pattern="dd/MM/yyyy HH:mm" mask="99/99/9999 99:99" size="20"
+					navigator="true"
+					valueChangeListener="#{relatorioPermanenciaController.alteraDataFim}">
+
+					<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+				</p:calendar>
+
+			</div>
+		</ui:define>
+
+		<ui:define name="conteudo">
+			<h:panelGrid width="100%" columns="1" headerClass="h-grid-header">
+				<f:facet name="header">
+					<h:outputText value="Relatório de Permanência dos Pedestres" />
+				</f:facet>
+
+				<p:dataTable id="pedestresTable"
+					value="#{relatorioPermanenciaController.listaResultados}"
+					var="pedestre" paginator="true" rows="10"
+					paginatorPosition="bottom">
+
+					<p:column headerText="Nome" style="text-align: center">
+						<h:outputText value="#{pedestre.nome}" />
+					</p:column>
+
+					<p:column headerText="Tempo Total no Local"
+						style="text-align: center">
+						<h:outputText value="#{pedestre.tempoTotalFormatado}" />
+					</p:column>
+
+					<p:column headerText="Cota Mensal" style="text-align: center">
+						<h:outputText value="#{pedestre.cotaMensalFormatada}" />
+					</p:column>
+
+					<p:column headerText="Saldo Restante" style="text-align: center">
+						<h:outputText value="#{pedestre.saldoRestanteFormatado}" />
+					</p:column>
+
+				</p:dataTable>
+
+			</h:panelGrid>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>
