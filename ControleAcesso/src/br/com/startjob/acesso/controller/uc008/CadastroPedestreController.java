@@ -39,6 +39,7 @@ import br.com.startjob.acesso.annotations.UseCase;
 import br.com.startjob.acesso.controller.CadastroBaseController;
 import br.com.startjob.acesso.controller.MenuController;
 import br.com.startjob.acesso.modelo.BaseConstant;
+import br.com.startjob.acesso.modelo.ejb.PedestreEJB;
 import br.com.startjob.acesso.modelo.ejb.PedestreEJBRemote;
 import br.com.startjob.acesso.modelo.entity.BiometriaEntity;
 import br.com.startjob.acesso.modelo.entity.CadastroExternoEntity;
@@ -49,6 +50,7 @@ import br.com.startjob.acesso.modelo.entity.DocumentoEntity;
 import br.com.startjob.acesso.modelo.entity.EmpresaEntity;
 import br.com.startjob.acesso.modelo.entity.EnderecoEntity;
 import br.com.startjob.acesso.modelo.entity.EquipamentoEntity;
+import br.com.startjob.acesso.modelo.entity.HistoricoCotaEntity;
 import br.com.startjob.acesso.modelo.entity.HorarioEntity;
 import br.com.startjob.acesso.modelo.entity.MensagemEquipamentoEntity;
 import br.com.startjob.acesso.modelo.entity.ParametroEntity;
@@ -113,6 +115,12 @@ public class CadastroPedestreController extends CadastroBaseController {
 
 	private List<EquipamentoEntity> equipamentos;
 	private Long idEquipamentoSelecionado;
+	
+	private List<HistoricoCotaEntity> listaCotas;
+	private Integer mes;
+	private Integer ano;
+	private Long cotaMensal;
+
 
 	private BiometriaEntity biometria;
 	private StreamedContent imagemBiometria;
@@ -327,6 +335,7 @@ public class CadastroPedestreController extends CadastroBaseController {
 		listaPedestresEquipamentos = new ArrayList<PedestreEquipamentoEntity>();
 		listaPedestreRegra = new ArrayList<PedestreRegraEntity>();
 		responsaveis = new ArrayList<ResponsibleEntity>();
+		listaCotas = new ArrayList<HistoricoCotaEntity>(); 
 	}
 
 	public void iniciaVariaveisNovoPedestre(PedestreEntity pedestre) {
@@ -369,9 +378,6 @@ public class CadastroPedestreController extends CadastroBaseController {
 			pedestre.setDepartamento(new DepartamentoEntity());
 		}
 		
-		if(Objects.isNull(pedestre.getResponsavel())) {
-			pedestre.setResponsavel(new ResponsibleEntity());
-		}
 
 		if (pedestre.getDocumentos() != null && !pedestre.getDocumentos().isEmpty()) {
 			listaDocumentos = pedestre.getDocumentos();
@@ -406,12 +412,15 @@ public class CadastroPedestreController extends CadastroBaseController {
 			tipoPadraoQrCode = pedestre.getTipoQRCode();
 		}
 		
+		if (pedestre.getCotas() != null && !pedestre.getCotas().isEmpty()) {
+			listaCotas = pedestre.getCotas();
+		}
+		
 	}
 
 	@Override
 	public String salvar() {
 		PedestreEntity pedestre = getPedestreAtual();
-
 		pedestre.setCliente(getUsuarioLogado().getCliente());
 
 		boolean naoPossuiCamposRepetidos = verificaCamposRepetidos();
@@ -537,7 +546,12 @@ public class CadastroPedestreController extends CadastroBaseController {
 			pedestre.setDocumentos(listaDocumentos);
 		else
 			pedestre.setDocumentos(new ArrayList<>());
-
+		if (listaCotas != null && !listaCotas.isEmpty()) {
+			
+			pedestre.setCotas(listaCotas);
+		}else {
+			pedestre.setCotas(new ArrayList<>());
+		}
 		if (listaMensagensEquipamento != null && !listaMensagensEquipamento.isEmpty())
 			pedestre.setMensagensPersonalizadas(listaMensagensEquipamento);
 		else
@@ -549,7 +563,10 @@ public class CadastroPedestreController extends CadastroBaseController {
 			pedestre.setEquipamentos(new ArrayList<>());
 		}
 		if (responsaveis != null && !responsaveis.isEmpty()) {
-			pedestre.setResponsavel(responsaveis.get(0));	
+		    pedestre.setResponsavel(responsaveis.stream()
+		            .filter(r -> r != null && r.getId() != null)
+		            .findFirst()
+		            .orElse(responsavel));	
 		} else {
 			pedestre.setResponsavel(responsavel);
 		}
@@ -686,7 +703,13 @@ public class CadastroPedestreController extends CadastroBaseController {
 	
 	public void bindDependencies() {
 		PedestreEntity pedestre = getPedestreAtual();
-		pedestre.setResponsavel(responsavel);
+		
+	    if (responsavel == null) {
+	        throw new IllegalStateException("Responsável não pode ser nulo!");
+	    }
+	    pedestre.setResponsavel(responsavel);
+	      
+	    responsaveis.add(responsavel);
 	}
 
 	public void removerRegra(PedestreRegraEntity pedestreRegraSelecionado) {
@@ -698,12 +721,11 @@ public class CadastroPedestreController extends CadastroBaseController {
 		}
 	}
 	
-	public void removeResponsible(ResponsibleEntity responsible) {
-		if (Objects.nonNull(responsible)) {
-			responsaveis.remove(responsible);
-			responsible.setDataRemovido(new Date());
-			responsible.setRemovido(true);
-			responsaveis.add(responsible);
+	public void removeResponsible(ResponsibleEntity responsavel) {
+		if (Objects.nonNull(responsavel)) {
+			responsaveis.remove(responsavel);
+			responsavel.setDataRemovido(new Date());
+			responsavel.setRemovido(true);
 		}
 	}
 
@@ -1561,7 +1583,41 @@ public class CadastroPedestreController extends CadastroBaseController {
 	    }
 	}
 
+	public void cadastrarCota() {
+	    try {
+	        PedestreEntity pedestre = getPedestreAtual();
+	        if (pedestre == null || pedestre.getId() == null) {
+	            mensagemErro("Erro", "Pedestre não encontrado.");
+	            return;
+	        }
+
+	        HistoricoCotaEntity cota = new HistoricoCotaEntity();
+	        cota.setPedestre(pedestre);
+	        cota.setMes(mes);
+	        cota.setAno(ano);
+	        cota.setCotaMensal(cotaMensal);
+
+	        listaCotas.add(cota); // Atualiza a lista de cotas
+
+	        // Limpa os campos após o cadastro
+	        mes = null;
+	        ano = null;
+	        cotaMensal = null;
+	    } catch (Exception e) {
+	        mensagemErro("Erro ao cadastrar cota", e.getMessage());
+	    }
+	}
 	
+	public void removerCotas(HistoricoCotaEntity cota) {
+		if (cota != null) {
+			cota.setRemovido(true);
+			cota.setDataRemovido(getDataAtual());
+			
+			listaCotas.remove(cota);
+		}
+	}
+
+
 	
 	public void imprimirQRCode() {
 		PrimeFaces.current().executeScript("printSimpleDiv('imageQrCodeDiv');");
@@ -1861,6 +1917,38 @@ public class CadastroPedestreController extends CadastroBaseController {
 
 	public void setResponsaveis(List<ResponsibleEntity> responsaveis) {
 		this.responsaveis = responsaveis;
+	}
+
+	public Integer getMes() {
+		return mes;
+	}
+
+	public void setMes(Integer mes) {
+		this.mes = mes;
+	}
+
+	public Integer getAno() {
+		return ano;
+	}
+
+	public void setAno(Integer ano) {
+		this.ano = ano;
+	}
+
+	public Long getCotaMensal() {
+		return cotaMensal;
+	}
+
+	public void setCotaMensal(Long cotaMensal) {
+		this.cotaMensal = cotaMensal;
+	}
+
+	public List<HistoricoCotaEntity> getListaCotas() {
+		return listaCotas;
+	}
+
+	public void setListaCotas(List<HistoricoCotaEntity> listaCotas) {
+		this.listaCotas = listaCotas;
 	}
 
 }

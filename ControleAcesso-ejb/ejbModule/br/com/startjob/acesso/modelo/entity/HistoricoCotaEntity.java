@@ -1,5 +1,7 @@
 package br.com.startjob.acesso.modelo.entity;
 
+import java.text.DateFormatSymbols;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -22,7 +24,8 @@ import br.com.startjob.acesso.modelo.entity.base.ClienteBaseEntity;
 			     query = "SELECT hc.cotaMensal FROM HistoricoCotaEntity hc " +
 			             "WHERE hc.pedestre.id = :idPedestre " +
 			             "AND hc.mes = :mes " +
-			             "AND hc.ano = :ano")
+			             "AND hc.ano = :ano " +
+	 					 "AND (hc.removido = false or hc.removido is null)")
 })
 @SuppressWarnings("serial")
 @Entity
@@ -48,6 +51,13 @@ public class HistoricoCotaEntity extends ClienteBaseEntity {
         this.mes = mes;
         this.ano = ano;
         this.cotaMensal = cotaMensal;
+    }
+    
+    public String getMesExtenso() {
+        if (mes == null || mes < 0 || mes > 11) {
+            return "Mês inválido";
+        }
+        return new DateFormatSymbols().getMonths()[mes];
     }
 
 	public Long getId() {
@@ -90,6 +100,5 @@ public class HistoricoCotaEntity extends ClienteBaseEntity {
 		this.cotaMensal = cotaMensal;
 	}
 
-    // Getters e Setters
 }
 

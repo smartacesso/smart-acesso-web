@@ -10,38 +10,32 @@
 }
 </style>
 
-	<p:panelGrid columns="2" id="painelCadastroResponsavel">
-
+	<p:panelGrid columns="1" id="painelCadastroResponsavel" style="width: 100%">
 		<p:column>
 			<p:outputLabel value="#{msgs['label.uc016.responsavel']}"
-				for="findResponsibleAutoComplete"/>
+				for="findResponsibleAutoComplete" />
 			<br />
 			<p:autoComplete id="findResponsibleAutoComplete"
 				value="#{cadastroPedestreController.responsavel}" var="responsavel"
 				itemLabel="#{responsavel.nome}" itemValue="#{responsavel}"
 				forceSelection="true" queryDelay="800" cache="true"
 				minQueryLength="2" maxResults="10"
-				
-				completeMethod="#{cadastroPedestreController.findResponsibleAutoFill}"
-				>
+				completeMethod="#{cadastroPedestreController.findResponsibleAutoFill}">
 
 				<p:ajax event="itemSelect" update="painelCadastroResponsavel" />
 			</p:autoComplete>
-
+			
 			<p:commandButton id="buscarResponsavel" icon="pi pi-search"
 				update="form:dialogEscolherResponsavel"
 				oncomplete="PF('escolherResponsavel').show(); return false;"
 				styleClass="whiteIcon" process="@this" />
-		</p:column>
-
-		<p:column>
+				
 			<p:commandButton id="bindDependencies"
 				action="#{cadastroPedestreController.bindDependencies()}"
 				value="#{msgs['alt.acao.vincular']}"
 				process="painelCadastroResponsavel"
 				update="painelCadastroResponsavel responsaveis form:dialogEscolherResponsavel" />
 		</p:column>
-
 	</p:panelGrid>
 
 	<br />
@@ -90,7 +84,7 @@
 						<h:commandButton
 							image="#{menuController.path}/tema/img/bt_remove_min.png"
 							title="#{msgs['alt.acao.excluir']}"
-							action="#{cadastroPedestreController.removeResponsible()}">
+							action="#{cadastroPedestreController.removeResponsible(responsavel)}">
 							<p:ajax process="@this"
 								update="form:cadastroPedestreTab:tableResponsavel form:cadastroPedestreTab:responsaveis" />
 						</h:commandButton>

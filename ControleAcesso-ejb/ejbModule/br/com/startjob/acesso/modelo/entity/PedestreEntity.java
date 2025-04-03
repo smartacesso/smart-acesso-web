@@ -58,7 +58,9 @@ import br.com.startjob.acesso.modelo.utils.EncryptionUtils;
 				+ " left join fetch obj.cargo ca " + " left join fetch obj.cliente cli " + " left join obj.regras re "
 				+ " left join obj.equipamentos eq " + " left join obj.documentos doc "
 				+ " left join obj.biometrias bio " + " left join obj.mensagensPersonalizadas men "
-				+ " left join obj.responsavel res " + "where obj.id = :ID order by obj.id asc"),
+				+ " left join obj.responsavel res " 
+				+ " left join fetch obj.cotas c "
+				+ "where obj.id = :ID order by obj.id asc"),
 		@NamedQuery(name = "PedestreEntity.findAllComEmpresa", query = "select obj from PedestreEntity obj "
 				+ " left join fetch obj.empresa e " + "where (obj.removido = false or obj.removido is null) "
 				+ "order by obj.id asc"),
@@ -254,6 +256,10 @@ public class PedestreEntity extends ClienteBaseEntity {
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, targetEntity = MensagemEquipamentoEntity.class, mappedBy = "pedestre")
 	@Fetch(FetchMode.SUBSELECT)
 	private List<MensagemEquipamentoEntity> mensagensPersonalizadas;
+	
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, targetEntity = HistoricoCotaEntity.class, mappedBy = "pedestre")
+	@Fetch(FetchMode.SUBSELECT)
+	private List<HistoricoCotaEntity> cotas;
 
 	@ManyToOne(cascade = {}, fetch = FetchType.LAZY)
 	@JoinColumn(name = "ID_USUARIO", nullable = true)
@@ -265,7 +271,7 @@ public class PedestreEntity extends ClienteBaseEntity {
 	@Column(name = "CODIGO_PERMISSAO", nullable = true, length = 15)
 	private String codigoPermissao;
 
-	@ManyToOne(cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
+	@ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
 	@JoinColumn(name = "ID_RESPONSAVEL", nullable = true)
 	private ResponsibleEntity responsavel;
 	
@@ -811,6 +817,14 @@ public class PedestreEntity extends ClienteBaseEntity {
 	public void setResponsavel(ResponsibleEntity responsavel) {
 		this.responsavel = responsavel;
 
+	}
+
+	public List<HistoricoCotaEntity> getCotas() {
+		return cotas;
+	}
+
+	public void setCotas(List<HistoricoCotaEntity> cotas) {
+		this.cotas = cotas;
 	}
 
 }
