@@ -92,59 +92,57 @@ public class RelatorioPermanenciaController extends RelatorioController {
             });
 
             if ("ENTRADA".equalsIgnoreCase(sentido)) {
-                // Armazena a última entrada do pedestre
+                if (ultimaEntradaPorPedestre.containsKey(idPedestre)) {
+                    System.out.println("Aviso: Entrada repetida ignorada para o pedestre " + dto.getNome());
+                    continue; // Ignora essa entrada e mantém a anterior
+                }
+                // Registra a primeira entrada válida
                 ultimaEntradaPorPedestre.put(idPedestre, data);
 
             } else if ("SAIDA".equalsIgnoreCase(sentido)) {
-                if (ultimaEntradaPorPedestre.containsKey(idPedestre)) {
-                    Date entrada = ultimaEntradaPorPedestre.remove(idPedestre);
+                if (!ultimaEntradaPorPedestre.containsKey(idPedestre)) {
+                    System.out.println("Aviso: Saída sem entrada detectada para o pedestre " + dto.getNome() + ". Ignorando saída.");
+                    continue;
+                }
 
-                    // Garante que a entrada ocorreu antes da saída
-                    if (entrada.before(data)) {
-                        long segundos = (data.getTime() - entrada.getTime()) / 1000;
+                Date entrada = ultimaEntradaPorPedestre.remove(idPedestre);
 
-                        if (segundos > 0) {
-                            dto.setTempoTotal(dto.getTempoTotal() + segundos);
-                        }
+                if (entrada.before(data)) {
+                    long segundos = (data.getTime() - entrada.getTime()) / 1000;
+                    if (segundos > 0) {
+                        dto.setTempoTotal(dto.getTempoTotal() + segundos);
                     }
+                } else {
+                    System.out.println("Erro: Entrada posterior à saída para " + dto.getNome() + ". Verifique os dados.");
                 }
             }
-
         }
 
+        // Processa pedestres que entraram e não saíram
         Date fimDoPeriodo = getFimDoDia((Date) super.getParans().get("data_maior_data"));
         for (Map.Entry<Long, Date> entradaPendente : ultimaEntradaPorPedestre.entrySet()) {
             Long idPedestre = entradaPendente.getKey();
             Date entrada = entradaPendente.getValue();
             long minutos = (fimDoPeriodo.getTime() - entrada.getTime()) / 60000;
             mapaPermanencia.get(idPedestre).setTempoTotal(mapaPermanencia.get(idPedestre).getTempoTotal() + minutos);
+
+            System.out.println("⚠️ Aviso: Pedestre " + mapaPermanencia.get(idPedestre).getNome() + " entrou mas não saiu. Tempo calculado até o fim do período.");
         }
 
-        
+        // Calcula saldo e formata tempo
         for (RelatorioPermanenciaDto dto : mapaPermanencia.values()) {
-        	
-        	System.out.println("Pedestre: " + dto.getNome());
-        	System.out.println("Tempo Total (segundos): " + dto.getTempoTotal());
-        	System.out.println("Tempo Total Formatado: " + dto.getTempoTotalFormatado());
-        	System.out.println("Cota Mensal (segundos): " + dto.getCotaMensal());
-        	System.out.println("Cota Mensal Formatada: " + dto.getCotaMensalFormatada());
-        	System.out.println("Saldo Restante (segundos): " + dto.getSaldoRestante());
-        	System.out.println("Saldo Restante Formatado: " + dto.getSaldoRestanteFormatado());
+            Long cotaMensal = dto.getCotaMensal() != null ? dto.getCotaMensal() : 0L;
+            Long saldoRestante = cotaMensal - Math.abs(dto.getTempoTotal());
 
-        	Long cotaMensal = dto.getCotaMensal() != null ? dto.getCotaMensal() : 0L;
-        	Long saldoRestante = cotaMensal - Math.abs(dto.getTempoTotal()); // Usa valor absoluto
-
-        	dto.setSaldoRestante(saldoRestante);
-            
-         // Converte para minutos antes de formatar
-            dto.setTempoTotalFormatado(formatarTempo(dto.getTempoTotal())); // Agora recebe segundos corretamente convertidos
-            dto.setSaldoRestanteFormatado(formatarTempo(dto.getSaldoRestante())); // Também converte antes de formatar
-            dto.setCotaMensalFormatada(formatarTempo(dto.getCotaMensal())); // Converte antes de formatar
-
+            dto.setSaldoRestante(saldoRestante);
+            dto.setTempoTotalFormatado(formatarTempo(dto.getTempoTotal()));
+            dto.setSaldoRestanteFormatado(formatarTempo(dto.getSaldoRestante()));
+            dto.setCotaMensalFormatada(formatarTempo(dto.getCotaMensal()));
         }
 
         return new ArrayList<>(mapaPermanencia.values());
     }
+
 
     private Long buscarCotaMensal(Long idPedestre, int mes, int ano) {
         Long cota = super.buscaCotasPedestre(idPedestre, mes, ano);
