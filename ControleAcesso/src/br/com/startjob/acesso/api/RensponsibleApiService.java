@@ -274,6 +274,11 @@ public class RensponsibleApiService extends BaseService {
 
 		Optional<ResponsibleEntity> responsibleOutPut = responsibleEJB
 				.findResponsibleByID(tokenResponse.getIdResponsible());
+
+		if (!responsibleOutPut.isPresent()) {
+			return Response.status(Status.NOT_FOUND).build();
+		}
+
 		return Response.ok(responsibleOutPut.get().getDeviceKey()).build();
 
 	}
@@ -286,6 +291,10 @@ public class RensponsibleApiService extends BaseService {
 
 		ResponsibleEJBRemote responsibleEJB = (ResponsibleEJBRemote) getEjb("ResponsibleEJB");
 
+		if (token == null || token.trim().isEmpty()) {
+			return Response.status(Status.BAD_REQUEST).entity("Token não enviado").build();
+		}
+
 		TokenOutput tokenResponse = (TokenOutput) decriptToken(token);
 		if (Objects.isNull(tokenResponse)) {
 			return Response.status(Status.UNAUTHORIZED).build();
@@ -294,9 +303,14 @@ public class RensponsibleApiService extends BaseService {
 		Optional<ResponsibleEntity> responsibleOutPut = responsibleEJB
 				.findResponsibleByID(tokenResponse.getIdResponsible());
 
+		if (!responsibleOutPut.isPresent()) {
+			return Response.status(Status.NOT_FOUND).build();
+		}
+
 		responsibleOutPut.get().setDeviceKey(deviceOutput.getDeviceKey());
 		responsibleEJB.gravaObjeto(responsibleOutPut.get());
-		return null;
+
+		return Response.ok().build();
 
 	}
 

@@ -1,21 +1,10 @@
 package br.com.startjob.acesso.modelo.utils;
 
-
 import java.util.Base64;
-
-import javax.crypto.Cipher;
-import javax.crypto.spec.SecretKeySpec;
-import javax.crypto.spec.IvParameterSpec;
-
-import java.nio.charset.StandardCharsets;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.Map;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
-
 
 public class CriptografiaAES {
 	private final String IV = "0000000000000000";
@@ -35,8 +24,12 @@ public class CriptografiaAES {
 	}
 
 	public String decript(String textoCriptografado) throws Exception {
+		if (textoCriptografado == null || textoCriptografado.trim().isEmpty()) {
+			return null; // ou lançar uma exceção, como new IllegalArgumentException("Token is null or
+							// empty")
+		}
 		byte[] decoded = Base64.getDecoder().decode(textoCriptografado);
-		String decript  =  decrypt(decoded, chaveencriptacao);
+		String decript = decrypt(decoded, chaveencriptacao);
 		return decript;
 	}
 
@@ -55,19 +48,19 @@ public class CriptografiaAES {
 	}
 
 	public static void main(String[] args) throws Exception {
-	String teste = "TokenOutput [idResponsible=" + 1 + ", login=" + 1 + ", senha=" + 2 + "]";
-		
+		String teste = "TokenOutput [idResponsible=" + 1 + ", login=" + 1 + ", senha=" + 2 + "]";
+
 		CriptografiaAES criptografiaAES = new CriptografiaAES();
 		byte[] encrypt = criptografiaAES.encrypt(teste, criptografiaAES.chaveencriptacao);
-		
-		//String encoded = java.util.Base64.getEncoder().encodeToString(encrypt);
-		String encoded ="5qi50XnwqKUqQPG+M/PYb8BQJcW6/7TnY7NmrexP8fR3rS2eL7JTRcKJkS0XE+YV1bbwJNtZIvhI2Z3TG1e9mA==";
+
+		// String encoded = java.util.Base64.getEncoder().encodeToString(encrypt);
+		String encoded = "5qi50XnwqKUqQPG+M/PYb8BQJcW6/7TnY7NmrexP8fR3rS2eL7JTRcKJkS0XE+YV1bbwJNtZIvhI2Z3TG1e9mA==";
 
 		System.out.println("Resposta: " + encoded);
 		byte[] decoded = java.util.Base64.getDecoder().decode(encoded);
-		
+
 		String decript = criptografiaAES.decrypt(decoded, criptografiaAES.chaveencriptacao);
-		
+
 		System.out.println("Decript: " + decript);
 	}
 

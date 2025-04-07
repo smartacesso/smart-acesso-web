@@ -1,6 +1,5 @@
 package br.com.startjob.acesso.api;
 
-import java.math.BigInteger;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -483,6 +482,7 @@ public class DesktopApiService extends BaseService {
 
 			if (!logs.isEmpty()) {
 				getEjb("BaseEJB").saveRegisterLogs(logs);
+				getEjb("BaseEJB").enviaNotificacao(logs);
 			}
 
 		} catch (Exception e) {
@@ -1002,8 +1002,7 @@ public class DesktopApiService extends BaseService {
 			}
 
 			if (!"".equals(jsonObject.get("backupPreferences").toString())) {
-				usuario.getConfiguracoesDesktop()
-						.setBackupPreferences(jsonObject.get("backupPreferences").toString());
+				usuario.getConfiguracoesDesktop().setBackupPreferences(jsonObject.get("backupPreferences").toString());
 			}
 
 			if (!"".equals(jsonObject.get("backupDevices").toString())) {
@@ -1022,14 +1021,14 @@ public class DesktopApiService extends BaseService {
 			List<EquipamentoEntity> equipamentos = (List<EquipamentoEntity>) baseEJB
 					.pesquisaSimples(EquipamentoEntity.class, "findAll", args);
 
-			List<DeviceTO> devices = getGSonConverter().fromJson(
-					usuario.getConfiguracoesDesktop().getBackupDevices(), new TypeToken<List<DeviceTO>>() {
+			List<DeviceTO> devices = getGSonConverter().fromJson(usuario.getConfiguracoesDesktop().getBackupDevices(),
+					new TypeToken<List<DeviceTO>>() {
 					}.getType());
 
-			if(devices == null || devices.isEmpty()) {
+			if (devices == null || devices.isEmpty()) {
 				return Response.status(statusResponse).entity("See status code.").build();
 			}
-			
+
 			if (equipamentos != null && !equipamentos.isEmpty()) {
 				for (DeviceTO d : devices) {
 					EquipamentoEntity eq = null;
@@ -1039,7 +1038,7 @@ public class DesktopApiService extends BaseService {
 							break;
 						}
 					}
-					
+
 					if (eq != null) {
 						eq.setCliente(usuario.getCliente());
 						eq.setUsuario(usuario);
@@ -1047,11 +1046,12 @@ public class DesktopApiService extends BaseService {
 						eq.setMarca(d.getManufacturer());
 						eq.setNome(d.getName());
 						eq.setLocal(d.getLocation());
-						
+
 						try {
 							baseEJB.alteraObjeto(eq);
-							
-						} catch (Exception e) {}
+
+						} catch (Exception e) {
+						}
 
 					} else {
 						eq = new EquipamentoEntity();
@@ -1065,7 +1065,8 @@ public class DesktopApiService extends BaseService {
 					}
 				}
 
-				equipamentos = (List<EquipamentoEntity>) baseEJB.pesquisaSimples(EquipamentoEntity.class, "findAll", args);
+				equipamentos = (List<EquipamentoEntity>) baseEJB.pesquisaSimples(EquipamentoEntity.class, "findAll",
+						args);
 
 				for (EquipamentoEntity e : equipamentos) {
 					boolean encontrou = false;
@@ -1202,7 +1203,7 @@ public class DesktopApiService extends BaseService {
 		if (!jsonObject.getString("foto").isEmpty()) {
 			visitante.setFoto(Base64.decodeBase64(jsonObject.getString("foto")));
 		}
-		
+
 		visitante.setTipo(TipoPedestre.valueOf(jsonObject.getString("tipo")));
 		visitante.setStatus(br.com.startjob.acesso.modelo.enumeration.Status.valueOf(jsonObject.getString("status")));
 		visitante.setMatricula(jsonObject.getString("matricula"));
@@ -1597,7 +1598,7 @@ public class DesktopApiService extends BaseService {
 
 		return entidade;
 	}
-	
+
 	@POST
 	@Path("/uploadRegras")
 	@Produces(MediaType.TEXT_PLAIN)
@@ -1634,7 +1635,7 @@ public class DesktopApiService extends BaseService {
 
 		return Response.status(Status.OK).entity("See status code.").build();
 	}
-	
+
 	private RegraEntity buscaRegraPeloId(Long idRegra) {
 		Map<String, Object> args = new HashMap<>();
 		args.put("ID", idRegra);
@@ -1642,8 +1643,9 @@ public class DesktopApiService extends BaseService {
 		List<RegraEntity> regras = null;
 
 		try {
-			regras = (List<RegraEntity>) getEjb("BaseEJB")
-					.pesquisaArgFixos(RegraEntity.class, "findByIdComplete", args); ;
+			regras = (List<RegraEntity>) getEjb("BaseEJB").pesquisaArgFixos(RegraEntity.class, "findByIdComplete",
+					args);
+			;
 			if (regras != null)
 				return regras.stream().findFirst().orElse(null);
 
@@ -1653,6 +1655,5 @@ public class DesktopApiService extends BaseService {
 
 		return null;
 	}
-
 
 }

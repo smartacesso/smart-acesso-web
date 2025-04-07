@@ -158,7 +158,7 @@ public class ResponsibleEJB extends BaseEJB implements ResponsibleEJBRemote {
 	public Optional<ResponsibleEntity> findResponsibleByID(long idResponsible) {
 		// TODO Auto-generated method stub
 		Map<String, Object> args = new HashMap<String, Object>();
-		args.put("ID", String.valueOf(idResponsible));
+		args.put("ID", idResponsible);
 		try {
 			@SuppressWarnings("unchecked")
 			List<ResponsibleEntity> responblibleList = (List<ResponsibleEntity>) this

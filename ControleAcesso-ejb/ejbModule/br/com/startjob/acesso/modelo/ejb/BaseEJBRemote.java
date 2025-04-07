@@ -23,38 +23,39 @@ import br.com.startjob.acesso.modelo.entity.base.BaseEntity;
  */
 @Remote
 public interface BaseEJBRemote {
-	
+
 	/**
 	 * Testa EJB
 	 * 
 	 * @author Gustavo Diniz
 	 */
 	public void execute();
-	
+
 	/**
 	 * Grava entidade no banco de dados usando hibernate
 	 *
 	 * @author: Gustavo Diniz
 	 * @param entidade - nova entidade
-	 * @return array no layout [entidade,mensagem] 
+	 * @return array no layout [entidade,mensagem]
 	 * @throws RemoteException e
 	 */
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
-	public Object [] gravaObjeto(BaseEntity entidade) throws Exception;
-	
+	public Object[] gravaObjeto(BaseEntity entidade) throws Exception;
+
 	/**
 	 * 
-	 * Grava entidade no banco de dados usando hibernate e exclui filhos das listas no array
+	 * Grava entidade no banco de dados usando hibernate e exclui filhos das listas
+	 * no array
 	 *
 	 * @author: Gustavo Diniz
-	 * @param entidade - entidade já existente
+	 * @param entidade       - entidade já existente
 	 * @param filhosExclusao - array que contém as listas dos filhos para exclusão
 	 * @return e
 	 * @throws RemoteException e
 	 */
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
-	public Object [] gravaObjeto(BaseEntity entidade, Object [] filhosExclusao) throws Exception ;
-	
+	public Object[] gravaObjeto(BaseEntity entidade, Object[] filhosExclusao) throws Exception;
+
 	/**
 	 * 
 	 * Altera entidade no banco de dados usando hibernate
@@ -65,22 +66,22 @@ public interface BaseEJBRemote {
 	 * @throws RemoteException e
 	 */
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
-	public Object [] alteraObjeto(BaseEntity entidade) throws Exception ;
-	
+	public Object[] alteraObjeto(BaseEntity entidade) throws Exception;
+
 	/**
 	 * 
-	 * Altera entidade no banco de dados usando hibernate e exclui filhos das listas no array
+	 * Altera entidade no banco de dados usando hibernate e exclui filhos das listas
+	 * no array
 	 *
 	 * @author: Gustavo Diniz
-	 * @param entidade - entidade já existente
+	 * @param entidade       - entidade já existente
 	 * @param filhosExclusao - array que contém as listas dos filhos para exclusão
 	 * @return array no layout [entidade,mensagem]
 	 * @throws RemoteException e
 	 */
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
-	public Object [] alteraObjeto(BaseEntity entidade, Object [] filhosExclusao) throws Exception ;
-	
-	
+	public Object[] alteraObjeto(BaseEntity entidade, Object[] filhosExclusao) throws Exception;
+
 	/**
 	 * 
 	 * Exclui entidade no banco de dados usando hibernate
@@ -91,193 +92,201 @@ public interface BaseEJBRemote {
 	 * @throws RemoteException e
 	 */
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
-	public String excluiObjeto(BaseEntity entidade) throws Exception ;
-	
+	public String excluiObjeto(BaseEntity entidade) throws Exception;
+
 	/**
 	 * 
-	 * Exclui entidade no banco de dados usando hibernate e exclui filhos das listas no array
+	 * Exclui entidade no banco de dados usando hibernate e exclui filhos das listas
+	 * no array
 	 *
 	 * @author: Gustavo Diniz
-	 * @param entidade - entidade já existente
+	 * @param entidade       - entidade já existente
 	 * @param filhosExclusao - array que contém as listas dos filhos para exclusão
 	 * @return e
 	 * @throws RemoteException e
 	 */
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
-	public String excluiObjeto(BaseEntity entidade, Object [] filhosExclusao) throws Exception ;
-	
-	
+	public String excluiObjeto(BaseEntity entidade, Object[] filhosExclusao) throws Exception;
+
 	/**
 	 * 
 	 * Recupera lista de entidades do banco sem argumentos.
 	 *
-	 * @author: Gustavo Diniz 
+	 * @author: Gustavo Diniz
 	 * @param classeEntidade - classe representativa
-	 * @param namedQuery - namedQuery usada para pesquisa
+	 * @param namedQuery     - namedQuery usada para pesquisa
 	 * @return lista de entidades
 	 * @throws RemoteException e
 	 */
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
 	@SuppressWarnings("rawtypes")
-	public List<BaseEntity> pesquisaSimples(Class classeEntidade, String namedQuery) throws Exception ;
-	
+	public List<BaseEntity> pesquisaSimples(Class classeEntidade, String namedQuery) throws Exception;
+
 	/**
 	 * 
 	 * Recupera quantidade de registros no banco utilizando os argumentos indicados.
 	 *
-	 * @author: Gustavo Diniz 
+	 * @author: Gustavo Diniz
 	 * @param classeEntidade - classe representativa
-	 * @param namedQuery - namedQuery usada para pesquisa
-	 * @param arg - map com os argumentos para pesquisa
+	 * @param namedQuery     - namedQuery usada para pesquisa
+	 * @param arg            - map com os argumentos para pesquisa
 	 * @return lista de entidades
 	 * @throws RemoteException e
 	 */
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
 	@SuppressWarnings("rawtypes")
-	public int pesquisaSimplesCount(Class classeEntidade, String namedQuery, Map<String, Object> arg) throws Exception ;
-	
+	public int pesquisaSimplesCount(Class classeEntidade, String namedQuery, Map<String, Object> arg) throws Exception;
+
 	/**
 	 * 
 	 * Recupera quantidade de registros no banco utilizando os argumentos indicados.
 	 *
-	 * @author: Gustavo Diniz 
+	 * @author: Gustavo Diniz
 	 * @param classeEntidade - classe representativa
-	 * @param namedQuery - namedQuery usada para pesquisa
-	 * @param arg - map com os argumentos para pesquisa
+	 * @param namedQuery     - namedQuery usada para pesquisa
+	 * @param arg            - map com os argumentos para pesquisa
 	 * @return lista de entidades
 	 * @throws RemoteException e
 	 */
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
 	@SuppressWarnings("rawtypes")
-	public int pesquisaSimplesCount(Class classeEntidade, String namedQuery,Map<String, Object> arg, String field) throws Exception;
-	
+	public int pesquisaSimplesCount(Class classeEntidade, String namedQuery, Map<String, Object> arg, String field)
+			throws Exception;
+
 	/**
 	 * 
 	 * Recupera quantidade de registros no banco utilizando os argumentos fixos.
 	 *
 	 * @param classeEntidade - classe representativa
-	 * @param namedQuery - namedQuery usada para pesquisa
-	 * @param arg - map com os argumentos para pesquisa
+	 * @param namedQuery     - namedQuery usada para pesquisa
+	 * @param arg            - map com os argumentos para pesquisa
 	 * @return lista de entidades
 	 * @throws RemoteException e
 	 */
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
 	@SuppressWarnings("rawtypes")
-	public int pesquisaArgFixosLimitadoCount(Class classeEntidade, String namedQuery, Map<String, Object> arg) throws Exception ;
-	
+	public int pesquisaArgFixosLimitadoCount(Class classeEntidade, String namedQuery, Map<String, Object> arg)
+			throws Exception;
+
 	/**
 	 * 
 	 * Recupera a soma de registros no banco utilizando os argumentos indicados.
 	 *
 	 * @author: Juscelino Oliveira
 	 * @param classeEntidade - classe representativa
-	 * @param namedQuery - namedQuery usada para pesquisa
-	 * @param arg - map com os argumentos para pesquisa
+	 * @param namedQuery     - namedQuery usada para pesquisa
+	 * @param arg            - map com os argumentos para pesquisa
 	 * @return lista de entidades
 	 * @throws RemoteException e
 	 */
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
 	@SuppressWarnings("rawtypes")
-	public double pesquisaSimplesSum(Class classeEntidade, String namedQuery, Map<String, Object> arg) throws Exception ;
-	
+	public double pesquisaSimplesSum(Class classeEntidade, String namedQuery, Map<String, Object> arg) throws Exception;
+
 	/**
 	 * 
 	 * Recupera lista de entidades do banco com argumentos.
 	 *
-	 * @author: Gustavo Diniz 
+	 * @author: Gustavo Diniz
 	 * @param classeEntidade - classe representativa
-	 * @param namedQuery - namedQuery usada para pesquisa
-	 * @param arg - map com os argumentos para pesquisa
+	 * @param namedQuery     - namedQuery usada para pesquisa
+	 * @param arg            - map com os argumentos para pesquisa
 	 * @return lista de entidades
 	 * @throws RemoteException e
 	 */
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
 	@SuppressWarnings("rawtypes")
-	public List<?> pesquisaSimples(Class classeEntidade, String namedQuery, Map<String, Object> arg) throws Exception ;
-	
+	public List<?> pesquisaSimples(Class classeEntidade, String namedQuery, Map<String, Object> arg) throws Exception;
+
 	/**
 	 * 
 	 * Recupera lista de entidades do banco com argumentos.
 	 *
-	 * @author: Gustavo Diniz 
+	 * @author: Gustavo Diniz
 	 * @param classeEntidade - classe representativa
-	 * @param namedQuery - namedQuery usada para pesquisa
-	 * @param arg - map com os argumentos para pesquisa
-	 * @param ini - início
+	 * @param namedQuery     - namedQuery usada para pesquisa
+	 * @param arg            - map com os argumentos para pesquisa
+	 * @param ini            - início
 	 * @para quant - quantidade a partir do início
 	 * @return lista de entidades
 	 * @throws RemoteException e
 	 */
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
 	@SuppressWarnings("rawtypes")
-	public List<?> pesquisaSimplesLimitado(Class classeEntidade, String namedQuery, Map<String, Object> arg, int ini, int quant) throws Exception;
-	
+	public List<?> pesquisaSimplesLimitado(Class classeEntidade, String namedQuery, Map<String, Object> arg, int ini,
+			int quant) throws Exception;
+
 	/**
 	 * 
 	 * Recupera lista de entidades do banco com argumentos e ordenação.
 	 *
-	 * @author: Gustavo Diniz 
+	 * @author: Gustavo Diniz
 	 * @param classeEntidade - classe representativa
-	 * @param namedQuery - namedQuery usada para pesquisa
-	 * @param arg - map com os argumentos para pesquisa
-	 * @param ini - início
+	 * @param namedQuery     - namedQuery usada para pesquisa
+	 * @param arg            - map com os argumentos para pesquisa
+	 * @param ini            - início
 	 * @para quant - quantidade a partir do início
 	 * @return lista de entidades
 	 * @throws RemoteException e
 	 */
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
 	@SuppressWarnings("rawtypes")
-	public List<?> pesquisaSimplesLimitado(Class classeEntidade, String namedQuery, Map<String, Object> arg, Map<String, String> order, int ini, int quant) throws Exception;
-	
+	public List<?> pesquisaSimplesLimitado(Class classeEntidade, String namedQuery, Map<String, Object> arg,
+			Map<String, String> order, int ini, int quant) throws Exception;
+
 	/**
 	 * 
 	 * Recupera lista de entidades do banco com argumentos fixos.
 	 *
 	 * @author: Jairo Zanutto
 	 * @param classeEntidade - classe representativa
-	 * @param namedQuery - namedQuery usada para pesquisa
-	 * @param arg - map com os argumentos para pesquisa
+	 * @param namedQuery     - namedQuery usada para pesquisa
+	 * @param arg            - map com os argumentos para pesquisa
 	 * @return lista de entidades
 	 * @throws RemoteException e
 	 */
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
 	@SuppressWarnings("rawtypes")
-	public List<?> pesquisaArgFixos(Class classeEntidade, String namedQuery, Map<String, Object> arg) throws Exception ;
-	
+	public List<?> pesquisaArgFixos(Class classeEntidade, String namedQuery, Map<String, Object> arg) throws Exception;
+
 	/**
 	 * 
 	 * Recupera lista de entidades do banco com argumentos fixos.
 	 *
 	 * @author: Jairo Zanutto
 	 * @param classeEntidade - classe representativa
-	 * @param namedQuery - namedQuery usada para pesquisa
-	 * @param arg - map com os argumentos para pesquisa
+	 * @param namedQuery     - namedQuery usada para pesquisa
+	 * @param arg            - map com os argumentos para pesquisa
 	 * @return lista de entidades
 	 * @throws RemoteException e
 	 */
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
 	@SuppressWarnings("rawtypes")
-	public List<?> pesquisaArgFixosLimitado(Class classeEntidade, String namedQuery, Map<String, Object> arg, int ini, int quant) throws Exception ;
-	
+	public List<?> pesquisaArgFixosLimitado(Class classeEntidade, String namedQuery, Map<String, Object> arg, int ini,
+			int quant) throws Exception;
+
 	/**
 	 * 
 	 * Recupera lista de entidades do banco com argumentos fixos.
 	 *
 	 * @author: Jairo Zanutto
 	 * @param classeEntidade - classe representativa
-	 * @param namedQuery - namedQuery usada para pesquisa
-	 * @param arg - map com os argumentos para pesquisa
-	 * @param limit - limite de resgistros
+	 * @param namedQuery     - namedQuery usada para pesquisa
+	 * @param arg            - map com os argumentos para pesquisa
+	 * @param limit          - limite de resgistros
 	 * @return lista de entidades
 	 * @throws RemoteException e
 	 */
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
 	@SuppressWarnings("rawtypes")
-	public List<? extends BaseEntity> pesquisaArgFixos(Class classeEntidade, String namedQuery, Map<String, Object> arg, int limit) throws Exception ;
-	
+	public List<? extends BaseEntity> pesquisaArgFixos(Class classeEntidade, String namedQuery, Map<String, Object> arg,
+			int limit) throws Exception;
+
 	/**
-	 * Recupera lista de entidades do banco com argumentos fixos e ordem variada, que sobrescreverá a ordem da named query.
-	 * Se a ordem não for informada, será usada a ordem definida na named query. 
+	 * Recupera lista de entidades do banco com argumentos fixos e ordem variada,
+	 * que sobrescreverá a ordem da named query. Se a ordem não for informada, será
+	 * usada a ordem definida na named query.
+	 * 
 	 * @param classeEntidade
 	 * @param namedQuery
 	 * @param arg
@@ -287,39 +296,37 @@ public interface BaseEJBRemote {
 	 */
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
 	@SuppressWarnings("rawtypes")
-	public List<?> pesquisaArgFixosLimitadoOrdenado(Class classeEntidade,
-			String namedQuery, Map<String, Object> arg, List<String> order, int ini, int quant) throws Exception ;
-	
+	public List<?> pesquisaArgFixosLimitadoOrdenado(Class classeEntidade, String namedQuery, Map<String, Object> arg,
+			List<String> order, int ini, int quant) throws Exception;
+
 	/**
 	 * 
-	 * Recupera objeto do banco de dados 
-	 * atraves da namedQuery "findById".
+	 * Recupera objeto do banco de dados atraves da namedQuery "findById".
 	 *
 	 * @author: Gustavo Diniz
 	 * @param classeEntidade - classe para recupera
-	 * @param id - id a ser recuperado
+	 * @param id             - id a ser recuperado
 	 * @return classe
 	 * @throws RemoteException e
 	 */
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
 	@SuppressWarnings("rawtypes")
-	public BaseEntity recuperaObjeto(Class classeEntidade, Object id) throws Exception ;
-	
+	public BaseEntity recuperaObjeto(Class classeEntidade, Object id) throws Exception;
+
 	/**
 	 * 
-	 * Recupera objeto do banco de dados 
-	 * atraves da namedQuery "findById".
+	 * Recupera objeto do banco de dados atraves da namedQuery "findById".
 	 *
 	 * @author: Gustavo Diniz
 	 * @param classeEntidade - classe para recupera
-	 * @param id - id a ser recuperado
+	 * @param id             - id a ser recuperado
 	 * @return classe
 	 * @throws RemoteException e
 	 */
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
 	@SuppressWarnings("rawtypes")
-	public BaseEntity recuperaObjeto(Class classeEntidade, String namedQuery, Object id) throws Exception ;
-	
+	public BaseEntity recuperaObjeto(Class classeEntidade, String namedQuery, Object id) throws Exception;
+
 	/**
 	 * 
 	 * @param argumentos
@@ -327,9 +334,9 @@ public interface BaseEJBRemote {
 	 * @return
 	 * @throws Exception
 	 */
-	public List<UsuarioEntity> recuperaUsuariosArgFixos(
-			Map<String, Object> argumentos, String namedQuery) throws Exception;
-	
+	public List<UsuarioEntity> recuperaUsuariosArgFixos(Map<String, Object> argumentos, String namedQuery)
+			throws Exception;
+
 	/**
 	 * 
 	 * @param lista
@@ -337,7 +344,7 @@ public interface BaseEJBRemote {
 	 * @throws Exception
 	 */
 	public List<BaseEntity> gravaTodos(List<BaseEntity> lista) throws Exception;
-	
+
 	/**
 	 * 
 	 * @param parameterName
@@ -352,7 +359,7 @@ public interface BaseEJBRemote {
 	 * @throws Exception
 	 */
 	public void saveRegisterLogs(List<AcessoEntity> logs) throws Exception;
-	
+
 	/**
 	 * 
 	 * @param classe
@@ -360,4 +367,13 @@ public interface BaseEJBRemote {
 	 * @throws Exception
 	 */
 	public void updateDataAlteracao(Class classe, Date data, Long id) throws Exception;
+
+	/**
+	 * 
+	 * @param classe
+	 * @param data
+	 * @throws Exception
+	 */
+
+	public void enviaNotificacao(List<AcessoEntity> logs) throws Exception;
 }
