@@ -272,7 +272,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 				+ schema + "TB_MENSAGEM_EQUIPAMENTO mp " + "			on mp.ID_PEDESTRE = pd.ID_PEDESTRE "
 				+ "			and mp.status = 'ATIVO' "
 				+ "           and (mp.VALIDADE IS NULL or mp.VALIDADE >= :DATA_ATUAL )  "
-				+ "where pd.ID_CLIENTE in ( :ID_CLIENTES )  "
+				+ "where pd.ID_CLIENTE in (:ID_CLIENTES )  "
 				+ ("mysql".equals(sgdb)
 						? "group by pd.ID_PEDESTRE, r.ID_REGRA, rHorario.ID_HORARIO, b.TEMPLATE, ep.ID_EQUIPAMENTO, mp.ID_MENSAGEM_EQUIPAMENTO "
 						: "")
@@ -403,7 +403,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 				+ "TB_USUARIO usuario " + "			on usuario.ID_USUARIO = pd.ID_USUARIO "
 				+ "left join " + schema
 				+ "TB_HORARIO h2 on rp.ID_PEDESTRE_REGRA = h2.ID_PEDESTRE_REGRA and (h2.REMOVIDO is null or h2.REMOVIDO = 0) "
-				+ "where pd.ID_CLIENTE in ( :ID_CLIENTES )  " + "		  and pd.DATA_ALTERACAO >= :LAST_SYNC "
+				+ "where pd.ID_CLIENTE in (:ID_CLIENTES )  " + "		  and pd.DATA_ALTERACAO >= :LAST_SYNC "
 				+ ("mysql".equals(sgdb)
 						? "group by pd.ID_PEDESTRE, r.ID_REGRA, rHorario.ID_HORARIO, b.TEMPLATE, ep.ID_EQUIPAMENTO, mp.ID_MENSAGEM_EQUIPAMENTO, h2.ID_HORARIO "
 						: "")
@@ -417,19 +417,17 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 	}
 
 	private String formataHora(String sgdb, String campo) {
-		String hora = " DATE_FORMAT(" + campo + ", '%H:%i')";
+		String hora = " DATE_FORMAT(" + campo + ", '%H:%i')"; // padrão para MySQL
 
-		if (sgdb.equals("plsql")) {
+		if ("plsql".equals(sgdb)) {
 			String sqlServerVersion = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SQL_SERVER_VESION);
-
 			if (Integer.valueOf(sqlServerVersion) >= 2012) {
 				hora = " FORMAT(" + campo + ", N'HH:mm')";
 			} else {
 				hora = " CONVERT(VARCHAR(5), " + campo + ", 108)";
 			}
-
 		} else if ("oracle".equals(sgdb)) {
-			hora = " TO_CHAR(TO_DATE(" + campo + ", N'HH:mm'))";
+			hora = " TO_CHAR(" + campo + ", 'HH24:MI')";
 		}
 
 		return hora;
