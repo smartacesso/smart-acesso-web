@@ -11,6 +11,7 @@ import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToMany;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
 import javax.persistence.OneToMany;
@@ -84,7 +85,10 @@ public class ResponsibleEntity extends ClienteBaseEntity {
 	@Column(name = "TOKEN", nullable = true, length = 100)
 	private String token;
 
-	@OneToMany(mappedBy = "responsavel", cascade = CascadeType.ALL, orphanRemoval = true)
+//	@OneToMany(mappedBy = "responsavel", cascade = CascadeType.ALL, orphanRemoval = true)
+//	private List<PedestreEntity> pedestres;
+	
+	@ManyToMany(mappedBy = "responsaveis")
 	private List<PedestreEntity> pedestres;
 
 	@Column(name = "DESCRICAO", nullable = true, length = 255)

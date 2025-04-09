@@ -40,6 +40,7 @@ import br.com.startjob.acesso.modelo.entity.MensagemEquipamentoEntity;
 import br.com.startjob.acesso.modelo.entity.ParametroEntity;
 import br.com.startjob.acesso.modelo.entity.PedestreEntity;
 import br.com.startjob.acesso.modelo.entity.PedestreRegraEntity;
+import br.com.startjob.acesso.modelo.entity.ResponsibleEntity;
 import br.com.startjob.acesso.modelo.entity.UsuarioEntity;
 import br.com.startjob.acesso.modelo.entity.base.BaseEntity;
 import br.com.startjob.acesso.modelo.enumeration.TipoPedestre;
@@ -2011,52 +2012,66 @@ public class BaseEJB implements BaseEJBRemote {
 			}
 
 			PedestreEntity pedestre = acesso.getPedestre();
-			if (pedestre == null || pedestre.getResponsavel() == null
-					|| pedestre.getResponsavel().getDeviceKey() == null) {
+			if (pedestre == null || pedestre.getResponsaveis() == null || pedestre.getResponsaveis().isEmpty()) {
 				System.out.println("Dados incompletos para envio de notificação");
 				return;
 			}
 
-			String deviceKey = pedestre.getResponsavel().getDeviceKey();
 			String title = "Smart Acesso";
 			String message = String.format("Acesso de: %s deu %s", pedestre.getNome(), acesso.getSentido());
 
-			String body = String.format("{\"token\":\"%s\", \"titulo\":\"%s\", \"corpo\":\"%s\"}", deviceKey, title,
-					message);
+			for (ResponsibleEntity responsavel : pedestre.getResponsaveis()) {
+				String deviceKey = responsavel.getDeviceKey();
 
-			URL url = new URL("http://localhost:8085/notificacao/enviar");
-			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-			connection.setRequestMethod("POST");
-			connection.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
-			connection.setRequestProperty("Accept", "application/json");
-			connection.setDoOutput(true);
-
-			try (OutputStream os = connection.getOutputStream()) {
-				byte[] input = body.getBytes(StandardCharsets.UTF_8);
-				os.write(input, 0, input.length);
-			}
-
-			int responseCode = connection.getResponseCode();
-			System.out.println("Response Code: " + responseCode);
-
-			if (responseCode == 200) {
-				try (BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
-					StringBuilder response = new StringBuilder();
-					String inputLine;
-					while ((inputLine = in.readLine()) != null) {
-						response.append(inputLine);
-					}
-					System.out.println("Resposta da notificação: " + response);
+				if (deviceKey == null || deviceKey.trim().isEmpty()) {
+					System.out.printf("Responsável %s não possui deviceKey. Ignorando.%n", responsavel.getNome());
+					continue;
 				}
-			} else {
-				System.out.printf("Falha ao enviar notificação. Código HTTP: %d%n", responseCode);
-			}
 
+				String body = String.format(
+					"{\"token\":\"%s\", \"titulo\":\"%s\", \"corpo\":\"%s\"}",
+					deviceKey, title, message
+				);
+
+				try {
+					URL url = new URL("http://localhost:8085/notificacao/enviar");
+					HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+					connection.setRequestMethod("POST");
+					connection.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+					connection.setRequestProperty("Accept", "application/json");
+					connection.setDoOutput(true);
+
+					try (OutputStream os = connection.getOutputStream()) {
+						byte[] input = body.getBytes(StandardCharsets.UTF_8);
+						os.write(input, 0, input.length);
+					}
+
+					int responseCode = connection.getResponseCode();
+					System.out.printf("Notificação enviada para %s (HTTP %d)%n", responsavel.getNome(), responseCode);
+
+					if (responseCode == 200) {
+						try (BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+							StringBuilder response = new StringBuilder();
+							String inputLine;
+							while ((inputLine = in.readLine()) != null) {
+								response.append(inputLine);
+							}
+							System.out.println("Resposta da notificação: " + response);
+						}
+					} else {
+						System.out.printf("Falha ao enviar notificação para %s. Código HTTP: %d%n", responsavel.getNome(), responseCode);
+					}
+				} catch (Exception e) {
+					System.err.printf("Erro ao enviar notificação para %s:%n", responsavel.getNome());
+					e.printStackTrace();
+				}
+			}
 		} catch (Exception e) {
-			System.err.println("Erro ao processar envio de notificação:");
+			System.err.println("Erro geral ao processar envio de notificações:");
 			e.printStackTrace();
 		}
 	}
+
 
 	private AcessoEntity buscarPedestre(AcessoEntity acesso) throws Exception {
 		if (acesso.getIdPedestre() == null) {

@@ -121,6 +121,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 							eq.getEquipamento().getId();
 					}
 				}
+				
 
 				if (pedestre.getMensagensPersonalizadas() != null)
 					pedestre.getMensagensPersonalizadas().isEmpty();
@@ -133,13 +134,15 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 
 				if (pedestre.getMatricula() != null)
 					pedestre.getMatricula().isEmpty();
+				
+				if (pedestre.getResponsaveis() != null) {
+					pedestre.getResponsaveis().isEmpty();
+				}
 
 				if (pedestre.getCargo() != null)
 					pedestre.getCargo();
 
-				if (pedestre.getResponsavel() != null) {
-					pedestre.getResponsavel();
-				}
+
 			}
 
 			return pedestres;

@@ -397,9 +397,13 @@ public class CadastroPedestreController extends CadastroBaseController {
 					.collect(Collectors.toList());
 		}
 		
-		if (Objects.nonNull(pedestre.getResponsavel())) {
-			responsaveis.add(pedestre.getResponsavel());
+		if (pedestre.getResponsaveis() != null && !pedestre.getResponsaveis().isEmpty()) {
+		    responsaveis = new ArrayList<>(pedestre.getResponsaveis());
+		} else {
+		    responsaveis = new ArrayList<>();
 		}
+
+
 
 		if (pedestre.getEmpresa() != null && pedestre.getEmpresa().getId() != null) {
 			idEmpresaSelecionada = pedestre.getEmpresa().getId();
@@ -562,14 +566,15 @@ public class CadastroPedestreController extends CadastroBaseController {
 		} else {
 			pedestre.setEquipamentos(new ArrayList<>());
 		}
-		if (responsaveis != null && !responsaveis.isEmpty()) {
-		    pedestre.setResponsavel(responsaveis.stream()
-		            .filter(r -> r != null && r.getId() != null)
-		            .findFirst()
-		            .orElse(responsavel));	
+		
+		if (responsaveis != null) {
+		    pedestre.setResponsaveis(responsaveis.stream()
+		        .filter(r -> r != null && r.getId() != null)
+		        .collect(Collectors.toList()));
 		} else {
-			pedestre.setResponsavel(responsavel);
+		    pedestre.setResponsaveis(new ArrayList<>());
 		}
+		
 		if (listaPedestreRegra != null && !listaPedestreRegra.isEmpty()) {
 			pedestre.setRegras(listaPedestreRegra);
 
@@ -703,13 +708,21 @@ public class CadastroPedestreController extends CadastroBaseController {
 	
 	public void bindDependencies() {
 		PedestreEntity pedestre = getPedestreAtual();
-		
-	    if (responsavel == null) {
-	        throw new IllegalStateException("Responsável não pode ser nulo!");
-	    }
-	    pedestre.setResponsavel(responsavel);
-	      
-	    responsaveis.add(responsavel);
+
+		if (responsavel == null) {
+			throw new IllegalStateException("Responsável não pode ser nulo!");
+		}
+
+		if (responsaveis == null) {
+			responsaveis = new ArrayList<>();
+		}
+
+		if (!responsaveis.contains(responsavel)) {
+			responsaveis.add(responsavel);
+		}
+
+		pedestre.setResponsaveis(new ArrayList<>(responsaveis));
+
 	}
 
 	public void removerRegra(PedestreRegraEntity pedestreRegraSelecionado) {

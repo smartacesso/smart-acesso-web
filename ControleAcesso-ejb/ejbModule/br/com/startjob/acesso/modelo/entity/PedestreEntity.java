@@ -19,7 +19,9 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
 import javax.persistence.Lob;
+import javax.persistence.ManyToMany;
 import javax.persistence.ManyToOne;
 import javax.persistence.NamedQueries;
 import javax.persistence.NamedQuery;
@@ -58,7 +60,7 @@ import br.com.startjob.acesso.modelo.utils.EncryptionUtils;
 				+ " left join fetch obj.cargo ca " + " left join fetch obj.cliente cli " + " left join obj.regras re "
 				+ " left join obj.equipamentos eq " + " left join obj.documentos doc "
 				+ " left join obj.biometrias bio " + " left join obj.mensagensPersonalizadas men "
-				+ " left join obj.responsavel res " 
+				+ " left join obj.responsaveis res " 
 				+ " left join fetch obj.cotas c "
 				+ "where obj.id = :ID order by obj.id asc"),
 		@NamedQuery(name = "PedestreEntity.findAllComEmpresa", query = "select obj from PedestreEntity obj "
@@ -271,9 +273,18 @@ public class PedestreEntity extends ClienteBaseEntity {
 	@Column(name = "CODIGO_PERMISSAO", nullable = true, length = 15)
 	private String codigoPermissao;
 
-	@ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
-	@JoinColumn(name = "ID_RESPONSAVEL", nullable = true)
-	private ResponsibleEntity responsavel;
+//	@ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
+//	@JoinColumn(name = "ID_RESPONSAVEL", nullable = true)
+//	private ResponsibleEntity responsavel;
+	
+	@ManyToMany
+	@JoinTable(
+	    name = "aluno_responsavel",
+	    joinColumns = @JoinColumn(name = "id_pedestre"),
+	    inverseJoinColumns = @JoinColumn(name = "id_responsavel")
+	)
+	private List<ResponsibleEntity> responsaveis;
+
 	
 	@Transient
 	private String token;
@@ -808,14 +819,14 @@ public class PedestreEntity extends ClienteBaseEntity {
 		this.codigoPermissao = codigoPermissao;
 	}
 
-	public ResponsibleEntity getResponsavel() {
-		return responsavel;
-	}
-
-	public void setResponsavel(ResponsibleEntity responsavel) {
-		this.responsavel = responsavel;
-
-	}
+//	public ResponsibleEntity getResponsavel() {
+//		return responsavel;
+//	}
+//
+//	public void setResponsavel(ResponsibleEntity responsavel) {
+//		this.responsavel = responsavel;
+//
+//	}
 
 	public List<HistoricoCotaEntity> getCotas() {
 		return cotas;
@@ -823,6 +834,14 @@ public class PedestreEntity extends ClienteBaseEntity {
 
 	public void setCotas(List<HistoricoCotaEntity> cotas) {
 		this.cotas = cotas;
+	}
+
+	public List<ResponsibleEntity> getResponsaveis() {
+		return responsaveis;
+	}
+
+	public void setResponsaveis(List<ResponsibleEntity> responsaveis) {
+		this.responsaveis = responsaveis;
 	}
 
 }
