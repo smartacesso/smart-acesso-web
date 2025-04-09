@@ -342,12 +342,10 @@ public class PedestreEntity extends ClienteBaseEntity {
 			this.status = Status.INATIVO;
 		} else {
 			// Atualiza para ativo somente se o status atual não for INATIVO
-			if (this.status != Status.INATIVO) {
+			System.out.println("Funcionario sem nenhum impedimento");
 				this.observacoes = "STATUS : ATIVO";
 				this.status = Status.ATIVO;
-			}
 		}
-
 	}
 	
 	public void updateFuncionarioTotvs(final FuncionarioTotvsDto funcionarioTotvsDto) {
