@@ -128,40 +128,96 @@ public class RensponsibleApiService extends BaseService {
 				.collect(Collectors.toList());
 	}
 
+//	@GET
+//	@Path("/access")
+//	@Produces(MediaType.APPLICATION_JSON)
+//	public Response getAllDependentsAccess(@HeaderParam("token") String token, @HeaderParam("size") int size,
+//			@HeaderParam("page") int page) throws Exception {
+//		ResponsibleEJBRemote responsibleEJB = (ResponsibleEJBRemote) getEjb("ResponsibleEJB");
+//
+//		TokenOutput tokenResponse = (TokenOutput) decriptToken(token);
+//		if (Objects.isNull(tokenResponse)) {
+//			return Response.status(Status.UNAUTHORIZED).build();
+//		}
+//
+//		//trocar o tokenresponse para o id do responsavel
+//		//usar o findAllDependentsPageable para buscar o id do dependente
+//		//buscar os acessos de todos os dependentes
+//		
+//		
+//		List<PedestreEntity> dependencies = responsibleEJB.findAllDependentsPageable(tokenResponse.getIdResponsible(),
+//				page, size);
+//
+//		List<PedestrianAccessTO> pedestres = convertPedestrianTO(dependencies);
+//		
+//
+//		List<AccessTO> accessTOList = new ArrayList<>();
+//		AccessTO accessTO = new AccessTO();
+//
+//		if (Objects.nonNull(accessList) && accessList.size() > 0) {
+//			accessList.forEach(aacess -> {
+//				try {
+//					accessTOList.add(accessTO.convertToAccessTO(aacess));
+//				} catch (ParseException e) {
+//					// TODO Auto-generated catch block
+//					e.printStackTrace();
+//				}
+//			});
+//
+//			return Response.ok(accessTOList).build();
+//		}
+//
+//		return Response.status(Status.NOT_FOUND).build();
+//	}
+	
 	@GET
 	@Path("/access")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getAllDependentsAccess(@HeaderParam("token") String token, @HeaderParam("size") int size,
-			@HeaderParam("page") int page) throws Exception {
-		ResponsibleEJBRemote responsibleEJB = (ResponsibleEJBRemote) getEjb("ResponsibleEJB");
+	public Response getAllDependentsAccess(@HeaderParam("token") String token,
+	                                       @HeaderParam("size") int size,
+	                                       @HeaderParam("page") int page) throws Exception {
+	    ResponsibleEJBRemote responsibleEJB = (ResponsibleEJBRemote) getEjb("ResponsibleEJB");
+	//    AccessEJBRemote accessEJB = (AccessEJBRemote) getEjb("AccessEJB"); // supondo que você tenha esse EJB
 
-		TokenOutput tokenResponse = (TokenOutput) decriptToken(token);
-		if (Objects.isNull(tokenResponse)) {
-			return Response.status(Status.UNAUTHORIZED).build();
-		}
+	    TokenOutput tokenResponse = (TokenOutput) decriptToken(token);
+	    if (Objects.isNull(tokenResponse)) {
+	        return Response.status(Status.UNAUTHORIZED).build();
+	    }
+	    System.out.println("TOKEN : " + token);
+	    System.out.println("Id do responsavel : " + tokenResponse.getIdResponsible());
+	    
+	    // Passo 1: Buscar os dependentes do responsável
+	    List<PedestreEntity> dependents = responsibleEJB.findAllDependentsPageable(
+	        tokenResponse.getIdResponsible(), page, size);
 
-		List<AcessoEntity> accessList = responsibleEJB.findAllAccessPageable(tokenResponse.getLogin(),
-				tokenResponse.getSenha(), size, page);
+	    // Lista final de acessos dos dependentes
+	    List<AccessTO> accessTOList = new ArrayList<>();
 
-		List<AccessTO> accessTOList = new ArrayList<>();
-		AccessTO accessTO = new AccessTO();
+	    // Passo 2: Buscar os acessos de cada dependente
+	    for (PedestreEntity dependent : dependents) {
+	    	 List<AcessoEntity> accessList = responsibleEJB.findAllAccessPageable(dependent.getId(), 10, 10);
 
-		if (Objects.nonNull(accessList) && accessList.size() > 0) {
-			accessList.forEach(aacess -> {
-				try {
-					accessTOList.add(accessTO.convertToAccessTO(aacess));
-				} catch (ParseException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-			});
+	        if (accessList != null && !accessList.isEmpty()) {
+	        	System.out.println("Criando to dos acessos do dependete");
+	            for (AcessoEntity access : accessList) {
+	                try {
+	                    AccessTO accessTO = new AccessTO().convertToAccessTO(access);
+	                    accessTOList.add(accessTO);
+	                } catch (ParseException e) {
+	                    e.printStackTrace(); // ou logue com algum logger
+	                }
+	            }
+	        }
+	    }
 
-			return Response.ok(accessTOList).build();
-		}
-
-		return Response.status(Status.NOT_FOUND).build();
-
+	    // Passo 3: Retornar a resposta
+	    if (!accessTOList.isEmpty()) {
+	        return Response.ok(accessTOList).build();
+	    } else {
+	        return Response.status(Status.NOT_FOUND).build();
+	    }
 	}
+
 
 	@GET
 	@Path("/token")
@@ -236,6 +292,11 @@ public class RensponsibleApiService extends BaseService {
 		}
 
 		List<NewsLetterEntity> newsLetterList = responsibleEJB.findNewsLetter(tokenResponse.getIdResponsible());
+		
+		if(Objects.isNull(newsLetterList)) {
+			return Response.status(Status.NOT_FOUND).build();
+		}
+		
 		if (newsLetterList.size() > 0) {
 			return assembleNewsLetterOutput(newsLetterList);
 		}

@@ -16,7 +16,7 @@ public interface ResponsibleEJBRemote extends BaseEJBRemote {
 
 	List<PedestreEntity> findAllDependentsPageable(final long idResponsible, final int page, final int size);
 
-	List<AcessoEntity> findAllAccessPageable(final String login, final String password, final int Page, final int size);
+	List<AcessoEntity> findAllAccessPageable(final Long idPedestre, final int Page, final int size);
 
 	Optional<TokenNotificationEntity> findTokenNotification();
 

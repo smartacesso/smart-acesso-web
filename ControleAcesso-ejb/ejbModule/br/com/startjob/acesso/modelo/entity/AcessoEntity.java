@@ -21,10 +21,12 @@ import javax.persistence.Transient;
 import br.com.startjob.acesso.modelo.entity.base.ClienteBaseEntity;
 
 @Entity
-@Table(name = "TB_ACESSO", indexes = { @Index(name = "idx_pedestre_data", columnList = "ID_PEDESTRE, DATA"),
+@Table(name = "TB_ACESSO", indexes = {
+		@Index(name = "idx_pedestre_data", columnList = "ID_PEDESTRE, DATA"),
 		@Index(name = "idx_pedestre_tipo", columnList = "ID_PEDESTRE, TIPO"),
 		@Index(name = "idx_cliente_data", columnList = "ID_CLIENTE, DATA, SENTIDO, TIPO"),
-		@Index(name = "idx_pedestre_sentido_tipo", columnList = "ID_PEDESTRE, SENTIDO, TIPO, DATA") })
+		@Index(name = "idx_pedestre_sentido_tipo", columnList = "ID_PEDESTRE, SENTIDO, TIPO, DATA"),
+		@Index(name = "idx_only_pedestre", columnList = "ID_PEDESTRE")})
 @NamedQueries({
 		@NamedQuery(name = "AcessoEntity.findAll", query = "select obj " + "from AcessoEntity obj "
 				+ "where (obj.removido = false or obj.removido is null) " + "order by obj.id asc"),
@@ -67,7 +69,13 @@ import br.com.startjob.acesso.modelo.entity.base.ClienteBaseEntity;
 				+ "and obj.tipo = 'INDEFINIDO' " + "order by obj.id desc"),
 		@NamedQuery(name = "AcessoEntity.findLastAccessByIdAndCurrentLastAccess", query = "select new br.com.startjob.acesso.modelo.entity.AcessoEntity(obj.id) "
 				+ "from AcessoEntity obj " + "	join obj.pedestre p " + "where p.id = :ID_PEDESTRE "
-				+ "and obj.data = :DATA ")
+				+ "and obj.data = :DATA "),
+		@NamedQuery(name = "AcessoEntity.findAllByIdPedestre",
+				    query = "select obj from AcessoEntity obj " +
+				            "where obj.pedestre.id = :ID_PEDESTRE " +
+				            "and (obj.removido = false or obj.removido is null) " +
+				            "order by obj.data desc")
+
 /*
  * ,
  * 

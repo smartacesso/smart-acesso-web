@@ -66,17 +66,25 @@ public class ResponsibleEJB extends BaseEJB implements ResponsibleEJBRemote {
 	}
 
 	@Override
-	public List<AcessoEntity> findAllAccessPageable(String login, String password, int page, int size) {
+	public List<AcessoEntity> findAllAccessPageable(Long idPedestre, int page, int size) { 
 		Map<String, Object> args = new HashMap<String, Object>();
-		args.put("LOGIN", login);
-		args.put("PASSWORD", password);
+		args.put("ID_PEDESTRE", idPedestre);
 
 		try {
+//			@SuppressWarnings("unchecked")
+//			List<AcessoEntity> dependentsAccess = (List<AcessoEntity>) this.pesquisaArgFixos(AcessoEntity.class,
+//					"findAllByIdPedestre", args);
+			
+			page = Math.max(page, 0);
+			int ini = page * size;
+			
 			@SuppressWarnings("unchecked")
-			List<AcessoEntity> dependentsAccess = (List<AcessoEntity>) this.pesquisaSimples(AcessoEntity.class,
-					"findAllPedestresSemSaida", null);
+			List<AcessoEntity> dependentsAccess = (List<AcessoEntity>) this.pesquisaArgFixosLimitado(
+			    AcessoEntity.class, "findAllByIdPedestre", args, ini, size);
+
 
 			if (!dependentsAccess.isEmpty()) {
+				System.out.println("Acessos do dependente : " + idPedestre + " encontrado");
 				return dependentsAccess;
 			}
 
