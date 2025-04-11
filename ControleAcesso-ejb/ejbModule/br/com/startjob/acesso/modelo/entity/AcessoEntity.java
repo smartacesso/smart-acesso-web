@@ -75,15 +75,6 @@ import br.com.startjob.acesso.modelo.entity.base.ClienteBaseEntity;
 				            "where obj.pedestre.id = :ID_PEDESTRE " +
 				            "and (obj.removido = false or obj.removido is null) " +
 				            "order by obj.data desc")
-
-/*
- * ,
- * 
- * @NamedQuery(name = "AcessoEntity.findAllAccessByResponsible", query =
- * "select obj " + "from AcessoEntity obj " + " join fetch obj.pedestre p " +
- * "left join  controle-acesso.tb_responsible r " +
- * "where  p.ID_RESPONSIBLE = r.ID_RESPONSIBLE " + "order by obj.data desc ")
- */
 })
 @SuppressWarnings("serial")
 public class AcessoEntity extends ClienteBaseEntity {

@@ -1,29 +1,19 @@
 package br.com.startjob.acesso.to;
 
 import java.text.ParseException;
-import java.util.Date;
+import java.text.SimpleDateFormat;
 
-import javax.persistence.Column;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-import javax.persistence.Transient;
+
 
 import br.com.startjob.acesso.modelo.entity.AcessoEntity;
 import br.com.startjob.acesso.modelo.entity.PedestreEntity;
-import br.com.startjob.acesso.modelo.entity.UsuarioEntity;
 
 public class AccessTO {
 	
 	
-	private PedestrianAccessTO pedestre;
+	private PedestreAppDto pedestre;
 	
-	private Date data;
+	private String data;
 	
 	private String sentido;
 	
@@ -34,30 +24,20 @@ public class AccessTO {
 	private String local;
 	
 	private String razao;
-	
-	private String cartaoAcessoRecebido;
-	
-	private Long qtdePedestresHora;
-	
-	private Integer hora;
-	
-	private Boolean bloquearSaida;
-	
-	private Long idPedestre;
 
-	public PedestrianAccessTO getPedestre() {
+	public PedestreAppDto getPedestre() {
 		return pedestre;
 	}
 
-	public void setPedestre(PedestrianAccessTO pedestre) {
+	public void setPedestre(PedestreAppDto pedestre) {
 		this.pedestre = pedestre;
 	}
 
-	public Date getData() {
+	public String getData() {
 		return data;
 	}
 
-	public void setData(Date data) {
+	public void setData(String data) {
 		this.data = data;
 	}
 
@@ -101,62 +81,38 @@ public class AccessTO {
 		this.razao = razao;
 	}
 
-	public String getCartaoAcessoRecebido() {
-		return cartaoAcessoRecebido;
-	}
-
-	public void setCartaoAcessoRecebido(String cartaoAcessoRecebido) {
-		this.cartaoAcessoRecebido = cartaoAcessoRecebido;
-	}
-
-	public Long getQtdePedestresHora() {
-		return qtdePedestresHora;
-	}
-
-	public void setQtdePedestresHora(Long qtdePedestresHora) {
-		this.qtdePedestresHora = qtdePedestresHora;
-	}
-
-	public Integer getHora() {
-		return hora;
-	}
-
-	public void setHora(Integer hora) {
-		this.hora = hora;
-	}
-
-	public Boolean getBloquearSaida() {
-		return bloquearSaida;
-	}
-
-	public void setBloquearSaida(Boolean bloquearSaida) {
-		this.bloquearSaida = bloquearSaida;
-	}
-
-	public Long getIdPedestre() {
-		return idPedestre;
-	}
-
-	public void setIdPedestre(Long idPedestre) {
-		this.idPedestre = idPedestre;
-	}
 	
 	@SuppressWarnings("static-access")
 	public AccessTO convertToAccessTO(AcessoEntity acesso) throws ParseException {
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 		
-		this.data = acesso.getData();
+		this.data = formatter.format(acesso.getData());
 		this.tipo = acesso.getTipo();
 		this.local = acesso.getLocal();
 		this.razao = acesso.getRazao();
 		this.sentido = acesso.getSentido();
 		this.equipamento = acesso.getEquipamento();
-		this.bloquearSaida = acesso.getBloquearSaida();
-		
-		PedestrianAccessTO pedestreTO = new PedestrianAccessTO();
-		this.pedestre = (pedestreTO.convertPedestrianAccess(acesso.getPedestre()));
+		this.pedestre = convertToResponseDTO(acesso.getPedestre());
+
 		return this;
-		
 	}
+	
+	public PedestreAppDto convertToResponseDTO(PedestreEntity entity) {
+		PedestreAppDto dto = new PedestreAppDto();
+	    dto.setId(entity.getId());
+	    dto.setIdTemp(entity.getIdTemp());
+	    dto.setIdUsuario(entity.getUsuario() != null ? entity.getUsuario().getId() : null);
+	    dto.setName(entity.getNome());
+	    dto.setTipo(entity.getTipo() != null ? entity.getTipo().name() : null);
+	    dto.setEmail(entity.getEmail());
+	    dto.setCpf(entity.getCpf());
+	    dto.setGenero(entity.getGenero() != null ? entity.getGenero().name() : null);
+	    dto.setRg(entity.getRg());
+	    dto.setTelefone(entity.getTelefone());
+	    dto.setCelular(entity.getCelular());
+	    return dto;
+	}
+
 	
 
 }

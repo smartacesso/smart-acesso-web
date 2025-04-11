@@ -71,16 +71,16 @@ public class ResponsibleEJB extends BaseEJB implements ResponsibleEJBRemote {
 		args.put("ID_PEDESTRE", idPedestre);
 
 		try {
-//			@SuppressWarnings("unchecked")
-//			List<AcessoEntity> dependentsAccess = (List<AcessoEntity>) this.pesquisaArgFixos(AcessoEntity.class,
-//					"findAllByIdPedestre", args);
-			
-			page = Math.max(page, 0);
-			int ini = page * size;
-			
 			@SuppressWarnings("unchecked")
-			List<AcessoEntity> dependentsAccess = (List<AcessoEntity>) this.pesquisaArgFixosLimitado(
-			    AcessoEntity.class, "findAllByIdPedestre", args, ini, size);
+			List<AcessoEntity> dependentsAccess = (List<AcessoEntity>) this.pesquisaArgFixos(AcessoEntity.class,
+					"findAllByIdPedestre", args);
+			
+//			page = Math.max(page, 1); // Garante que o mínimo seja 1
+//			int ini = (page - 1) * size;
+//			
+//			@SuppressWarnings("unchecked")
+//			List<AcessoEntity> dependentsAccess = (List<AcessoEntity>) this.pesquisaArgFixosLimitado(
+//			    AcessoEntity.class, "findAllByIdPedestre", args, ini, size);
 
 
 			if (!dependentsAccess.isEmpty()) {
