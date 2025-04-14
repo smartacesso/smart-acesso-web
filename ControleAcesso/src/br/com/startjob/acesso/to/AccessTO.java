@@ -88,7 +88,7 @@ public class AccessTO {
 		
 		this.data = formatter.format(acesso.getData());
 		this.tipo = acesso.getTipo();
-		this.local = acesso.getLocal();
+		this.local = acesso.getEquipamento();
 		this.razao = acesso.getRazao();
 		this.sentido = acesso.getSentido();
 		this.equipamento = acesso.getEquipamento();
@@ -100,7 +100,7 @@ public class AccessTO {
 	public PedestreAppDto convertToResponseDTO(PedestreEntity entity) {
 		PedestreAppDto dto = new PedestreAppDto();
 	    dto.setId(entity.getId());
-	    dto.setIdTemp(entity.getIdTemp());
+	    dto.setIdTemp(0);
 	    dto.setIdUsuario(entity.getUsuario() != null ? entity.getUsuario().getId() : null);
 	    dto.setName(entity.getNome());
 	    dto.setTipo(entity.getTipo() != null ? entity.getTipo().name() : null);

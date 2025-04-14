@@ -3,7 +3,7 @@ package br.com.startjob.acesso.to;
 public class PedestreAppDto {
 	
     private Long id;
-    private Long idTemp;
+    private Integer idTemp;
     private Long idUsuario;
     private String name;
     private String tipo;
@@ -20,10 +20,10 @@ public class PedestreAppDto {
 	public void setId(Long id) {
 		this.id = id;
 	}
-	public Long getIdTemp() {
+	public Integer getIdTemp() {
 		return idTemp;
 	}
-	public void setIdTemp(Long idTemp) {
+	public void setIdTemp(Integer idTemp) {
 		this.idTemp = idTemp;
 	}
 	public Long getIdUsuario() {
@@ -80,7 +80,4 @@ public class PedestreAppDto {
 	public void setCelular(String celular) {
 		this.celular = celular;
 	}
-    
-    
-
 }
