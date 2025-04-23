@@ -91,7 +91,13 @@
 										<f:selectItems value="#{cadastroEmpresaController.listaStatus}"/>
 									</p:selectOneMenu>
 								</p:column>
-								
+
+								<p:column>
+									<p:selectBooleanCheckbox id="autoAtendimentoLiberado"
+										value="#{cadastroEmpresaController.entidade.autoAtendimentoLiberado}"
+										itemLabel="Auto atendimento liberado" />
+								</p:column>
+
 							</p:panelGrid>
 							
 							<h:panelGrid columns="1" width="100%" headerClass="h-grid-header">

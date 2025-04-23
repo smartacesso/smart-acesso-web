@@ -135,6 +135,9 @@ public class EmpresaEntity extends ClienteBaseEntity {
 	@Column(name = "PRIM_IMPORT_FUNC_SENIOR_SUCESSO", nullable = true)
 	private Boolean primeiroImportacaoFuncionarioSeniorSucesso;
 	
+	@Column(name = "AUTO_ATENDIMENTO", nullable = true)
+	private Boolean autoAtendimentoLiberado;
+	
 	public EmpresaEntity() {
 		
 	}
@@ -246,6 +249,14 @@ public class EmpresaEntity extends ClienteBaseEntity {
 
 	public void setCodEmpresaSenior(String codEmpresaSenior) {
 		this.codEmpresaSenior = codEmpresaSenior;
+	}
+
+	public Boolean getAutoAtendimentoLiberado() {
+		return autoAtendimentoLiberado;
+	}
+
+	public void setAutoAtendimentoLiberado(Boolean autoAtendimentoLiberado) {
+		this.autoAtendimentoLiberado = autoAtendimentoLiberado;
 	}
 	
 }

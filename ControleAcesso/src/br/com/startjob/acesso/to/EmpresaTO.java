@@ -22,6 +22,7 @@ public class EmpresaTO implements Serializable {
 	private String status;
 	
 	private Boolean removed;
+	private Boolean autoAtendimentoLiberado;
 	private Date dataRemovido;
 
 	private ArrayList<CargoTO> cargos;
@@ -38,6 +39,7 @@ public class EmpresaTO implements Serializable {
 		this.status = empresa.getStatus().toString();
 		this.removed = empresa.getRemovido();
 		this.dataRemovido = empresa.getDataRemovido();
+		this.autoAtendimentoLiberado = empresa.getAutoAtendimentoLiberado();
 		
 		if(empresa.getCargos() != null) {
 			this.cargos = new ArrayList<>();
@@ -155,5 +157,13 @@ public class EmpresaTO implements Serializable {
 
 	public void setStatus(String status) {
 		this.status = status;
+	}
+
+	public Boolean getAutoAtendimentoLiberado() {
+		return autoAtendimentoLiberado;
+	}
+
+	public void setAutoAtendimentoLiberado(Boolean autoAtendimentoLiberado) {
+		this.autoAtendimentoLiberado = autoAtendimentoLiberado;
 	}
 }

@@ -79,6 +79,11 @@ xmlns:p="http://primefaces.org/ui">
 				itemLabel="#{msgs['label.uc008.habilitar.teclado']}"/>
 		</p:column>
 		
+		<p:column>
+			<p:selectBooleanCheckbox id="AutoAtendimentoCheck" value="#{cadastroPedestreController.entidade.autoAtendimento}"
+				itemLabel="#{msgs['label.uc008.auto.atendimento']}"/>
+		</p:column>
+		
 		<p:column rendered="#{cadastroPedestreController.exibeCampoCadastroFacialObrigatorio()}">
 			<p:selectBooleanCheckbox id="cadastroFacialObrigatorioCheck" value="#{cadastroPedestreController.entidade.cadastroFacialObrigatorio}" 
 				itemLabel="#{msgs['label.uc008.cadastro.facial.obrigatorio']}"/>

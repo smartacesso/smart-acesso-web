@@ -272,6 +272,13 @@ public class PedestreEntity extends ClienteBaseEntity {
 
 	@Column(name = "CODIGO_PERMISSAO", nullable = true, length = 15)
 	private String codigoPermissao;
+	
+	@Column(name = "AUTO_ATENDIMENTO", nullable = true)
+	private Boolean autoAtendimento;
+
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "AUTO_ATENDIMENTO_AT", nullable = true)
+	private Date autoAtendimentoAt;
 
 //	@ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
 //	@JoinColumn(name = "ID_RESPONSAVEL", nullable = true)
@@ -842,6 +849,22 @@ public class PedestreEntity extends ClienteBaseEntity {
 
 	public void setResponsaveis(List<ResponsibleEntity> responsaveis) {
 		this.responsaveis = responsaveis;
+	}
+
+	public Boolean getAutoAtendimento() {
+		return autoAtendimento;
+	}
+
+	public void setAutoAtendimento(Boolean autoAtendimento) {
+		this.autoAtendimento = autoAtendimento;
+	}
+
+	public Date getAutoAtendimentoAt() {
+		return autoAtendimentoAt;
+	}
+
+	public void setAutoAtendimentoAt(Date autoAtendimentoAt) {
+		this.autoAtendimentoAt = autoAtendimentoAt;
 	}
 
 }
