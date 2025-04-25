@@ -53,4 +53,12 @@ public class ActivatedTasks {
 			}
 		}
 	}
+	
+	public void limpaTimersAutoAtendimento() {
+		for (String key : timers.keySet()) {
+			if(key.contains("AUTO_ATENDIMENTO")) {
+				timers.get(key).cancel();
+			}
+		}
+	}
 }

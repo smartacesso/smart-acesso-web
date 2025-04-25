@@ -1610,6 +1610,35 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		}
 		return result;
 	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	@TransactionAttribute(TransactionAttributeType.REQUIRED)
+	@TransactionTimeout(unit = TimeUnit.HOURS, value = 4)
+	public void resetAutoAtendimento() throws Exception {
+		
+        Map<String, Object> args = new HashMap<>();
+//        args.put("MATRICULA", funcionarioTotvsDto.getCode());
+        
+        List<PedestreEntity> pedestres = (List<PedestreEntity>) pesquisaArgFixos(PedestreEntity.class, "findAllAutoAtendimentoAtivo", args);
+
+        Date agora = new Date();
+        for (PedestreEntity p : pedestres) {
+            if (p.getAutoAtendimentoAt() != null) {
+                long diff = agora.getTime() - p.getAutoAtendimentoAt().getTime();
+                if (diff > (30 * 60 * 1000)) { // 30 minutos
+                    p.setAutoAtendimento(false);
+                    p.setAutoAtendimentoAt(null);
+                    
+                    alteraObjeto(p);
+                    
+                  System.out.println("Autoatendimento desmarcado para: " + p.getId());
+                }
+            }
+        }
+		
+	}
+	
 
 	@SuppressWarnings("unchecked")
 	@Override

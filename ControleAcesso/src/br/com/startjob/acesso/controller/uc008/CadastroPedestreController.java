@@ -1630,6 +1630,15 @@ public class CadastroPedestreController extends CadastroBaseController {
 		}
 	}
 
+	public void onAutoAtendimentoChange() {
+		PedestreEntity pedestre = getPedestreAtual();
+		
+	    if (pedestre.getAutoAtendimento()) {
+	    	pedestre.setAutoAtendimentoAt(getDataAtual());
+	    } else {
+	    	pedestre.setAutoAtendimentoAt(null); // ou manter a última data, se preferir
+	    }
+	}
 
 	
 	public void imprimirQRCode() {

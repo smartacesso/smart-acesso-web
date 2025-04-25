@@ -17,6 +17,7 @@ import br.com.startjob.acesso.modelo.ejb.BaseEJBRemote;
 import br.com.startjob.acesso.modelo.entity.ClienteEntity;
 import br.com.startjob.acesso.modelo.utils.AppAmbienteUtils;
 import br.com.startjob.acesso.tasks.ActivatedTasks;
+import br.com.startjob.acesso.tasks.AutoAtendimentoResetTask;
 import br.com.startjob.acesso.tasks.ImportacaoSocTask;
 import br.com.startjob.acesso.tasks.ImportarTotvsTask;
 import br.com.startjob.acesso.tasks.ExportacaoSocTask;
@@ -43,6 +44,7 @@ public class ConfiguraRotinasServlet extends BaseServlet {
 		registraTimersParaSOC();
 		registraTimersParaSenior();
 		registraTimersParaTovs();
+		registraTimersAutoAtendimento();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -131,6 +133,21 @@ public class ConfiguraRotinasServlet extends BaseServlet {
 	    log.info("Registrando rotina da Totvs");
 
 	    ActivatedTasks.getInstancia().timers.put("importacaoTOTVS_cliente", timer);
+	}
+
+	
+	private void registraTimersAutoAtendimento() {
+		log.info("Registrando rotina de reset do autoAtendimento...");
+
+		ActivatedTasks.getInstancia().limpaTimersAutoAtendimento();
+
+		Long period = 15 * 60 * 1000L; // a cada 15 minutos
+		Timer timer = new Timer();
+		TimerTask task = new AutoAtendimentoResetTask();
+
+		timer.scheduleAtFixedRate(task, 0, period);
+
+		ActivatedTasks.getInstancia().timers.put("AUTO_ATENDIMENTO", timer);
 	}
 
 	

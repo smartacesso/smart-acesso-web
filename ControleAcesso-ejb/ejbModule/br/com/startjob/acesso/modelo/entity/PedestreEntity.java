@@ -103,7 +103,11 @@ import br.com.startjob.acesso.modelo.utils.EncryptionUtils;
 		@NamedQuery(name = "PedestreEntity.findByMatriculaAndIdEmpresaAndIdCliente", query = "select obj from PedestreEntity obj "
 				+ "left join fetch obj.empresa e " + "left join fetch obj.equipamentos eq "
 				+ "where obj.matricula = :MATRICULA " + "and e.id = :ID_EMPRESA "
-				+ "and obj.cliente.id = :ID_CLIENTE ") })
+				+ "and obj.cliente.id = :ID_CLIENTE "),
+		
+		@NamedQuery(name = "PedestreEntity.findAllAutoAtendimentoAtivo", query = "select obj " + "from PedestreEntity obj "
+				+ "where (obj.removido = false or obj.removido is null) and obj.autoAtendimento = true " + "order by obj.id asc")
+})
 
 @SuppressWarnings("serial")
 public class PedestreEntity extends ClienteBaseEntity {
