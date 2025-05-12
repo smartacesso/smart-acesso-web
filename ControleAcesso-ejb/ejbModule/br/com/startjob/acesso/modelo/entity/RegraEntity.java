@@ -102,7 +102,7 @@ public class RegraEntity extends ClienteBaseEntity {
 	@Column(name="STATUS", nullable=true, length=100)
 	private Status status;
 	
-	@Temporal(TemporalType.TIMESTAMP)
+	@Temporal(TemporalType.DATE)
 	@Column(name="VALIDADE", nullable=true, length=11)
 	private Date validade;
 	
