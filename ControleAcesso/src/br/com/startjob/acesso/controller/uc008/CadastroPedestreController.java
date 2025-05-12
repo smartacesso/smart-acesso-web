@@ -31,6 +31,7 @@ import javax.transaction.Transactional;
 import org.primefaces.PrimeFaces;
 import org.primefaces.event.CaptureEvent;
 import org.primefaces.event.FileUploadEvent;
+import org.primefaces.event.TabChangeEvent;
 import org.primefaces.model.CroppedImage;
 import org.primefaces.model.DefaultStreamedContent;
 import org.primefaces.model.StreamedContent;
@@ -41,6 +42,7 @@ import br.com.startjob.acesso.controller.MenuController;
 import br.com.startjob.acesso.modelo.BaseConstant;
 import br.com.startjob.acesso.modelo.ejb.PedestreEJB;
 import br.com.startjob.acesso.modelo.ejb.PedestreEJBRemote;
+import br.com.startjob.acesso.modelo.entity.AcessoEntity;
 import br.com.startjob.acesso.modelo.entity.BiometriaEntity;
 import br.com.startjob.acesso.modelo.entity.CadastroExternoEntity;
 import br.com.startjob.acesso.modelo.entity.CargoEntity;
@@ -171,6 +173,10 @@ public class CadastroPedestreController extends CadastroBaseController {
 	private CadastroExternoEntity ultimoCadastroExterno;
 
 	private MenuController menuController = new MenuController();
+	
+	private AcessoEntity relatorio = new AcessoEntity(); // para binding do formulário
+	private List<AcessoEntity> listaRelatorios = new ArrayList<>();
+
 	
 	@PostConstruct
 	@Override
@@ -1639,8 +1645,92 @@ public class CadastroPedestreController extends CadastroBaseController {
 	    	pedestre.setAutoAtendimentoAt(null); // ou manter a última data, se preferir
 	    }
 	}
-
 	
+	public boolean isAdminOrGerente() {
+		if (PerfilAcesso.ADMINISTRADOR.equals(getUsuarioLogado().getPerfil())
+				|| PerfilAcesso.GERENTE.equals(getUsuarioLogado().getPerfil())) {
+			
+			return true;
+		}
+		
+	    return false;
+	}
+	
+	public boolean isOperador() {
+		if (PerfilAcesso.ADMINISTRADOR.equals(getUsuarioLogado().getPerfil())
+				|| PerfilAcesso.GERENTE.equals(getUsuarioLogado().getPerfil())
+				|| PerfilAcesso.OPERADOR.equals(getUsuarioLogado().getPerfil())) {
+			return true;
+		}
+	    return false;
+	}
+	
+	
+	public boolean isCuidador() {
+		if (PerfilAcesso.CUIDADOR.equals(getUsuarioLogado().getPerfil())
+			|| PerfilAcesso.RESPONSAVEL.equals(getUsuarioLogado().getPerfil())
+				|| PerfilAcesso.GERENTE.equals(getUsuarioLogado().getPerfil())
+				 || PerfilAcesso.ADMINISTRADOR.equals(getUsuarioLogado().getPerfil())) {
+			return true;
+		}
+	    return false;
+	}
+	
+	public void adicionarRelatorio() {
+		PedestreEntity pedestre = getPedestreAtual();
+	    relatorio.setIdPedestre(pedestre.getId()); // associa ao pedestre em edição
+	    try {
+			baseEJB.gravaObjeto(relatorio);
+			listaRelatorios.add(relatorio);       // atualiza lista na tela
+			relatorio = new AcessoEntity();    // reseta para próximo uso
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	public void removerRelatorio(AcessoEntity rel) {
+		rel.setRemovido(true);
+		rel.setDataRemovido(getDataAtual());
+		try {
+			baseEJB.gravaObjeto(rel);
+			listaRelatorios.remove(rel);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}           // ou serviço equivalente
+	}
+	
+	@SuppressWarnings("unchecked")
+	public void carregarRelatorios() {
+		PedestreEntity pedestre = getPedestreAtual();
+
+	    
+		Map<String, Object> args = new HashMap<>();
+		args.put("ID_PEDESTRE", pedestre.getId());
+
+		List<AcessoEntity> acessos = null;
+
+		try {
+//			acessos = (List<AcessoEntity>) baseEJB.pesquisaArgFixosLimitado(AcessoEntity.class, "findAllByIdPedestre", args, 0, 1);
+			acessos = (List<AcessoEntity>) baseEJB.pesquisaArgFixos(AcessoEntity.class, "findAllByIdPedestre", args);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	    this.listaRelatorios = acessos;
+//		return regras.stream().findFirst().orElse(null);
+	}
+
+	public void onTabChange(TabChangeEvent event) {
+	    String tituloAba = event.getTab().getTitle();
+
+	    if ("Relatórios".contains(tituloAba)) {
+	        carregarRelatorios();
+	    }
+	}
+
+
 	public void imprimirQRCode() {
 		PrimeFaces.current().executeScript("printSimpleDiv('imageQrCodeDiv');");
 	}
@@ -1648,6 +1738,7 @@ public class CadastroPedestreController extends CadastroBaseController {
 	public String nomeUsuarioLogado() {
 		return getUsuarioLogado().getNome();
 	}
+	
 
 	public Date getDataAtual() {
 		return new Date();
@@ -1971,6 +2062,22 @@ public class CadastroPedestreController extends CadastroBaseController {
 
 	public void setListaCotas(List<HistoricoCotaEntity> listaCotas) {
 		this.listaCotas = listaCotas;
+	}
+
+	public AcessoEntity getRelatorio() {
+		return relatorio;
+	}
+
+	public void setRelatorio(AcessoEntity relatorio) {
+		this.relatorio = relatorio;
+	}
+
+	public List<AcessoEntity> getListaRelatorios() {
+		return listaRelatorios;
+	}
+
+	public void setListaRelatorios(List<AcessoEntity> listaRelatorios) {
+		this.listaRelatorios = listaRelatorios;
 	}
 
 }

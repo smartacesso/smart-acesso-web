@@ -348,29 +348,30 @@
 						
 						<div class="col-md-10">
 							
-							<p:tabView id="cadastroPedestreTab">
-					
+							<p:tabView id="cadastroPedestreTab" cache="true">
+								<p:ajax event="tabChange" listener="#{cadastroPedestreController.onTabChange}" process="@this" update="@form"/>
+								
 								<p:tab title="#{msgs['label.uc008.dados.basicos']}">
 									<ui:include src="/WEB-INF/template/pedestres/dadosBasicos.xhtml" />			
 								</p:tab>
 								
-								<p:tab title="#{msgs['label.uc001.endereco']}">
+								<p:tab title="#{msgs['label.uc001.endereco']}" rendered="#{cadastroPedestreController.isAdminOrGerente()}">
 									<ui:include src="/WEB-INF/template/pedestres/endereco.xhtml" />	
 								</p:tab>
 								
-								<p:tab title="#{msgs['title.uc008.regras.acesso']}">
+								<p:tab title="#{msgs['title.uc008.regras.acesso']}" rendered="#{cadastroPedestreController.isAdminOrGerente() or cadastroPedestreController.isOperador()}">
 									<ui:include src="/WEB-INF/template/pedestres/regrasAcesso.xhtml" />	
 								</p:tab>
 								
-								<p:tab title="#{msgs['label.uc008.equipamentos']}">
+								<p:tab title="#{msgs['label.uc008.equipamentos']}" rendered="#{cadastroPedestreController.isAdminOrGerente() or cadastroPedestreController.isOperador()}">
 									<ui:include src="/WEB-INF/template/pedestres/equipamentos.xhtml" />
 								</p:tab>
 								
-								<p:tab title="#{msgs['label.uc008.documentos']}">
+								<p:tab title="#{msgs['label.uc008.documentos']}" rendered="#{cadastroPedestreController.isAdminOrGerente() or cadastroPedestreController.isOperador() or cadastroPedestreController.isCuidador()}">
 									<ui:include src="/WEB-INF/template/pedestres/documentos.xhtml" />
 								</p:tab>
 								
-								<p:tab title="#{msgs['label.uc016.responsavel']}">
+								<p:tab title="#{msgs['label.uc016.responsavel']}" rendered="#{cadastroPedestreController.isAdminOrGerente() or cadastroPedestreController.isOperador()}">
 									<ui:include src="/WEB-INF/template/pedestres/responsavel.xhtml" />
 								</p:tab>
 								
@@ -378,12 +379,20 @@
 									<ui:include src="/WEB-INF/template/pedestres/biometrias.xhtml" />
 								</p:tab>
 								
-								<p:tab title="#{msgs['label.uc008.mensagem.personalizada']}">
+								<p:tab title="#{msgs['label.uc008.mensagem.personalizada']}" rendered="#{cadastroPedestreController.isAdminOrGerente() or cadastroPedestreController.isOperador()}">
 									<ui:include src="/WEB-INF/template/pedestres/mensagensPersonalizadas.xhtml" />
 								</p:tab>
 
-								<p:tab title="#{msgs['label.uc017.cota.mensal']}">
+								<p:tab title="#{msgs['label.uc017.editar.relatorio']}" rendered="#{cadastroPedestreController.isAdminOrGerente() or cadastroPedestreController.isOperador()}">
+									<ui:include src="/WEB-INF/template/pedestres/editarRelatorio.xhtml" />
+								</p:tab>
+								
+								<p:tab title="#{msgs['label.uc017.cota.mensal']}" rendered="#{cadastroPedestreController.isAdminOrGerente()}">
 									<ui:include src="/WEB-INF/template/pedestres/cotaMensal.xhtml" />
+								</p:tab>
+								
+								<p:tab title="#{msgs['label.uc017.relatorio.diario']}" rendered="#{cadastroPedestreController.isCuidador()}">
+									<ui:include src="/WEB-INF/template/pedestres/relatorioDiario.xhtml" />
 								</p:tab>
 
 							</p:tabView>
