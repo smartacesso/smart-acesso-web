@@ -1679,6 +1679,11 @@ public class CadastroPedestreController extends CadastroBaseController {
 	public void adicionarRelatorio() {
 		PedestreEntity pedestre = getPedestreAtual();
 	    relatorio.setIdPedestre(pedestre.getId()); // associa ao pedestre em edição
+	    relatorio.setCartaoAcessoRecebido(pedestre.getCodigoCartaoAcesso());
+	    relatorio.setCliente(pedestre.getCliente());
+	    relatorio.setPedestre(pedestre);
+	    relatorio.setSentido(relatorio.getSentido());
+	    relatorio.setTipo("ATIVO");
 	    try {
 			baseEJB.gravaObjeto(relatorio);
 			listaRelatorios.add(relatorio);       // atualiza lista na tela
@@ -1687,6 +1692,7 @@ public class CadastroPedestreController extends CadastroBaseController {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	    carregarRelatorios(); 
 	}
 
 	public void removerRelatorio(AcessoEntity rel) {

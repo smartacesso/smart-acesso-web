@@ -29,13 +29,13 @@
             <p:inputText id="equipamento" value="#{cadastroPedestreController.relatorio.equipamento}" />
         </p:column>
 
-        <p:column>
-            <p:commandButton id="addRelatorio" value="Adicionar Relatório"
-                             action="#{cadastroPedestreController.adicionarRelatorio}"
-                             update="painelCadastroRelatorio painelRelatorios"
-                             process="painelCadastroRelatorio"/>
-        </p:column>
-    </p:panelGrid>
+		<p:column>
+			<p:commandButton id="addRelatorio" value="Adicionar Relatório"
+				action="#{cadastroPedestreController.adicionarRelatorio}"
+				process="@form"
+				update="form:cadastroPedestreTab:painelRelatorios form:cadastroPedestreTab:painelCadastroRelatorio" />
+		</p:column>
+	</p:panelGrid>
 
     <br/>
 
