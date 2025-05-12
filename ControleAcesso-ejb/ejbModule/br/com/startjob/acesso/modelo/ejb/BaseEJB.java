@@ -2007,15 +2007,15 @@ public class BaseEJB implements BaseEJBRemote {
 		try {
 			AcessoEntity acesso = buscarPedestre(acessoOriginal);
 			if (acesso == null) {
-				System.out.println("Acesso retornou null após buscar pedestre");
 				return;
 			}
 
 			PedestreEntity pedestre = acesso.getPedestre();
 			if (pedestre == null || pedestre.getResponsaveis() == null || pedestre.getResponsaveis().isEmpty()) {
-				System.out.println("Dados incompletos para envio de notificação");
 				return;
 			}
+			
+			System.out.println("Enviando notificação");
 
 			String title = "Smart Acesso";
 			String message = String.format("Acesso de: %s deu %s", pedestre.getNome(), acesso.getSentido());
@@ -2075,7 +2075,6 @@ public class BaseEJB implements BaseEJBRemote {
 
 	private AcessoEntity buscarPedestre(AcessoEntity acesso) throws Exception {
 		if (acesso.getIdPedestre() == null) {
-			System.out.println("Sem id pedestre");
 			return null;
 		}
 		PedestreEntity pedestre = (PedestreEntity) recuperaObjeto(PedestreEntity.class, acesso.getIdPedestre());
