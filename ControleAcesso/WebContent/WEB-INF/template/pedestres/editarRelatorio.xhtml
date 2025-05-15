@@ -5,7 +5,6 @@
     xmlns:p="http://primefaces.org/ui">
 
     <p:panelGrid columns="4" id="painelCadastroRelatorio" style="width: 100%" rendered="#{cadastroPedestreController.isAdminOrGerente()}">
-        
         <p:column>
             <p:outputLabel value="Data e Hora" for="dataHora"/>
             <br />
@@ -32,6 +31,12 @@
 		<p:column>
 			<p:commandButton id="addRelatorio" value="Adicionar Relatório"
 				action="#{cadastroPedestreController.adicionarRelatorio}"
+				process="@form"
+				update="form:cadastroPedestreTab:painelRelatorios form:cadastroPedestreTab:painelCadastroRelatorio" 
+				style="margin-right: 15px;" />
+				
+			<p:commandButton id="buscarRelatorio" value="Buscar Relatório"
+				action="#{cadastroPedestreController.carregarRelatorios()}"
 				process="@form"
 				update="form:cadastroPedestreTab:painelRelatorios form:cadastroPedestreTab:painelCadastroRelatorio" />
 		</p:column>

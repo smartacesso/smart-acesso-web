@@ -186,7 +186,10 @@ public class CadastroPedestreController extends CadastroBaseController {
 		super.init();
 
 		PedestreEntity pedestre = getPedestreAtual();
-
+		
+		getParans().put("data_maior_data", ajustarDataInicio(new Date()));
+		getParans().put("data_menor_data", ajustarDataFim(new Date()));
+		
 		acao = getRequest().getParameter("acao");
 		origem = getRequest().getParameter("origem");
 		tipo = getRequest().getParameter("tipo");
@@ -1710,22 +1713,28 @@ public class CadastroPedestreController extends CadastroBaseController {
 	@SuppressWarnings("unchecked")
 	public void carregarRelatorios() {
 		PedestreEntity pedestre = getPedestreAtual();
-
-	    
+		
+		getParans().put("data_maior_data", ajustarDataInicio(getParans().get("data_maior_data")));
+		getParans().put("data_menor_data", ajustarDataFim(getParans().get("data_menor_data")));
+		
+		System.out.println("data inicio : " + getParans().get("data_maior_data"));
+		System.out.println("data fim : " + getParans().get("data_menor_data"));
+		
 		Map<String, Object> args = new HashMap<>();
 		args.put("ID_PEDESTRE", pedestre.getId());
+		args.put("DATA_FIM", (getParans().get("data_menor_data")));
+		args.put("DATA_INICIO", (getParans().get("data_maior_data")));
+		
 
 		List<AcessoEntity> acessos = null;
 
 		try {
-//			acessos = (List<AcessoEntity>) baseEJB.pesquisaArgFixosLimitado(AcessoEntity.class, "findAllByIdPedestre", args, 0, 1);
 			acessos = (List<AcessoEntity>) baseEJB.pesquisaArgFixos(AcessoEntity.class, "findAllByIdPedestre", args);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
 	    this.listaRelatorios = acessos;
-//		return regras.stream().findFirst().orElse(null);
 	}
 
 	public void onTabChange(TabChangeEvent event) {
@@ -1735,7 +1744,41 @@ public class CadastroPedestreController extends CadastroBaseController {
 	        carregarRelatorios();
 	    }
 	}
+	
+	private Date ajustarDataInicio(Object obj) {
+	    if (obj instanceof Date) {
+	        Calendar cal = Calendar.getInstance();
+	        cal.setTime((Date) obj);
+	        cal.set(Calendar.HOUR_OF_DAY, 0);
+	        cal.set(Calendar.MINUTE, 0);
+	        cal.set(Calendar.SECOND, 0);
+	        cal.set(Calendar.MILLISECOND, 0);
+	        return cal.getTime();
+	    }
+	    return null;
+	}
 
+	private Date ajustarDataFim(Object obj) {
+	    if (obj instanceof Date) {
+	        Calendar cal = Calendar.getInstance();
+	        cal.setTime((Date) obj);
+	        cal.set(Calendar.HOUR_OF_DAY, 23);
+	        cal.set(Calendar.MINUTE, 59);
+	        cal.set(Calendar.SECOND, 59);
+	        cal.set(Calendar.MILLISECOND, 999);
+	        return cal.getTime();
+	    }
+	    return null;
+	}
+
+
+	public void alteraDataInicio(ValueChangeEvent event) {
+		getParans().put("data_maior_data", event.getNewValue());
+	}
+	
+	public void alteraDataFim(ValueChangeEvent event) {
+		getParans().put("data_menor_data", event.getNewValue());
+	}
 
 	public void imprimirQRCode() {
 		PrimeFaces.current().executeScript("printSimpleDiv('imageQrCodeDiv');");
