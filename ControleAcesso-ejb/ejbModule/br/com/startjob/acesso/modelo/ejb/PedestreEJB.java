@@ -60,6 +60,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.senior.services.IntegracaoSeniorService;
+import com.senior.services.Enum.ModoImportacaoFuncionario;
 import com.senior.services.dto.EmpresaSeniorDto;
 import com.senior.services.dto.FuncionarioSeniorDto;
 import com.senior.services.dto.HorarioPedestreDto;
@@ -1478,9 +1479,14 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 	private List<FuncionarioSeniorDto> buscaTodosOsFuncioriosDaEmpresaDoDia(final String numEmp,
 			final ClienteEntity cliente) {
 		System.out.println("buscando todos funcionarios da empresa :" + numEmp);
+		
+		LocalDate data = LocalDate.now();
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+		String dataString = data.format(formatter);
+		
 		IntegracaoSeniorService integracaoSeniorService = new IntegracaoSeniorService(cliente);
 
-		return integracaoSeniorService.buscarFuncionarios(numEmp);
+		return integracaoSeniorService.buscarFuncionariosAtualizadosNoDia(numEmp, dataString);
 	}
 
 	private List<FuncionarioSeniorDto> buscarFuncionariosDemitidos(String numEmp, final ClienteEntity cliente) {
@@ -1812,6 +1818,10 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		}
 	}
 
+	private static final Map<Long, LocalDate> cacheExecucaoRegras = new HashMap<>();
+    private static final long OITO_HORAS_EM_MILLIS = 4 * 60 * 60 * 1000L;
+    private static Map<Long, Long> ultimaImportacaoCompletaPorCliente = new HashMap<>();
+	
 	@SuppressWarnings("unchecked")
 	@Override
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
@@ -1826,118 +1836,216 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		}
 		System.out.println("Processo Senior iniciado");
 		clientes.forEach(cliente -> {
-			importarEmpresasSenior(cliente);
+//			importarEmpresasSenior(cliente);
+			importarEmpresasComControle(cliente);
 		});
 		System.out.println("Processo Senior finalizado");
 	}
+	
+	
+    private void importarEmpresasComControle(ClienteEntity cliente) {
+        long agora = System.currentTimeMillis();
+        long ultimaImportacaoCompleta = ultimaImportacaoCompletaPorCliente.getOrDefault(cliente.getId(), 0L);
 
-	private void importarEmpresasSenior(final ClienteEntity cliente) {
-		EmpresaSeniorDto empresaSenior = buscaTodasEmpresasSenior(cliente);
-		if (Objects.isNull(empresaSenior)) {
-			return;
-		}
+        boolean deveFazerImportacaoCompleta = (agora - ultimaImportacaoCompleta) > OITO_HORAS_EM_MILLIS;
 
-		
-			Optional<EmpresaEntity> empresaExistenteOpt = buscaEmpresaExistente(empresaSenior.getNumEmp(),
-					cliente.getId());
+        ModoImportacaoFuncionario modo = deveFazerImportacaoCompleta
+                ? ModoImportacaoFuncionario.COMPLETA
+                : ModoImportacaoFuncionario.INCREMENTAL;
 
-			EmpresaEntity empresaExistente = null;
+        importarEmpresasSenior(cliente, modo);
 
-			if (empresaExistenteOpt.isPresent()) {
-				empresaExistente = empresaExistenteOpt.get();
+        if (deveFazerImportacaoCompleta) {
+            ultimaImportacaoCompletaPorCliente.put(cliente.getId(), agora);
+        }
+    }
+    
+    private void importarEmpresasSenior(final ClienteEntity cliente, ModoImportacaoFuncionario modo) {
+        EmpresaSeniorDto empresaSenior = buscaTodasEmpresasSenior(cliente);
+        if (Objects.isNull(empresaSenior)) {
+            return;
+        }
 
-			} else {
-				empresaExistente = new EmpresaEntity(empresaSenior, false, cliente);
-				try {
-					empresaExistente = (EmpresaEntity) gravaObjeto(empresaExistente)[0];
+        Optional<EmpresaEntity> empresaExistenteOpt = buscaEmpresaExistente(empresaSenior.getNumEmp(), cliente.getId());
+        EmpresaEntity empresaExistente = empresaExistenteOpt.orElseGet(() -> {
+            EmpresaEntity novaEmpresa = new EmpresaEntity(empresaSenior, false, cliente);
+            try {
+                return (EmpresaEntity) gravaObjeto(novaEmpresa)[0];
+            } catch (Exception e) {
+                System.out.println("Erro ao salvar empresa");
+                return null;
+            }
+        });
 
-				} catch (Exception e) {
-					System.out.println("Erro ao salvar empresa");
-				}
-			}
-			System.out.println(
-					"Importando empresa : " + empresaSenior.getNumEmp() + ", nome :" + empresaSenior.getNomEmp());
-			importaFuncionariosSenior(empresaExistente, cliente);
+        if (empresaExistente == null) return;
 
-			if (Objects.isNull(empresaExistente.getPrimeiroImportacaoFuncionarioSeniorSucesso())
-					|| Boolean.FALSE.equals(empresaExistente.getPrimeiroImportacaoFuncionarioSeniorSucesso())) {
-				empresaExistente.setPrimeiroImportacaoFuncionarioSeniorSucesso(true);
-				try {
-					empresaExistente = (EmpresaEntity) gravaObjeto(empresaExistente)[0];
+        System.out.println("Importando empresa: " + empresaSenior.getNumEmp() + ", nome: " + empresaSenior.getNomEmp());
+        importaFuncionariosSenior(empresaExistente, cliente, modo);
 
-				} catch (Exception e) {
-					System.out.println("Erro ao salvar empresa");
-				}
-			}
+        if (Objects.isNull(empresaExistente.getPrimeiroImportacaoFuncionarioSeniorSucesso())
+                || Boolean.FALSE.equals(empresaExistente.getPrimeiroImportacaoFuncionarioSeniorSucesso())) {
+            empresaExistente.setPrimeiroImportacaoFuncionarioSeniorSucesso(true);
+            try {
+                empresaExistente = (EmpresaEntity) gravaObjeto(empresaExistente)[0];
+            } catch (Exception e) {
+                System.out.println("Erro ao salvar empresa");
+            }
+        }
+    }
+    
+	private void importaFuncionariosSenior(final EmpresaEntity empresaExistente, final ClienteEntity cliente, ModoImportacaoFuncionario modo) {
+		 List<FuncionarioSeniorDto> funcionarios = new ArrayList<>();
+
+		    if (modo == ModoImportacaoFuncionario.COMPLETA) {
+		        System.out.println("Importação COMPLETA");
+		        funcionarios = buscaTodosOsFuncioriosDaEmpresa(empresaExistente.getCodEmpresaSenior(), cliente);
+		    } else {
+		        System.out.println("Importação INCREMENTAL");
+	            funcionarios.addAll(buscaTodosOsFuncioriosDaEmpresaDoDia(empresaExistente.getCodEmpresaSenior(), cliente));
+	            funcionarios.addAll(buscarFuncionariosAdmitidos(empresaExistente.getCodEmpresaSenior(), cliente));
+	            funcionarios.addAll(buscarFuncionariosDemitidos(empresaExistente.getCodEmpresaSenior(), cliente));
+		    }
+
+		    if (funcionarios.isEmpty()) return;
+		    
+		    System.out.println("Quantidade de funcionários processados: " + funcionarios.size());
+		    LocalDate hoje = LocalDate.now();
+		    
+		    funcionarios.forEach(funcionario -> {
+		        Optional<PedestreEntity> pedestreExistente = buscaPedestreExistente(funcionario.getNumeroMatricula(), empresaExistente);
+		        PedestreEntity pedestre = pedestreExistente.orElseGet(() -> new PedestreEntity(funcionario, empresaExistente));
+		        pedestre.updateFuncionarioSenior(funcionario, empresaExistente);
+		        pedestre.setExistente(true);
+
+		        try {
+		            pedestre = (PedestreEntity) (pedestreExistente.isPresent() ? alteraObjeto(pedestre)[0] : gravaObjeto(pedestre)[0]);
+		        } catch (Exception e) {
+		            e.printStackTrace();
+		            throw new RuntimeException("Erro ao gravar/alterar pedestre", e);
+		        }
+
+//		        if (!hoje.equals(cacheExecucaoRegras.get(pedestre.getId()))) {
+		            try {
+		                atualizarPermissao(cliente, pedestre);
+		                processarRegrasPorFuncionario(pedestre, cliente);
+		                cacheExecucaoRegras.put(pedestre.getId(), hoje);
+		            } catch (Exception e) {
+		                System.err.println("Erro ao processar regras para: " + funcionario.getNome());
+		                e.printStackTrace();
+		            }
+//		        }
+		    });
 	}
 
-	private static final Map<Long, LocalDate> cacheExecucaoRegras = new HashMap<>();
+//	private void importarEmpresasSenior(final ClienteEntity cliente) {
+//		EmpresaSeniorDto empresaSenior = buscaTodasEmpresasSenior(cliente);
+//		if (Objects.isNull(empresaSenior)) {
+//			return;
+//		}
+//
+//		
+//			Optional<EmpresaEntity> empresaExistenteOpt = buscaEmpresaExistente(empresaSenior.getNumEmp(),
+//					cliente.getId());
+//
+//			EmpresaEntity empresaExistente = null;
+//
+//			if (empresaExistenteOpt.isPresent()) {
+//				empresaExistente = empresaExistenteOpt.get();
+//
+//			} else {
+//				empresaExistente = new EmpresaEntity(empresaSenior, false, cliente);
+//				try {
+//					empresaExistente = (EmpresaEntity) gravaObjeto(empresaExistente)[0];
+//
+//				} catch (Exception e) {
+//					System.out.println("Erro ao salvar empresa");
+//				}
+//			}
+//			System.out.println(
+//					"Importando empresa : " + empresaSenior.getNumEmp() + ", nome :" + empresaSenior.getNomEmp());
+////			importaFuncionariosSenior(empresaExistente, cliente);
+//			
+//			
+//
+//			if (Objects.isNull(empresaExistente.getPrimeiroImportacaoFuncionarioSeniorSucesso())
+//					|| Boolean.FALSE.equals(empresaExistente.getPrimeiroImportacaoFuncionarioSeniorSucesso())) {
+//				empresaExistente.setPrimeiroImportacaoFuncionarioSeniorSucesso(true);
+//				try {
+//					empresaExistente = (EmpresaEntity) gravaObjeto(empresaExistente)[0];
+//
+//				} catch (Exception e) {
+//					System.out.println("Erro ao salvar empresa");
+//				}
+//			}
+//	}
+
+
 	
-	private void importaFuncionariosSenior(final EmpresaEntity empresaExistente, final ClienteEntity cliente) {
-		List<FuncionarioSeniorDto> funcionarios = null;
+//	private void importaFuncionariosSenior(final EmpresaEntity empresaExistente, final ClienteEntity cliente) {
+//		List<FuncionarioSeniorDto> funcionarios = null;
+//	
+//		// List<FuncionarioSeniorDto> funcionariosDemitidos = null;
+//
+//		if (Boolean.TRUE.equals(empresaExistente.getPrimeiroImportacaoFuncionarioSeniorSucesso())) {
+//			// Pensar num jeito de não rodar sempre para os mesmos funcionarios
+//			// OBS: a data não tem hora
+//			System.out.println("Atualizando apenas");
+//			funcionarios = buscaTodosOsFuncioriosDaEmpresa(empresaExistente.getCodEmpresaSenior(), cliente);
+//		} else {
+//			System.out.println("Primeira importação");
+//			funcionarios = buscaTodosOsFuncioriosDaEmpresa(empresaExistente.getCodEmpresaSenior(), cliente);
+//		}
+//
+//		if (Objects.isNull(funcionarios) || funcionarios.isEmpty()) {
+//			return;
+//		}
+//		System.out.println("quantidade de funcionarios " + funcionarios.size());
+//		LocalDate hoje = LocalDate.now();
+//		
+//		funcionarios.forEach(funcionario -> {
+//			Optional<PedestreEntity> pedestreExistente = buscaPedestreExistente(funcionario.getNumeroMatricula(),
+//					empresaExistente);
+//			PedestreEntity pedestre = null;
+//
+//			//boolean permissaoAlterada = true;
+//			if (pedestreExistente.isPresent()) {
+//				pedestre = pedestreExistente.get();
+//				//permissaoAlterada = isPermissaoAlterada(pedestre, funcionario);
+//
+//				pedestre.updateFuncionarioSenior(funcionario, empresaExistente);
+//				pedestre.setExistente(true);
+//
+//				try {
+//					pedestre = (PedestreEntity) alteraObjeto(pedestre)[0];
+//				} catch (Exception e) {
+//					e.printStackTrace();
+//					throw new RuntimeException();
+//				}
+//
+//			} else {
+//				pedestre = new PedestreEntity(funcionario, empresaExistente);
+//				try {
+//					pedestre = (PedestreEntity) gravaObjeto(pedestre)[0];
+//
+//				} catch (Exception e) {
+//					e.printStackTrace();
+//					throw new RuntimeException();
+//				}
+//			}
+//			
+//			if(!hoje.equals(cacheExecucaoRegras.get(pedestre.getId()))) {	
+//				try {
+//					atualizarPermissao(cliente, pedestre);
+//					processarRegrasPorFuncionario(pedestre, cliente);
+//	                cacheExecucaoRegras.put(pedestre.getId(), hoje);
+//	            } catch (Exception e) {
+//	                System.err.println("Erro ao processar permissao e regras para funcionário: " + funcionario.getNome());
+//	                e.printStackTrace();
+//	            }
+//			}
+//		});
+//	}
 	
-		// List<FuncionarioSeniorDto> funcionariosDemitidos = null;
-
-		if (Boolean.TRUE.equals(empresaExistente.getPrimeiroImportacaoFuncionarioSeniorSucesso())) {
-			// Pensar num jeito de não rodar sempre para os mesmos funcionarios
-			// OBS: a data não tem hora
-			System.out.println("Atualizando apenas");
-			funcionarios = buscaTodosOsFuncioriosDaEmpresa(empresaExistente.getCodEmpresaSenior(), cliente);
-		} else {
-			System.out.println("Primeira importação");
-			funcionarios = buscaTodosOsFuncioriosDaEmpresa(empresaExistente.getCodEmpresaSenior(), cliente);
-		}
-
-		if (Objects.isNull(funcionarios) || funcionarios.isEmpty()) {
-			return;
-		}
-		System.out.println("quantidade de funcionarios " + funcionarios.size());
-		LocalDate hoje = LocalDate.now();
-		
-		funcionarios.forEach(funcionario -> {
-			Optional<PedestreEntity> pedestreExistente = buscaPedestreExistente(funcionario.getNumeroMatricula(),
-					empresaExistente);
-			PedestreEntity pedestre = null;
-
-			//boolean permissaoAlterada = true;
-			if (pedestreExistente.isPresent()) {
-				pedestre = pedestreExistente.get();
-				//permissaoAlterada = isPermissaoAlterada(pedestre, funcionario);
-
-				pedestre.updateFuncionarioSenior(funcionario, empresaExistente);
-				pedestre.setExistente(true);
-
-				try {
-					pedestre = (PedestreEntity) alteraObjeto(pedestre)[0];
-				} catch (Exception e) {
-					e.printStackTrace();
-					throw new RuntimeException();
-				}
-
-			} else {
-				pedestre = new PedestreEntity(funcionario, empresaExistente);
-				try {
-					pedestre = (PedestreEntity) gravaObjeto(pedestre)[0];
-
-				} catch (Exception e) {
-					e.printStackTrace();
-					throw new RuntimeException();
-				}
-			}
-			
-			if(!hoje.equals(cacheExecucaoRegras.get(pedestre.getId()))) {	
-				try {
-					atualizarPermissao(cliente, pedestre);
-					processarRegrasPorFuncionario(pedestre, cliente);
-	                cacheExecucaoRegras.put(pedestre.getId(), hoje);
-	            } catch (Exception e) {
-	                System.err.println("Erro ao processar permissao e regras para funcionário: " + funcionario.getNome());
-	                e.printStackTrace();
-	            }
-			}
-		});
-	}
-
 	private void atualizarPermissao(final ClienteEntity cliente, PedestreEntity pedestre) {
 		System.out.println("Atualizando permissão do funcionario " + pedestre.getNome());
 		apagaTodosPedetreEquipamentos(pedestre);
