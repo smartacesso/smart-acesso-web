@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui">
+
+<h:head>
+    <title>Autoatendimento - Cadastro</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+</h:head>
+
+<h:body style="background-color: #f5f5f5; text-align: center; padding-top: 50px;">
+
+    <h:form id="formAutoCadastro">
+        <p:panel header="Cadastro de Visitante" style="max-width: 500px; margin: auto;">
+            
+            <p:messages id="msgs" showDetail="true" autoUpdate="true"/>
+            
+            <p:outputLabel for="nome" value="Nome Completo:"/>
+            <p:inputText id="nome" value="#{cadastroPedestreController.entidade.nome}" 
+                         required="true" requiredMessage="Informe seu nome completo." style="width: 100%;" />
+
+            <p:spacer height="10"/>
+            
+            <p:outputLabel for="cpf" value="CPF:"/>
+            <p:inputMask id="cpf" value="#{cadastroPedestreController.entidade.cpf}" 
+                         mask="999.999.999-99" required="true" requiredMessage="Informe seu CPF." style="width: 100%;"/>
+            
+            <p:spacer height="10"/>
+
+            <p:outputLabel for="foto" value="Tirar Foto:"/>
+            <p:fileUpload id="foto" mode="simple" value="#{cadastroPedestreController.fotoUpload}" 
+                          auto="true" label="Enviar Foto" style="width: 100%;" />
+
+            <p:spacer height="20"/>
+
+            <p:commandButton value="Concluir Cadastro" 
+                             action="#{cadastroPedestreController.salvar}" 
+                             update="formAutoCadastro"
+                             icon="pi pi-check" styleClass="ui-button-success" style="width: 100%;"/>
+
+        </p:panel>
+    </h:form>
+</h:body>
+</html>

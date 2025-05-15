@@ -343,6 +343,16 @@ public class MenuController extends BaseController {
 	        cadastros.getElements().add(alteracaoEmMassa);
 		}
  
+        if(PerfilAcesso.ADMINISTRADOR.equals(usuarioLogado.getPerfil()) 
+        		|| PerfilAcesso.GERENTE.equals(usuarioLogado.getPerfil())) {
+	        DefaultMenuItem alteracaoEmMassa = DefaultMenuItem.builder()
+	                .value(resource.recuperaChave("menu.cadastro.auto.atendimento", getFacesContext()))
+	                .url(BaseConstant.URL_APLICACAO + "/paginas/sistema/pedestres/cadastroAutoatendimento.xhtml")
+	                .styleClass("ui-simple-menu")
+	                .build();
+	        cadastros.getElements().add(alteracaoEmMassa);
+		}
+        
         menu.getElements().add(cadastros);
 		
 	}
