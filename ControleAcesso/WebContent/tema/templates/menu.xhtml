@@ -1,31 +1,89 @@
-
 <h:form id="menuForm" xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:f="http://java.sun.com/jsf/core"
 	xmlns:p="http://primefaces.org/ui"
 	xmlns:ui="http://java.sun.com/jsf/facelets"
-    xmlns:c="http://java.sun.com/jsp/jstl/core">
-	
-	<h:panelGrid columns="3" style="margin-top: 5px" >
-	
+	xmlns:c="http://java.sun.com/jsp/jstl/core">
+
+	<h:panelGrid columns="3" style="margin-top: 5px; align-items:center;">
 		<h:column>
-			<a href="/#{menuController.appName}/#{menuController.path}/paginas/principal.xhtml" >
-				<img id="imgLogo" width="220px" style="margin-left: 20px;margin-right: 20px;"
-					 src="/#{menuController.appName}/#{menuController.path}/tema/img/logo.png" />
+			<a
+				href="/#{menuController.appName}/#{menuController.path}/paginas/principal.xhtml">
+				<img id="imgLogo" width="220px"
+				style="margin-left: 20px; margin-right: 20px; margin-top: 10px;"
+				src="/#{menuController.appName}/#{menuController.path}/tema/img/logo.png" />
 			</a>
 		</h:column>
-		
-		<h:column>
-			<div style="margin-top: 5px">
+
+		<h:column style="position: relative;">
+			<!-- Botão toggle visível somente no mobile -->
+			<!-- Botão toggle posicionado no canto direito -->
+			<div class="toggle-wrapper">
+				<p:commandButton id="btnToggleMenu" icon="pi pi-bars"
+					styleClass="mobile-toggle-btn"
+					action="#{menuController.togglePainel}" update="menuMobile"
+					process="@this" title="Menu" />
+			</div>
+
+			<!-- Menu desktop sempre visível -->
+			<div class="desktop-menu"
+				style="margin-top: 5px; display: flex; align-items: center; justify-content: space-between; width: 100%;">
 				<p:menubar model="#{menuController.menu}" />
-			</div>	
-		</h:column>
-		
-	</h:panelGrid>
-	
-	<h:panelGrid columns="1" style="float: right;margin-right: 20px;margin-top: -30px">
-		<h:column>
-			<p:menubar model="#{menuController.menuUsuario}"  />
+				<p:menubar model="#{menuController.menuUsuario}" />
+			</div>
+
+			<!-- Menu mobile toggle -->
+			<h:panelGroup id="menuMobile" layout="block" styleClass="mobile-menu"
+				rendered="#{menuController.painelVisivel}">
+				<p:menubar model="#{menuController.menu}" />
+			</h:panelGroup>
 		</h:column>
 	</h:panelGrid>
 
+	<style>
+/* Esconde o botão toggle no desktop */
+.mobile-toggle-btn {
+	display: none;
+	background-color: white;
+}
+
+/* Menu mobile inicialmente oculto */
+.mobile-menu {
+	display: none;
+}
+
+/* Exibe o menu mobile quando o painel está visível */
+#menuForm\\:menuMobile {
+	display: block !important;
+	position: absolute;
+	background-color: white;
+	width: 100%;
+	top: 50px;
+	left: 0;
+	z-index: 9999;
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* Responsividade - exibe toggle no mobile e esconde menu desktop */
+@media ( max-width : 768px) {
+	.mobile-toggle-btn {
+		display: inline-block !important;
+	}
+	.desktop-menu {
+		display: none !important;
+	}
+	/* Ajusta alinhamento do logo para mobile */
+	#imgLogo {
+		width: 150px !important;
+		margin-left: 10px !important;
+		margin-right: 10px !important;
+	}
+}
+.toggle-wrapper {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+    padding: 5px;
+    z-index: 1000;
+}
+</style>
 </h:form>
