@@ -75,6 +75,16 @@ public class MenuController extends BaseController {
 		
 	}
 	
+	 private boolean painelVisivel = false;
+
+	    public boolean isPainelVisivel() {
+	        return painelVisivel;
+	    }
+
+	    public void togglePainel() {
+	        painelVisivel = !painelVisivel;
+	    }
+	
 	protected void configuraAmbiente() {
 		
 		path = AppAmbienteUtils.getConfig(
