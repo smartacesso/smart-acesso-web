@@ -18,10 +18,27 @@
 			<!-- Botão toggle visível somente no mobile -->
 			<!-- Botão toggle posicionado no canto direito -->
 			<div class="toggle-wrapper">
-				<p:commandButton id="btnToggleMenu" icon="pi pi-bars"
-					styleClass="mobile-toggle-btn"
-					action="#{menuController.togglePainel}" update="menuMobile"
-					process="@this" title="Menu" />
+				<p:commandButton icon="pi pi-bars" type="button"
+					onclick="PF('sidebar1').show()" styleClass="mr-2"
+					class="mobile-toggle-btn" />
+
+				<p:sidebar widgetVar="sidebar1" position="left" style="width: 300px;">
+					<h:column>
+						<a
+							href="/#{menuController.appName}/#{menuController.path}/paginas/principal.xhtml">
+							<img id="imgLogo" width="220px"
+							style="margin-left: 20px; margin-right: 20px; margin-top: 10px; margin-bottom: 20px;"
+							src="/#{menuController.appName}/#{menuController.path}/tema/img/logo.png" />
+						</a>
+					</h:column>
+
+					<!-- Form obrigatório para JSF processar ações e outcomes -->
+					<h:form style="width: 100%;">
+						<p:tieredMenu model="#{menuController.menu}" style="width: 100%;" />
+						<p:tieredMenu model="#{menuController.menuUsuario}"
+							style="width: 100%;" />
+					</h:form>
+				</p:sidebar>
 			</div>
 
 			<!-- Menu desktop sempre visível -->
@@ -36,6 +53,7 @@
 				rendered="#{menuController.painelVisivel}">
 				<p:menubar model="#{menuController.menu}" />
 			</h:panelGroup>
+
 		</h:column>
 	</h:panelGrid>
 
@@ -78,12 +96,52 @@
 		margin-right: 10px !important;
 	}
 }
+
 .toggle-wrapper {
-    position: absolute;
-    right: 10px;
-    top: 10px;
-    padding: 5px;
-    z-index: 1000;
+	position: absolute;
+	right: 10px;
+	top: 10px;
+	padding: 5px;
+	z-index: 1000;
 }
+
+#menuForm\\:btnToggleMenu_menu {
+	background-color: #fff !important;
+	border: 1px solid #ccc !important;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+	opacity: 1 !important;
+}
+
+/* Muda o fundo da sidebar para preto */
+.ui-sidebar {
+	background-color: #222 !important;
+	color: #ffffff !important; /* texto branco */
+}
+
+/* Ajusta o título do sidebar */
+.ui-sidebar h3 {
+	color: #ffffff !important;
+}
+
+/* Ajusta os itens do menu dentro do sidebar */
+.ui-sidebar .ui-menuitem-link {
+	color: #ffffff !important;
+}
+
+/* Muda o hover dos itens do menu */
+.ui-sidebar .ui-menuitem-link:hover {
+	background-color: #333333 !important;
+	color: #ffffff !important;
+}
+
+body .mobile-toggle-btn {
+    background-color: rgb(255, 255, 255) !important;
+    border: 1px solid rgb(255, 255, 255) !important;
+    font-size: 14px !important;
+    margin: 0 0.1em 0 0 !important;
+    outline: none !important;
+    color: white !important;
+}
+
 </style>
 </h:form>
