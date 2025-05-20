@@ -19,13 +19,6 @@
 			#{msgs['title.sistema']} | #{msgs['title.uc001.consulta.usuarios']}
 		</ui:define>
 
-		<ui:define name="breadcrumb">
-			<a target="_top"
-				href="/#{menuController.appName}/paginas/principal.xhtml"> <h:outputText
-					value="#{msgs['title.principal']}" />
-			</a> > <h:outputText value="#{msgs['title.uc001.consulta.usuarios']}" />
-		</ui:define>
-
 		<ui:define name="tools">
 			<p:toolbar
 				styleClass="flex flex-col md:flex-row justify-between items-center gap-4 w-full max-w-screen-xl">
@@ -86,7 +79,7 @@
 						styleClass="tabela-responsive">
 
 						<p:column headerText="#{msgs['label.uc004.codigo']}"
-							styleClass="align-left">
+							styleClass="align-left col-desktop-only">
 							<h:outputText value="#{usuario.id}" />
 						</p:column>
 
@@ -104,19 +97,19 @@
 						</p:column>
 
 						<p:column headerText="#{msgs['label.uc004.cpf']}"
-							styleClass="align-left">
+							styleClass="align-left col-desktop-only">
 							<h:outputText value="#{usuario.cpf}">
 								<f:converter converterId="cpfConverter" />
 							</h:outputText>
 						</p:column>
 
 						<p:column headerText="#{msgs['label.uc004.status']}"
-							styleClass="align-left">
+							styleClass="align-left col-desktop-only">
 							<h:outputText value="#{usuario.status}" />
 						</p:column>
 
 						<p:column headerText="#{msgs['label.uc004.data.cadastro']}"
-							styleClass="align-left">
+							styleClass="col-desktop-only" >
 							<h:outputText value="#{usuario.dataCriacao}">
 								<f:convertDateTime pattern="dd/MM/yyyy" />
 							</h:outputText>
@@ -191,6 +184,11 @@
 
 .align-left {
 	text-align: left !important;
+}
+@media ( max-width : 768px) {
+	.col-desktop-only {
+		display: none !important;
+	}
 }
 </style>
 

@@ -31,8 +31,7 @@
 
 					<p:commandButton id="acaoNovo"
 						action="#{consultaResponsavelController.novo}" icon="pi pi-plus"
-						process="@this" update="@form"
-						title="#{msgs['alt.acao.novo']}"
+						process="@this" update="@form" title="#{msgs['alt.acao.novo']}"
 						styleClass="rounded-button ui-button-success" />
 				</p:toolbarGroup>
 
@@ -42,9 +41,9 @@
 
 					<p:commandButton id="acaoLimpar"
 						action="#{consultaResponsavelController.limpar}"
-						icon="pi pi-filter" process="@this"
-						update="@form" styleClass="rounded-button ui-button-flat" />
-						
+						icon="pi pi-filter" process="@this" update="@form"
+						styleClass="rounded-button ui-button-flat" />
+
 					<p:inputText id="filtro-nome" placeholder="Filtrar por nome"
 						value="#{consultaResponsavelController.parans['nome']}"
 						style="width:200px; font-size:13px;" />
@@ -59,12 +58,11 @@
 
 		<ui:define name="conteudo">
 
-			<h:panelGrid width="100%" columns="1" headerClass="h-grid-header">
-				<f:facet name="header">
-					<h:outputText value="#{msgs['title.uc016.cadastra.responsavel']}" />
-				</f:facet>
+			<h2 class="p-text-center p-mb-3">#{msgs['title.uc016.cadastra.responsavel']}</h2>
 
-				<h:column>
+			<p:outputPanel styleClass="p-grid">
+
+				<p:outputPanel styleClass="p-col-12">
 
 					<ui:include src="/tema/templates/vazio.xhtml">
 						<ui:param name="exibe"
@@ -72,53 +70,62 @@
 						<ui:param name="exibeAdicionar" value="true" />
 					</ui:include>
 
-
-
 					<p:dataTable id="responsavelTable"
 						value="#{consultaResponsavelController.result}" var="responsavel"
 						rendered="#{not empty consultaResponsavelController.result}"
 						paginator="true"
 						rows="#{consultaResponsavelController.quantPorPagina}"
-						paginatorPosition="bottom" paginatorAlwaysVisible="false">
+						paginatorPosition="bottom" paginatorAlwaysVisible="false"
+						scrollable="true" scrollHeight="flex"
+						styleClass="tabela-responsive">
 
 						<p:column headerText="#{msgs['label.uc016.nome.responsavel']}"
-							style="text-align: center">
+							styleClass="align-left">
 							<h:outputText value="#{responsavel.nome}" />
+							<h:outputText value="#{msgs['label.este.e.voce']}"
+								rendered="#{responsavel.id == sessionScope.usuario.id}"
+								style="font-weight: bold;" />
 						</p:column>
 
 						<p:column headerText="#{msgs['label.uc005.status']}"
-							style="text-align: center">
+							styleClass="align-left col-desktop-only">
 							<h:outputText value="#{responsavel.status}" />
 						</p:column>
 
 						<p:column headerText="#{msgs['alt.acao.editar']}"
-							style="text-align: center;width: 40px">
-							<h:commandButton id="botaoEditarResponsavel"
-								action="#{consultaResponsavelController.editar(responsavel.id)}"
+							style="text-align: center;">
+							<p:commandButton icon="pi pi-pencil"
 								title="#{msgs['alt.acao.editar']}"
-								image="#{menuController.path}/tema/img/bt_edit_min.png">
-							</h:commandButton>
+								action="#{consultaResponsavelController.editar(responsavel.id)}"
+								styleClass="rounded-button ui-button-info ui-button-flat" />
 						</p:column>
 
 						<p:column headerText="#{msgs['alt.acao.excluir']}"
-							style="text-align: center;width: 40px">
-							<h:commandButton
-								image="#{menuController.path}/tema/img/bt_remove_min.png"
-								title="#{msgs['alt.acao.excluir']}">
-
+							style="text-align: center;">
+							<p:commandButton icon="pi pi-trash"
+								title="#{msgs['alt.acao.excluir']}"
+								rendered="#{responsavel.id != sessionScope.usuario.id}"
+								styleClass="rounded-button ui-button-danger ui-button-flat">
 								<f:setPropertyActionListener value="#{responsavel}"
 									target="#{consultaResponsavelController.responsavelSelecionado}" />
-								<p:ajax oncomplete="PF('confirmarExclusao').show()"></p:ajax>
-							</h:commandButton>
-						</p:column>
-					</p:dataTable>
-				</h:column>
-			</h:panelGrid>
+								<p:ajax oncomplete="PF('confirmarExclusao').show()" />
+							</p:commandButton>
 
+							<p:commandButton icon="pi pi-ban"
+								title="#{msgs['alt.acao.excluir']}"
+								rendered="#{responsavel.id == sessionScope.usuario.id}"
+								styleClass="rounded-button ui-button-secondary ui-button-flat">
+								<p:ajax oncomplete="PF('naoExclusao').show()" />
+							</p:commandButton>
+						</p:column>
+
+					</p:dataTable>
+				</p:outputPanel>
+			</p:outputPanel>
+			<!-- Diálogo de Confirmação -->
 			<p:confirmDialog id="dialogConfirmarExclusao"
 				widgetVar="confirmarExclusao" header="Confirmar"
 				message="Tem certeza que deseja excluir este responsável?">
-
 				<p:button value="Não"
 					onclick="PF('confirmarExclusao').hide(); return false;" />
 				<p:commandButton value="Sim"
@@ -127,7 +134,36 @@
 					process="@this" update="@form" />
 			</p:confirmDialog>
 
+			<!-- Estilo Responsivo -->
+			<style>
+.tabela-responsive .ui-datatable-scrollable-body {
+	overflow-x: auto;
+}
+
+.tabela-responsive .ui-datatable-scrollable-header-box {
+	overflow-x: auto;
+}
+
+@media screen and (max-width: 768px) {
+	.ui-datatable th, .ui-datatable td {
+		font-size: 12px;
+		padding: 6px;
+	}
+}
+
+.align-left {
+	text-align: left !important;
+}
+
+@media ( max-width : 768px) {
+	.col-desktop-only {
+		display: none !important;
+	}
+}
+</style>
+
 		</ui:define>
+
 	</ui:composition>
 </body>
 </html>
