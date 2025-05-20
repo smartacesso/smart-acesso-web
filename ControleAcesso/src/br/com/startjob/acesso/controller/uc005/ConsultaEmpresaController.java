@@ -20,6 +20,8 @@ public class ConsultaEmpresaController extends BaseController{
 	
 	private String acao;
 	private EmpresaEntity empresaSelecionada;
+	private String paramBuscaGeral;
+
 	
 	@PostConstruct
 	@Override
@@ -49,9 +51,24 @@ public class ConsultaEmpresaController extends BaseController{
 	
 	@Override
 	public String buscar() {
-		getParans().put("cliente.id", getUsuarioLogado().getCliente().getId());
-		return super.buscar();
+	    getParans().clear(); // limpar filtros antigos
+	    getParans().put("cliente.id", getUsuarioLogado().getCliente().getId());
+
+	    if (paramBuscaGeral != null && !paramBuscaGeral.trim().isEmpty()) {
+	        String busca = paramBuscaGeral.trim().replaceAll("[^\\d]", ""); // remover pontuação
+
+	        if (busca.matches("\\d{14}")) {
+	            // CNPJ sem máscara
+	            getParans().put("cnpj", busca);
+	        } else {
+	            // Considerar como nome
+	            getParans().put("nome", paramBuscaGeral.trim());
+	        }
+	    }
+
+	    return super.buscar();
 	}
+
 
 	public EmpresaEntity getEmpresaSelecionada() {
 		return empresaSelecionada;
@@ -61,4 +78,12 @@ public class ConsultaEmpresaController extends BaseController{
 		this.empresaSelecionada = empresaSelecionada;
 	}
 	
+	public String getParamBuscaGeral() {
+	    return paramBuscaGeral;
+	}
+
+	public void setParamBuscaGeral(String paramBuscaGeral) {
+	    this.paramBuscaGeral = paramBuscaGeral;
+	}
+
 }
