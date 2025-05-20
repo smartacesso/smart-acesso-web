@@ -5,172 +5,196 @@
 	xmlns:f="http://java.sun.com/jsf/core"
 	xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:p="http://primefaces.org/ui">
-	
+
 <body>
 
-	<f:metadata>  
-    	<f:event type="preRenderView" listener="#{consultaUsuarioController.exibeMensagens}"/>  
-	</f:metadata> 
+	<f:metadata>
+		<f:event type="preRenderView"
+			listener="#{consultaUsuarioController.exibeMensagens}" />
+	</f:metadata>
 
 	<ui:composition template="/tema/templates/template.xhtml">
-	
+
 		<ui:define name="titulo">
 			#{msgs['title.sistema']} | #{msgs['title.uc001.consulta.usuarios']}
 		</ui:define>
-		
+
 		<ui:define name="breadcrumb">
-			<a target="_top" href="/#{menuController.appName}/paginas/principal.xhtml"> <h:outputText
+			<a target="_top"
+				href="/#{menuController.appName}/paginas/principal.xhtml"> <h:outputText
 					value="#{msgs['title.principal']}" />
 			</a> > <h:outputText value="#{msgs['title.uc001.consulta.usuarios']}" />
 		</ui:define>
-		
-		<ui:define name="tools">
-			<h:panelGrid columns="4" styleClass="conteudo_tools">
-	
-				<h:commandButton id="acaoNovo"
-						action="#{consultaUsuarioController.novo}"
-						title="#{msgs['alt.acao.novo.usuario']}" alt="#{msgs['alt.acao.novo.usuario']}"
-						image="#{menuController.path}/tema/img/bt_newer.png">
-					
-					<p:ajax process="@this" update="@form"/>
-				</h:commandButton>
-				
-				<h:commandButton id="acaoBuscar" 
-						action="#{consultaUsuarioController.buscar()}" 
-						title="#{msgs['alt.acao.buscar']}" alt="#{msgs['alt.acao.buscar']}"
-						image="#{menuController.path}/tema/img/bt_searcher.png">
-					
-					<p:ajax process="@form" update="@form"/>
-				</h:commandButton>
 
-				<h:commandButton id="acaoLimpar" 
+		<ui:define name="tools">
+			<p:toolbar
+				styleClass="flex flex-col md:flex-row justify-between items-center gap-4 w-full max-w-screen-xl">
+
+				<p:toolbarGroup align="left"
+					styleClass="flex gap-2 flex-wrap justify-end items-center">
+					<p:commandButton id="acaoNovo"
+						action="#{consultaUsuarioController.novo}"
+						title="#{msgs['alt.acao.novo.usuario']}" icon="pi pi-plus">
+						<p:ajax process="@this" update="@form" />
+					</p:commandButton>
+				</p:toolbarGroup>
+
+				<p:toolbarGroup align="right"
+					styleClass="flex gap-2 flex-wrap justify-end items-center w-full md:w-auto">
+
+					<p:commandButton id="acaoLimpar"
 						action="#{consultaUsuarioController.limpar()}"
-						title="#{msgs['alt.acao.limpar']}" alt="#{msgs['alt.acao.limpar']}"
-						image="#{menuController.path}/tema/img/bt_cleaner.png">
-					
-					<p:ajax process="@this" update="@form"/>
-				</h:commandButton>
-				
-			</h:panelGrid>
-			
-			<div style="float: right;">
-				<p:inputText id="filtro-nome" placeholder="Filtrar por nome" style="width:200px;" 
-						value="#{consultaUsuarioController.parans['nome']}"/>
-				
-				<p:inputText id="filtro-cpf" placeholder="Filtrar por CPF" style="width:200px;"
-						value="#{consultaUsuarioController.parans['cpf']}"/>
-				
-				<p:inputText id="filtro-login" placeholder="Filtrar por login" style="width:200px;"
-						value="#{consultaUsuarioController.parans['login']}"/>
-			</div>
+						title="#{msgs['alt.acao.limpar']}" icon="pi pi-filter"
+						process="@this" update="@form" />
+
+					<p:inputText id="filtro-geral"
+						value="#{consultaUsuarioController.paramBuscaGeral}"
+						placeholder="Buscar por nome ou CPF" />
+
+					<p:commandButton id="acaoBuscar"
+						action="#{consultaUsuarioController.buscar()}"
+						title="#{msgs['alt.acao.buscar']}" icon="pi pi-search"
+						style="" process="@form" update="@form" />
+
+				</p:toolbarGroup>
+
+			</p:toolbar>
+
 		</ui:define>
-		
+
 		<ui:define name="conteudo">
-			
-			<h:panelGrid width="100%" columns="1" headerClass="h-grid-header">
-				<f:facet name="header">
-					<h:outputText value="#{msgs['title.uc001.consulta.usuarios']}" />
-				</f:facet>
-				
-				<h:column>
-				
+
+			<h2 class="p-text-center p-mb-3">#{msgs['title.uc001.consulta.usuarios']}</h2>
+
+			<p:outputPanel styleClass="p-grid">
+
+				<p:outputPanel styleClass="p-col-12">
+
 					<ui:include src="/tema/templates/vazio.xhtml">
-						<ui:param name="exibe" value="#{empty consultaUsuarioController.result}" />
+						<ui:param name="exibe"
+							value="#{empty consultaUsuarioController.result}" />
 						<ui:param name="exibeAdicionar" value="true" />
 					</ui:include>
-					
-					<p:dataTable id="usuariosTable" value="#{consultaUsuarioController.result}" var="usuario" 
-						rendered="#{not empty consultaUsuarioController.result}" paginator="true" 
-						rows="#{consultaUsuarioController.quantPorPagina}" paginatorPosition="bottom"
-						paginatorAlwaysVisible="false" >
-						
-						<p:column headerText="#{msgs['label.uc004.codigo']}" style="text-align: center">
+
+					<p:dataTable id="usuariosTable"
+						value="#{consultaUsuarioController.result}" var="usuario"
+						rendered="#{not empty consultaUsuarioController.result}"
+						paginator="true"
+						rows="#{consultaUsuarioController.quantPorPagina}"
+						paginatorPosition="bottom" paginatorAlwaysVisible="false"
+						scrollable="true" scrollHeight="flex"
+						styleClass="tabela-responsive">
+
+						<p:column headerText="#{msgs['label.uc004.codigo']}"
+							styleClass="align-left">
 							<h:outputText value="#{usuario.id}" />
 						</p:column>
-						
-						<p:column headerText="#{msgs['label.uc004.nome.usuario']}" style="text-align: center">
+
+						<p:column headerText="#{msgs['label.uc004.nome.usuario']}"
+							styleClass="align-left">
 							<h:outputText value="#{usuario.nome}" />
-							<h:outputText value="#{msgs['label.este.e.voce']}" 
-										  rendered="#{usuario.id == sessionScope.usuario.id}"
-										  style="font-weight: bold;" />
+							<h:outputText value="#{msgs['label.este.e.voce']}"
+								rendered="#{usuario.id == sessionScope.usuario.id}"
+								style="font-weight: bold;" />
 						</p:column>
-	
-						<p:column headerText="#{msgs['label.uc004.login']}" style="text-align: center">
+
+						<p:column headerText="#{msgs['label.uc004.login']}"
+							styleClass="align-left">
 							<h:outputText value="#{usuario.login}" />
 						</p:column>
-	
-						<p:column headerText="#{msgs['label.uc004.cpf']}" style="text-align: center">
+
+						<p:column headerText="#{msgs['label.uc004.cpf']}"
+							styleClass="align-left">
 							<h:outputText value="#{usuario.cpf}">
-								<f:converter converterId="cpfConverter"/>
+								<f:converter converterId="cpfConverter" />
 							</h:outputText>
 						</p:column>
-	
-						<p:column headerText="#{msgs['label.uc004.status']}" style="text-align: center">
+
+						<p:column headerText="#{msgs['label.uc004.status']}"
+							styleClass="align-left">
 							<h:outputText value="#{usuario.status}" />
 						</p:column>
-						
-						<p:column headerText="#{msgs['label.uc004.data.cadastro']}" style="text-align: center">
-							<h:outputText value="#{usuario.dataCriacao}" >
-								<f:convertDateTime pattern="dd/MM/yyyy"/>
+
+						<p:column headerText="#{msgs['label.uc004.data.cadastro']}"
+							styleClass="align-left">
+							<h:outputText value="#{usuario.dataCriacao}">
+								<f:convertDateTime pattern="dd/MM/yyyy" />
 							</h:outputText>
 						</p:column>
-						
-						<p:column headerText="#{msgs['alt.acao.editar']}" style="text-align: center;width: 40px">
-							<h:commandButton id="botaoEditarusuario"
-								action="#{consultaUsuarioController.editar(usuario.id)}"
-								title="#{msgs['alt.acao.novo.usuario']}"
-								image="#{menuController.path}/tema/img/bt_edit_min.png">
-							</h:commandButton>
-						</p:column>
-	
-						<p:column headerText="#{msgs['alt.acao.excluir']}" style="text-align: center;width: 40px">
-							<h:commandButton image="#{menuController.path}/tema/img/bt_remove_min.png" 
-										title="#{msgs['alt.acao.excluir']}" 
-										rendered="#{usuario.id != sessionScope.usuario.id}">
-								
-								<f:setPropertyActionListener value="#{usuario}" target="#{consultaUsuarioController.usuarioSelecionado}" />
-								<p:ajax oncomplete="PF('confirmarExclusao').show()"></p:ajax>
-							</h:commandButton>
-							
-							<h:commandButton image="#{menuController.path}/tema/img/bt_remove_min.png" 
-										title="#{msgs['alt.acao.excluir']}"
-										rendered="#{usuario.id == sessionScope.usuario.id}" >
-								<p:ajax oncomplete="PF('naoExclusao').show()"></p:ajax>
-							</h:commandButton>
-							
-							
-							 
-							
-						</p:column>
-						
-					</p:dataTable>
-				
-				</h:column>
-				
-			</h:panelGrid>
-				
-			<p:confirmDialog id="dialogConfirmarExclusao"
-				widgetVar="confirmarExclusao"
-					header="Confirmar"
-					message="Tem certeza que deseja excluir este usuario?">
-				
-				<p:button value="Não" onclick="PF('confirmarExclusao').hide(); return false;"/>
-				<p:commandButton value="Sim" oncomplete="PF('confirmarExclusao').hide();"  
-					action="#{consultaUsuarioController.excluirUsuario()}" process="@this" update="@form"/>
-			</p:confirmDialog>
-			
-			<p:confirmDialog id="dialogConfirmarNaoExclusao"
-				widgetVar="naoExclusao"
-					header="Ops..."
-					message="Você não pode se excluir do sistema!">
-				
-				<p:button value="OK" onclick="PF('naoExclusao').hide(); return false;"/>
-			</p:confirmDialog>
-			
-			
-				
-		</ui:define>
 
+						<p:column headerText="#{msgs['alt.acao.editar']}"
+							style="text-align: center;">
+							<p:commandButton icon="pi pi-pencil"
+								title="#{msgs['alt.acao.novo.usuario']}"
+								action="#{consultaUsuarioController.editar(usuario.id)}"
+								styleClass="rounded-button ui-button-info ui-button-flat" />
+						</p:column>
+
+						<p:column headerText="#{msgs['alt.acao.excluir']}"
+							style="text-align: center;">
+							<p:commandButton icon="pi pi-trash"
+								title="#{msgs['alt.acao.excluir']}"
+								rendered="#{usuario.id != sessionScope.usuario.id}"
+								styleClass="rounded-button ui-button-danger ui-button-flat">
+								<f:setPropertyActionListener value="#{usuario}"
+									target="#{consultaUsuarioController.usuarioSelecionado}" />
+								<p:ajax oncomplete="PF('confirmarExclusao').show()" />
+							</p:commandButton>
+
+							<p:commandButton icon="pi pi-ban"
+								title="#{msgs['alt.acao.excluir']}"
+								rendered="#{usuario.id == sessionScope.usuario.id}"
+								styleClass="rounded-button ui-button-secondary ui-button-flat">
+								<p:ajax oncomplete="PF('naoExclusao').show()" />
+							</p:commandButton>
+						</p:column>
+
+					</p:dataTable>
+				</p:outputPanel>
+			</p:outputPanel>
+
+			<!-- Diálogo de Confirmação -->
+			<p:confirmDialog id="dialogConfirmarExclusao"
+				widgetVar="confirmarExclusao" header="Confirmar"
+				message="Tem certeza que deseja excluir este usuário?">
+				<p:button value="Não"
+					onclick="PF('confirmarExclusao').hide(); return false;" />
+				<p:commandButton value="Sim"
+					oncomplete="PF('confirmarExclusao').hide();"
+					action="#{consultaUsuarioController.excluirUsuario()}"
+					process="@this" update="@form" />
+			</p:confirmDialog>
+
+			<p:confirmDialog id="dialogConfirmarNaoExclusao"
+				widgetVar="naoExclusao" header="Ops..."
+				message="Você não pode se excluir do sistema!">
+				<p:button value="OK"
+					onclick="PF('naoExclusao').hide(); return false;" />
+			</p:confirmDialog>
+
+			<!-- Estilo Responsivo -->
+			<style>
+.tabela-responsive .ui-datatable-scrollable-body {
+	overflow-x: auto;
+}
+
+.tabela-responsive .ui-datatable-scrollable-header-box {
+	overflow-x: auto;
+}
+
+@media screen and (max-width: 768px) {
+	.ui-datatable th, .ui-datatable td {
+		font-size: 12px;
+		padding: 6px;
+	}
+}
+
+.align-left {
+	text-align: left !important;
+}
+</style>
+
+		</ui:define>
 	</ui:composition>
 
 </body>
