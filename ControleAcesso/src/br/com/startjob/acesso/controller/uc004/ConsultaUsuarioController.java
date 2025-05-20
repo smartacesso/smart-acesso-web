@@ -19,6 +19,10 @@ public class ConsultaUsuarioController extends BaseController {
 
 	private UsuarioEntity usuarioSelecionado;
 	private String acao;
+	private String paramBuscaGeral;
+
+
+
 	
 	@PostConstruct
 	@Override
@@ -38,9 +42,27 @@ public class ConsultaUsuarioController extends BaseController {
 	
 	@Override
 	public String buscar() {
-		getParans().put("cliente.id", getUsuarioLogado().getCliente().getId());
-		return super.buscar();
+	    getParans().clear(); // Limpa filtros anteriores
+	    getParans().put("cliente.id", getUsuarioLogado().getCliente().getId());
+
+	    if (paramBuscaGeral != null && !paramBuscaGeral.trim().isEmpty()) {
+	        String busca = paramBuscaGeral.trim();
+
+	        if (busca.matches("\\d{11}")) {
+	            // Provavelmente é CPF (sem máscara)
+	            getParans().put("cpf", busca);
+	        } else if (busca.length() <= 20 && !busca.contains(" ")) {
+	            // Provavelmente é login
+	            getParans().put("login", busca);
+	        } else {
+	            // Nome (completo ou parcial)
+	            getParans().put("nome", busca);
+	        }
+	    }
+
+	    return super.buscar();
 	}
+
 	
 	@Override
 	public void exibeMensagens(ComponentSystemEvent evt) throws AbortProcessingException {
@@ -59,6 +81,14 @@ public class ConsultaUsuarioController extends BaseController {
 
 	public void setUsuarioSelecionado(UsuarioEntity usuarioSelecionado) {
 		this.usuarioSelecionado = usuarioSelecionado;
+	}
+	
+	public String getParamBuscaGeral() {
+	    return paramBuscaGeral;
+	}
+
+	public void setParamBuscaGeral(String paramBuscaGeral) {
+	    this.paramBuscaGeral = paramBuscaGeral;
 	}
 	
 }
