@@ -3,56 +3,73 @@
 	xmlns:f="http://java.sun.com/jsf/core"
 	xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:p="http://primefaces.org/ui">
-	
-	<p:panelGrid columns="2" id="painelCadastroPedestreEndereco" style="width: 100%">
-						
-		<p:column>
-			<p:outputLabel value="#{msgs['label.uc001.cep']}" for="cep"/>
-			<br />
-			<p:inputMask id="cep" value="#{cadastroPedestreController.entidade.endereco.cep}" mask="99999-999"
-				required="#{cadastroPedestreController.verificaObrigatorio('endereco')}"/>
-		</p:column>
 
-		<p:column>
-			<p:outputLabel value="#{msgs['label.uc001.logradouro']}" for="logradouro"/>
-			<br />
-			<p:inputText id="logradouro" value="#{cadastroPedestreController.entidade.endereco.logradouro}" size="40"
-				required="#{cadastroPedestreController.verificaObrigatorio('endereco')}"/>
-		</p:column>
+	<p:panelGrid id="painelCadastroPedestreEndereco" layout="grid"
+		styleClass="form-grid ui-fluid" columns="1">
+		<p:accordionPanel id="endereco" cache="true">
+			<p:tab title="Cadastrar endereço">
+				<div class="ui-g">
+					<div class="ui-g-12 ui-md-6">
+						<p:outputLabel value="#{msgs['label.uc001.cep']}" for="cep" />
+						<p:inputMask id="cep"
+							value="#{cadastroPedestreController.entidade.endereco.cep}"
+							mask="99999-999"
+							required="#{cadastroPedestreController.verificaObrigatorio('endereco')}"
+							style="width: 100%" />
+					</div>
 
-		<p:column>
-			<p:outputLabel value="#{msgs['label.uc001.numero']}" for="numero"/>
-			<br />
-			<p:inputNumber id="numero" value="#{cadastroPedestreController.entidade.endereco.numero}" size="5" minValue="0" decimalPlaces="0"
-				required="#{cadastroPedestreController.verificaObrigatorio('endereco')}"/>
-		</p:column>
+					<div class="ui-g-12 ui-md-6">
+						<p:outputLabel value="#{msgs['label.uc001.logradouro']}"
+							for="logradouro" />
+						<p:inputText id="logradouro"
+							value="#{cadastroPedestreController.entidade.endereco.logradouro}"
+							required="#{cadastroPedestreController.verificaObrigatorio('endereco')}"
+							style="width: 100%" />
+					</div>
 
-		<p:column>
-			<p:outputLabel value="#{msgs['label.uc001.complemento']}" for="complemento"/>
-			<br />
-			<p:inputText id="complemento" value="#{cadastroPedestreController.entidade.endereco.complemento}" size="40"/>
-		</p:column>
-		
-		<p:column>
-			<p:outputLabel value="#{msgs['label.uc001.bairro']}" for="bairro"/>
-			<br />
-			<p:inputText id="bairro" value="#{cadastroPedestreController.entidade.endereco.bairro}" size="30"
-				required="#{cadastroPedestreController.verificaObrigatorio('endereco')}"/>
-		</p:column>
+					<div class="ui-g-12 ui-md-6">
+						<p:outputLabel value="#{msgs['label.uc001.numero']}" for="numero" />
+						<p:inputNumber id="numero"
+							value="#{cadastroPedestreController.entidade.endereco.numero}"
+							 minValue="0" decimalPlaces="0"
+							required="#{cadastroPedestreController.verificaObrigatorio('endereco')}"
+							style="width: 100%" />
+					</div>
 
-		<p:column>
-			<p:outputLabel value="#{msgs['label.uc001.cidade']}" for="cidade"/>
-			<br />
-			<p:inputText id="cidade" value="#{cadastroPedestreController.entidade.endereco.cidade}" size="40"
-				required="#{cadastroPedestreController.verificaObrigatorio('endereco')}"/>
-		</p:column>
+					<div class="ui-g-12 ui-md-6">
+						<p:outputLabel value="#{msgs['label.uc001.complemento']}"
+							for="complemento" />
+						<p:inputText id="complemento"
+							value="#{cadastroPedestreController.entidade.endereco.complemento}"
+							style="width: 100%" />
+					</div>
 
-		<p:column>
-			<p:outputLabel value="#{msgs['label.uc001.estado']}" for="estado"/>
-			<br />
-			<p:inputText id="estado" value="#{cadastroPedestreController.entidade.endereco.estado}" size="5"
-				required="#{cadastroPedestreController.verificaObrigatorio('endereco')}"/>
-		</p:column>
-				
+					<div class="ui-g-12 ui-md-6">
+						<p:outputLabel value="#{msgs['label.uc001.bairro']}" for="bairro" />
+						<p:inputText id="bairro"
+							value="#{cadastroPedestreController.entidade.endereco.bairro}"
+							required="#{cadastroPedestreController.verificaObrigatorio('endereco')}"
+							style="width: 100%" />
+					</div>
+
+					<div class="ui-g-12 ui-md-6">
+						<p:outputLabel value="#{msgs['label.uc001.cidade']}" for="cidade" />
+						<p:inputText id="cidade"
+							value="#{cadastroPedestreController.entidade.endereco.cidade}"
+							required="#{cadastroPedestreController.verificaObrigatorio('endereco')}"
+							style="width: 100%" />
+					</div>
+
+					<div class="ui-g-12 ui-md-6">
+						<p:outputLabel value="#{msgs['label.uc001.estado']}" for="estado" />
+						<p:inputText id="estado"
+							value="#{cadastroPedestreController.entidade.endereco.estado}"
+							size="5"
+							required="#{cadastroPedestreController.verificaObrigatorio('endereco')}"
+							style="width: 100%" />
+					</div>
+				</div>
+			</p:tab>
+		</p:accordionPanel>
 	</p:panelGrid>
 </ui:composition>

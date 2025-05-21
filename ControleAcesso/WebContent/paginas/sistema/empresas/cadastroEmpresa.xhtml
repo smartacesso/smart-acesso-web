@@ -5,391 +5,475 @@
 	xmlns:f="http://java.sun.com/jsf/core"
 	xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:p="http://primefaces.org/ui">
-	
+
 <body>
 	<ui:composition template="/tema/templates/template.xhtml">
-	
+
 		<ui:define name="titulo">
 			#{msgs['title.sistema']} | #{cadastroEmpresaController.entidade.id != null 
 											? msgs['title.uc005.editar.empresa'] 
 											: msgs['title.uc005.cadastrar.empresa']}
 		</ui:define>
-		
+
 		<ui:define name="breadcrumb">
-			<a target="_top" href="/#{menuController.appName}/paginas/principal.xhtml"> <h:outputText
+			<a target="_top"
+				href="/#{menuController.appName}/paginas/principal.xhtml"> <h:outputText
 					value="#{msgs['title.principal']}" />
 			</a> > 
-			<a target="_top" href="/#{menuController.appName}/paginas/sistema/empresas/pesquisaEmpresa.xhtml"> <h:outputText
-					value="#{msgs['title.uc005.consulta.empresas']}" />
-			</a> > <h:outputText value="#{cadastroEmpresaController.entidade.id != null 
+			<a target="_top"
+				href="/#{menuController.appName}/paginas/sistema/empresas/pesquisaEmpresa.xhtml">
+				<h:outputText value="#{msgs['title.uc005.consulta.empresas']}" />
+			</a> > <h:outputText
+				value="#{cadastroEmpresaController.entidade.id != null 
 										? msgs['title.uc005.editar.empresa'] 
 										: msgs['title.uc005.cadastrar.empresa']}" />
 		</ui:define>
-		
+
 		<ui:define name="tools">
 			<h:panelGrid columns="4" styleClass="conteudo_tools">
-	
+
 				<h:commandButton id="save"
 					action="#{cadastroEmpresaController.salvar}"
 					title="#{msgs['alt.acao.save']}"
 					image="#{menuController.path}/tema/img/bt_saver.png">
-					<p:ajax process="@form" update="@form"/>
+					<p:ajax process="@form" update="@form" />
 				</h:commandButton>
-				
+
 			</h:panelGrid>
 		</ui:define>
-		
+
 		<ui:define name="conteudo">
 			<h:panelGrid width="100%" columns="1" headerClass="h-grid-header">
 				<f:facet name="header">
-					<h:outputText value="#{cadastroEmpresaController.entidade.id != null 
+					<h:outputText
+						value="#{cadastroEmpresaController.entidade.id != null 
 										? msgs['title.uc005.editar.empresa'] 
-										: msgs['title.uc005.cadastrar.empresa']}"/>
+										: msgs['title.uc005.cadastrar.empresa']}" />
 				</f:facet>
-				
+
 				<h:column>
-					<p:tabView id="cadastroEmpresaTab">
-						
+					<p:accordionPanel id="cadastroEmpresaTab">
 						<p:tab title="#{msgs['label.uc001.dados.empresa']}">
-							<p:panelGrid columns="2" id="painelCadastroEmpresa" style="width: 86%">
+							<p:panel id="painelCadastroEmpresa"
+								header="Cadastro de empresa" styleClass="ui-fluid">
+								<div class="form-grid ui-fluid ui-g" style="width: 86%;">
 
-								<p:column>
-									<p:outputLabel value="#{msgs['label.uc005.nome.empresa']}" for="nome" indicateRequired="true"/>
-									<br />
-									<p:inputText id="nome" value="#{cadastroEmpresaController.entidade.nome}" required="true" size="40" />
-								</p:column>
-								
-								<p:column>
-									<p:outputLabel value="#{msgs['label.uc005.cnpj']}" for="cnpj" indicateRequired="true"/>
-									<br />
-									<p:inputMask id="cnpj" value="#{cadastroEmpresaController.entidade.cnpj}" mask="99.999.999/9999-99"
-											required="true" converter="cnpjConverter"/>
-								</p:column>
-								
-								<p:column>
-									<p:outputLabel value="#{msgs['label.uc005.email']}" for="email"/>
-									<br />
-									<p:inputText id="email" value="#{cadastroEmpresaController.entidade.email}" size="40" />
-								</p:column>
-								
-								<p:column>
-									<p:outputLabel value="#{msgs['label.uc005.telefone']}" for="telefone"/>
-									<br />
-									<p:inputMask id="telefone" value="#{cadastroEmpresaController.entidade.telefone}" mask="(99) 9999-9999"/>
-								</p:column>
-								
-								<p:column>
-									<p:outputLabel value="#{msgs['label.uc005.celular']}" for="celular"/>
-									<br />
-									<p:inputMask id="celular" value="#{cadastroEmpresaController.entidade.celular}" mask="(99) 9 9999-9999"/>
-								</p:column>
-								
-								<p:column>
-									<p:outputLabel value="#{msgs['label.uc005.status']}" for="status" indicateRequired="true"/>
-									<br />
-									<p:selectOneMenu id="status" value="#{cadastroEmpresaController.entidade.status}" required="true" >
-										<f:selectItems value="#{cadastroEmpresaController.listaStatus}"/>
-									</p:selectOneMenu>
-								</p:column>
+									<!-- Dados da empresa -->
+									<div class="ui-g-12 ui-md-6">
+										<p:outputLabel value="#{msgs['label.uc005.nome.empresa']}"
+											for="nome" indicateRequired="true" />
+										<p:inputText id="nome"
+											value="#{cadastroEmpresaController.entidade.nome}"
+											required="true" size="40" />
+									</div>
 
-								<p:column>
-									<p:selectBooleanCheckbox id="autoAtendimentoLiberado"
-										value="#{cadastroEmpresaController.entidade.autoAtendimentoLiberado}"
-										itemLabel="Auto atendimento liberado" />
-								</p:column>
+									<div class="ui-g-12 ui-md-6">
+										<p:outputLabel value="#{msgs['label.uc005.cnpj']}" for="cnpj"
+											indicateRequired="true" />
+										<p:inputMask id="cnpj"
+											value="#{cadastroEmpresaController.entidade.cnpj}"
+											mask="99.999.999/9999-99" required="true"
+											converter="cnpjConverter" />
+									</div>
 
-							</p:panelGrid>
-							
-							<h:panelGrid columns="1" width="100%" headerClass="h-grid-header">
-								<f:facet name="header">
-									<h:outputText value="#{msgs['label.uc001.endereco']}" />
-								</f:facet>
-								
-								<h:column>
-									<p:panelGrid id="painelEnderecoEmpresa" columns="2" style="width: 100%;">
-										<p:column>
-											<p:outputLabel value="#{msgs['label.uc001.cep']}" for="cep"/>
-											<br />
-											<p:inputMask id="cep" value="#{cadastroEmpresaController.entidade.endereco.cep}" mask="99999-999"/>
-										</p:column>
-				
-										<p:column>
-											<p:outputLabel value="#{msgs['label.uc001.logradouro']}" for="logradouro" />
-											<br />
-											<p:inputText id="logradouro" value="#{cadastroEmpresaController.entidade.endereco.logradouro}" size="40" />
-										</p:column>
-				
-										<p:column>
-											<p:outputLabel value="#{msgs['label.uc001.numero']}" for="numero"/>
-											<br />
-											<p:inputNumber id="numero" value="#{cadastroEmpresaController.entidade.endereco.numero}" minValue="0" 
-													decimalPlaces="0" size="5"/>
-										</p:column>
-				
-										<p:column>
-											<p:outputLabel value="#{msgs['label.uc001.complemento']}" for="complemento"/>
-											<br />
-											<p:inputText id="complemento" value="#{cadastroEmpresaController.entidade.endereco.complemento}" size="40"/>
-										</p:column>
-										
-										<p:column>
-											<p:outputLabel value="#{msgs['label.uc001.bairro']}" for="bairro"/>
-											<br />
-											<p:inputText id="bairro" value="#{cadastroEmpresaController.entidade.endereco.bairro}" size="30"/>
-										</p:column>
-				
-										<p:column>
-											<p:outputLabel value="#{msgs['label.uc001.cidade']}" for="cidade" />
-											<br />
-											<p:inputText id="cidade" value="#{cadastroEmpresaController.entidade.endereco.cidade}" size="40" />
-										</p:column>
-				
-										<p:column>
-											<p:outputLabel value="#{msgs['label.uc001.estado']}" for="estado" />
-											<br />
-											<p:inputText id="estado" value="#{cadastroEmpresaController.entidade.endereco.estado}" size="5" maxlength="5"/>
-										</p:column>
+									<div class="ui-g-12 ui-md-6">
+										<p:outputLabel value="#{msgs['label.uc005.email']}"
+											for="email" />
+										<p:inputText id="email"
+											value="#{cadastroEmpresaController.entidade.email}" size="40" />
+									</div>
 
-									</p:panelGrid>
-								</h:column>
-							</h:panelGrid>
+									<div class="ui-g-12 ui-md-6">
+										<p:outputLabel value="#{msgs['label.uc005.telefone']}"
+											for="telefone" />
+										<p:inputMask id="telefone"
+											value="#{cadastroEmpresaController.entidade.telefone}"
+											mask="(99) 9999-9999" />
+									</div>
+
+									<div class="ui-g-12 ui-md-6">
+										<p:outputLabel value="#{msgs['label.uc005.celular']}"
+											for="celular" />
+										<p:inputMask id="celular"
+											value="#{cadastroEmpresaController.entidade.celular}"
+											mask="(99) 9 9999-9999" />
+									</div>
+
+									<div class="ui-g-12 ui-md-6">
+										<p:outputLabel value="#{msgs['label.uc005.status']}"
+											for="status" indicateRequired="true" />
+										<p:selectOneMenu id="status"
+											value="#{cadastroEmpresaController.entidade.status}"
+											required="true">
+											<f:selectItems
+												value="#{cadastroEmpresaController.listaStatus}" />
+										</p:selectOneMenu>
+									</div>
+
+									<div class="ui-g-12">
+										<p:selectBooleanCheckbox id="autoAtendimentoLiberado"
+											value="#{cadastroEmpresaController.entidade.autoAtendimentoLiberado}"
+											itemLabel="Auto atendimento liberado" />
+									</div>
+								</div>
+							</p:panel>
 						</p:tab>
-						
+						<p:tab title="#{msgs['label.uc001.endereco']}">
+							<p:panel id="painelCadastroEndereco"
+								header="Cadastro de endereço" styleClass="ui-fluid">
+								<div class="form-grid ui-fluid ui-g">
+									<div class="ui-g-12 ui-md-4">
+										<p:outputLabel value="#{msgs['label.uc001.cep']}" for="cep" />
+										<p:inputMask id="cep"
+											value="#{cadastroEmpresaController.entidade.endereco.cep}"
+											mask="99999-999" />
+									</div>
+
+									<div class="ui-g-12 ui-md-8">
+										<p:outputLabel value="#{msgs['label.uc001.logradouro']}"
+											for="logradouro" />
+										<p:inputText id="logradouro"
+											value="#{cadastroEmpresaController.entidade.endereco.logradouro}" />
+									</div>
+
+									<div class="ui-g-12 ui-md-4">
+										<p:outputLabel value="#{msgs['label.uc001.numero']}"
+											for="numero" />
+										<p:inputNumber id="numero"
+											value="#{cadastroEmpresaController.entidade.endereco.numero}"
+											minValue="0" decimalPlaces="0" />
+									</div>
+
+									<div class="ui-g-12 ui-md-8">
+										<p:outputLabel value="#{msgs['label.uc001.complemento']}"
+											for="complemento" />
+										<p:inputText id="complemento"
+											value="#{cadastroEmpresaController.entidade.endereco.complemento}" />
+									</div>
+
+									<div class="ui-g-12 ui-md-6">
+										<p:outputLabel value="#{msgs['label.uc001.bairro']}"
+											for="bairro" />
+										<p:inputText id="bairro"
+											value="#{cadastroEmpresaController.entidade.endereco.bairro}" />
+									</div>
+
+									<div class="ui-g-12 ui-md-4">
+										<p:outputLabel value="#{msgs['label.uc001.cidade']}"
+											for="cidade" />
+										<p:inputText id="cidade"
+											value="#{cadastroEmpresaController.entidade.endereco.cidade}" />
+									</div>
+
+									<div class="ui-g-12 ui-md-2">
+										<p:outputLabel value="#{msgs['label.uc001.estado']}"
+											for="estado" />
+										<p:inputText id="estado"
+											value="#{cadastroEmpresaController.entidade.endereco.estado}" />
+									</div>
+								</div>
+							</p:panel>
+						</p:tab>
+
 						<p:tab title="#{msgs['title.uc005.departamentos']}">
-							<p:panelGrid columns="3" id="painelCadastroDepartamento">
-								<p:column>
-									<p:outputLabel value="#{msgs['label.uc005.nome.empresa']}" for="nomeDepartamento" indicateRequired="true"/>
-									<br />
-									<p:inputText id="nomeDepartamento" value="#{cadastroEmpresaController.departamento.nome}" size="40"/>
-								</p:column>
-								
-								<p:column>
-									<p:outputLabel value="#{msgs['label.uc001.status']}" for="statusDepartamento" indicateRequired="true"/>
-									<br />
-									<p:selectOneMenu id="statusDepartamento" value="#{cadastroEmpresaController.departamento.status}">
-										<f:selectItems value="#{cadastroEmpresaController.listaStatus}"/>
-									</p:selectOneMenu>
-								</p:column>
-								
-								<p:column>
-									<br/>
-									<p:commandButton id="addDepartamento" value="#{msgs['alt.acao.adicionar']}" action="#{cadastroEmpresaController.adicionarDepartamento}"
-											update="painelCadastroDepartamento departamentos" process="painelCadastroDepartamento">
-									</p:commandButton>
-								</p:column>
-								
-							</p:panelGrid>
-							
-							<br/>
-							
+							<p:panel id="painelCadastroDepartamento"
+								header="Cadastro de Departamento" styleClass="ui-fluid">
+								<div class="ui-g">
+
+									<div class="ui-g-12 ui-md-4">
+										<p:outputLabel value="#{msgs['label.uc005.nome.empresa']}"
+											for="nomeDepartamento" indicateRequired="true" />
+										<p:inputText id="nomeDepartamento"
+											value="#{cadastroEmpresaController.departamento.nome}" />
+									</div>
+
+									<div class="ui-g-12 ui-md-4">
+										<p:outputLabel value="#{msgs['label.uc001.status']}"
+											for="statusDepartamento" indicateRequired="true" />
+										<p:selectOneMenu id="statusDepartamento"
+											value="#{cadastroEmpresaController.departamento.status}">
+											<f:selectItems
+												value="#{cadastroEmpresaController.listaStatus}" />
+										</p:selectOneMenu>
+									</div>
+
+									<div class="ui-g-12 ui-md-4">
+										<p:commandButton id="addDepartamento"
+											value="#{msgs['alt.acao.adicionar']}"
+											action="#{cadastroEmpresaController.adicionarDepartamento}"
+											update="painelCadastroDepartamento departamentos"
+											process="painelCadastroDepartamento"
+											style="margin-top: 20px;" />
+									</div>
+
+								</div>
+							</p:panel>
+
+							<br />
+
 							<p:panelGrid columns="4" id="departamentos" style="width: 100%;">
-							
-								<h:outputText value="#{msgs['msg.nenhum.item.encontrado.adicionar']}" escape="false"
-											  rendered="#{empty cadastroEmpresaController.listaDepartamentos}" />
-								
-								<p:dataTable id="tableDepartamentos" value="#{cadastroEmpresaController.listaDepartamentos}" 
-									var="departamento" paginator="true" rows="5" 
-									paginatorPosition="bottom" editable="true" paginatorAlwaysVisible="false"
+
+								<h:outputText
+									value="#{msgs['msg.nenhum.item.encontrado.adicionar']}"
+									escape="false"
+									rendered="#{empty cadastroEmpresaController.listaDepartamentos}" />
+
+								<p:dataTable id="tableDepartamentos"
+									value="#{cadastroEmpresaController.listaDepartamentos}"
+									var="departamento" paginator="true" rows="5"
+									paginatorPosition="bottom" editable="true"
+									paginatorAlwaysVisible="false"
 									rendered="#{not empty cadastroEmpresaController.listaDepartamentos}">
-									
-									<p:column headerText="#{msgs['label.uc005.nome.empresa']}" style="text-align: center;">
+
+									<p:column headerText="#{msgs['label.uc005.nome.empresa']}"
+										style="text-align: center;">
 										<p:cellEditor>
 											<f:facet name="output">
-												<h:outputText value="#{departamento.nome}"/>
+												<h:outputText value="#{departamento.nome}" />
 											</f:facet>
-											
+
 											<f:facet name="input">
-												<p:inputText value="#{departamento.nome}"/>
+												<p:inputText value="#{departamento.nome}" />
 											</f:facet>
 										</p:cellEditor>
 									</p:column>
 
-									<p:column headerText="#{msgs['label.uc001.status']}" style="text-align: center;">
+									<p:column headerText="#{msgs['label.uc001.status']}"
+										style="text-align: center;">
 										<p:cellEditor>
 											<f:facet name="output">
 												<h:outputText value="#{departamento.status}" />
 											</f:facet>
-											
+
 											<f:facet name="input">
-												<p:selectOneMenu value="#{departamento.status}"  style="width:100%">
-													<f:selectItems value="#{cadastroEmpresaController.listaStatus}"/>
+												<p:selectOneMenu value="#{departamento.status}"
+													style="width:100%">
+													<f:selectItems
+														value="#{cadastroEmpresaController.listaStatus}" />
 												</p:selectOneMenu>
 											</f:facet>
 										</p:cellEditor>
 									</p:column>
-									
-									<p:column headerText="#{msgs['alt.acao.editar']}" style="width:35px; text-align: center;">
-							            <p:rowEditor />
-							        </p:column>
-									
-									<p:column headerText="#{msgs['alt.acao.excluir']}" style="text-align: center;">
-										<h:commandButton image="#{menuController.path}/tema/img/bt_remove_min.png" 
-													title="#{msgs['alt.acao.excluir']}" action="#{cadastroEmpresaController.removeDepartamento(departamento)}">
-											<p:ajax process="@this" update="form:cadastroEmpresaTab:tableDepartamentos form:cadastroEmpresaTab:departamentos"/>
+
+									<p:column headerText="#{msgs['alt.acao.editar']}"
+										style="width:35px; text-align: center;">
+										<p:rowEditor />
+									</p:column>
+
+									<p:column headerText="#{msgs['alt.acao.excluir']}"
+										style="text-align: center;">
+										<h:commandButton
+											image="#{menuController.path}/tema/img/bt_remove_min.png"
+											title="#{msgs['alt.acao.excluir']}"
+											action="#{cadastroEmpresaController.removeDepartamento(departamento)}">
+											<p:ajax process="@this"
+												update="form:cadastroEmpresaTab:tableDepartamentos form:cadastroEmpresaTab:departamentos" />
 										</h:commandButton>
 									</p:column>
-								
+
 								</p:dataTable>
 							</p:panelGrid>
 						</p:tab>
-						
+
 						<p:tab title="#{msgs['title.uc005.centro.custo']}">
-							<p:panelGrid columns="3" id="painelCadastroCentroDeCusto">
-								<p:column>
-									<p:outputLabel value="#{msgs['label.uc005.nome.empresa']}" for="nomeCentroDeCusto" indicateRequired="true"/>
-									<br />
-									<p:inputText id="nomeCentroDeCusto" value="#{cadastroEmpresaController.centroCusto.nome}" size="40"/>
-								</p:column>
-								
-								<p:column>
-									<p:outputLabel value="#{msgs['label.uc001.status']}" for="statusCentroDeCusto" indicateRequired="true"/>
-									<br />
-									<p:selectOneMenu id="statusCentroDeCusto" value="#{cadastroEmpresaController.centroCusto.status}">
-										<f:selectItems value="#{cadastroEmpresaController.listaStatus}"/>
-									</p:selectOneMenu>
-								</p:column>
-								
-								<p:column>
-									<br />
-									<p:commandButton id="addCentroDeCusto" value="#{msgs['alt.acao.adicionar']}" action="#{cadastroEmpresaController.adicionarCentroDeCusto}"
-											update="painelCadastroCentroDeCusto centrosDeCusto" process="painelCadastroCentroDeCusto">
-									</p:commandButton>
-								</p:column>
-								
-							</p:panelGrid>
-							
-							<br/>
-							
+							<p:panel id="painelCadastroCentroDeCusto"
+								header="Cadastro de Centro de Custo" styleClass="ui-fluid">
+								<div class="ui-g">
+
+									<div class="ui-g-12 ui-md-4">
+										<p:outputLabel value="#{msgs['label.uc005.nome.empresa']}"
+											for="nomeCentroDeCusto" indicateRequired="true" />
+										<p:inputText id="nomeCentroDeCusto"
+											value="#{cadastroEmpresaController.centroCusto.nome}" />
+									</div>
+
+									<div class="ui-g-12 ui-md-4">
+										<p:outputLabel value="#{msgs['label.uc001.status']}"
+											for="statusCentroDeCusto" indicateRequired="true" />
+										<p:selectOneMenu id="statusCentroDeCusto"
+											value="#{cadastroEmpresaController.centroCusto.status}">
+											<f:selectItems
+												value="#{cadastroEmpresaController.listaStatus}" />
+										</p:selectOneMenu>
+									</div>
+
+									<div class="ui-g-12 ui-md-4">
+										<p:commandButton id="addCentroDeCusto"
+											value="#{msgs['alt.acao.adicionar']}"
+											action="#{cadastroEmpresaController.adicionarCentroDeCusto}"
+											update="painelCadastroCentroDeCusto centrosDeCusto"
+											process="painelCadastroCentroDeCusto"
+											style="margin-top: 20px;" />
+									</div>
+
+								</div>
+							</p:panel>
+
+
+							<br />
+
 							<p:panelGrid columns="4" id="centrosDeCusto" style="width: 100%;">
-							
-								<h:outputText value="#{msgs['msg.nenhum.item.encontrado.adicionar']}" escape="false"
-											  rendered="#{empty cadastroEmpresaController.listaCentroCustos}" />
-								
-								<p:dataTable id="tableCentrosDeCusto" value="#{cadastroEmpresaController.listaCentroCustos}" 
-									var="centro" paginator="true" rows="5" 
-									paginatorPosition="bottom" editable="true" paginatorAlwaysVisible="false"
+
+								<h:outputText
+									value="#{msgs['msg.nenhum.item.encontrado.adicionar']}"
+									escape="false"
+									rendered="#{empty cadastroEmpresaController.listaCentroCustos}" />
+
+								<p:dataTable id="tableCentrosDeCusto"
+									value="#{cadastroEmpresaController.listaCentroCustos}"
+									var="centro" paginator="true" rows="5"
+									paginatorPosition="bottom" editable="true"
+									paginatorAlwaysVisible="false"
 									rendered="#{not empty cadastroEmpresaController.listaCentroCustos}">
-									
-									<p:column headerText="#{msgs['label.uc005.nome.empresa']}" style="text-align: center;">
+
+									<p:column headerText="#{msgs['label.uc005.nome.empresa']}"
+										style="text-align: center;">
 										<p:cellEditor>
 											<f:facet name="output">
-												<h:outputText value="#{centro.nome}"/>
+												<h:outputText value="#{centro.nome}" />
 											</f:facet>
-											
+
 											<f:facet name="input">
-												<p:inputText value="#{centro.nome}"/>
+												<p:inputText value="#{centro.nome}" />
 											</f:facet>
 										</p:cellEditor>
 									</p:column>
 
-									<p:column headerText="#{msgs['label.uc001.status']}" style="text-align: center;">
+									<p:column headerText="#{msgs['label.uc001.status']}"
+										style="text-align: center;">
 										<p:cellEditor>
 											<f:facet name="output">
 												<h:outputText value="#{centro.status}" />
 											</f:facet>
-											
+
 											<f:facet name="input">
-												<p:selectOneMenu value="#{centro.status}"  style="width:100%">
-													<f:selectItems value="#{cadastroEmpresaController.listaStatus}"/>
+												<p:selectOneMenu value="#{centro.status}" style="width:100%">
+													<f:selectItems
+														value="#{cadastroEmpresaController.listaStatus}" />
 												</p:selectOneMenu>
-											</f:facet>
-										</p:cellEditor>
-									</p:column>
-									
-									<p:column headerText="#{msgs['alt.acao.editar']}" style="width:35px; text-align: center;">
-							            <p:rowEditor />
-							        </p:column>
-									
-									<p:column headerText="#{msgs['alt.acao.excluir']}" style="text-align: center;">
-										<h:commandButton image="#{menuController.path}/tema/img/bt_remove_min.png" 
-													title="#{msgs['alt.acao.excluir']}" action="#{cadastroEmpresaController.removeCentroDeCusto(centro)}">
-											<p:ajax process="@this" update="form:cadastroEmpresaTab:tableCentrosDeCusto form:cadastroEmpresaTab:centrosDeCusto"/>
-										</h:commandButton>
-									</p:column>
-								
-								</p:dataTable>
-							</p:panelGrid>
-						</p:tab>
-						
-						<p:tab title="#{msgs['title.uc005.cargos']}">
-							<p:panelGrid columns="3" id="painelCadastroCargos">
-								<p:column>
-									<p:outputLabel value="#{msgs['label.uc005.nome.empresa']}" for="nomeCargo" indicateRequired="true"/>
-									<br />
-									<p:inputText id="nomeCargo" value="#{cadastroEmpresaController.cargo.nome}" size="40"/>
-								</p:column>
-								
-								<p:column>
-									<p:outputLabel value="#{msgs['label.uc001.status']}" for="statusCargo" indicateRequired="true"/>
-									<br />
-									<p:selectOneMenu id="statusCargo" value="#{cadastroEmpresaController.cargo.status}">
-										<f:selectItems value="#{cadastroEmpresaController.listaStatus}"/>
-									</p:selectOneMenu>
-								</p:column>
-								
-								<p:column>
-									<br />
-									<p:commandButton id="addCargo" value="#{msgs['alt.acao.adicionar']}" action="#{cadastroEmpresaController.adicionarCargo}"
-											update="painelCadastroCargos cargos" process="painelCadastroCargos">
-									</p:commandButton>
-								</p:column>
-								
-							</p:panelGrid>
-							
-							<br/>
-							
-							<p:panelGrid columns="4" id="cargos" style="width: 100%;">
-							
-								<h:outputText value="#{msgs['msg.nenhum.item.encontrado.adicionar']}" escape="false"
-											  rendered="#{empty cadastroEmpresaController.listaCargos}" />
-								
-								<p:dataTable id="tableCargos" value="#{cadastroEmpresaController.listaCargos}" 
-									var="cargo" paginator="true" rows="5" 
-									paginatorPosition="bottom" editable="true" paginatorAlwaysVisible="false"
-									rendered="#{not empty cadastroEmpresaController.listaCargos}">
-									
-									<p:column headerText="#{msgs['label.uc005.nome.empresa']}" style="text-align: center;">
-										<p:cellEditor>
-											<f:facet name="output">
-												<h:outputText value="#{cargo.nome}"/>
-											</f:facet>
-											
-											<f:facet name="input">
-												<p:inputText value="#{cargo.nome}"/>
 											</f:facet>
 										</p:cellEditor>
 									</p:column>
 
-									<p:column headerText="#{msgs['label.uc001.status']}" style="text-align: center;">
+									<p:column headerText="#{msgs['alt.acao.editar']}"
+										style="width:35px; text-align: center;">
+										<p:rowEditor />
+									</p:column>
+
+									<p:column headerText="#{msgs['alt.acao.excluir']}"
+										style="text-align: center;">
+										<h:commandButton
+											image="#{menuController.path}/tema/img/bt_remove_min.png"
+											title="#{msgs['alt.acao.excluir']}"
+											action="#{cadastroEmpresaController.removeCentroDeCusto(centro)}">
+											<p:ajax process="@this"
+												update="form:cadastroEmpresaTab:tableCentrosDeCusto form:cadastroEmpresaTab:centrosDeCusto" />
+										</h:commandButton>
+									</p:column>
+
+								</p:dataTable>
+							</p:panelGrid>
+						</p:tab>
+
+						<p:tab title="#{msgs['title.uc005.cargos']}">
+							<p:panel header="Cadastro de Cargo" styleClass="ui-fluid"
+								columns="3" id="painelCadastroCargos">
+								<div class="ui-g">
+
+									<div class="ui-g-12 ui-md-4">
+										<p:outputLabel value="#{msgs['label.uc005.nome.empresa']}"
+											for="nomeCargo" indicateRequired="true" />
+										<p:inputText id="nomeCargo"
+											value="#{cadastroEmpresaController.cargo.nome}" />
+									</div>
+
+									<div class="ui-g-12 ui-md-4">
+										<p:outputLabel value="#{msgs['label.uc001.status']}"
+											for="statusCargo" indicateRequired="true" />
+										<p:selectOneMenu id="statusCargo"
+											value="#{cadastroEmpresaController.cargo.status}">
+											<f:selectItems
+												value="#{cadastroEmpresaController.listaStatus}" />
+										</p:selectOneMenu>
+									</div>
+
+									<div class="ui-g-12 ui-md-4"
+										style="display: flex; align-items: flex-end;">
+										<p:commandButton id="addCargo"
+											value="#{msgs['alt.acao.adicionar']}"
+											action="#{cadastroEmpresaController.adicionarCargo}"
+											update="painelCadastroCargos cargos"
+											process="painelCadastroCargos" style="width: 100%;" />
+									</div>
+
+								</div>
+							</p:panel>
+
+
+							<br />
+
+							<p:panelGrid columns="4" id="cargos" style="width: 100%;">
+
+								<h:outputText
+									value="#{msgs['msg.nenhum.item.encontrado.adicionar']}"
+									escape="false"
+									rendered="#{empty cadastroEmpresaController.listaCargos}" />
+
+								<p:dataTable id="tableCargos"
+									value="#{cadastroEmpresaController.listaCargos}" var="cargo"
+									paginator="true" rows="5" paginatorPosition="bottom"
+									editable="true" paginatorAlwaysVisible="false"
+									rendered="#{not empty cadastroEmpresaController.listaCargos}">
+
+									<p:column headerText="#{msgs['label.uc005.nome.empresa']}"
+										style="text-align: center;">
+										<p:cellEditor>
+											<f:facet name="output">
+												<h:outputText value="#{cargo.nome}" />
+											</f:facet>
+
+											<f:facet name="input">
+												<p:inputText value="#{cargo.nome}" />
+											</f:facet>
+										</p:cellEditor>
+									</p:column>
+
+									<p:column headerText="#{msgs['label.uc001.status']}"
+										style="text-align: center;">
 										<p:cellEditor>
 											<f:facet name="output">
 												<h:outputText value="#{cargo.status}" />
 											</f:facet>
-											
+
 											<f:facet name="input">
-												<p:selectOneMenu value="#{cargo.status}"  style="width:100%">
-													<f:selectItems value="#{cadastroEmpresaController.listaStatus}"/>
+												<p:selectOneMenu value="#{cargo.status}" style="width:100%">
+													<f:selectItems
+														value="#{cadastroEmpresaController.listaStatus}" />
 												</p:selectOneMenu>
 											</f:facet>
 										</p:cellEditor>
 									</p:column>
-									
-									<p:column headerText="#{msgs['alt.acao.editar']}" style="width:35px; text-align: center;">
-							            <p:rowEditor />
-							        </p:column>
-									
-									<p:column headerText="#{msgs['alt.acao.excluir']}" style="text-align: center;">
-										<h:commandButton image="#{menuController.path}/tema/img/bt_remove_min.png" 
-													title="#{msgs['alt.acao.excluir']}" action="#{cadastroEmpresaController.removeCargo(cargo)}">
-											<p:ajax process="@this" update="form:cadastroEmpresaTab:tableCargos form:cadastroEmpresaTab:cargos"/>
+
+									<p:column headerText="#{msgs['alt.acao.editar']}"
+										style="width:35px; text-align: center;">
+										<p:rowEditor />
+									</p:column>
+
+									<p:column headerText="#{msgs['alt.acao.excluir']}"
+										style="text-align: center;">
+										<h:commandButton
+											image="#{menuController.path}/tema/img/bt_remove_min.png"
+											title="#{msgs['alt.acao.excluir']}"
+											action="#{cadastroEmpresaController.removeCargo(cargo)}">
+											<p:ajax process="@this"
+												update="form:cadastroEmpresaTab:tableCargos form:cadastroEmpresaTab:cargos" />
 										</h:commandButton>
 									</p:column>
-								
+
 								</p:dataTable>
 							</p:panelGrid>
 						</p:tab>
-						
-					</p:tabView>
+					</p:accordionPanel>
 				</h:column>
 			</h:panelGrid>
 		</ui:define>

@@ -1905,6 +1905,7 @@ input[type="image"] {
 
 .h-grid-header{
 	font-size: 20px;
+	padding-top: 20px !important;
 	padding-bottom: 20px !important;
 }
 
@@ -1931,7 +1932,7 @@ li {
 .tools_content .ui-inputfield{
 	background-color: white !important;
 	height: 36px;
-	margin-top: -1px !important;
+	margin-top: 7px !important;
 } 
 
 .tools_content .ui-selectonemenu {
