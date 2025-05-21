@@ -1819,7 +1819,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 	}
 
 	private static final Map<Long, LocalDate> cacheExecucaoRegras = new HashMap<>();
-    private static final long OITO_HORAS_EM_MILLIS = 4 * 60 * 60 * 1000L;
+    private static final long OITO_HORAS_EM_MILLIS = 1 * 60 * 60 * 1000L;
     private static Map<Long, Long> ultimaImportacaoCompletaPorCliente = new HashMap<>();
 	
 	@SuppressWarnings("unchecked")
@@ -2132,6 +2132,10 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 
 	        if (horarioExistente == null) {
 	            HorarioEntity horario = dto.toHorarioEntity();
+	            if(horario == null) {
+	            	continue;
+	            }
+	            
 	            horario.setRegra(regra); // Vincula o horário à regra
 	            horarios.add(horario);
 	            
@@ -2189,6 +2193,9 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		//precisa mesmmo apagar? ja que to criando um novo pedestreRegra sempre?
 		for(HorarioSeniorDto horario : horarios) {
 			HorarioEntity horarioPedestre = horario.toHorarioPedestre();
+			if(horarioPedestre == null) {
+				continue;
+			}
 			horarioPedestre.setPedestreRegra(pedestreRegra);
 			try {
 				gravaObjeto(horarioPedestre);

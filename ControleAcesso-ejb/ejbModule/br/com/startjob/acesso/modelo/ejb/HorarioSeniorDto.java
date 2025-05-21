@@ -103,6 +103,10 @@ public class HorarioSeniorDto {
 	}
 	
 	public HorarioEntity toHorarioEntity() {
+		if(this.nome.contains("Lanche")) {
+			return null;
+		}
+		
 		HorarioEntity horario = new HorarioEntity();
 		horario.setDiasSemana(diaSemana);
 		horario.setHorarioInicio(converterHorarioParaDate(inicio));
@@ -117,6 +121,10 @@ public class HorarioSeniorDto {
 	}
 	
 	public HorarioEntity toHorarioPedestre() {
+		if(this.nome.contains("Lanche")) {
+			return null;
+		}
+		
 		HorarioEntity horario = new HorarioEntity();
 		horario.setDiasSemana(diaSemana);
 		horario.setHorarioInicio(converterHorarioParaDate(inicio));
@@ -127,6 +135,7 @@ public class HorarioSeniorDto {
 		if(this.nome.equalsIgnoreCase("Refeicao") ||this.nome.equalsIgnoreCase("inicio")) {
 			horario.setQtdeDeCreditos(1L);
 		}
+
 		return horario;
 	}
 	
