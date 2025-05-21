@@ -19,23 +19,23 @@
 			<!-- Botão toggle posicionado no canto direito -->
 			<div class="toggle-wrapper">
 				<p:commandButton icon="pi pi-bars" type="button"
-					onclick="PF('sidebar1').show()" styleClass="mr-2"
-					class="mobile-toggle-btn" />
+					onclick="PF('sidebar1').show()" styleClass="mr-2 mobile-toggle-btn" />
 
-				<p:sidebar widgetVar="sidebar1" position="left" style="width: 300px;">
+				<p:sidebar widgetVar="sidebar1" position="left"
+					style="width: 300px;" modal="false" appendTo="@(body)">
+
 					<h:column>
 						<a
 							href="/#{menuController.appName}/#{menuController.path}/paginas/principal.xhtml">
 							<img id="imgLogo" width="220px"
-							style="margin-left: 20px; margin-right: 20px; margin-top: 10px; margin-bottom: 20px;"
+							style="margin: 10px 20px 20px 20px;"
 							src="/#{menuController.appName}/#{menuController.path}/tema/img/logo.png" />
 						</a>
 					</h:column>
 
-					<!-- Form obrigatório para JSF processar ações e outcomes -->
 					<h:form style="width: 100%;">
-						<p:tieredMenu model="#{menuController.menu}" style="width: 100%;" />
-						<p:tieredMenu model="#{menuController.menuUsuario}"
+						<p:panelMenu model="#{menuController.menu}" style="width: 100%;" />
+						<p:panelMenu model="#{menuController.menuUsuario}"
 							style="width: 100%;" />
 					</h:form>
 				</p:sidebar>
@@ -135,13 +135,51 @@
 }
 
 body .mobile-toggle-btn {
-    background-color: rgb(255, 255, 255) !important;
-    border: 1px solid rgb(255, 255, 255) !important;
-    font-size: 14px !important;
-    margin: 0 0.1em 0 0 !important;
-    outline: none !important;
-    color: white !important;
+	background-color: rgb(255, 255, 255) !important;
+	border: 1px solid rgb(255, 255, 255) !important;
+	font-size: 14px !important;
+	margin: 0 0.1em 0 0 !important;
+	outline: none !important;
+	color: white !important;
+}
+/* Remove a camada de overlay que bloqueia o clique no mobile */
+.ui-sidebar-mask {
+	display: none !important;
+	pointer-events: none !important;
 }
 
+/* Ajusta o z-index para o sidebar ficar na frente, mas sem bloquear o resto */
+.ui-sidebar {
+	z-index: 1100 !important;
+}
+
+/* Garante que o conteúdo do sidebar receba cliques normalmente */
+.ui-sidebar-content {
+	pointer-events: auto !important;
+}
+
+/* Estilização opcional para o botão, pra ficar visível e no topo */
+.mobile-toggle-btn {
+	z-index: 1200;
+	position: relative;
+}
+/* Força o submenu a abrir do lado direito do item pai */
+.ui-tieredmenu-root .ui-menu-child {
+	top: 0 !important;
+	left: 100% !important;
+	margin-left: 0 !important;
+}
+
+/* Se quiser garantir que o submenu fique visível e alinhado verticalmente */
+.ui-menu-child {
+	position: absolute !important;
+	z-index: 1200 !important;
+	padding-left: 20px !important;
+}
+
+/* Para evitar que o submenu fique “por cima” do primeiro item */
+.ui-tieredmenu-root .ui-menuitem {
+	position: relative; /* cria contexto para o submenu */
+}
 </style>
 </h:form>
