@@ -96,11 +96,13 @@
 				<p:toolbarGroup align="left"
 					styleClass="flex gap-2 flex-wrap justify-end items-center">
 
+					<div style="padding-top: 33%">
 					<p:commandButton id="save"
 						action="#{cadastroPedestreController.salvar}"
-						title="#{msgs['alt.acao.save']}" icon="pi pi-check-circle">
+						title="#{msgs['alt.acao.save']}" icon="pi pi-check">
 						<p:ajax process="@form" update="@form" />
 					</p:commandButton>
+					</div>
 
 					<p:commandButton id="addCredito"
 						rendered="#{cadastroPedestreController.exibeBotaoAddCreditoVisitante()}"

@@ -31,19 +31,20 @@
 
 				<p:toolbarGroup align="left"
 					styleClass="flex flex-wrap gap-2 justify-start w-full md:w-auto">
+					<div style="padding-top: 17%">
+						<p:commandButton id="acaoNovo"
+							action="#{consultaEmpresaController.novo}" icon="pi pi-plus"
+							process="@this" update="@form"
+							title="#{msgs['alt.acao.nova.empresa']}" styleClass="mr-2" />
 
-					<p:commandButton id="acaoNovo"
-						action="#{consultaEmpresaController.novo}" icon="pi pi-plus"
-						process="@this" update="@form"
-						title="#{msgs['alt.acao.nova.empresa']}" styleClass="mr-2" />
 
-
-					<p:commandButton id="acaoExportar" icon="pi pi-file-excel"
-						title="#{msgs['alt.acao.exportar']}" ajax="false"
-						styleClass="rounded-button ui-button-flat">
-						<p:dataExporter type="xlsx" target="form:empresasTable"
-							fileName="empresas" />
-					</p:commandButton>
+						<p:commandButton id="acaoExportar" icon="pi pi-file-excel"
+							title="#{msgs['alt.acao.exportar']}" ajax="false"
+							styleClass="rounded-button ui-button-flat">
+							<p:dataExporter type="xlsx" target="form:empresasTable"
+								fileName="empresas" />
+						</p:commandButton>
+					</div>
 				</p:toolbarGroup>
 
 				<p:toolbarGroup align="right"
@@ -60,11 +61,13 @@
 						placeholder="Buscar por nome ou CNPJ"
 						value="#{consultaEmpresaController.paramBuscaGeral}"
 						styleClass="w-full md:w-80" />
+					<div style="display:inline-flex">
+						<p:commandButton id="acaoBuscar"
+							action="#{consultaEmpresaController.buscar}" icon="pi pi-search"
+							process="@form" update="@form" title="#{msgs['alt.acao.buscar']}"
+							style="" />
 
-					<p:commandButton id="acaoBuscar"
-						action="#{consultaEmpresaController.buscar}" icon="pi pi-search"
-						process="@form" update="@form" title="#{msgs['alt.acao.buscar']}"
-						style="" />
+					</div>
 				</p:toolbarGroup>
 			</p:toolbar>
 		</ui:define>

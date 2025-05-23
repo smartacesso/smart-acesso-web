@@ -32,12 +32,12 @@
 		<ui:define name="tools">
 			<h:panelGrid columns="4" styleClass="conteudo_tools">
 
-				<h:commandButton id="save"
+				<p:commandButton id="save"
 					action="#{cadastroEmpresaController.salvar}"
 					title="#{msgs['alt.acao.save']}"
-					image="#{menuController.path}/tema/img/bt_saver.png">
+					icon="pi pi-check">
 					<p:ajax process="@form" update="@form" />
-				</h:commandButton>
+				</p:commandButton>
 
 			</h:panelGrid>
 		</ui:define>

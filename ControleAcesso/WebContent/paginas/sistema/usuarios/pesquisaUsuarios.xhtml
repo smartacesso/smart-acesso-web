@@ -23,13 +23,14 @@
 			<p:toolbar
 				styleClass="flex flex-col md:flex-row justify-between items-center gap-4 w-full max-w-screen-xl">
 
-				<p:toolbarGroup align="left"
-					styleClass="flex gap-2 flex-wrap justify-end items-center">
-					<p:commandButton id="acaoNovo"
-						action="#{consultaUsuarioController.novo}"
-						title="#{msgs['alt.acao.novo.usuario']}" icon="pi pi-plus">
-						<p:ajax process="@this" update="@form" />
-					</p:commandButton>
+				<p:toolbarGroup align="left">
+					<div style="padding-top: 35%">
+						<p:commandButton id="acaoNovo"
+							action="#{consultaUsuarioController.novo}"
+							title="#{msgs['alt.acao.novo.usuario']}" icon="pi pi-plus">
+							<p:ajax process="@this" update="@form" />
+						</p:commandButton>
+					</div>
 				</p:toolbarGroup>
 
 				<p:toolbarGroup align="right"
@@ -44,10 +45,12 @@
 						value="#{consultaUsuarioController.paramBuscaGeral}"
 						placeholder="Buscar por nome ou CPF" />
 
-					<p:commandButton id="acaoBuscar"
-						action="#{consultaUsuarioController.buscar()}"
-						title="#{msgs['alt.acao.buscar']}" icon="pi pi-search"
-						style="" process="@form" update="@form" />
+					<div style="display: inline-flex;">
+						<p:commandButton id="acaoBuscar"
+							action="#{consultaUsuarioController.buscar()}"
+							title="#{msgs['alt.acao.buscar']}" icon="pi pi-search"
+							process="@form" update="@form" />
+					</div>
 
 				</p:toolbarGroup>
 
@@ -109,7 +112,7 @@
 						</p:column>
 
 						<p:column headerText="#{msgs['label.uc004.data.cadastro']}"
-							styleClass="col-desktop-only" >
+							styleClass="col-desktop-only">
 							<h:outputText value="#{usuario.dataCriacao}">
 								<f:convertDateTime pattern="dd/MM/yyyy" />
 							</h:outputText>
@@ -185,6 +188,7 @@
 .align-left {
 	text-align: left !important;
 }
+
 @media ( max-width : 768px) {
 	.col-desktop-only {
 		display: none !important;

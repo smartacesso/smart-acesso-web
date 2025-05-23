@@ -33,13 +33,11 @@
 		<ui:define name="tools">
 			<h:panelGrid columns="4" styleClass="conteudo_tools">
 
-				<h:commandButton id="save"
+				<p:commandButton id="save"
 					action="#{cadastroUsuarioController.salvar}"
-					title="#{msgs['alt.acao.save']}"
-					image="#{menuController.path}/tema/img/bt_saver.png">
+					title="#{msgs['alt.acao.save']}" icon="pi pi-check">
 					<p:ajax process="@form" update="@form" />
-				</h:commandButton>
-
+				</p:commandButton>
 				<h:commandButton id="editarSenha"
 					rendered="#{cadastroUsuarioController.entidade.id != null}"
 					title="#{msgs['alt.acao.alterar.senha']}"
@@ -203,7 +201,7 @@
 									<div class="ui-g-12 ui-md-6">
 										<p:selectBooleanCheckbox id="expedidora"
 											value="#{cadastroUsuarioController.entidade.expedidora}"
-											itemLabel="#{msgs['label.uc001.habilita.expedidora']}" />
+											itemLabel="Habilitar expedidora" />
 									</div>
 								</h:panelGroup>
 

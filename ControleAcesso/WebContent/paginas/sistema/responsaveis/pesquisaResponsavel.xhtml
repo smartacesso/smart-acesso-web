@@ -24,15 +24,15 @@
 		<ui:define name="tools">
 			<p:toolbar
 				styleClass="flex flex-column md:flex-row justify-content-between align-items-start gap-3">
-
 				<!-- Ações à esquerda -->
 				<p:toolbarGroup align="left"
 					styleClass="flex flex-wrap gap-2 justify-start w-full md:w-auto">
-
-					<p:commandButton id="acaoNovo"
-						action="#{consultaResponsavelController.novo}" icon="pi pi-plus"
-						process="@this" update="@form" title="#{msgs['alt.acao.novo']}"
-						styleClass="rounded-button ui-button-success" />
+					<div style="padding-top: 35%">
+						<p:commandButton id="acaoNovo"
+							action="#{consultaResponsavelController.novo}" icon="pi pi-plus"
+							process="@this" update="@form" title="#{msgs['alt.acao.novo']}"
+							styleClass="rounded-button ui-button-success" />
+					</div>
 				</p:toolbarGroup>
 
 				<!-- Filtros à direita -->
@@ -46,12 +46,13 @@
 
 					<p:inputText id="filtro-nome" placeholder="Filtrar por nome"
 						value="#{consultaResponsavelController.parans['nome']}"
-						style="width:200px; font-size:13px;" />
-
-					<p:commandButton id="acaoBuscar"
-						action="#{consultaResponsavelController.buscar}"
-						icon="pi pi-search" process="@form" update="@form"
-						styleClass="rounded-button ui-button-primary" />
+						style="width:180px; font-size:13px;" />
+					<div style="display: inline-flex;">
+						<p:commandButton id="acaoBuscar"
+							action="#{consultaResponsavelController.buscar}"
+							icon="pi pi-search" process="@form" update="@form"
+							styleClass="rounded-button ui-button-primary" />
+					</div>
 				</p:toolbarGroup>
 			</p:toolbar>
 		</ui:define>
