@@ -84,7 +84,8 @@
 					<div style="display: inline-flex">
 						<p:commandButton id="acaoBuscar"
 							action="#{consultaPedestreController.buscar}" icon="pi pi-search"
-							process="@form" update="@form" styleClass="rounded-button" />
+							process="@this form:filtro-busca-geral"
+							update="form:pedestresTable" styleClass="rounded-button" />
 
 					</div>
 					<p:commandButton id="acaoFiltroAvancado" icon="pi pi-sliders-h"
