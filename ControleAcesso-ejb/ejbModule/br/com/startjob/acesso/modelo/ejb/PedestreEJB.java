@@ -2402,6 +2402,12 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 			 * pedestre.getCodigoCartaoAcesso().equals("") ||
 			 * pedestre.getCodigoCartaoAcesso().isEmpty()) { cartaoNuloOuVazio = true; }
 			 */
+			pedestre.setNome(funcionario.NOME);
+			pedestre.setTipo(TipoPedestre.PEDESTRE);
+			pedestre.setEmpresa(recuperaEmpresa(funcionario.NOMEEMPRESA, funcionario.CODIGOEMPRESA, cliente));
+			pedestre.setDepartamento(recuperaDepartamento(funcionario.NOMESETOR, pedestre.getEmpresa()));
+			pedestre.setCargo(recuperaCargo(funcionario.NOMECARGO, pedestre.getEmpresa()));
+			
 			if (pedestre.getCodigoExterno() == null || "".equals(pedestre.getCodigoExterno())) {
 				pedestre.setCodigoExterno(funcionario.CODIGO);
 			}
