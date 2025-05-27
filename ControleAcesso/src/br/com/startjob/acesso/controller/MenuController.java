@@ -165,7 +165,8 @@ public class MenuController extends BaseController {
 	private void criaMenuAdministracao() {
 		
 		if(!"smartponto".equals(usuarioLogado.getCliente().getNomeUnidadeOrganizacional())
-				&& !"startjob".equals(usuarioLogado.getCliente().getNomeUnidadeOrganizacional()))
+				&& !"startjob".equals(usuarioLogado.getCliente().getNomeUnidadeOrganizacional())
+					&& !"admin".equals(usuarioLogado.getCliente().getNomeUnidadeOrganizacional()))
 			return;
 		
 		
@@ -354,7 +355,6 @@ public class MenuController extends BaseController {
 		}
         
         menu.getElements().add(cadastros);
-		
 	}
 
 	private void montaMenuUsuario() {
