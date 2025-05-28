@@ -312,6 +312,7 @@ public class IntegracaoSeniorService {
 				funcionario.setCargo(getTagValue("titRed", retornoXml));
 				funcionario.setDddtelefone(getTagValue("dddTel", retornoXml));
 				funcionario.setNumtelefone(getTagValue("numTel", retornoXml));
+				funcionario.setUsaRef(getTagValue("usaRef", retornoXml));
 
 				funcionarios.add(funcionario);
 			}

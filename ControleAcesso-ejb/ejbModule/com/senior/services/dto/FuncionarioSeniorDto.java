@@ -25,6 +25,8 @@ public class FuncionarioSeniorDto {
     String tipCol; // <tipCol>Empregado</tipCol>
     String cargo; // <titRed>DIRETOR</titRed>
     String obs; // <titRed>DIRETOR</titRed>
+    String usaRef; //<usaRef>S</usaRef>
+
 	public String getCodPrm() {
 		return codPrm;
 	}
@@ -156,6 +158,12 @@ public class FuncionarioSeniorDto {
 	}
 	public void setDesAfa(String desAfa) {
 		this.desAfa = desAfa;
+	}
+	public String getUsaRef() {
+		return usaRef;
+	}
+	public void setUsaRef(String usaRef) {
+		this.usaRef = usaRef;
 	}
 	
 }
