@@ -94,6 +94,8 @@ public class HorarioSeniorDto {
 	
 	public RegraEntity toRegraEntity() {
 		RegraEntity regra =  new RegraEntity();
+		regra.setDataAlteracao(new Date());
+		regra.setDataCriacao(new Date());
 		regra.setNome("Escala " + getIdEscala());
 		regra.setIdEscala(Integer.parseInt(getIdEscala()));
 		regra.setStatus(Status.ATIVO);
@@ -146,6 +148,18 @@ public class HorarioSeniorDto {
 		horarioPadrao.setDiaSemana("1234567");
 		horarioPadrao.setInicio("00:00");
 		horarioPadrao.setFim("23:59");
+		horarioPadrao.setNome("periodo");
+		
+		return horarioPadrao;
+	}
+	
+	public static HorarioSeniorDto criarHorarioFolga() {
+		HorarioSeniorDto horarioPadrao = new HorarioSeniorDto();
+		horarioPadrao.setIdEscala("99992");
+		horarioPadrao.setIdHorario("99992");
+		horarioPadrao.setDiaSemana("7");
+		horarioPadrao.setInicio("00:00");
+		horarioPadrao.setFim("00:01");
 		horarioPadrao.setNome("periodo");
 		
 		return horarioPadrao;

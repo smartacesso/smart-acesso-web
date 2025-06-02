@@ -1819,7 +1819,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 	}
 
 	private static final Map<Long, LocalDate> cacheExecucaoRegras = new HashMap<>();
-    private static final long OITO_HORAS_EM_MILLIS = 8 * 60 * 60 * 1000L;
+    private static final long OITO_HORAS_EM_MILLIS = 1 * 30 * 60 * 1000L;
     private static Map<Long, Long> ultimaImportacaoCompletaPorCliente = new HashMap<>();
 	
 	@SuppressWarnings("unchecked")
@@ -1915,9 +1915,9 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		        PedestreEntity pedestre = pedestreExistente.orElseGet(() -> new PedestreEntity(funcionario, empresaExistente));
 		        pedestre.updateFuncionarioSenior(funcionario, empresaExistente);
 		        pedestre.setExistente(true);
-
+		        pedestre.setDataAlteracao(new Date());
 		        try {
-		            pedestre = (PedestreEntity) (pedestreExistente.isPresent() ? alteraObjeto(pedestre)[0] : gravaObjeto(pedestre)[0]);
+		            pedestre = (PedestreEntity) (pedestreExistente.isPresent() ? gravaObjeto(pedestre)[0] : gravaObjeto(pedestre)[0]);
 		        } catch (Exception e) {
 		            e.printStackTrace();
 		            throw new RuntimeException("Erro ao gravar/alterar pedestre", e);
@@ -2091,6 +2091,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 			}
 		}else {
 			System.out.println("criar horario padrão");
+			//criar regra folga
 			criaRegraPadrao(pedestre, cliente, horarios, funcionario);
 		}
 	}
@@ -2117,6 +2118,8 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 	    if (regra == null) {
 	        regra = horariosDto.get(0).toRegraEntity();
 	        regra.setCliente(cliente);
+			regra.setDataAlteracao(new Date());
+			regra.setDataCriacao(new Date());
 	        try {
 				gravaObjeto(regra);
 			} catch (Exception e) {
@@ -2197,7 +2200,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 			}
 			horarioPedestre.setPedestreRegra(pedestreRegra);
 			
-			if(!funcionario.getUsaRef().equals("S")) {
+			if(funcionario.getUsaRef().equals("N")) {
 				System.out.println("Não usa refeitório");
 				horarioPedestre.setQtdeDeCreditos(0L);
 			}
@@ -2408,6 +2411,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 			pedestre.setEmpresa(recuperaEmpresa(funcionario.NOMEEMPRESA, funcionario.CODIGOEMPRESA, cliente));
 			pedestre.setDepartamento(recuperaDepartamento(funcionario.NOMESETOR, pedestre.getEmpresa()));
 			pedestre.setCargo(recuperaCargo(funcionario.NOMECARGO, pedestre.getEmpresa()));
+			pedestre.setSempreLiberado(Boolean.TRUE);
 			
 			if (pedestre.getCodigoExterno() == null || "".equals(pedestre.getCodigoExterno())) {
 				pedestre.setCodigoExterno(funcionario.CODIGO);
@@ -2444,7 +2448,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		if (!inativo) {
 			pedestre.setStatus(Status.ATIVO);
 		}
-
+		
 		// grava e atualiza dados
 		try {
 			pedestre = (PedestreEntity) gravaObjeto(pedestre)[0];
