@@ -5,22 +5,32 @@
 	xmlns:p="http://primefaces.org/ui">
 
 	<style>
+	
+	.bloco-pedestre{
+	display:flex;
+    flex-direction: column;
+    align-items:center;
+    justify-content:center;
+	}
+
 .whiteIcon .ui-icon, .whiteIcon .ui-button-text {
 	color: #fff;
 }
 
 .image-container {
-	display: flex;
+	/*display: flex;
 	justify-content: center;
 	align-items: center;
-	margin-bottom: 1rem;
+	margin-bottom: 1rem;*/
+	width: 150px;
+	height: 150px;
 }
 
 .image-container img {
 	width: 150px;
 	height: 150px;
 	cursor: pointer;
-	border-radius: 50%;
+	border-radius: 50px;
 }
 
 .form-section {
@@ -28,11 +38,14 @@
 	flex-direction: column;
 	gap: 1rem;
 	padding: 1rem;
+	width: 35%;
 }
 
 @media screen and (max-width: 600px) {
+	
 	.form-section {
 		padding: 0.5rem;
+		width:100%;
 	}
 }
 </style>
@@ -81,6 +94,7 @@
 			rendered="#{cadastroPedestreController.exibeCampoMatricula}">
 			<p:outputLabel value="#{msgs['label.uc008.matricula']}"
 				for="matricula" />
+			<br/>
 			<p:inputText id="matricula"
 				value="#{cadastroPedestreController.entidade.matricula}"
 				disabled="#{cadastroPedestreController.desabilitaCampoMatricula}"
