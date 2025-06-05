@@ -107,5 +107,6 @@ public interface PedestreEJBRemote extends BaseEJBRemote {
 	
 	public void resetAutoAtendimento() throws Exception;
 
+	public void importarAD() throws Exception;
 }
 
