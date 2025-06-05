@@ -136,7 +136,7 @@ public class RegraEntity extends ClienteBaseEntity {
 	@Column(name="PERMITE_BLOQUEIO", nullable=true, length=30)
 	private Boolean permiteBloqueio;
 	
-	@Temporal(TemporalType.TIME)
+	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name="HORARIO_INICIO_TURNO", nullable=true, length=11)
 	private Date horarioInicioTurno;
 	

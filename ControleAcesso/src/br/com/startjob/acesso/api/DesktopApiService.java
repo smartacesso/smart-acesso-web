@@ -1617,11 +1617,13 @@ public class DesktopApiService extends BaseService {
 						Long idRegra = jsonObject.getLong("id");
 
 						final RegraEntity regra = buscaRegraPeloId(idRegra);
-						regra.setIdPlano(jsonObject.getInt("idPlano"));
-						regra.setIdTemplate(jsonObject.getInt("idTemplate"));
-
-						getEjb("BaseEJB").alteraObjeto(regra);
-
+						
+						if(Objects.nonNull(regra)) {
+							regra.setIdPlano(jsonObject.getInt("idPlano"));
+							regra.setIdTemplate(jsonObject.getInt("idTemplate"));
+							
+							getEjb("BaseEJB").alteraObjeto(regra);
+						}
 					}
 				} catch (Exception e) {
 					e.printStackTrace();

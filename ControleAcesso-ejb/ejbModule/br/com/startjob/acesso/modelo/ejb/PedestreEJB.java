@@ -1819,7 +1819,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 	}
 
 	private static final Map<Long, LocalDate> cacheExecucaoRegras = new HashMap<>();
-    private static final long OITO_HORAS_EM_MILLIS = 1 * 30 * 60 * 1000L;
+    private static final long OITO_HORAS_EM_MILLIS = 3 * 60 * 60 * 1000L;
     private static Map<Long, Long> ultimaImportacaoCompletaPorCliente = new HashMap<>();
 	
 	@SuppressWarnings("unchecked")
@@ -2046,15 +2046,16 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 //	}
 	
 	private void atualizarPermissao(final ClienteEntity cliente, PedestreEntity pedestre) {
-		System.out.println("Atualizando permissão do funcionario " + pedestre.getNome());
+		System.out.println("Atualizando permissão do funcionario " + pedestre.getNome() + "permissão : " + pedestre.getCodigoPermissao());
 		apagaTodosPedetreEquipamentos(pedestre);
 
 		Permissoes permissao = Permissoes.valueOf("_" + pedestre.getCodigoPermissao());
 
 		for (String nomeEquipamento : permissao.getEquipamentos()) {
+			System.out.println("Nome equipamento : " + nomeEquipamento);
 			EquipamentoEntity equipamento = buscaEquipamentoPeloNome(nomeEquipamento, cliente);
 			if (equipamento != null) {
-
+				System.out.println("Encontrou equipamento");
 				PedestreEquipamentoEntity pedestreEquipamento = new PedestreEquipamentoEntity();
 				pedestreEquipamento.setPedestre(pedestre);
 				pedestreEquipamento.setEquipamento(equipamento);
@@ -2064,6 +2065,8 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 				} catch (Exception e) {
 					System.out.println("erro ao salvar pedestre equipamento");
 				}
+			}else {
+				System.out.println("Não encontrou equipamento");
 			}
 		}
 		
