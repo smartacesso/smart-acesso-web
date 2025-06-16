@@ -1,5 +1,6 @@
 package br.com.startjob.acesso.controller.uc009;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -78,6 +79,40 @@ public class RelatorioPedestresController extends RelatorioController {
 			listaCentrosDeCusto = null;
 		}
 	}
+	
+	public String getTipoRefeicao(java.sql.Timestamp timestamp) {
+	    return getTipoRefeicao((Date) timestamp);
+	}
+
+	
+	public String getTipoRefeicao(Date dataAcesso) {
+	    if (dataAcesso == null) {
+	        return "--";
+	    }
+	    
+	    Calendar cal = Calendar.getInstance();
+	    cal.setTime(dataAcesso);
+	    int hora = cal.get(Calendar.HOUR_OF_DAY);
+	    int minuto = cal.get(Calendar.MINUTE);
+	    int minutosTotais = hora * 60 + minuto;
+
+	    if (minutosTotais >= 330 && minutosTotais <= 480) { // 05:30 - 08:00
+	        return "Lanche Matutino";
+	    } else if (minutosTotais >= 600 && minutosTotais <= 750) { // 10:00 - 13:30
+	        return "Almoço";
+	    } else if (minutosTotais >= 840 && minutosTotais <= 930) { // 14:00 - 15:30
+	        return "Lanche Vespertino";
+	    } else if (minutosTotais >= 1080 && minutosTotais <= 1260) { // 18:00 - 21:00
+	        return "Jantar";
+	    } else if (minutosTotais >= 1320 && minutosTotais <= 1410) { // 22:00 - 23:30
+	        return "Lanche Noturno";
+	    } else if ((minutosTotais >= 60 && minutosTotais <= 240)) { // 01:00 - 04:00
+	        return "Ceia";
+	    }
+
+	    return "Fora do horário de refeição";
+	}
+
 
 	public Long getIdEmpresaSelecionada() {
 		return idEmpresaSelecionada;
