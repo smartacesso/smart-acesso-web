@@ -3945,7 +3945,7 @@ body .ui-paginator .ui-paginator-pages .ui-paginator-page {
     margin: 0;
     -moz-border-radius: 0;
     -webkit-border-radius: 0;
-    border-radius: 0
+    border-radius: 0;
 }
 
 body .ui-paginator .ui-paginator-pages .ui-paginator-page.ui-state-active {
