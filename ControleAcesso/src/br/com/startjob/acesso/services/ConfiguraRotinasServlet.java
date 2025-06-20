@@ -141,7 +141,7 @@ public class ConfiguraRotinasServlet extends BaseServlet {
 
 		ActivatedTasks.getInstancia().limpaTimersAutoAtendimento();
 
-		Long period = 15 * 60 * 1000L; // a cada 15 minutos
+		Long period = 30 * 60 * 1000L; // a cada 15 minutos
 		Timer timer = new Timer();
 		TimerTask task = new AutoAtendimentoResetTask();
 

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+
+<h:head>
+	<title>Autoatendimento - Cadastro</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+</h:head>
+
+<h:body
+	style="background-color: #f5f5f5; text-align: center; padding-top: 50px;">
+
+	<h:form id="formAutoCadastro" enctype="multipart/form-data">
+
+		<p:panel header="Cadastro de Visitante"
+			style="max-width: 500px; margin: auto;">
+
+			<p:messages id="msgs" showDetail="true" autoUpdate="true" />
+
+			<!-- Nome -->
+			<p:outputLabel for="nome" value="Nome Completo:" />
+			<p:inputText id="nome"
+				value="#{cadastroFacialHikivisionController.pedestre.nome}"
+				style="width: 100%;"
+				disabled="#{not empty cadastroFacialHikivisionController.pedestre.nome}" />
+
+			<p:spacer height="10" />
+
+			<!-- CPF -->
+			<p:outputLabel for="cpf" value="CPF:" />
+			<p:inputMask id="cpf"
+				value="#{cadastroFacialHikivisionController.pedestre.cpf}"
+				mask="999.999.999-99" style="width: 100%;"
+				disabled="#{not empty cadastroFacialHikivisionController.pedestre.cpf}" />
+
+			<p:spacer height="10" />
+
+			<!-- Foto -->
+			<h:panelGroup id="fotoPreview">
+				<p:outputLabel value="Foto:" />
+				<p:panelGrid columns="1" style="margin: auto;">
+
+					<p:graphicImage
+						value="#{cadastroFacialHikivisionController.getStreamedContent(cadastroFacialHikivisionController.pedestre.foto)}"
+						rendered="#{cadastroFacialHikivisionController.pedestre.foto != null}"
+						stream="false"
+						style="height: 150px; width: 150px; border-radius: none; margin-bottom: 10px;" />
+
+					<p:graphicImage
+						value="#{menuController.path}/tema/img/ic_photo_male.png"
+						rendered="#{cadastroFacialHikivisionController.pedestre.foto == null}"
+						style="height: 150px; width: 150px; border-radius: 50%; margin-bottom: 10px;" />
+				</p:panelGrid>
+			</h:panelGroup>
+
+			<p:spacer height="10" />
+
+			<!-- Botão para abrir webcam -->
+			<p:commandButton value="Tirar Foto" icon="pi pi-camera" type="button"
+				onclick="PF('dlgCamera').show();" styleClass="ui-button-secondary"
+				style="width: 100%; margin-bottom: 10px;" />
+
+			<!-- Botão de envio -->
+			<p:commandButton value="Concluir Cadastro"
+				action="#{cadastroFacialHikivisionController.salvar}"
+				process="@form" icon="pi pi-check" styleClass="ui-button-success"
+				style="width: 100%;" />
+
+
+		</p:panel>
+
+		<p:dialog widgetVar="dlgCamera" header="Capturar Foto" modal="true"
+			closable="true" width="400" id="dialogCamera">
+
+			<p:photoCam id="webcam" widgetVar="webcamWidget"
+				listener="#{cadastroFacialHikivisionController.onCapture}"
+				update="formAutoCadastro:fotoPreview" style="margin-bottom: 10px;" />
+
+			<h:outputScript>
+        function capturarEFecharCamera() {
+            PF('webcamWidget').capture();
+            setTimeout(function () {
+                PF('dlgCamera').hide();
+            }, 800); // tempo para o listener executar
+        }
+    </h:outputScript>
+
+			<p:commandButton value="Capturar" type="button" icon="pi pi-camera"
+				styleClass="ui-button-primary" onclick="capturarEFecharCamera();"
+				style="width: 100%;" />
+		</p:dialog>
+
+	</h:form>
+
+</h:body>
+</html>

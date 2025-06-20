@@ -4,7 +4,7 @@
 	xmlns:ui="http://java.sun.com/jsf/facelets"
 	xmlns:f="http://java.sun.com/jsf/core"
 	xmlns:h="http://java.sun.com/jsf/html"
-	xmlns:p="http://primefaces.org/ui" xmlns:jsf="http://xmlns.jcp.org/jsf">
+	xmlns:p="http://primefaces.org/ui">
 
 <body>
 	<f:metadata>
@@ -93,31 +93,24 @@
 				styleClass="flex flex-col md:flex-row justify-between items-center gap-4 w-full max-w-screen-xl">
 
 				<!-- Grupo Esquerdo (ações principais) -->
-				<p:toolbarGroup align="left"
-					styleClass="flex gap-2 flex-wrap justify-end items-center">
+				<p:toolbarGroup align="left">
 
-					<div style="padding-top: 33%">
 					<p:commandButton id="save"
 						action="#{cadastroPedestreController.salvar}"
 						title="#{msgs['alt.acao.save']}" icon="pi pi-check">
 						<p:ajax process="@form" update="@form" />
 					</p:commandButton>
-					</div>
 
 					<p:commandButton id="addCredito"
 						rendered="#{cadastroPedestreController.exibeBotaoAddCreditoVisitante()}"
 						onclick="PF('confirmarAddCredito').show(); return false;"
-						title="#{msgs['alt.acao.add.credito']}" icon="pi pi-wallet" />
-
-					<p:commandButton id="acaoExcliurPedestre"
-						rendered="#{cadastroPedestreController.entidade.id != null}"
-						onclick="PF('confirmarExclusaoPedestre').show(); return false;"
-						title="#{msgs['alt.acao.excluir']}" icon="pi pi-trash" />
+						title="#{msgs['alt.acao.add.credito']}" icon="pi pi-plus" />
 
 					<p:commandButton id="gerarQrCode"
 						rendered="#{cadastroPedestreController.exibeBotaoGerarQRCode()}"
 						onclick="PF('gerarQrCode').show(); return false;"
-						title="#{msgs['alt.acao.gerar.qrcode']}" icon="pi pi-qrcode" />
+						title="#{msgs['alt.acao.gerar.qrcode']}"
+						icon="pi pi-external-link" />
 
 					<p:commandButton id="verQrCode"
 						rendered="#{cadastroPedestreController.exibeBotaoVerQRCode() and cadastroPedestreController.entidade.tipoQRCode != 'DINAMICO_TEMPO'}"
@@ -144,11 +137,21 @@
 						<p:ajax process="@this" update="alteraSenhaDialog"
 							oncomplete="PF('alteraSenha').show(); return false;" />
 					</p:commandButton>
+
+					<p:commandButton id="btnAbrirDialogWhatsapp" icon="pi pi-camera"
+						rendered="#{cadastroPedestreController.entidade.id != null}"
+						action="#{cadastroPedestreController.getLinkAutoatendimento()}"
+						process="@this" />
+
+					<p:commandButton id="acaoExcliurPedestre"
+						rendered="#{cadastroPedestreController.entidade.id != null}"
+						onclick="PF('confirmarExclusaoPedestre').show(); return false;"
+						title="#{msgs['alt.acao.excluir']}" icon="pi pi-trash" />
+
 				</p:toolbarGroup>
 
 				<!-- Grupo Direito (filtros de data) -->
-				<p:toolbarGroup align="right"
-					styleClass="flex gap-2 flex-wrap justify-end items-center w-full md:w-auto">
+				<p:toolbarGroup align="right">
 
 					<p:calendar id="filtro-data-inicio"
 						value="#{cadastroPedestreController.parans['data_maior_data']}"
@@ -169,7 +172,6 @@
 					</p:calendar>
 
 				</p:toolbarGroup>
-				<p:spacer height="10" />
 			</p:toolbar>
 		</ui:define>
 
@@ -421,13 +423,13 @@
 					<div class="row">
 						<div class="col-md-12">
 							<p:spacer height="10" />
-						
+
 							<div class="bloco-pedestre">
 								<ui:include src="/WEB-INF/template/pedestres/abaLateral.xhtml" />
 							</div>
-							
+
 							<p:spacer height="20" />
-							
+
 							<p:accordionPanel id="cadastroPedestreTab" cache="true">
 								<p:ajax event="tabChange"
 									listener="#{cadastroPedestreController.onTabChange}"
