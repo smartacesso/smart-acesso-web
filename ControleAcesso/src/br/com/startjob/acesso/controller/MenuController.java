@@ -166,7 +166,7 @@ public class MenuController extends BaseController {
 		
 		if(!"smartponto".equals(usuarioLogado.getCliente().getNomeUnidadeOrganizacional())
 				&& !"startjob".equals(usuarioLogado.getCliente().getNomeUnidadeOrganizacional())
-					&& !"admin".equals(usuarioLogado.getCliente().getNomeUnidadeOrganizacional()))
+					&& !"adminGeral".equals(usuarioLogado.getNome()))
 			return;
 		
 		

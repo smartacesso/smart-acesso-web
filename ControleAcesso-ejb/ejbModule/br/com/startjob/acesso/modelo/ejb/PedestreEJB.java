@@ -1751,7 +1751,9 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 //	            empresa.getCargos().add(cargo);
 //	        }
 	  //      empresa = em.merge(empresa);
-	  //      pedestre.setEmpresa(empresa);
+	        if(Objects.nonNull(empresa)) {
+	        	pedestre.setEmpresa(empresa);
+	        }
 	  //      pedestre.setCargo(cargo);
 	        
 	        if (pedestres == null || pedestres.isEmpty()) {
