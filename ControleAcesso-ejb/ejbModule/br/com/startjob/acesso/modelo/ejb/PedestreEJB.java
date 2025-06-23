@@ -1539,27 +1539,83 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 	}
 
 
+//	@SuppressWarnings("unchecked")
+//	private Optional<PedestreEntity> buscaPedestreExistente(String numeroMatricula, EmpresaEntity empresa) {
+//		Map<String, Object> args = new HashMap<String, Object>();
+//		args.put("MATRICULA", numeroMatricula);
+//		args.put("ID_EMPRESA", empresa.getId());
+//		args.put("ID_CLIENTE", empresa.getCliente().getId());
+//
+//		try {
+//			List<PedestreEntity> listaPedestres = (List<PedestreEntity>) pesquisaArgFixos(PedestreEntity.class,
+//					"findByMatriculaAndIdEmpresaAndIdCliente", args);
+//
+//			if (listaPedestres != null && !listaPedestres.isEmpty()) {
+//				return Optional.of(listaPedestres.get(0));
+//			}
+//
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//
+//		return Optional.empty();
+//	}
+	
 	@SuppressWarnings("unchecked")
-	private Optional<PedestreEntity> buscaPedestreExistente(String numeroMatricula, EmpresaEntity empresa) {
-		Map<String, Object> args = new HashMap<String, Object>();
-		args.put("MATRICULA", numeroMatricula);
-		args.put("ID_EMPRESA", empresa.getId());
-		args.put("ID_CLIENTE", empresa.getCliente().getId());
+	private Optional<PedestreEntity> buscaPedestreExistente(String numeroMatricula, String cartao, EmpresaEntity empresa) {
+	    Map<String, Object> args = new HashMap<>();
+	    args.put("MATRICULA", numeroMatricula);
+	    args.put("ID_EMPRESA", empresa.getId());
+	    args.put("ID_CLIENTE", empresa.getCliente().getId());
 
-		try {
-			List<PedestreEntity> listaPedestres = (List<PedestreEntity>) pesquisaArgFixos(PedestreEntity.class,
-					"findByMatriculaAndIdEmpresaAndIdCliente", args);
+	    try {
+	        List<PedestreEntity> listaPedestres = (List<PedestreEntity>) pesquisaArgFixos(
+	            PedestreEntity.class,
+	            "findByMatriculaAndIdEmpresaAndIdCliente",
+	            args
+	        );
 
-			if (listaPedestres != null && !listaPedestres.isEmpty()) {
-				return Optional.of(listaPedestres.get(0));
-			}
+	        if (listaPedestres == null || listaPedestres.isEmpty()) {
+	            return Optional.empty();
+	        }
 
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+	        if (listaPedestres.size() == 1) {
+	            return Optional.of(listaPedestres.get(0));
+	        }
 
-		return Optional.empty();
+	        // Mais de um encontrado para a mesma matrícula (potencial inconsistência)
+	        System.err.println("[Alerta] Matrícula duplicada: " + numeroMatricula
+	            + " na empresa " + empresa.getId()
+	            + ". Total encontrados: " + listaPedestres.size());
+
+	        // Fallback: tentar por Cracha (ou outro campo único)
+
+	        if (cartao != null && !cartao.trim().isEmpty()) {
+	            Map<String, Object> argsCartao = new HashMap<>();
+	            argsCartao.put("CARD_NUMBER", cartao);
+
+	            List<PedestreEntity> listaPorCartao = (List<PedestreEntity>) pesquisaArgFixos(
+	                PedestreEntity.class,
+	                "findByCardNumber",
+	                argsCartao
+	            );
+
+	            if (listaPorCartao != null && !listaPorCartao.isEmpty()) {
+	                System.out.println("Fallback por CARTAO retornou pedestre: " + listaPorCartao.get(0).getNome());
+	                return Optional.of(listaPorCartao.get(0));
+	            }
+	        }
+
+	        // Se não encontrou por CPF, retorna o primeiro mesmo (com alerta)
+	        System.err.println("[Aviso] Fallback por CARTAO falhou, retornando primeiro da lista para matrícula: " + numeroMatricula);
+	        return Optional.of(listaPedestres.get(0));
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return Optional.empty();
+	    }
 	}
+
 
 	@SuppressWarnings("unchecked")
 	private Optional<EmpresaEntity> buscaEmpresaExistente(String numEmp, Long idCliente) {
@@ -1918,7 +1974,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		        + ", nome = " + funcionario.getNome()
 		        + ", codPermissao = " + funcionario.getCodPrm());
 		    	
-		        Optional<PedestreEntity> pedestreExistente = buscaPedestreExistente(funcionario.getNumeroMatricula(), empresaExistente);
+		        Optional<PedestreEntity> pedestreExistente = buscaPedestreExistente(funcionario.getNumeroMatricula(), funcionario.getNumCracha(), empresaExistente);
 		        
 		        if (pedestreExistente.isPresent()) {
 		            System.out.println("Pedestre encontrado: ID " + pedestreExistente.get().getId() + ", nome: " + pedestreExistente.get().getNome());
