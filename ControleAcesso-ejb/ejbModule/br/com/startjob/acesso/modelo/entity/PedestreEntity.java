@@ -381,13 +381,10 @@ public class PedestreEntity extends ClienteBaseEntity {
 		this.setExistente(true);
 		
 		if(funcionarioTotvsDto.getEmployeeSituation().trim().equals("")) {
-			this.sempreLiberado = true;
-			this.status =  Status.ATIVO;
+			this.setStatus(Status.ATIVO);
 			this.observacoes =  "atualizado dia " + LocalDate.now().toString();
-
 		}else {
-			this.sempreLiberado = false;
-			this.status =  Status.INATIVO;
+			this.setStatus(Status.INATIVO);
 			this.observacoes = "Funcionario com situação : " + funcionarioTotvsDto.getEmployeeSituation();
 		}		
 	}

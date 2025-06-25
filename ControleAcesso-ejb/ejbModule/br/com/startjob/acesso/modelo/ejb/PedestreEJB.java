@@ -1791,15 +1791,6 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 			List<PedestreEntity> pedestres = (List<PedestreEntity>) pesquisaArgFixos(PedestreEntity.class, "findById_matricula", args);
 	        PedestreEntity pedestre = (pedestres == null || pedestres.isEmpty()) ? funcionarioTotvsDto.toPedestreEntity(cliente) : pedestres.get(0);
 	        
-			if(funcionarioTotvsDto.getEmployeeSituation().trim().equals("")) {
-				pedestre.setObservacoes("Importado dia " + LocalDate.now().toString());
-				pedestre.setStatus(Status.ATIVO);
-
-			}else {
-				pedestre.setStatus(Status.INATIVO);
-				pedestre.setObservacoes("Funcionario com situação : " + funcionarioTotvsDto.getEmployeeSituation());
-			}
-			
 	        if(Objects.nonNull(empresa)) {
 	        	pedestre.setEmpresa(empresa);
 	        }
