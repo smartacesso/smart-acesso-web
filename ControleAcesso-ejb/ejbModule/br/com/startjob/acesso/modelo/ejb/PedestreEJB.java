@@ -1591,20 +1591,16 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 	        // Fallback: tentar por Cracha (ou outro campo único)
 
 	        if (cartao != null && !cartao.trim().isEmpty()) {
-	            Map<String, Object> argsCartao = new HashMap<>();
-	            argsCartao.put("CARD_NUMBER", cartao);
+	            String cartaoTrim = cartao.trim();
 
-	            List<PedestreEntity> listaPorCartao = (List<PedestreEntity>) pesquisaArgFixos(
-	                PedestreEntity.class,
-	                "findByCardNumber",
-	                argsCartao
-	            );
+	            PedestreEntity pedestre = buscaPedestrePorCartao(cartaoTrim);
 
-	            if (listaPorCartao != null && !listaPorCartao.isEmpty()) {
-	                System.out.println("Fallback por CARTAO retornou pedestre: " + listaPorCartao.get(0).getNome());
-	                return Optional.of(listaPorCartao.get(0));
+	            if (pedestre != null) {
+	                System.out.println("Fallback por CARTAO retornou pedestre: " + pedestre.getNome());
+	                return Optional.of(pedestre);
 	            }
 	        }
+
 
 	        // Se não encontrou por CPF, retorna o primeiro mesmo (com alerta)
 	        System.err.println("[Aviso] Fallback por CARTAO falhou, retornando primeiro da lista para matrícula: " + numeroMatricula);
@@ -1791,26 +1787,22 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 	        Map<String, Object> args = new HashMap<>();
 	        args.put("MATRICULA", funcionarioTotvsDto.getCode());
 	        
-	        List<PedestreEntity> pedestres = (List<PedestreEntity>) pesquisaArgFixos(PedestreEntity.class, "findById_matricula", args);
-	        PedestreEntity pedestre = (pedestres == null || pedestres.isEmpty()) ? funcionarioTotvsDto.toPedestreEntity() : pedestres.get(0);
-	        pedestre.setCliente(cliente);
-	       
-	    //    CargoEntity cargo = buscaCargoTotvs(funcionarioTotvsDto.getRoleDescription(), empresa);
+	        @SuppressWarnings("unchecked")
+			List<PedestreEntity> pedestres = (List<PedestreEntity>) pesquisaArgFixos(PedestreEntity.class, "findById_matricula", args);
+	        PedestreEntity pedestre = (pedestres == null || pedestres.isEmpty()) ? funcionarioTotvsDto.toPedestreEntity(cliente) : pedestres.get(0);
 	        
-	        // Verifica se a empresa já tem cargos, se não, inicializa a lista
-//	        if (empresa.getCargos() == null) {
-//	            empresa.setCargos(new ArrayList<>()); 
-//	        }
-//	        
-//	        // Evita duplicatas antes de adicionar
-//	        if (!empresa.getCargos().contains(cargo)) {
-//	            empresa.getCargos().add(cargo);
-//	        }
-	  //      empresa = em.merge(empresa);
+			if(funcionarioTotvsDto.getEmployeeSituation().trim().equals("")) {
+				pedestre.setObservacoes("Importado dia " + LocalDate.now().toString());
+				pedestre.setStatus(Status.ATIVO);
+
+			}else {
+				pedestre.setStatus(Status.INATIVO);
+				pedestre.setObservacoes("Funcionario com situação : " + funcionarioTotvsDto.getEmployeeSituation());
+			}
+			
 	        if(Objects.nonNull(empresa)) {
 	        	pedestre.setEmpresa(empresa);
 	        }
-	  //      pedestre.setCargo(cargo);
 	        
 	        if (pedestres == null || pedestres.isEmpty()) {
 	        	pedestre = (PedestreEntity) gravaObjeto(pedestre)[0];
@@ -1877,7 +1869,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 	}
 
 	private static final Map<Long, LocalDate> cacheExecucaoRegras = new HashMap<>();
-    private static final long OITO_HORAS_EM_MILLIS = 3 * 60 * 60 * 1000L;
+    private static final long OITO_HORAS_EM_MILLIS = 30 * 60  * 1000L;
     private static Map<Long, Long> ultimaImportacaoCompletaPorCliente = new HashMap<>();
 	
 	@SuppressWarnings("unchecked")
@@ -1973,6 +1965,10 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		    	System.out.println("DTO recebido: matrícula = " + funcionario.getNumeroMatricula()
 		        + ", nome = " + funcionario.getNome()
 		        + ", codPermissao = " + funcionario.getCodPrm());
+		    	
+		    	if(funcionario.getNumeroMatricula().equals("11")) {
+		    		System.out.println("teste");
+		    	}
 		    	
 		        Optional<PedestreEntity> pedestreExistente = buscaPedestreExistente(funcionario.getNumeroMatricula(), funcionario.getNumCracha(), empresaExistente);
 		        

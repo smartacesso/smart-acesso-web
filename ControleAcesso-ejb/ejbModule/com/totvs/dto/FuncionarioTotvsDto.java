@@ -3,6 +3,7 @@ package com.totvs.dto;
 import java.time.LocalDate;
 
 import br.com.startjob.acesso.modelo.entity.CargoEntity;
+import br.com.startjob.acesso.modelo.entity.ClienteEntity;
 import br.com.startjob.acesso.modelo.entity.EmpresaEntity;
 import br.com.startjob.acesso.modelo.entity.PedestreEntity;
 import br.com.startjob.acesso.modelo.enumeration.Status;
@@ -61,7 +62,7 @@ public class FuncionarioTotvsDto {
 	private String esocialCategoryCode;
 	// Getters and Setters
 
-	public PedestreEntity toPedestreEntity() {
+	public PedestreEntity toPedestreEntity(ClienteEntity cliente) {
 		PedestreEntity pedestre = new PedestreEntity();
 		pedestre.setNome(name);
 		pedestre.setMatricula(code);
@@ -69,21 +70,10 @@ public class FuncionarioTotvsDto {
 		pedestre.setEmail(email);
 		pedestre.setEmpresa(null);
 		pedestre.setCargo(null);
-		
+		pedestre.setCliente(cliente);
 		pedestre.setTipo(TipoPedestre.PEDESTRE);
 		pedestre.setExistente(true);
 		pedestre.setVersao(0);
-		
-		if(employeeSituation.trim().equals("")) {
-			pedestre.setObservacoes("Importado dia " + LocalDate.now().toString());
-			pedestre.setStatus(Status.ATIVO);
-			pedestre.setSempreLiberado(true);
-
-		}else {
-			pedestre.setStatus(Status.INATIVO);
-			pedestre.setSempreLiberado(false);
-			pedestre.setObservacoes("Funcionario com situação : " + employeeSituation);
-		}
 		
 		return pedestre;
 	}
