@@ -66,6 +66,7 @@ public class FuncionarioTotvsDto {
 		PedestreEntity pedestre = new PedestreEntity();
 		pedestre.setNome(name);
 		pedestre.setMatricula(code);
+		pedestre.setCodigoCartaoAcesso(code);
 		pedestre.setCpf(employeeCpf);
 		pedestre.setEmail(email);
 		pedestre.setEmpresa(null);
@@ -74,6 +75,15 @@ public class FuncionarioTotvsDto {
 		pedestre.setTipo(TipoPedestre.PEDESTRE);
 		pedestre.setExistente(true);
 		pedestre.setVersao(0);
+		
+		if(employeeSituation.trim().equals("")) {
+			pedestre.setObservacoes("Importado dia " + LocalDate.now().toString());
+			pedestre.setStatus(Status.ATIVO);
+
+		}else {
+			pedestre.setStatus(Status.INATIVO);
+			pedestre.setObservacoes("Funcionario com situação : " + employeeSituation);
+		}
 		
 		return pedestre;
 	}
