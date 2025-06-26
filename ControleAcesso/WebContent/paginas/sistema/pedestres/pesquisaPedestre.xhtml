@@ -70,7 +70,8 @@
 
 					<p:inputText id="filtro-busca-geral" placeholder="Buscar por nome"
 						value="#{consultaPedestreController.parans['nome']}"
-						style="width:110px; font-size: 11px;" />
+						style="width:110px; font-size: 11px;"
+						onkeypress="if(event.key === 'Enter') { event.preventDefault(); document.getElementById('form:acaoBuscar').click(); }" />
 
 					<p:selectOneMenu id="filtro-tipoPedestre" rendered="false"
 						value="#{consultaPedestreController.parans['tipo']}"

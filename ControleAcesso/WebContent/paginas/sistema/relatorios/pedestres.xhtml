@@ -29,14 +29,15 @@
 					<p:inputText id="filtro-nome" placeholder="Filtrar por nome"
 						styleClass="filtro-nome filtro-nome-sync w-48"
 						onblur="sincronizarFiltro(this, 'filtro-nome-sync');"
-						value="#{relatorioPedestresController.parans['pedestre.nome']}" />
+						value="#{relatorioPedestresController.parans['pedestre.nome']}"
+						onkeypress="if(event.key === 'Enter') { event.preventDefault(); document.getElementById('form:acaoBuscar').click(); }" />
 
 					<p:commandButton id="acaoBuscar"
 						action="#{relatorioPedestresController.buscar()}"
+						process="@this form:filtro-nome" update="@form"
 						title="#{msgs['alt.acao.buscar']}"
-						alt="#{msgs['alt.acao.buscar']}" icon="pi pi-search">
-						<p:ajax process="@form" update="@form" />
-					</p:commandButton>
+						alt="#{msgs['alt.acao.buscar']}" icon="pi pi-search" />
+
 
 					<p:commandButton id="acaoLimpar"
 						action="#{relatorioPedestresController.limpar()}"
@@ -46,13 +47,12 @@
 					</p:commandButton>
 
 					<p:commandButton id="acaoExportar" icon="pi pi-file-excel"
-						ajax="false"
-						title="#{msgs['alt.acao.exportar']}"
+						ajax="false" title="#{msgs['alt.acao.exportar']}"
 						alt="#{msgs['alt.acao.exportar']}">
 						<p:dataExporter type="xlsx" target="form:pedestresTable"
 							fileName="pedestres" />
 					</p:commandButton>
-					
+
 					<h:outputText
 						value="Total: #{relatorioPedestresController.result.size()}"
 						rendered="#{relatorioPedestresController.result.size() > 0}"
@@ -88,8 +88,7 @@
 						<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
 					</p:calendar>
 
-					<p:commandButton id="acaoFiltrosAvancados"
-						icon="pi pi-sliders-h"
+					<p:commandButton id="acaoFiltrosAvancados" icon="pi pi-sliders-h"
 						action="#{relatorioPedestresController.toggleFiltroFlag('relatorio-pedestres-filtroFlag')}">
 						<p:ajax process="@this" update="@this"
 							oncomplete="alternarFiltrosAvançados();" />

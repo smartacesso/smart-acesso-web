@@ -39,7 +39,8 @@
 
 					<p:inputText id="filtro-nome" placeholder="Filtrar por nome"
 						value="#{alteracoesEmMassaController.parans['nome']}"
-						style="width:200px; font-size:13px;" />
+						style="width:200px; font-size:13px;" 
+						onkeypress="if(event.key === 'Enter') { event.preventDefault(); document.getElementById('form:acaoBuscar').click(); }" />
 
 					<p:commandButton id="acaoBuscar"
 						action="#{alteracoesEmMassaController.buscar}" icon="pi pi-search"

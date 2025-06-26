@@ -29,11 +29,13 @@
 					<p:inputText id="filtro-nome" placeholder="Filtrar por nome"
 						onblur="sincronizarFiltro(this, 'filtro-nome-sync');"
 						styleClass="filtro-nome filtro-nome-sync"
-						value="#{relatorioVisitantesController.parans['pedestre.nome']}" />
+						value="#{relatorioVisitantesController.parans['pedestre.nome']}" 
+						onkeypress="if(event.key === 'Enter') { event.preventDefault(); document.getElementById('form:acaoBuscar').click(); }" />
 
 
 					<p:commandButton id="acaoBuscar"
 						action="#{relatorioVisitantesController.buscar()}"
+						process="@this form:filtro-nome" update="@form"
 						title="#{msgs['alt.acao.buscar']}"
 						alt="#{msgs['alt.acao.buscar']}" icon="pi pi-search">
 
