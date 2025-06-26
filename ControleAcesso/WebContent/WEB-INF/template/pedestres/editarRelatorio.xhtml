@@ -4,77 +4,95 @@
     xmlns:h="http://java.sun.com/jsf/html"
     xmlns:p="http://primefaces.org/ui">
 
-    <p:panelGrid columns="4" id="painelCadastroRelatorio" style="width: 100%" rendered="#{cadastroPedestreController.isAdminOrGerente()}">
-        <p:column>
-            <p:outputLabel value="Data e Hora" for="dataHora"/>
-            <br />
-            <p:calendar id="dataHora" value="#{cadastroPedestreController.relatorio.data}" 
-                        pattern="dd/MM/yyyy HH:mm" showTime="true" required="false"/>
-        </p:column>
+    <h:panelGroup layout="block" id="painelCadastroRelatorio" rendered="#{cadastroPedestreController.isAdminOrGerente()}">
+        <p:panel header="Cadastro de Relatório" styleClass="ui-fluid">
+            <div class="ui-g">
 
-        <p:column>
-            <p:outputLabel value="Sentido" for="sentido"/>
-            <br />
-            <p:selectOneMenu id="sentido" value="#{cadastroPedestreController.relatorio.sentido}" required="false">
-                <f:selectItem itemLabel="Selecione" itemValue="" noSelectionOption="true"/>
-                <f:selectItem itemLabel="Entrada" itemValue="ENTRADA"/>
-                <f:selectItem itemLabel="Saída" itemValue="SAIDA"/>
-            </p:selectOneMenu>
-        </p:column>
+                <div class="ui-g-12 ui-md-4">
+                    <p:outputLabel for="dataHora" value="Data e Hora" />
+                    <p:calendar id="dataHora"
+                        value="#{cadastroPedestreController.relatorio.data}"
+                        pattern="dd/MM/yyyy HH:mm"
+                        showTime="true"
+                        required="false" />
+                </div>
 
-        <p:column>
-            <p:outputLabel value="Equipamento" for="equipamento"/>
-            <br />
-            <p:inputText id="equipamento" value="#{cadastroPedestreController.relatorio.equipamento}" />
-        </p:column>
+                <div class="ui-g-12 ui-md-4">
+                    <p:outputLabel for="sentido" value="Sentido" />
+                    <p:selectOneMenu id="sentido"
+                        value="#{cadastroPedestreController.relatorio.sentido}"
+                        required="false">
+                        <f:selectItem itemLabel="Selecione" itemValue="" noSelectionOption="true" />
+                        <f:selectItem itemLabel="Entrada" itemValue="ENTRADA" />
+                        <f:selectItem itemLabel="Saída" itemValue="SAIDA" />
+                    </p:selectOneMenu>
+                </div>
 
-		<p:column>
-			<p:commandButton id="addRelatorio" value="Adicionar Relatório"
-				action="#{cadastroPedestreController.adicionarRelatorio}"
-				process="@form"
-				update="form:cadastroPedestreTab:painelRelatorios form:cadastroPedestreTab:painelCadastroRelatorio" 
-				style="margin-right: 15px;" />
-				
-			<p:commandButton id="buscarRelatorio" value="Buscar Relatório"
-				action="#{cadastroPedestreController.carregarRelatorios()}"
-				process="@form"
-				update="form:cadastroPedestreTab:painelRelatorios form:cadastroPedestreTab:painelCadastroRelatorio" />
-		</p:column>
-	</p:panelGrid>
+                <div class="ui-g-12 ui-md-4">
+                    <p:outputLabel for="equipamento" value="Equipamento" />
+                    <p:inputText id="equipamento"
+                        value="#{cadastroPedestreController.relatorio.equipamento}" />
+                </div>
 
-    <br/>
+                <div class="ui-g-12 ui-md-12">
+                    <p:commandButton id="addRelatorio"
+                        value="Adicionar Relatório"
+                        action="#{cadastroPedestreController.adicionarRelatorio}"
+                        process="@form"
+                        update="form:cadastroPedestreTab:painelRelatorios form:cadastroPedestreTab:painelCadastroRelatorio"
+                        styleClass="p-mr-2"
+                        style="margin-bottom:5px" />
 
-	<p:panelGrid columns="1" id="painelRelatorios" style="width: 100%;">
-		<h:outputText value="Nenhum relatório encontrado." escape="false"
-			rendered="#{empty cadastroPedestreController.listaRelatorios}" />
+                    <p:commandButton id="buscarRelatorio"
+                        value="Buscar Relatório"
+                        action="#{cadastroPedestreController.carregarRelatorios}"
+                        process="@form"
+                        update="form:cadastroPedestreTab:painelRelatorios form:cadastroPedestreTab:painelCadastroRelatorio" />
+                </div>
 
-		<p:dataTable id="tableRelatorios"
-			value="#{cadastroPedestreController.listaRelatorios}" var="r"
-			paginator="true" rows="5" paginatorPosition="bottom"
-			paginatorAlwaysVisible="false">
+            </div>
+        </p:panel>
+    </h:panelGroup>
 
-			<p:column headerText="Data e Hora" style="text-align: center;">
-				<h:outputText value="#{r.data}">
-					<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
-				</h:outputText>
-			</p:column>
+    <p:spacer height="10" />
 
-			<p:column headerText="Sentido" style="text-align: center;">
-				<h:outputText value="#{r.sentido}" />
-			</p:column>
+    <p:panel id="painelRelatorios" header="Relatórios" styleClass="ui-fluid">
 
-			<p:column headerText="Equipamento" style="text-align: center;">
-				<h:outputText value="#{r.equipamento}" />
-			</p:column>
+        <h:outputText value="Nenhum relatório encontrado."
+            rendered="#{empty cadastroPedestreController.listaRelatorios}" />
 
-			<p:column headerText="Ações" style="text-align: center;" rendered="#{cadastroPedestreController.isAdminOrGerente()}">
-				<h:commandButton image="/tema/img/bt_remove_min.png" title="Excluir"
-					action="#{cadastroPedestreController.removerRelatorio(r)}">
-					<p:ajax process="@this"
-						update="form:cadastroPedestreTab:tableRelatorios form:cadastroPedestreTab:painelRelatorios" />
-				</h:commandButton>
-			</p:column>
-		</p:dataTable>
-	</p:panelGrid>
+        <p:dataTable id="tableRelatorios"
+            value="#{cadastroPedestreController.listaRelatorios}"
+            var="r"
+            paginator="true"
+            rows="5"
+            paginatorPosition="bottom"
+            paginatorAlwaysVisible="false"
+            rendered="#{not empty cadastroPedestreController.listaRelatorios}">
+
+            <p:column headerText="Data e Hora" style="text-align: center;">
+                <h:outputText value="#{r.data}">
+                    <f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+                </h:outputText>
+            </p:column>
+
+            <p:column headerText="Sentido" style="text-align: center;">
+                <h:outputText value="#{r.sentido}" />
+            </p:column>
+
+            <p:column headerText="Equipamento" style="text-align: center;">
+                <h:outputText value="#{r.equipamento}" />
+            </p:column>
+
+            <p:column headerText="Ações" style="text-align: center;" rendered="#{cadastroPedestreController.isAdminOrGerente()}">
+                <p:commandButton icon="pi pi-trash"
+                    title="Excluir"
+                    action="#{cadastroPedestreController.removerRelatorio(r)}"
+                    update="form:cadastroPedestreTab:tableRelatorios form:cadastroPedestreTab:painelRelatorios"
+                    process="@this"
+                    styleClass="ui-button-danger" />
+            </p:column>
+        </p:dataTable>
+    </p:panel>
 
 </ui:composition>

@@ -3,67 +3,89 @@
 	xmlns:f="http://java.sun.com/jsf/core"
 	xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:p="http://primefaces.org/ui">
-	
-	<p:panelGrid columns="4" id="painelCadastroPedestreEquipamentos">
-		
-		<p:column>
-			<p:outputLabel value="#{msgs['label.uc008.lista.equipamentos']}" for="listaEquipamentos"/>
-			<br />
-			<p:selectOneMenu value="#{cadastroPedestreController.idEquipamentoSelecionado}">
-				<f:selectItems id="listaEquipamentos" value="#{cadastroPedestreController.listaEquipamentosDisponiveis}"/>
-			</p:selectOneMenu>
-		</p:column>
-		
-		<p:column>
-			<p:outputLabel value="#{msgs['label.uc008.validade']}" for="validadeEquipamento"/>
-			<br />
-			<p:calendar id="validadeEquipamento" value="#{cadastroPedestreController.pedestreEquipamento.validade}" 
-						pattern="dd/MM/yyyy" mask="99/99/9999"/>
-		</p:column>
 
-		<p:column>
-			<br />
-			<p:commandButton id="addEquipamento" value="#{msgs['alt.acao.adicionar']}" action="#{cadastroPedestreController.adicionaPedestreEquipamento}" 
-					update="painelCadastroPedestreEquipamentos equipamentos" process="painelCadastroPedestreEquipamentos"/>
-		</p:column>
-					
+	<p:panelGrid id="painelCadastroPedestreEquipamentos" layout="grid"
+		columns="1" styleClass="form-grid ui-fluid">
+
+		<div class="ui-g">
+			<div class="ui-g-12 ui-md-4">
+				<p:outputLabel value="#{msgs['label.uc008.lista.equipamentos']}"
+					for="listaEquipamentos" />
+				<p:selectOneMenu id="listaEquipamentos"
+					value="#{cadastroPedestreController.idEquipamentoSelecionado}"
+					style="width: 100%;">
+					<f:selectItems
+						value="#{cadastroPedestreController.listaEquipamentosDisponiveis}" />
+				</p:selectOneMenu>
+			</div>
+
+			<div class="ui-g-12 ui-md-4">
+				<p:outputLabel value="#{msgs['label.uc008.validade']}"
+					for="validadeEquipamento" />
+				<p:calendar id="validadeEquipamento"
+					value="#{cadastroPedestreController.pedestreEquipamento.validade}"
+					pattern="dd/MM/yyyy" mask="99/99/9999" style="width: 100%;" />
+			</div>
+
+			<div class="ui-g-12 ui-md-4" style="padding-top: 2rem;">
+				<p:commandButton id="addEquipamento"
+					value="#{msgs['alt.acao.adicionar']}"
+					action="#{cadastroPedestreController.adicionaPedestreEquipamento}"
+					update="painelCadastroPedestreEquipamentos equipamentos"
+					process="painelCadastroPedestreEquipamentos" icon="pi pi-plus"
+					styleClass="ui-button-success" />
+			</div>
+		</div>
 	</p:panelGrid>
-	
+
 	<br />
-	
-	<p:panelGrid columns="2" id="equipamentos" style="width: 100%; text-align: center;">
-							
-		<h:outputText value="#{msgs['msg.nenhum.item.encontrado.adicionar']}" escape="false"
-					  rendered="#{empty cadastroPedestreController.listaPedestresEquipamentos}" />
-	
-		<p:dataTable id="tableEquipamentos" value="#{cadastroPedestreController.listaPedestresEquipamentos}" 
-			var="pedestreEquipamento" paginator="true" rows="5" 
+
+	<p:panelGrid columns="1" id="equipamentos"
+		styleClass="form-grid ui-fluid" style="width: 100%;">
+		<h:outputText value="#{msgs['msg.nenhum.item.encontrado.adicionar']}"
+			escape="false"
+			rendered="#{empty cadastroPedestreController.listaPedestresEquipamentos}" />
+
+		<p:dataTable id="tableEquipamentos"
+			value="#{cadastroPedestreController.listaPedestresEquipamentos}"
+			var="pedestreEquipamento" paginator="true" rows="5"
 			paginatorPosition="bottom" paginatorAlwaysVisible="false"
-			rendered="#{not empty cadastroPedestreController.listaPedestresEquipamentos}">
-			
+			rendered="#{not empty cadastroPedestreController.listaPedestresEquipamentos}"
+			styleClass="ui-datatable-hoverable-rows">
+
 			<p:column headerText="#{msgs['label.uc008.nome']}">
 				<h:outputLabel value="#{pedestreEquipamento.equipamento.nome}" />
 			</p:column>
-			
+
 			<p:column headerText="#{msgs['label.uc008.modelo']}">
 				<h:outputLabel value="#{pedestreEquipamento.equipamento.modelo}" />
 			</p:column>
-			
-			<p:column headerText="#{msgs['label.uc008.validade']}">
+
+			<p:column headerText="#{msgs['label.uc008.validade']}"
+				styleClass="col-desktop-only">
 				<h:outputText value="#{pedestreEquipamento.validade}">
-					<f:convertDateTime pattern="dd/MM/yyyy"/>
-				</h:outputText>			
+					<f:convertDateTime pattern="dd/MM/yyyy" />
+				</h:outputText>
 			</p:column>
-			
-			<p:column headerText="#{msgs['alt.acao.excluir']}" style="text-align: center;">
-				<h:commandButton image="#{menuController.path}/tema/img/bt_remove_min.png" 
-							title="#{msgs['alt.acao.excluir']}" action="#{cadastroPedestreController.removerPedestreEquipamento(pedestreEquipamento)}">
-					<p:ajax process="@this" update="form:cadastroPedestreTab:tableEquipamentos form:cadastroPedestreTab:equipamentos"/>
+
+			<p:column headerText="#{msgs['alt.acao.excluir']}"
+				style="text-align: center;">
+				<h:commandButton
+					image="#{menuController.path}/tema/img/bt_remove_min.png"
+					title="#{msgs['alt.acao.excluir']}"
+					action="#{cadastroPedestreController.removerPedestreEquipamento(pedestreEquipamento)}">
+					<p:ajax process="@this"
+						update="form:cadastroPedestreTab:tableEquipamentos form:cadastroPedestreTab:equipamentos" />
 				</h:commandButton>
 			</p:column>
-			
 		</p:dataTable>
-		
 	</p:panelGrid>
-	
+	<style>
+@media ( max-width : 768px) {
+	.col-desktop-only {
+		display: none !important;
+	}
+}
+</style>
+
 </ui:composition>

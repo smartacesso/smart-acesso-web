@@ -54,19 +54,17 @@
 	<h:body id="body" >
 	
 		<div style="margin: 0px;top: 71px;height: 91%;">
-			<div class="overlay"></div>	
-			<div style="margin: 0px;position: fixed;top: 0;width: 100%;" class="zindex-menu">
-				<div class="menu_normal">
-					<div class="overlay"></div>	
-					<!-- Menu -->
-					<ui:insert name="menu">
-						<ui:include src="./menu.xhtml" />
-					</ui:insert>
-				</div>
+			<div class="overlay"></div>
+			<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+			<div class="menu_normal">
+				<div class="overlay"></div>
+				<!-- Menu -->
+				<ui:insert name="menu">
+					<ui:include src="./menu.xhtml" />
+				</ui:insert>
 			</div>
-			
-			<div style="margin: 0px;top: 0;height: 71px;width: 100%;z-index: -100"></div>
-			
+			</nav>
+
 			<h:form id="form" styleClass="form_external" >
 			
 				<p:ajaxStatus onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" />
@@ -80,12 +78,8 @@
 				</p:dialog>
 				
 			
-		        <div class="breadcrumb_pro" >
-					<!-- Caminho -->
-					<ui:insert name="breadcrumb"></ui:insert>
-				</div>
-			
-				<div class="tools_content" style="background-color: rgb(240,240,241);position: absolute;left: 0;right: 0;" >
+
+				<div class="tools_content" style="background-color: rgb(240,240,241);position: absolute;left: 0;right: 0; top: -80px;" >
 					<!-- Barra de ferramentas -->
 					<div style="margin-left: 20px; margin-right: 20px;">
 						<ui:insert name="tools">
@@ -213,6 +207,15 @@
 		</div>
 		
 	</h:body>
+	
+	<style>
+		* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+		
+	</style>
 	
 </f:view>
 </html>

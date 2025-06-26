@@ -51,18 +51,18 @@
 * {
     -moz-box-sizing: border-box;
     -webkit-box-sizing: border-box;
-    box-sizing: border-box
+    box-sizing: border-box;
 }
 
 body .ui-widget,
 body .ui-widget .ui-widget {
-    text-decoration: none
+    text-decoration: none;
 }
 
 body .ui-widget:not(.pi),
 body .ui-widget .ui-widget:not(.pi) {
     font-family: "Open Sans", "Helvetica Neue", sans-serif;
-    font-size: 12px
+    font-size: 12px;
 }
 
 body .ui-icon {
@@ -76,11 +76,13 @@ body .ui-icon {
     position: static;
     text-indent: 0;
     overflow: visible;
-    background-repeat: no-repeat
+    background-repeat: no-repeat;
+    color: #fff;
 }
 
 body .pi {
-    font-size: 1.25em
+    font-size: 1.25em;
+    color: #fff;
 }
 
 body .ui-corner-all {
@@ -130,7 +132,7 @@ body .ui-widget-overlay {
 }
 
 body a {
-    color: #007ad9;
+    color: #088D8C;
     text-decoration: none
 }
 
@@ -449,7 +451,7 @@ body .ui-chkbox .ui-chkbox-box .ui-chkbox-icon.ui-icon-closethick {
     text-align: center;
     background: 0;
     display: inline-block;
-    font-size: 1.25em
+    font-size: 1.25em;
 }
 
 body .ui-chkbox .ui-chkbox-box .ui-chkbox-icon.ui-icon-closethick:before {
@@ -2407,7 +2409,7 @@ body .ui-texteditor .ql-snow .ql-toolbar .ql-picker-item.ql-selected .ql-stroke-
 
 body .ui-button {
     background-color: #005e9f;
-    color: white !important;
+    color: #fff !important;
     border: 1px solid #005e9f;
     font-size: 14px;
     margin: 0;
@@ -2883,7 +2885,7 @@ body .ui-panel .ui-panel-titlebar .ui-panel-titlebar-icon .ui-icon-closethick {
     text-align: center;
     background: 0;
     display: inline-block;
-    font-size: 1.25em
+    font-size: 1.25em;
 }
 
 body .ui-panel .ui-panel-titlebar .ui-panel-titlebar-icon .ui-icon-closethick:before {
@@ -3943,7 +3945,7 @@ body .ui-paginator .ui-paginator-pages .ui-paginator-page {
     margin: 0;
     -moz-border-radius: 0;
     -webkit-border-radius: 0;
-    border-radius: 0
+    border-radius: 0;
 }
 
 body .ui-paginator .ui-paginator-pages .ui-paginator-page.ui-state-active {
@@ -6864,7 +6866,8 @@ body .ui-dialog .ui-dialog-titlebar .ui-dialog-titlebar-icon .ui-icon-closethick
 }
 
 body .ui-dialog .ui-dialog-titlebar .ui-dialog-titlebar-icon .ui-icon-closethick:before {
-    content: ""
+    content: "";
+    color: #000;
 }
 
 body .ui-dialog .ui-dialog-titlebar .ui-dialog-titlebar-icon .ui-icon-minus {

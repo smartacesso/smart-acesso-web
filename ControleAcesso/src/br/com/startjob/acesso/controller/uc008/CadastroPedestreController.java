@@ -3,11 +3,15 @@ package br.com.startjob.acesso.controller.uc008;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
@@ -15,10 +19,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
+import javax.faces.application.FacesMessage;
+import javax.faces.context.FacesContext;
 import javax.faces.event.AbortProcessingException;
 import javax.faces.event.ComponentSystemEvent;
 import javax.faces.event.ValueChangeEvent;
@@ -36,7 +43,10 @@ import org.primefaces.model.CroppedImage;
 import org.primefaces.model.DefaultStreamedContent;
 import org.primefaces.model.StreamedContent;
 
+import com.google.gson.JsonObject;
+
 import br.com.startjob.acesso.annotations.UseCase;
+import br.com.startjob.acesso.api.WebSocketEndpoint;
 import br.com.startjob.acesso.controller.CadastroBaseController;
 import br.com.startjob.acesso.controller.MenuController;
 import br.com.startjob.acesso.modelo.BaseConstant;
@@ -176,7 +186,8 @@ public class CadastroPedestreController extends CadastroBaseController {
 	
 	private AcessoEntity relatorio = new AcessoEntity(); // para binding do formulário
 	private List<AcessoEntity> listaRelatorios = new ArrayList<>();
-
+	
+	private String linkGerado;
 	
 	@PostConstruct
 	@Override
@@ -1310,6 +1321,58 @@ public class CadastroPedestreController extends CadastroBaseController {
 
 		return "";
 	}
+	
+	public void getLinkAutoatendimento() {
+	    PedestreEntity pedestre = getPedestreAtual();
+	    if (pedestre == null || pedestre.getId() == null ) {
+	        FacesContext.getCurrentInstance().addMessage(null,
+	            new FacesMessage(FacesMessage.SEVERITY_ERROR, "Erro", "Pedestre não selecionado."));
+	        return;
+	    }
+	    pedestre.getTipo();
+
+		if (pedestre == null || pedestre.getCelular() == null) {
+			mensagemFatal("", "msg.celular.nulo");
+			return;
+		}
+
+	    ParametroEntity param = baseEJB.getParametroSistema(
+	            BaseConstant.PARAMETERS_NAME.DIAS_VALIDADE_LINK_CADASTRO_FACIAL_EXTERNO,
+	            getUsuarioLogado().getCliente().getId());
+
+	    int diasValidade = param != null ? Integer.parseInt(param.getValor()) : 1;
+
+	    Calendar calendar = Calendar.getInstance();
+	    calendar.add(Calendar.DAY_OF_YEAR, diasValidade);
+	    long tokenValidade = calendar.getTimeInMillis();
+
+	    String baseUrl = AppAmbienteUtils.isProdution()
+	            ? AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_MAIN_SITE)
+	              + AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_NOME_APP) + "/"
+	            : "http://localhost:8081/";
+
+	    this.linkGerado = baseUrl
+	            + "cadastroAutoatendimento.xhtml"
+	            + "?cliente=" + getUsuarioLogado().getCliente().getId()
+	            + "&idPedestre=" + pedestre.getId()
+	            + "&token=" + tokenValidade;
+	    
+
+		String celphone = pedestre.getCelular().replace("-", "").replace("(", "").replace(")", "").replace(" ", "");
+
+		String msg = "Olá, acesse o link para cadastro facial:\n" + linkGerado;
+
+		try {
+		    String encodedMsg = URLEncoder.encode(msg, "UTF-8");
+		    
+		    PrimeFaces.current().executeScript(
+		        "window.open('" + BaseConstant.URL_WHATSAPP + "55" + celphone + "&text=" + encodedMsg + "','whatsAppTab');");
+
+		} catch (UnsupportedEncodingException e) {
+		    e.printStackTrace();
+		}
+
+	}
 
 	public StreamedContent getPrimeiraFotoStreamed() {
 		return Utils.getStreamedContent(ultimoCadastroExterno.getPrimeiraFoto());
@@ -1770,8 +1833,7 @@ public class CadastroPedestreController extends CadastroBaseController {
 	    }
 	    return null;
 	}
-
-
+	
 	public void alteraDataInicio(ValueChangeEvent event) {
 		getParans().put("data_maior_data", event.getNewValue());
 	}
@@ -2129,4 +2191,11 @@ public class CadastroPedestreController extends CadastroBaseController {
 		this.listaRelatorios = listaRelatorios;
 	}
 
+	public String getLinkGerado() {
+	    return linkGerado;
+	}
+
+	public void setLinkGerado(String linkGerado) {
+	    this.linkGerado = linkGerado;
+	}
 }

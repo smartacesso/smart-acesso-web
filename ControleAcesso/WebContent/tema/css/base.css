@@ -1905,7 +1905,10 @@ input[type="image"] {
 
 .h-grid-header{
 	font-size: 20px;
+	padding-top: 60px !important;
 	padding-bottom: 20px !important;
+	text-align: center;
+	font-weight: bold;
 }
 
 .ui-outputlabel{
@@ -1931,8 +1934,14 @@ li {
 .tools_content .ui-inputfield{
 	background-color: white !important;
 	height: 36px;
-	margin-top: -1px !important;
+	margin-top: 7px !important;
 } 
+
+@media(max-width: 680px) {
+	.tools_content .ui-inputfield{
+	width: 85px;
+	}
+}
 
 .tools_content .ui-selectonemenu {
     display: inline-flex !important;
@@ -1945,6 +1954,7 @@ li {
     display: inline-flex !important;
     height: 28px !important;
     margin-top: 2px !important;
+	width: auto;
 }
 
 body .ui-selectonemenu {

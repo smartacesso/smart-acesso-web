@@ -412,6 +412,15 @@ public class PedestreEntity extends ClienteBaseEntity {
 			return true;
 		return false;
 	}
+	
+	public boolean isVisitante() {
+		return TipoPedestre.VISITANTE.equals(this.tipo);
+	}
+	
+	public boolean autoAtendimentoLiberado() {
+		return Boolean.TRUE.equals(this.autoAtendimento);
+	}
+
 
 	public Long getId() {
 		return id;

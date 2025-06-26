@@ -75,6 +75,16 @@ public class MenuController extends BaseController {
 		
 	}
 	
+	 private boolean painelVisivel = false;
+
+	    public boolean isPainelVisivel() {
+	        return painelVisivel;
+	    }
+
+	    public void togglePainel() {
+	        painelVisivel = !painelVisivel;
+	    }
+	
 	protected void configuraAmbiente() {
 		
 		path = AppAmbienteUtils.getConfig(
@@ -166,7 +176,8 @@ public class MenuController extends BaseController {
 		
 		if(!"smartponto".equals(usuarioLogado.getCliente().getNomeUnidadeOrganizacional())
 				&& !"startjob".equals(usuarioLogado.getCliente().getNomeUnidadeOrganizacional())
-					&& !"adminGeral".equals(usuarioLogado.getNome()))
+					&& !"adminGeral".equals(usuarioLogado.getNome())
+					&& !"fiemg".equals(usuarioLogado.getCliente().getNomeUnidadeOrganizacional()))
 			return;
 		
 		
@@ -238,20 +249,19 @@ public class MenuController extends BaseController {
                 .build();
         relatorios.getElements().add(pedestres);
         
-        DefaultMenuItem ocupacao = DefaultMenuItem.builder()
-                .value(resource.recuperaChave("menu.relatorio.ocupacao", getFacesContext()))
-                .styleClass("ui-simple-menu")
-                .url(BaseConstant.URL_APLICACAO + "/paginas/sistema/relatorios/ocupacao.xhtml")
-                .build();
-        relatorios.getElements().add(ocupacao);
-        
         DefaultMenuItem visitantes = DefaultMenuItem.builder()
                 .value(resource.recuperaChave("menu.relatorio.visitante", getFacesContext()))
                 .styleClass("ui-simple-menu")
                 .url(BaseConstant.URL_APLICACAO + "/paginas/sistema/relatorios/visitantes.xhtml")
                 .build();
         relatorios.getElements().add(visitantes);
-
+        
+        DefaultMenuItem ocupacao = DefaultMenuItem.builder()
+                .value(resource.recuperaChave("menu.relatorio.ocupacao", getFacesContext()))
+                .styleClass("ui-simple-menu")
+                .url(BaseConstant.URL_APLICACAO + "/paginas/sistema/relatorios/ocupacao.xhtml")
+                .build();
+        relatorios.getElements().add(ocupacao);
         
         DefaultMenuItem equipamentos = DefaultMenuItem.builder()
                 .value(resource.recuperaChave("menu.relatorio.equipamentos", getFacesContext()))
@@ -339,16 +349,6 @@ public class MenuController extends BaseController {
 	        DefaultMenuItem alteracaoEmMassa = DefaultMenuItem.builder()
 	                .value(resource.recuperaChave("menu.cadastro.alteracao.massa", getFacesContext()))
 	                .url(BaseConstant.URL_APLICACAO + "/paginas/sistema/alteracoes/alteracoesEmMassa.xhtml")
-	                .styleClass("ui-simple-menu")
-	                .build();
-	        cadastros.getElements().add(alteracaoEmMassa);
-		}
- 
-        if(PerfilAcesso.ADMINISTRADOR.equals(usuarioLogado.getPerfil()) 
-        		|| PerfilAcesso.GERENTE.equals(usuarioLogado.getPerfil())) {
-	        DefaultMenuItem alteracaoEmMassa = DefaultMenuItem.builder()
-	                .value(resource.recuperaChave("menu.cadastro.auto.atendimento", getFacesContext()))
-	                .url(BaseConstant.URL_APLICACAO + "/paginas/sistema/pedestres/cadastroAutoatendimento.xhtml")
 	                .styleClass("ui-simple-menu")
 	                .build();
 	        cadastros.getElements().add(alteracaoEmMassa);

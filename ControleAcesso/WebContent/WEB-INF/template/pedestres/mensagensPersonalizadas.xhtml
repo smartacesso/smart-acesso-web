@@ -3,92 +3,112 @@
 	xmlns:f="http://java.sun.com/jsf/core"
 	xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:p="http://primefaces.org/ui">
-	
-	<p:panelGrid columns="6" id="painelCadastroPedestreMensagens" style="width: 100%">
-		<p:column>
-			<p:outputLabel value="#{msgs['label.uc008.nome']}" for="nomeMensagem"/>
-			<br />
-			<p:inputText id="nomeMensagem" value="#{cadastroPedestreController.mensagemEquipamento.nome}"/>
-		</p:column>
-		
-		<p:column>
-			<p:outputLabel value="#{msgs['label.uc008.status']}" for="statusMensagem"/>
-			<br />
-			<p:selectOneMenu id="statusMensagem" value="#{cadastroPedestreController.mensagemEquipamento.status}">
-				<f:selectItems value="#{cadastroPedestreController.listaStatus}"/>
-			</p:selectOneMenu>
-		</p:column>
-		
-		<p:column>
-			<p:outputLabel value="#{msgs['label.uc008.mensagem']}" for="mensagem"/>
-			<br />
-			<p:inputText id="mensagem" value="#{cadastroPedestreController.mensagemEquipamento.mensagem}" size="50"/>
-		</p:column>
-		
-		<p:column>
-			<p:outputLabel value="#{msgs['label.uc008.quantidade']}" for="qtdeMensagem"/>
-			<br />
-			<p:inputNumber id="qtdeMensagem" value="#{cadastroPedestreController.mensagemEquipamento.quantidade}" 
-							decimalPlaces="0" minValue="0" size="6"/>
-		</p:column>
-		
-		<p:column>
-			<p:outputLabel value="#{msgs['label.uc008.validade']}" for="validadeMensagem"/>
-			<br />
-			<p:calendar id="validadeMensagem" value="#{cadastroPedestreController.mensagemEquipamento.validade}" 
-							pattern="dd/MM/yyyy" mask="99/99/9999" size="10"/>
-		</p:column>
-		
-		<p:column>
-			<br />
-			<p:commandButton id="addMensagem" value="#{msgs['alt.acao.adicionar']}" action="#{cadastroPedestreController.adicionarMensagem}"
-					update="painelCadastroPedestreMensagens mensagens" process="painelCadastroPedestreMensagens"/>
-		</p:column>
-					
+
+	<p:panelGrid id="painelCadastroPedestreMensagens" layout="grid"
+		columns="1" styleClass="form-grid ui-fluid">
+		<div class="ui-g">
+			<div class="ui-g-12 ui-md-6">
+				<p:outputLabel value="#{msgs['label.uc008.nome']}"
+					for="nomeMensagem" />
+				<p:inputText id="nomeMensagem"
+					value="#{cadastroPedestreController.mensagemEquipamento.nome}" />
+			</div>
+
+			<div class="ui-g-12 ui-md-6">
+				<p:outputLabel value="#{msgs['label.uc008.status']}"
+					for="statusMensagem" />
+				<p:selectOneMenu id="statusMensagem"
+					value="#{cadastroPedestreController.mensagemEquipamento.status}">
+					<f:selectItems value="#{cadastroPedestreController.listaStatus}" />
+				</p:selectOneMenu>
+			</div>
+
+			<div class="ui-g-12">
+				<p:outputLabel value="#{msgs['label.uc008.mensagem']}"
+					for="mensagem" />
+				<p:inputText id="mensagem"
+					value="#{cadastroPedestreController.mensagemEquipamento.mensagem}"/>
+			</div>
+
+			<div class="ui-g-12 ui-md-4">
+				<p:outputLabel value="#{msgs['label.uc008.quantidade']}"
+					for="qtdeMensagem" />
+				<p:inputNumber id="qtdeMensagem"
+					value="#{cadastroPedestreController.mensagemEquipamento.quantidade}"
+					decimalPlaces="0" minValue="0" />
+			</div>
+
+			<div class="ui-g-12 ui-md-4">
+				<p:outputLabel value="#{msgs['label.uc008.validade']}"
+					for="validadeMensagem" />
+				<p:calendar id="validadeMensagem"
+					value="#{cadastroPedestreController.mensagemEquipamento.validade}"
+					pattern="dd/MM/yyyy" mask="99/99/9999" />
+			</div>
+
+			<div class="ui-g-12 ui-md-4" style="padding-top: 24px;">
+				<p:commandButton id="addMensagem"
+					value="#{msgs['alt.acao.adicionar']}"
+					action="#{cadastroPedestreController.adicionarMensagem}"
+					update="painelCadastroPedestreMensagens mensagens"
+					process="painelCadastroPedestreMensagens" />
+			</div>
+		</div>
 	</p:panelGrid>
-	
+
 	<br />
-	
-	<p:panelGrid columns="2" id="mensagens" style="width: 100%;">
-							
-		<h:outputText value="#{msgs['msg.nenhum.item.encontrado.adicionar']}" escape="false"
-					  rendered="#{empty cadastroPedestreController.listaMensagensEquipamento}" />
-	
-		<p:dataTable id="tableMensagens" value="#{cadastroPedestreController.listaMensagensEquipamento}" 
-			var="mensgem" paginator="true" rows="5" 
-			paginatorPosition="bottom" paginatorAlwaysVisible="false"
+
+	<p:panelGrid id="mensagens"  columns="1"
+		styleClass="form-grid ui-fluid" style="width: 100%;">
+		<h:outputText value="#{msgs['msg.nenhum.item.encontrado.adicionar']}"
+			escape="false"
+			rendered="#{empty cadastroPedestreController.listaMensagensEquipamento}" />
+
+		<p:dataTable id="tableMensagens"
+			value="#{cadastroPedestreController.listaMensagensEquipamento}"
+			var="mensgem" paginator="true" rows="5" paginatorPosition="bottom"
+			editable="true" paginatorAlwaysVisible="false"
 			rendered="#{not empty cadastroPedestreController.listaMensagensEquipamento}">
-			
-			<p:column headerText="#{msgs['label.uc008.nome']}" style="text-align: center;">
+
+			<p:column headerText="#{msgs['label.uc008.nome']}"
+				style="text-align: center;">
 				<h:outputText value="#{mensgem.nome}" />
 			</p:column>
-			
-			<p:column headerText="#{msgs['label.uc008.status']}" style="text-align: center;">
+
+			<p:column headerText="#{msgs['label.uc008.status']}"
+				style="text-align: center;">
 				<h:outputText value="#{mensgem.status}" />
 			</p:column>
-			
-			<p:column headerText="#{msgs['label.uc008.mensagem']}" style="text-align: center;">
+
+			<p:column headerText="#{msgs['label.uc008.mensagem']}"
+				style="text-align: center;">
 				<h:outputText value="#{mensgem.mensagem}" />
 			</p:column>
-			
-			<p:column headerText="#{msgs['label.uc008.quantidade']}" style="text-align: center;">
+
+			<p:column headerText="#{msgs['label.uc008.quantidade']}"
+				style="text-align: center;">
 				<h:outputText value="#{mensgem.quantidade}" />
 			</p:column>
-			
-			<p:column headerText="#{msgs['label.uc008.validade']}" style="text-align: center;">
+
+			<p:column headerText="#{msgs['label.uc008.validade']}"
+				style="text-align: center;">
 				<h:outputText value="#{mensgem.validade}">
-					<f:convertDateTime pattern="dd/MM/yyyy"/>
+					<f:convertDateTime pattern="dd/MM/yyyy" />
 				</h:outputText>
 			</p:column>
-			
-			<p:column headerText="#{msgs['alt.acao.excluir']}" style="text-align: center;">
-				<h:commandButton image="#{menuController.path}/tema/img/bt_remove_min.png" 
-							title="#{msgs['alt.acao.excluir']}" action="#{cadastroPedestreController.removerMensagem(mensgem)}">
-					<p:ajax process="@this" update="form:cadastroPedestreTab:tableMensagens form:cadastroPedestreTab:mensagens"/>
+
+			<p:column headerText="#{msgs['alt.acao.excluir']}"
+				style="text-align: center;">
+				<h:commandButton
+					image="#{menuController.path}/tema/img/bt_remove_min.png"
+					title="#{msgs['alt.acao.excluir']}"
+					action="#{cadastroPedestreController.removerMensagem(mensgem)}">
+					<p:ajax process="@this"
+						update="form:cadastroPedestreTab:tableMensagens form:cadastroPedestreTab:mensagens" />
 				</h:commandButton>
 			</p:column>
-			
+
 		</p:dataTable>
 	</p:panelGrid>
-	
+
 </ui:composition>

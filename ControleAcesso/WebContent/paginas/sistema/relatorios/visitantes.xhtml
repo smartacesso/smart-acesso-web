@@ -5,239 +5,300 @@
 	xmlns:f="http://java.sun.com/jsf/core"
 	xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:p="http://primefaces.org/ui">
-	
+
 <body>
 
 	<ui:composition template="/tema/templates/template.xhtml">
 		<ui:define name="titulo">
 			#{msgs['title.sistema']} | #{msgs['title.uc011.relatorio.visitantes']}
 		</ui:define>
-		
+
 		<ui:define name="breadcrumb">
-			<a target="_top" href="/#{menuController.appName}/paginas/principal.xhtml"> <h:outputText
+			<a target="_top"
+				href="/#{menuController.appName}/paginas/principal.xhtml"> <h:outputText
 					value="#{msgs['title.principal']}" />
 			</a> > <h:outputText value="#{msgs['title.uc011.relatorio.visitantes']}" />
 		</ui:define>
-		
-		<ui:define name="tools">
-			<h:panelGrid columns="4" styleClass="conteudo_tools">
-				
-				<h:commandButton id="acaoBuscar" 
-						action="#{relatorioVisitantesController.buscar()}" 
-						title="#{msgs['alt.acao.buscar']}" alt="#{msgs['alt.acao.buscar']}"
-						image="#{menuController.path}/tema/img/bt_searcher.png">
-					
-					<p:ajax process="@form" update="@form"/>
-				</h:commandButton>
 
-				<h:commandButton id="acaoLimpar" 
+		<ui:define name="tools">
+			<p:toolbar
+				styleClass="flex flex-col md:flex-row justify-between items-center gap-4 w-full max-w-screen-xl">
+
+				<p:toolbarGroup align="left">
+
+					<p:inputText id="filtro-nome" placeholder="Filtrar por nome"
+						onblur="sincronizarFiltro(this, 'filtro-nome-sync');"
+						styleClass="filtro-nome filtro-nome-sync"
+						value="#{relatorioVisitantesController.parans['pedestre.nome']}" 
+						onkeypress="if(event.key === 'Enter') { event.preventDefault(); document.getElementById('form:acaoBuscar').click(); }" />
+
+
+					<p:commandButton id="acaoBuscar"
+						action="#{relatorioVisitantesController.buscar()}"
+						process="@this form:filtro-nome" update="@form"
+						title="#{msgs['alt.acao.buscar']}"
+						alt="#{msgs['alt.acao.buscar']}" icon="pi pi-search">
+
+						<p:ajax process="@form" update="@form" />
+					</p:commandButton>
+
+					<p:commandButton id="acaoLimpar"
 						action="#{relatorioVisitantesController.limpar()}"
-						title="#{msgs['alt.acao.limpar']}" alt="#{msgs['alt.acao.limpar']}"
-						image="#{menuController.path}/tema/img/bt_cleaner.png">
-					
-					<p:ajax process="@this" update="@form"/>
-				</h:commandButton>
-				
-				<h:commandButton id="acaoExportar" 
-					image="#{menuController.path}/tema/img/bt_exporter_xlsx.png"
-					title="#{msgs['alt.acao.exportar']}" alt="#{msgs['alt.acao.exportar']}">
-					
-					<p:dataExporter type="xlsx" target="form:visitantesTable" fileName="visitantes" />
-				</h:commandButton>
-								
-			</h:panelGrid>
-			
-			<div style="float: right;">
-			
-				<h:outputText value="Total: #{relatorioVisitantesController.result.size()}" style="margin-right: 5px"
-							  rendered="#{relatorioVisitantesController.result.size() > 0}"/>
-			
-				<p:inputText id="filtro-nome" placeholder="Filtrar por nome" style="width:200px;"
-						onblur="sincronizarFiltro(this, 'filtro-nome-sync');" styleClass="filtro-nome filtro-nome-sync"
-						value="#{relatorioVisitantesController.parans['pedestre.nome']}"/>
-				
-				<p:calendar id="filtro-data-inicio" value="#{relatorioVisitantesController.parans['data_maior_data']}"
-						pattern="dd/MM/yyyy HH:mm" mask="99/99/9999 99:99" size="20" navigator="true"
+						title="#{msgs['alt.acao.limpar']}"
+						alt="#{msgs['alt.acao.limpar']}" icon="pi pi-filter">
+
+						<p:ajax process="@this" update="@form" />
+					</p:commandButton>
+
+					<p:commandButton id="acaoExportar" icon="pi pi-file-excel"
+						ajax="false"
+						title="#{msgs['alt.acao.exportar']}"
+						alt="#{msgs['alt.acao.exportar']}">
+
+						<p:dataExporter type="xlsx" target="form:visitantesTable"
+							fileName="visitantes" />
+					</p:commandButton>
+
+
+					<h:outputText
+						value="Total: #{relatorioVisitantesController.result.size()}"
+						style="margin-right: 5px"
+						rendered="#{relatorioVisitantesController.result.size() > 0}" />
+				</p:toolbarGroup>
+
+				<p:toolbarGroup align="right"
+					styleClass="flex gap-2 flex-wrap justify-end items-center w-full md:w-auto">
+
+					<p:calendar id="filtro-data-inicio"
+						value="#{relatorioVisitantesController.parans['data_maior_data']}"
+						pattern="dd/MM/yyyy HH:mm" mask="99/99/9999 99:99" size="15"
+						navigator="true"
 						valueChangeListener="#{relatorioVisitantesController.alteraDataInicio}">
-					
-					<p:ajax event="dateSelect" update="filtro-avancado-dataInicio" />
-					<p:ajax event="change" update="filtro-avancado-dataInicio" />
-					<f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
-				</p:calendar>
-				até	
-				<p:calendar id="filtro-data-fim" value="#{relatorioVisitantesController.parans['data_menor_data']}"
-						pattern="dd/MM/yyyy HH:mm" mask="99/99/9999 99:99" size="20" navigator="true"
+
+						<p:ajax event="dateSelect" update="filtro-avancado-dataInicio" />
+						<p:ajax event="change" update="filtro-avancado-dataInicio" />
+						<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+					</p:calendar>
+					até
+					<p:calendar id="filtro-data-fim"
+						value="#{relatorioVisitantesController.parans['data_menor_data']}"
+						pattern="dd/MM/yyyy HH:mm" mask="99/99/9999 99:99" size="15"
+						navigator="true"
 						valueChangeListener="#{relatorioVisitantesController.alteraDataFim}">
-					
-					<p:ajax event="dateSelect" update="filtro-avancado-dataFim"/>
-					<p:ajax event="change" update="filtro-avancado-dataFim"/>
-					<f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
-				</p:calendar>
-				
-				<h:commandButton id="acaoFiltrosAvancados" 
-					image="#{menuController.path}/tema/img/ic_search_details.png"
-					styleClass="filtro-button"
-					action="#{relatorioVisitantesController.toggleFiltroFlag('relatorio-visitantes-filtroFlag')}">
-					<p:ajax process="@this" update="@this" oncomplete="alternarFiltrosAvançados();"/>
-				</h:commandButton>
-				
-				<p:tooltip for="acaoFiltrosAvancados" value="#{msgs['alt.acao.alternar.filtros.avancados']}" />
-			</div>
+
+						<p:ajax event="dateSelect" update="filtro-avancado-dataFim" />
+						<p:ajax event="change" update="filtro-avancado-dataFim" />
+						<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+					</p:calendar>
+
+					<p:commandButton id="acaoFiltrosAvancados" icon="pi pi-sliders-h"
+						action="#{relatorioVisitantesController.toggleFiltroFlag('relatorio-visitantes-filtroFlag')}">
+						<p:ajax process="@this" update="@this"
+							oncomplete="alternarFiltrosAvançados();" />
+					</p:commandButton>
+
+					<p:tooltip for="acaoFiltrosAvancados"
+						value="#{msgs['alt.acao.alternar.filtros.avancados']}" />
+				</p:toolbarGroup>
+			</p:toolbar>
 		</ui:define>
-		
+
 		<ui:define name="conteudo">
-		
+
 			<script>
 				jQuery(document).ready(function() {
 					try {
 						$('.filtro-nome').on('keydown', function(e) {
-						    if (e.key === "Enter") {
-						    	sincronizarFiltro(this, 'filtro-nome-sync');
-						    }
+							if (e.key === "Enter") {
+								sincronizarFiltro(this, 'filtro-nome-sync');
+							}
 						});
-					}catch(e){}
+					} catch (e) {
+					}
 				})
 			</script>
-			
-			<div class="filtros-avancados" 
+
+			<div class="filtros-avancados"
 				style="width: 100%; display: #{relatorioVisitantesController.getFiltroFlag('relatorio-visitantes-filtroFlag') ? 'inline-block' : 'none'}">
-				
-				<h:panelGrid id="parameters" width="100%" columns="1" headerClass="h-grid-header">
+
+				<h:panelGrid id="parameters" width="100%" columns="1"
+					headerClass="h-grid-header">
 					<f:facet name="header">
 						#{msgs['title.uc008.filtros.avancados']}				
 					</f:facet>
-					
-					<h:panelGrid columns="#{menuController.mobile == true ? 1 : 2}" width="100%">
+
+					<h:panelGrid columns="#{menuController.mobile == true ? 1 : 2}"
+						width="100%">
 						<p:column>
-							<p:outputLabel value="#{msgs['label.uc011.data.inical']}" for="filtro-avancado-dataInicio"/>
-							<br/>
-							<p:calendar id="filtro-avancado-dataInicio" value="#{relatorioVisitantesController.parans['data_maior_data']}" 
-								pattern="dd/MM/yyyy HH:mm" mask="99/99/9999 99:99" navigator="true"
+							<p:outputLabel value="#{msgs['label.uc011.data.inical']}"
+								for="filtro-avancado-dataInicio" />
+							<br />
+							<p:calendar id="filtro-avancado-dataInicio"
+								value="#{relatorioVisitantesController.parans['data_maior_data']}"
+								pattern="dd/MM/yyyy HH:mm" mask="99/99/9999 99:99"
+								navigator="true"
 								valueChangeListener="#{relatorioVisitantesController.alteraDataInicio}">
-								
-								<p:ajax event="dateSelect" update="filtro-data-inicio"/>
-								<p:ajax event="change" update="filtro-data-inicio"/>
-								<f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
-							</p:calendar>
-						</p:column>
-						
-						<p:column>
-							<p:outputLabel value="#{msgs['label.uc011.data.final']}" for="filtro-avancado-dataFim"/>
-							<br/>
-							<p:calendar id="filtro-avancado-dataFim" value="#{relatorioVisitantesController.parans['data_menor_data']}" 
-								pattern="dd/MM/yyyy HH:mm" mask="99/99/9999 99:99" navigator="true"
-								valueChangeListener="#{relatorioVisitantesController.alteraDataFim}">
-								
-								<p:ajax event="dateSelect" update="filtro-data-fim"/>
-								<p:ajax event="change" update="filtro-data-fim"/>
-								<f:convertDateTime pattern="dd/MM/yyyy HH:mm"/>
+
+								<p:ajax event="dateSelect" update="filtro-data-inicio" />
+								<p:ajax event="change" update="filtro-data-inicio" />
+								<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
 							</p:calendar>
 						</p:column>
 
 						<p:column>
-							<p:outputLabel value="#{msgs['label.uc011.nome']}" for="filtro-avancado-nome"/>
+							<p:outputLabel value="#{msgs['label.uc011.data.final']}"
+								for="filtro-avancado-dataFim" />
 							<br />
-							<p:inputText id="filtro-avancado-nome" value="#{relatorioVisitantesController.parans['pedestre.nome']}" size="50"
-								onblur="sincronizarFiltro(this, 'filtro-nome-sync');" styleClass="filtro-nome-sync" />
+							<p:calendar id="filtro-avancado-dataFim"
+								value="#{relatorioVisitantesController.parans['data_menor_data']}"
+								pattern="dd/MM/yyyy HH:mm" mask="99/99/9999 99:99"
+								navigator="true"
+								valueChangeListener="#{relatorioVisitantesController.alteraDataFim}">
+
+								<p:ajax event="dateSelect" update="filtro-data-fim" />
+								<p:ajax event="change" update="filtro-data-fim" />
+								<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+							</p:calendar>
 						</p:column>
-						
+
 						<p:column>
-							<p:outputLabel value="#{msgs['label.uc011.equipamento']}" for="filtro-avancado-equipamento"/>
+							<p:outputLabel value="#{msgs['label.uc011.nome']}"
+								for="filtro-avancado-nome" />
 							<br />
-							<p:selectOneMenu id="filtro-avancado-equipamento" value="#{relatorioVisitantesController.parans['equipamento']}">
-								<f:selectItems value="#{relatorioVisitantesController.listaEquipamentos}" />
+							<p:inputText id="filtro-avancado-nome"
+								value="#{relatorioVisitantesController.parans['pedestre.nome']}"
+								size="50" onblur="sincronizarFiltro(this, 'filtro-nome-sync');"
+								styleClass="filtro-nome-sync" />
+						</p:column>
+
+						<p:column>
+							<p:outputLabel value="#{msgs['label.uc011.equipamento']}"
+								for="filtro-avancado-equipamento" />
+							<br />
+							<p:selectOneMenu id="filtro-avancado-equipamento"
+								value="#{relatorioVisitantesController.parans['equipamento']}">
+								<f:selectItems
+									value="#{relatorioVisitantesController.listaEquipamentos}" />
 							</p:selectOneMenu>
 						</p:column>
-						
+
 						<p:column>
-							<p:outputLabel value="#{msgs['label.uc011.empresa']}" for="filtro-avancado-empresa"/>
+							<p:outputLabel value="#{msgs['label.uc011.empresa']}"
+								for="filtro-avancado-empresa" />
 							<br />
-							<p:selectOneMenu id="filtro-avancado-empresa" value="#{relatorioVisitantesController.parans['pedestre.empresa.id']}"
+							<p:selectOneMenu id="filtro-avancado-empresa"
+								value="#{relatorioVisitantesController.parans['pedestre.empresa.id']}"
 								valueChangeListener="#{relatorioVisitantesController.eventoEmpresaSelecionada}">
-								<f:selectItems value="#{relatorioVisitantesController.listaEmpresas}"/>
-								<p:ajax process="@this" update="@this filtro-avancado-departamento filtro-avancado-centroCusto filtro-avancado-cargo" 
-									event="valueChange"/>
-								<f:converter converterId="javax.faces.Long"/>
+								<f:selectItems
+									value="#{relatorioVisitantesController.listaEmpresas}" />
+								<p:ajax process="@this"
+									update="@this filtro-avancado-departamento filtro-avancado-centroCusto filtro-avancado-cargo"
+									event="valueChange" />
+								<f:converter converterId="javax.faces.Long" />
 							</p:selectOneMenu>
 						</p:column>
-						
+
 						<p:column>
-							<p:outputLabel value="#{msgs['label.uc011.departamento']}" for="filtro-avancado-departamento"/>
+							<p:outputLabel value="#{msgs['label.uc011.departamento']}"
+								for="filtro-avancado-departamento" />
 							<br />
-							<p:selectOneMenu id="filtro-avancado-departamento" value="#{relatorioVisitantesController.parans['pedestre.departamento.id']}">
-								<f:selectItems value="#{relatorioVisitantesController.listaDepartamentos}"/>
-								<f:converter converterId="javax.faces.Long"/>
+							<p:selectOneMenu id="filtro-avancado-departamento"
+								value="#{relatorioVisitantesController.parans['pedestre.departamento.id']}">
+								<f:selectItems
+									value="#{relatorioVisitantesController.listaDepartamentos}" />
+								<f:converter converterId="javax.faces.Long" />
 							</p:selectOneMenu>
 						</p:column>
-						
+
 						<p:column>
-							<p:outputLabel value="#{msgs['label.uc011.cargo']}" for="filtro-avancado-cargo"/>
+							<p:outputLabel value="#{msgs['label.uc011.cargo']}"
+								for="filtro-avancado-cargo" />
 							<br />
-							<p:selectOneMenu id="filtro-avancado-cargo" value="#{relatorioVisitantesController.parans['pedestre.cargo.id']}">
-								<f:selectItems value="#{relatorioVisitantesController.listaCargos}"/>
-								<f:converter converterId="javax.faces.Long"/>
+							<p:selectOneMenu id="filtro-avancado-cargo"
+								value="#{relatorioVisitantesController.parans['pedestre.cargo.id']}">
+								<f:selectItems
+									value="#{relatorioVisitantesController.listaCargos}" />
+								<f:converter converterId="javax.faces.Long" />
 							</p:selectOneMenu>
 						</p:column>
-						
+
 						<p:column>
-							<p:outputLabel value="#{msgs['label.uc011.centro.custo']}" for="filtro-avancado-centroCusto"/>
+							<p:outputLabel value="#{msgs['label.uc011.centro.custo']}"
+								for="filtro-avancado-centroCusto" />
 							<br />
-							<p:selectOneMenu id="filtro-avancado-centroCusto" value="#{relatorioVisitantesController.parans['pedestre.centroCusto.id']}">
-								<f:selectItems value="#{relatorioVisitantesController.listaCentrosDeCusto}"/>
-								<f:converter converterId="javax.faces.Long"/>
+							<p:selectOneMenu id="filtro-avancado-centroCusto"
+								value="#{relatorioVisitantesController.parans['pedestre.centroCusto.id']}">
+								<f:selectItems
+									value="#{relatorioVisitantesController.listaCentrosDeCusto}" />
+								<f:converter converterId="javax.faces.Long" />
 							</p:selectOneMenu>
 						</p:column>
-					
+
 					</h:panelGrid>
 				</h:panelGrid>
 			</div>
-			
+
 			<h:panelGrid width="100%" columns="1" headerClass="h-grid-header">
 				<f:facet name="header">
 					<h:outputText value="#{msgs['title.uc011.relatorio.visitantes']}" />
 				</f:facet>
-				
+
 				<h:column>
-				
+
 					<ui:include src="/tema/templates/vazio.xhtml">
-						<ui:param name="exibe" value="#{empty relatorioVisitantesController.result}" />
+						<ui:param name="exibe"
+							value="#{empty relatorioVisitantesController.result}" />
 						<ui:param name="exibeAdicionar" value="true" />
 					</ui:include>
-					
-					<p:dataTable id="visitantesTable" value="#{relatorioVisitantesController.result}" var="visitante" 
-						rendered="#{not empty relatorioVisitantesController.result}" paginator="true" 
-						rows="#{relatorioVisitantesController.quantPorPagina}" paginatorPosition="bottom"
-						paginatorAlwaysVisible="false" >
-						
-						<p:column headerText="#{msgs['label.uc009.foto']}" style="text-align: center; width: 60px">
-							<p:graphicImage value="#{visitante.pedestre.foto != null 
+
+					<p:dataTable id="visitantesTable"
+						value="#{relatorioVisitantesController.result}" var="visitante"
+						rendered="#{not empty relatorioVisitantesController.result}"
+						paginator="true"
+						rows="#{relatorioVisitantesController.quantPorPagina}"
+						paginatorPosition="bottom" paginatorAlwaysVisible="false">
+
+						<p:column headerText="#{msgs['label.uc009.foto']}"
+						styleClass="col-desktop-only"
+							style="text-align: center; width: 60px">
+							<p:graphicImage
+								value="#{visitante.pedestre.foto != null 
 									? relatorioVisitantesController.getStreamedContent(visitante.pedestre.foto)
 									: visitante.pedestre.genero eq 'FEMININO'
 										? '../../../tema/img/ic_photo_female.png'
-										: '../../../tema/img/ic_photo_male.png'}" 
-								stream="false" 
-								style="height: 50px;width: 50px; padding: 0px; margin: 0px; cursor: pointer; border-radius: 50%;"/>
+										: '../../../tema/img/ic_photo_male.png'}"
+								stream="false"
+								style="height: 50px;width: 50px; padding: 0px; margin: 0px; cursor: pointer; border-radius: 50%;" />
 						</p:column>
-						
-						<p:column headerText="#{msgs['label.uc011.numero.cartao.acesso']}" style="text-align: center">
-							<h:outputText value="#{visitante.pedestre.codigoCartaoAcesso != null ? visitante.pedestre.codigoCartaoAcesso : '--'}" />
+
+						<p:column headerText="#{msgs['label.uc011.numero.cartao.acesso']}"
+						styleClass="col-desktop-only"
+							style="text-align: center">
+							<h:outputText
+								value="#{visitante.pedestre.codigoCartaoAcesso != null ? visitante.pedestre.codigoCartaoAcesso : '--'}" />
 						</p:column>
-						
-						<p:column headerText="#{msgs['label.uc011.nome']}" style="text-align: center">
+
+						<p:column headerText="#{msgs['label.uc011.nome']}"
+							style="text-align: center">
 							<h:outputText value="#{visitante.pedestre.nome}" />
 						</p:column>
-						
-						<p:column headerText="#{msgs['label.uc011.empresa']}" style="text-align: center">
+
+						<p:column headerText="#{msgs['label.uc011.empresa']}"
+						styleClass="col-desktop-only"
+							style="text-align: center">
 							<h:outputText value="#{visitante.pedestre.empresa.nome}" />
 						</p:column>
-						
-						<p:column headerText="#{msgs['label.uc011.data.nascimento']}" style="text-align: center">
+
+						<p:column headerText="#{msgs['label.uc011.data.nascimento']}"
+						styleClass="col-desktop-only"
+							style="text-align: center">
 							<h:outputText value="#{visitante.pedestre.dataNascimento}">
-								<f:convertDateTime pattern="dd/MM/yyyy"/>
+								<f:convertDateTime pattern="dd/MM/yyyy" />
 							</h:outputText>
 						</p:column>
 
 						<p:column headerText="#{msgs['label.uc011.cpf']}"
+						styleClass="col-desktop-only"
 							style="text-align: center">
 							<h:outputText value="#{visitante.pedestre.cpf}">
 								<f:convertDateTime pattern="dd/MM/yyyy" />
@@ -245,43 +306,61 @@
 						</p:column>
 
 						<p:column headerText="#{msgs['label.uc011.observacao']}"
+						styleClass="col-desktop-only"
 							style="text-align: center">
 							<h:outputText value="#{visitante.pedestre.observacoes}">
 								<f:convertDateTime pattern="dd/MM/yyyy" />
 							</h:outputText>
 						</p:column>
 
-						<p:column headerText="#{msgs['label.uc011.data.acesso']}" style="text-align: center">
+						<p:column headerText="#{msgs['label.uc011.data.acesso']}"
+							style="text-align: center">
 							<h:outputText value="#{visitante.data}">
-								<f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss"/>
+								<f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
 							</h:outputText>
 						</p:column>
-						
-						<p:column headerText="#{msgs['label.uc011.equipamento']}" style="text-align: center">
+
+						<p:column headerText="#{msgs['label.uc011.equipamento']}"
+						styleClass="col-desktop-only"
+							style="text-align: center">
 							<h:outputText value="#{visitante.equipamento}" />
 						</p:column>
-						
-						<p:column headerText="#{msgs['label.uc011.tipo.acesso']}" style="text-align: center">
+
+						<p:column headerText="#{msgs['label.uc011.tipo.acesso']}"
+						styleClass="col-desktop-only"
+							style="text-align: center">
 							<h:outputText value="#{msgs[visitante.tipo]}" />
 						</p:column>
-						
-						<p:column headerText="#{msgs['label.uc011.sentido']}" style="text-align: center">
-							<h:outputFormat value="#{visitante.tipo == 'ATIVO' ? visitante.sentido : '---'}" />
+
+						<p:column headerText="#{msgs['label.uc011.sentido']}"
+							style="text-align: center">
+							<h:outputFormat
+								value="#{visitante.tipo == 'ATIVO' ? visitante.sentido : '---'}" />
 						</p:column>
-						
-						<p:column headerText="#{msgs['alt.acao.visualizar']}" style="text-align: center" exportable="false">
+
+						<p:column headerText="#{msgs['alt.acao.visualizar']}"
+						styleClass="col-desktop-only"
+							style="text-align: center" exportable="false">
 							<h:commandButton id="acaoVisualizar"
 								action="#{relatorioVisitantesController.redirecionaPaginaEditarPedetre(visitante.pedestre.id, 'reVisitantes')}"
-								title="#{msgs['alt.acao.visualizar']}" alt="#{msgs['alt.acao.visualizar']}"
-								image="#{menuController.path}/tema/img/bt_viewer_min.png"/>
+								title="#{msgs['alt.acao.visualizar']}"
+								alt="#{msgs['alt.acao.visualizar']}"
+								image="#{menuController.path}/tema/img/bt_viewer_min.png" />
 						</p:column>
-						
+
 					</p:dataTable>
-					
+
 				</h:column>
 			</h:panelGrid>
+			<style>
+@media ( max-width : 768px) {
+	.col-desktop-only {
+		display: none !important;
+	}
+}
+</style>
 		</ui:define>
-		
+
 	</ui:composition>
 </body>
 </html>

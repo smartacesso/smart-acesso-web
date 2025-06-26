@@ -1,183 +1,253 @@
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
-xmlns:ui="http://java.sun.com/jsf/facelets"
-xmlns:f="http://java.sun.com/jsf/core"
-xmlns:h="http://java.sun.com/jsf/html"
-xmlns:p="http://primefaces.org/ui">
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui">
 
 	<style>
-		.whiteIcon .ui-icon{
-			color: #fff;
-		}
-		.whiteIcon .ui-button-text{
-			color: #fff;
-		}
-	</style>
 	
-	<p:panelGrid id="painelFoto" columns="1" style="margin-left: 20px;">
-		<p:column>
-			<p:graphicImage value="#{menuController.path}/tema/img/ic_photo_male.png"
-				style="height: 150px;width: 150px; padding: 0px; margin: 0px; cursor: pointer; margin-bottom: 30px;"
-				onclick="PF('escolherFoto').show()" rendered="#{cadastroPedestreController.entidade.foto == null}"/>
-				
-			<p:graphicImage value="#{cadastroPedestreController.getSreamedContent(cadastroPedestreController.entidade.foto)}" 
-				rendered="#{cadastroPedestreController.entidade.foto != null}" stream="false" 
-				style="height: 150px;width: 150px; padding: 0px; margin: 0px; cursor: pointer; margin-bottom: 30px; border-radius: 50%;"
-				onclick="PF('escolherFoto').show()"/>
-		</p:column>
-	</p:panelGrid>
-	
-	<p:panelGrid id="painelTipoPedestre" columns="1">
-		<p:column rendered="#{empty cadastroPedestreController.tipo
-							and cadastroPedestreController.entidade.id == null}">
-			<p:outputLabel value="#{msgs['label.uc008.selecione.tipo.usuario']}" indicateRequired="true" style="text-alig: left;"/>
-			<br />
-			<div class="refresh-accent">
-				<h:selectOneRadio id="tipoUsuario" value="#{cadastroPedestreController.entidade.tipo}">
-					<f:selectItems value="#{cadastroPedestreController.listaTipoUsario}"/>
-					<p:ajax process="@this" update="painelTipoPedestre"/>
-				</h:selectOneRadio>
-			</div>
-		</p:column>
-		
-		<p:column rendered="#{not empty cadastroPedestreController.tipo
-							or cadastroPedestreController.entidade.id != null}">
-			<h:outputText value="Tipo: "/>
-			<h:outputText value="#{cadastroPedestreController.entidade.tipo}" style="font-weight: bold;"/>
-		</p:column>
-		
-		<p:column>
-			<p:outputLabel value="#{msgs['label.uc008.status']}" for="status" />
-			<br />
-			<p:selectOneMenu id="status" value="#{cadastroPedestreController.entidade.status}" >
-				<f:selectItems value="#{cadastroPedestreController.listaStatus}"/>
-			</p:selectOneMenu>
-		</p:column>
-		
-		<p:column rendered="#{cadastroPedestreController.exibeCampoMatricula}">
-			<p:outputLabel value="#{msgs['label.uc008.matricula']}" for="matricula"/>
-			<br />
-			<p:inputText id="matricula" value="#{cadastroPedestreController.entidade.matricula}" size="20" 
-				disabled="#{cadastroPedestreController.desabilitaCampoMatricula}" onkeyup="$(this).val($(this).val().replace(/[^0-9]/g, ''));">
-			</p:inputText>
-		</p:column>
-		
-		<p:column>
-			<p:outputLabel value="#{msgs['label.uc008.codigo.cartao.acesso']}" for="codigoCartaoAcesso"/>
-			<br />
-			<p:inputText id="codigoCartaoAcesso" value="#{cadastroPedestreController.entidade.codigoCartaoAcesso}" 
-				size="20" maxlength="#{cadastroPedestreController.qtdeDigitosCartao}" styleClass="left-zeros" 
-				required="#{cadastroPedestreController.verificaObrigatorio('cartao.acesso')}" autocomplete="off" />
-		</p:column>
-		
-		<p:column rendered="#{cadastroPedestreController.exibeCampoSempreLiberado()}">
-			<p:selectBooleanCheckbox id="sempreLiberadoCheck" value="#{cadastroPedestreController.entidade.sempreLiberado}"
-				itemLabel="#{msgs['label.uc008.sempre.liberado']}"/>
-		</p:column>
-		
-		<p:column>
-			<p:selectBooleanCheckbox id="habilitaTecladoCheck" value="#{cadastroPedestreController.entidade.habilitarTeclado}"
-				itemLabel="#{msgs['label.uc008.habilitar.teclado']}"/>
-		</p:column>
+	.bloco-pedestre{
+	display:flex;
+    flex-direction: column;
+    align-items:center;
+    justify-content:center;
+	}
 
-		<p:column>
-			<p:selectBooleanCheckbox id="AutoAtendimentoCheck"
-				value="#{cadastroPedestreController.entidade.autoAtendimento}"
-				itemLabel="#{msgs['label.uc008.auto.atendimento']}">
-				<p:ajax
-					listener="#{cadastroPedestreController.onAutoAtendimentoChange}"
-					process="@this" />
-			</p:selectBooleanCheckbox>
-		</p:column>
+.whiteIcon .ui-icon, .whiteIcon .ui-button-text {
+	color: #fff;
+}
 
-		<p:column rendered="#{cadastroPedestreController.exibeCampoCadastroFacialObrigatorio()}">
-			<p:selectBooleanCheckbox id="cadastroFacialObrigatorioCheck" value="#{cadastroPedestreController.entidade.cadastroFacialObrigatorio}" 
-				itemLabel="#{msgs['label.uc008.cadastro.facial.obrigatorio']}"/>
-		</p:column>
-		
-		<p:column rendered="#{cadastroPedestreController.exibeCheckBoxDeEnvioSMS()}">
-			<p:selectBooleanCheckbox id="enviaSMSdeConfirmacaoEntrada" value="#{cadastroPedestreController.entidade.enviaSmsAoPassarNaCatraca}"
-				itemLabel="#{msgs['label.enviar.sms.ao.entrar']}" />
-		</p:column>
-		
-	</p:panelGrid>
+.image-container {
+	/*display: flex;
+	justify-content: center;
+	align-items: center;
+	margin-bottom: 1rem;*/
+	width: 150px;
+	height: 150px;
+}
+
+.image-container img {
+	width: 150px;
+	height: 150px;
+	cursor: pointer;
+	border-radius: 50px;
+}
+
+.form-section {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
+	padding: 1rem;
+	width: 35%;
+}
+
+@media screen and (max-width: 600px) {
 	
+	.form-section {
+		padding: 0.5rem;
+		width:100%;
+	}
+}
+</style>
+
+	<!-- Foto -->
+	<p:outputPanel id="painelFoto" styleClass="image-container">
+		<p:graphicImage
+			value="#{menuController.path}/tema/img/ic_photo_male.png"
+			rendered="#{cadastroPedestreController.entidade.foto == null}"
+			onclick="PF('escolherFoto').show()" />
+
+		<p:graphicImage
+			value="#{cadastroPedestreController.getSreamedContent(cadastroPedestreController.entidade.foto)}"
+			rendered="#{cadastroPedestreController.entidade.foto != null}"
+			stream="false" onclick="PF('escolherFoto').show()" />
+	</p:outputPanel>
+
+	<!-- Formulário Principal -->
+	<p:outputPanel id="painelTipoPedestre" styleClass="form-section">
+
+		<p:outputPanel
+			rendered="#{empty cadastroPedestreController.tipo and cadastroPedestreController.entidade.id == null}">
+			<p:outputLabel value="#{msgs['label.uc008.selecione.tipo.usuario']}"
+				indicateRequired="true" />
+			<h:selectOneRadio id="tipoUsuario"
+				value="#{cadastroPedestreController.entidade.tipo}">
+				<f:selectItems value="#{cadastroPedestreController.listaTipoUsario}" />
+				<p:ajax process="@this" update="painelTipoPedestre" />
+			</h:selectOneRadio>
+		</p:outputPanel>
+
+		<p:outputPanel
+			rendered="#{not empty cadastroPedestreController.tipo or cadastroPedestreController.entidade.id != null}">
+			<h:outputText value="Tipo: " />
+			<h:outputText value="#{cadastroPedestreController.entidade.tipo}"
+				style="font-weight: bold;" />
+		</p:outputPanel>
+
+		<p:outputLabel value="#{msgs['label.uc008.status']}" for="status" />
+		<p:selectOneMenu id="status"
+			value="#{cadastroPedestreController.entidade.status}">
+			<f:selectItems value="#{cadastroPedestreController.listaStatus}" />
+		</p:selectOneMenu>
+
+		<p:outputPanel
+			rendered="#{cadastroPedestreController.exibeCampoMatricula}">
+			<p:outputLabel value="#{msgs['label.uc008.matricula']}"
+				for="matricula" />
+			<br/>
+			<p:inputText id="matricula"
+				value="#{cadastroPedestreController.entidade.matricula}"
+				disabled="#{cadastroPedestreController.desabilitaCampoMatricula}"
+				onkeyup="$(this).val($(this).val().replace(/[^0-9]/g, ''));" />
+		</p:outputPanel>
+
+		<p:outputLabel value="#{msgs['label.uc008.codigo.cartao.acesso']}"
+			for="codigoCartaoAcesso" />
+		<p:inputText id="codigoCartaoAcesso"
+			value="#{cadastroPedestreController.entidade.codigoCartaoAcesso}"
+			maxlength="#{cadastroPedestreController.qtdeDigitosCartao}"
+			styleClass="left-zeros"
+			required="#{cadastroPedestreController.verificaObrigatorio('cartao.acesso')}"
+			autocomplete="off" />
+
+		<p:selectBooleanCheckbox id="sempreLiberadoCheck"
+			rendered="#{cadastroPedestreController.exibeCampoSempreLiberado()}"
+			value="#{cadastroPedestreController.entidade.sempreLiberado}"
+			itemLabel="#{msgs['label.uc008.sempre.liberado']}" />
+
+		<p:selectBooleanCheckbox id="habilitaTecladoCheck"
+			value="#{cadastroPedestreController.entidade.habilitarTeclado}"
+			itemLabel="#{msgs['label.uc008.habilitar.teclado']}" />
+
+		<p:selectBooleanCheckbox id="AutoAtendimentoCheck"
+			value="#{cadastroPedestreController.entidade.autoAtendimento}"
+			itemLabel="#{msgs['label.uc008.auto.atendimento']}">
+			<p:ajax
+				listener="#{cadastroPedestreController.onAutoAtendimentoChange}"
+				process="@this" />
+		</p:selectBooleanCheckbox>
+
+		<p:selectBooleanCheckbox id="cadastroFacialObrigatorioCheck"
+			rendered="#{cadastroPedestreController.exibeCampoCadastroFacialObrigatorio()}"
+			value="#{cadastroPedestreController.entidade.cadastroFacialObrigatorio}"
+			itemLabel="#{msgs['label.uc008.cadastro.facial.obrigatorio']}" />
+
+		<p:selectBooleanCheckbox id="enviaSMSdeConfirmacaoEntrada"
+			rendered="#{cadastroPedestreController.exibeCheckBoxDeEnvioSMS()}"
+			value="#{cadastroPedestreController.entidade.enviaSmsAoPassarNaCatraca}"
+			itemLabel="#{msgs['label.enviar.sms.ao.entrar']}" />
+	</p:outputPanel>
+
+	<!-- Diálogos mantidos com estilos e ajustes internos -->
+	<!-- ... (os diálogos podem seguir como estão, já estão funcionais e bem definidos) -->
 	<h:form enctype="multipart/form-data" prependId="false">
-		<p:dialog id="dialogEscolherFoto" widgetVar="escolherFoto" header="#{msgs['label.uc008.origem.foto']}" modal="true" resizable="false">
+		<p:dialog id="dialogEscolherFoto" widgetVar="escolherFoto"
+			header="#{msgs['label.uc008.origem.foto']}" modal="true"
+			resizable="false">
 
 			<p:panelGrid columns="1" style="text-align: center;">
 				<p:column>
-					<p:button id="abrirCamera" value="#{msgs['alt.acao.tirar.foto']}" update="form:dialogTirarFoto" 
-							onclick="PF('escolherFoto').hide(); PF('pc').attach(); PF('tirarFoto').show(); return false;" style="width: 100%"/>
+					<p:button id="abrirCamera" value="#{msgs['alt.acao.tirar.foto']}"
+						update="form:dialogTirarFoto"
+						onclick="PF('escolherFoto').hide(); PF('pc').attach(); PF('tirarFoto').show(); return false;"
+						style="width: 100%" />
 				</p:column>
-				
+
 				<p:column>
-					<p:button id="abrirArquivo" value="#{msgs['alt.acao.procurar.arquivo']}" onclick="clicaBotaoFileUpload(); return false;" style="width: 100%"/>
+					<p:button id="abrirArquivo"
+						value="#{msgs['alt.acao.procurar.arquivo']}"
+						onclick="clicaBotaoFileUpload(); return false;"
+						style="width: 100%" />
 				</p:column>
-				
-				<p:fileUpload id="acaoAbrirArquivo" listener="#{cadastroPedestreController.upload}" multiple="false" 
-							sizeLimit="3145728" allowTypes="/(\.|\/)(jpe?g|png)$/" auto="true" style="display: none;" 
-							update="form:dialogCropImage" onstart="PF('statusDialogEnviandoFile').show(); return true;"
-							oncomplete="PF('statusDialogEnviandoFile').hide(); PF('escolherFoto').hide(); PF('cropImage').show(); return false;">
+
+				<p:fileUpload id="acaoAbrirArquivo"
+					listener="#{cadastroPedestreController.upload}" multiple="false"
+					sizeLimit="3145728" allowTypes="/(\.|\/)(jpe?g|png)$/" auto="true"
+					style="display: none;" update="form:dialogCropImage"
+					onstart="PF('statusDialogEnviandoFile').show(); return true;"
+					oncomplete="PF('statusDialogEnviandoFile').hide(); PF('escolherFoto').hide(); PF('cropImage').show(); return false;">
 				</p:fileUpload>
-				
+
 				<p:column>
-					<p:button value="#{msgs['alt.acao.cancelar']}" onclick="PF('escolherFoto').hide(); return false;" style="width: 100%"/>
+					<p:button value="#{msgs['alt.acao.cancelar']}"
+						onclick="PF('escolherFoto').hide(); return false;"
+						style="width: 100%" />
 				</p:column>
 			</p:panelGrid>
-			
+
 		</p:dialog>
 	</h:form>
-	
+
 	<h:form enctype="multipart/form-data" prependId="false">
-		<p:dialog id="dialogTirarFoto" widgetVar="tirarFoto" header="#{msgs['label.uc008.tirar.foto']}" 
-					modal="true" onHide="PF('pc').dettach()">
-			
-			<p:photoCam id="idPc" widgetVar="pc" listener="#{cadastroPedestreController.capturarFoto}" autoStart="false"/>
-			<p:commandButton value="#{msgs['label.uc008.capturar']}" process="dialogTirarFoto" update="form:dialogCropImage"
-				onclick="PF('pc').capture();" oncomplete="PF('tirarFoto').hide(); PF('cropImage').show(); PF('pc').dettach(); return false;"
-				style="margin-top: 10px"/>
-				
+		<p:dialog id="dialogTirarFoto" widgetVar="tirarFoto"
+			header="#{msgs['label.uc008.tirar.foto']}" modal="true"
+			onHide="PF('pc').dettach()">
+
+			<p:photoCam id="idPc" widgetVar="pc"
+				listener="#{cadastroPedestreController.capturarFoto}"
+				autoStart="false" />
+			<p:commandButton value="#{msgs['label.uc008.capturar']}"
+				process="dialogTirarFoto" update="form:dialogCropImage"
+				onclick="PF('pc').capture();"
+				oncomplete="PF('tirarFoto').hide(); PF('cropImage').show(); PF('pc').dettach(); return false;"
+				style="margin-top: 10px" />
+
 		</p:dialog>
 	</h:form>
-	 
-	<p:dialog id="dialogCropImage" widgetVar="cropImage" header="#{msgs['label.uc008.cortar.imagem']}" modal="true" closable="false"
-		width="370" position="top" resizable="true" positionType="absolute">
-		
+
+	<p:dialog id="dialogCropImage" widgetVar="cropImage"
+		header="#{msgs['label.uc008.cortar.imagem']}" modal="true"
+		closable="false" width="370" position="top" resizable="true"
+		positionType="absolute">
+
 		<h:panelGrid columns="2">
-			<p:imageCropper id="imageCroppedTemp" value="#{cadastroPedestreController.croppedImage}"  
-					rendered="#{cadastroPedestreController.exibeCrop}" 
-					image="#{menuController.urlMain}/resources/upload/#{cadastroPedestreController.fileNameTemp}" 
-					initialCoords="0,0,150,150" aspectRatio="1.0" guides="true" minSize="150,150"
-					onerror="console.error('Erro ao carregar imagem no cropper');"
-   					onsuccess="console.log('Cropper inicializado com sucesso');" />
+			<p:imageCropper id="imageCroppedTemp"
+				value="#{cadastroPedestreController.croppedImage}"
+				rendered="#{cadastroPedestreController.exibeCrop}"
+				image="#{menuController.urlMain}/resources/upload/#{cadastroPedestreController.fileNameTemp}"
+				initialCoords="0,0,150,150" aspectRatio="1.0" guides="true"
+				minSize="150,150"
+				onerror="console.error('Erro ao carregar imagem no cropper');"
+				onsuccess="console.log('Cropper inicializado com sucesso');" />
 
 		</h:panelGrid>
-		
-	 	<p:commandButton value="#{msgs['label.uc008.cortar']}" action="#{cadastroPedestreController.crop}" process="dialogCropImage" update="painelFoto" icon="pi pi-clone" 
-	 			oncomplete="PF('cropImage').hide(); console.log('Imagem cortada com sucesso:', '#{cadastroPedestreController.croppedImage}'); return false;"
-				 style="margin-top: 10px; margin-right: 10px;" styleClass="whiteIcon"/>
-	 	
-	 	<p:commandButton value="#{msgs['alt.acao.cancelar']}" action="#{cadastroPedestreController.cancelaCrop}" process="@this"
-	 			oncomplete="PF('cropImage').hide(); PF('escolherFoto').show(); console.log('Corte cancelado'); return false;"/>
-		
+
+		<p:commandButton value="#{msgs['label.uc008.cortar']}"
+			action="#{cadastroPedestreController.crop}" process="dialogCropImage"
+			update="painelFoto" icon="pi pi-clone"
+			oncomplete="PF('cropImage').hide(); console.log('Imagem cortada com sucesso:', '#{cadastroPedestreController.croppedImage}'); return false;"
+			style="margin-top: 10px; margin-right: 10px;" styleClass="whiteIcon" />
+
+		<p:commandButton value="#{msgs['alt.acao.cancelar']}"
+			action="#{cadastroPedestreController.cancelaCrop}" process="@this"
+			oncomplete="PF('cropImage').hide(); PF('escolherFoto').show(); console.log('Corte cancelado'); return false;" />
+
 	</p:dialog>
-	
-	<p:dialog id="cartaoAcessoExistenteDialog" widgetVar="cartaoAcessoExistente" header="#{msgs['msg.uc008.cartao.acesso.existente']}" 
-				modal="true">
-		<p:outputLabel value="#{msgs['msg.uc008.este.cartao.acesso.esta.em.uso']}"/>
-		<br/>
-		<p:link target="_blank" value="#{cadastroPedestreController.pedestreComCartaoAcesoExistente.nome}" style="font-size: 14px;">
-    		<f:param name="id" value="#{cadastroPedestreController.pedestreComCartaoAcesoExistente.id}" />
-    		<f:param name="tipo" value="#{cadastroPedestreController.pedestreComCartaoAcesoExistente.tipo eq 'VISITANTE' ? 'vi' : 'pe'}"/>
+
+	<p:dialog id="cartaoAcessoExistenteDialog"
+		widgetVar="cartaoAcessoExistente"
+		header="#{msgs['msg.uc008.cartao.acesso.existente']}" modal="true">
+		<p:outputLabel
+			value="#{msgs['msg.uc008.este.cartao.acesso.esta.em.uso']}" />
+		<br />
+		<p:link target="_blank"
+			value="#{cadastroPedestreController.pedestreComCartaoAcesoExistente.nome}"
+			style="font-size: 14px;">
+			<f:param name="id"
+				value="#{cadastroPedestreController.pedestreComCartaoAcesoExistente.id}" />
+			<f:param name="tipo"
+				value="#{cadastroPedestreController.pedestreComCartaoAcesoExistente.tipo eq 'VISITANTE' ? 'vi' : 'pe'}" />
 		</p:link>
-		<br/>
-		<p:button value="Voltar" onclick="PF('cartaoAcessoExistente').hide(); return false;" style="margin-left: 220px; margin-top: 20px;" />
+		<br />
+		<p:button value="Voltar"
+			onclick="PF('cartaoAcessoExistente').hide(); return false;"
+			style="margin-left: 220px; margin-top: 20px;" />
 	</p:dialog>
-	
+
+	<!-- Script -->
 	<script>
 		function clicaBotaoFileUpload() {
 			document.getElementById("form:acaoAbrirArquivo_label").click();
 		}
 	</script>
-	
 </ui:composition>
