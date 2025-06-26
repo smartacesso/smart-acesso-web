@@ -43,7 +43,11 @@ import br.com.startjob.acesso.modelo.enumeration.Status;
 				+ "where (obj.removido = false or obj.removido is null) " + "order by obj.id asc"),
 		@NamedQuery(name = "ResponsibleEntity.findAllByNome", query = "select obj from ResponsibleEntity obj "
 				+ "where obj.nome like :NOME " + " and (obj.removido = false or obj.removido is null) "
-				+ " and obj.status = 'ATIVO' " + " and obj.cliente.id = :ID_CLIENTE " + "order by obj.id asc") })
+				+ " and obj.status = 'ATIVO' " + " and obj.cliente.id = :ID_CLIENTE " + "order by obj.id asc"),
+		@NamedQuery(name = "ResponsibleEntity.findByLoginGeral", query = "select obj from ResponsibleEntity obj "
+				+ "where obj.login = :LOGIN " 
+				+ "order by obj.id asc") 
+		})
 public class ResponsibleEntity extends ClienteBaseEntity {
 
 	@Id

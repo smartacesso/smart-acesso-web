@@ -3,7 +3,9 @@ package br.com.startjob.acesso.controller.uc016;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.faces.model.SelectItem;
@@ -12,6 +14,7 @@ import javax.inject.Named;
 
 import br.com.startjob.acesso.annotations.UseCase;
 import br.com.startjob.acesso.controller.BaseController;
+import br.com.startjob.acesso.modelo.entity.PedestreEntity;
 import br.com.startjob.acesso.modelo.entity.ResponsibleEntity;
 import br.com.startjob.acesso.modelo.entity.UsuarioEntity;
 import br.com.startjob.acesso.modelo.enumeration.PerfilAcesso;
@@ -40,48 +43,74 @@ public class CadastroResponsavelController extends BaseController {
 	
 	@Override
 	public String salvar() {
-		ResponsibleEntity responsavel = (ResponsibleEntity) getEntidade();
-		String passwordEncrypted = "";
+	    ResponsibleEntity responsavel = (ResponsibleEntity) getEntidade();
+	    boolean isNovo = (responsavel.getId() == null);
 
-		try {
-			passwordEncrypted = EncryptionUtils.encrypt(responsavel.getPassword());
-		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-		}
-		
-		responsavel.setPassword(passwordEncrypted);
-		responsavel.setCliente(getUsuarioLogado().getCliente());
+	    String passwordEncrypted = null;
 
-		String retorno = super.salvar();
-		
-		
-		if (!"e".equals(retorno)) { // Verifica se não houve erro ao salvar o responsável
-			UsuarioEntity usuario = new UsuarioEntity();
-			usuario.setNome(responsavel.getNome());
-			usuario.setLogin(responsavel.getLogin());
-			usuario.setSenha(passwordEncrypted);
-			usuario.setEmail(responsavel.getEmail());
-			usuario.setCpf(responsavel.getCpf());
-			usuario.setRg(responsavel.getRg());
-			usuario.setCelular(responsavel.getCelular());
-			usuario.setDataNascimento(responsavel.getDataNascimento());
-			usuario.setPerfil(PerfilAcesso.RESPONSAVEL);
-			usuario.setCliente(responsavel.getCliente());
-			usuario.setStatus(Status.ATIVO);
+	    // Checa se login já existe em novo cadastro
+	    if (isNovo && responsavelExiste(responsavel.getLogin())) {
+	        mensagemFatal("", "Login já existe");
+	        return "e";
+	    }
 
-			try {
-				baseEJB.gravaObjeto(usuario); // Persistindo o usuário usando a mesma lógica
-			} catch (Exception e) {
-				e.printStackTrace();
-				return "e";
-			}
-		}
-		
-		redirect("/paginas/sistema/responsaveis/pesquisaResponsavel.xhtml?acao=OK");
-		return retorno;
+	    try {
+	        if (responsavel.getPassword() != null && !responsavel.getPassword().trim().isEmpty()) {
+	            // Criptografa nova senha se foi digitada
+	            passwordEncrypted = EncryptionUtils.encrypt(responsavel.getPassword());
+	            responsavel.setPassword(passwordEncrypted);
+	        } else if (!isNovo) {
+	            // Em edição: mantém senha atual
+	            ResponsibleEntity existente = (ResponsibleEntity) baseEJB.recuperaObjeto(ResponsibleEntity.class, responsavel.getId());
+	            responsavel.setPassword(existente.getPassword());
+	        }
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        mensagemFatal("", "Erro ao criptografar a senha");
+	        return "e";
+	    }
+
+	    responsavel.setCliente(getUsuarioLogado().getCliente());
+
+	    String retorno = super.salvar();
+
+	    if (!"e".equals(retorno)) {
+	        try {
+//	            UsuarioEntity usuario = getUsuarioPorLogin(responsavel.getLogin());
+
+//	            if (usuario == null) {
+	        	UsuarioEntity  usuario = new UsuarioEntity();
+	                usuario.setLogin(responsavel.getLogin());
+	                usuario.setPerfil(PerfilAcesso.RESPONSAVEL);
+	                usuario.setCliente(responsavel.getCliente());
+	                usuario.setStatus(Status.ATIVO);
+//	            }
+
+	            usuario.setNome(responsavel.getNome());
+	            usuario.setEmail(responsavel.getEmail());
+	            usuario.setCpf(responsavel.getCpf());
+	            usuario.setRg(responsavel.getRg());
+	            usuario.setCelular(responsavel.getCelular());
+	            usuario.setDataNascimento(responsavel.getDataNascimento());
+
+	            if (passwordEncrypted != null) {
+	                usuario.setSenha(passwordEncrypted);
+	            }
+
+	            baseEJB.gravaObjeto(usuario);
+
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	            mensagemFatal("", "Erro ao salvar usuário vinculado");
+	            return "e";
+	        }
+
+	        redirect("/paginas/sistema/responsaveis/pesquisaResponsavel.xhtml?acao=OK");
+	    }
+
+	    return retorno;
 	}
+
 	
 	private void montaListaStatus() {
 		listaStatus = new ArrayList<SelectItem>();
@@ -97,5 +126,40 @@ public class CadastroResponsavelController extends BaseController {
 	public void setListaStatus(List<SelectItem> listaStatus) {
 		this.listaStatus = listaStatus;
 	}
+	
+	@SuppressWarnings("unchecked")
+	private boolean responsavelExiste(String login) {
+	    Map<String, Object> args = new HashMap<>();
+	    args.put("LOGIN", login.trim().toLowerCase());
+
+	    List<ResponsibleEntity> encontrados = new ArrayList<>();
+
+	    try {
+	        encontrados = (List<ResponsibleEntity>) baseEJB
+	                .pesquisaArgFixosLimitado(ResponsibleEntity.class, "findByLoginGeral", args, 0, 1);
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return false; // ou true, se quiser barrar o cadastro em caso de erro
+	    }
+
+	    if (encontrados == null || encontrados.isEmpty()) {
+	        return false;
+	    }
+
+	    ResponsibleEntity responsavelAtual = (ResponsibleEntity) getEntidade();
+
+	    for (ResponsibleEntity r : encontrados) {
+	        // Em edição, ignora o próprio registro
+	        if (responsavelAtual.getId() != null && responsavelAtual.getId().equals(r.getId())) {
+	            continue;
+	        }
+	        return true; // Existe outro com o mesmo login
+	    }
+
+	    return false;
+	}
+
+
+
 
 }

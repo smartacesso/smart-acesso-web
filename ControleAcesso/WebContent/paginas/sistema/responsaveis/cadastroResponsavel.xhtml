@@ -34,8 +34,7 @@
 
 				<p:commandButton id="save"
 					action="#{cadastroResponsavelController.salvar}"
-					title="#{msgs['alt.acao.save']}"
-					icon="pi pi-check">
+					title="#{msgs['alt.acao.save']}" icon="pi pi-check">
 					<p:ajax process="@form" update="@form" />
 				</p:commandButton>
 
@@ -139,9 +138,12 @@
 									<div class="ui-g-12 ui-md-6">
 										<p:outputLabel value="#{msgs['label.uc016.senha']}"
 											for="senha" indicateRequired="true" />
-										<p:inputMask id="senha"
+										<p:password id="senha"
 											value="#{cadastroResponsavelController.entidade.password}"
-											required="true" style="width: 100%" />
+											required="#{cadastroResponsavelController.entidade.id == null}"
+											redisplay="#{cadastroResponsavelController.entidade.id == null}"
+											style="width: 100%" />
+
 									</div>
 
 								</div>
