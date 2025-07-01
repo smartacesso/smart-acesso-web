@@ -61,7 +61,8 @@ public class PedestrianAccessTO {
 	private Boolean bloqueado;
 	
 	private Boolean enviaSmsAoPassarNaCatraca;
-	
+
+	private Long idLocal;
 	private Long idEmpresa;
 	private Long idCargo;
 	private Long idCentroCusto;
@@ -121,6 +122,8 @@ public class PedestrianAccessTO {
 		this.bairro			  = objects[35] == null ? null : objects[35].toString();
 		this.cidade			  = objects[36] == null ? null : objects[36].toString();
 		this.estado			  = objects[37] == null ? null : objects[37].toString();
+		
+		this.idLocal 		  = objects[78] == null ? null : Long.valueOf(objects[78].toString());
 		
 		this.idEmpresa = objects[45] == null ? null : Long.valueOf(objects[45].toString());
 		this.idCargo = objects[46] == null ? null : Long.valueOf(objects[46].toString());
@@ -852,6 +855,14 @@ public class PedestrianAccessTO {
 
 	public void setDataCadastroFotoNaHikivision(Date dataCadastroFotoNaHikivision) {
 		this.dataCadastroFotoNaHikivision = dataCadastroFotoNaHikivision;
+	}
+
+	public Long getIdLocal() {
+		return idLocal;
+	}
+
+	public void setIdLocal(Long idLocal) {
+		this.idLocal = idLocal;
 	}
 	
 }

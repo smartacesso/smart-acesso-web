@@ -2172,7 +2172,7 @@ public class BaseEJB implements BaseEJBRemote {
 
 		return pedestreRegra;
 	}
-
+	
 	private void apagaDadosCartaoAcessoVisitate(PedestreEntity visitante, PedestreRegraEntity pedestreRegra) {
 		if (pedestreRegra == null || pedestreRegra.getRegra() == null) {
 			visitante.setCodigoCartaoAcesso(null);

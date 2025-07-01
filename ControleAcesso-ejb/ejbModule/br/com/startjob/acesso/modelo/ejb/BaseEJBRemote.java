@@ -376,4 +376,5 @@ public interface BaseEJBRemote {
 	 */
 
 	public void enviaNotificacao(List<AcessoEntity> logs) throws Exception;
+	
 }

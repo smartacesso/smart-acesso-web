@@ -23,13 +23,16 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.codec.binary.Base64;
+import org.hibernate.Hibernate;
 import org.primefaces.shaded.json.JSONArray;
 import org.primefaces.shaded.json.JSONException;
 import org.primefaces.shaded.json.JSONObject;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 
+import br.com.startjob.acesso.modelo.ejb.BaseEJB;
 import br.com.startjob.acesso.modelo.ejb.BaseEJBRemote;
 import br.com.startjob.acesso.modelo.ejb.PedestreEJBRemote;
 import br.com.startjob.acesso.modelo.entity.AcessoEntity;
@@ -45,6 +48,7 @@ import br.com.startjob.acesso.modelo.entity.EmpresaEntity;
 import br.com.startjob.acesso.modelo.entity.EnderecoEntity;
 import br.com.startjob.acesso.modelo.entity.EquipamentoEntity;
 import br.com.startjob.acesso.modelo.entity.HorarioEntity;
+import br.com.startjob.acesso.modelo.entity.LocalEntity;
 import br.com.startjob.acesso.modelo.entity.MensagemEquipamentoEntity;
 import br.com.startjob.acesso.modelo.entity.ParametroEntity;
 import br.com.startjob.acesso.modelo.entity.PedestreEntity;
@@ -61,6 +65,7 @@ import br.com.startjob.acesso.modelo.enumeration.TipoQRCode;
 import br.com.startjob.acesso.modelo.enumeration.TipoRegra;
 import br.com.startjob.acesso.to.DeviceTO;
 import br.com.startjob.acesso.to.EmpresaTO;
+import br.com.startjob.acesso.to.LocalTo;
 import br.com.startjob.acesso.to.PedestrianAccessTO;
 import br.com.startjob.acesso.to.RegraTO;
 import br.com.startjob.acesso.to.UserTO;
@@ -198,6 +203,41 @@ public class DesktopApiService extends BaseService {
 			e.printStackTrace();
 		}
 		return Response.status(statusResponse).entity(usersAccessListTO).build();
+	}
+	
+	@GET
+	@Path("/requestAllLocais")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response requestAllLocais(@QueryParam("client") Long idClient) {
+		if (idClient == null) {
+			return Response.status(Status.NOT_FOUND).entity("See status code").build();
+		}
+
+		try {
+			Map<String, Object> args = new HashMap<String, Object>();
+			args.put("ID_CLIENTE", idClient);
+			
+			List<LocalTo> locaisTO = new ArrayList<LocalTo>();
+			List<LocalEntity> locais = (List<LocalEntity>) ((BaseEJBRemote) getEjb("BaseEJB"))
+					.pesquisaArgFixos(LocalEntity.class, "findAllByIdCliente", args);
+
+			if (locais == null || locais.isEmpty()) {
+				return Response.status(Status.NOT_FOUND).entity(locaisTO).build();				
+			}
+			
+			for(LocalEntity local : locais) {
+				locaisTO.add(new LocalTo(local));
+			}
+			System.out.println(new ObjectMapper().writeValueAsString(locaisTO));
+
+			
+			return Response.status(Status.OK).entity(locaisTO).build();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return Response.status(Status.NOT_FOUND).entity(null).build();
 	}
 
 	@GET
@@ -695,6 +735,77 @@ public class DesktopApiService extends BaseService {
 
 		return Response.status(statusResponse).entity("See status code.").build();
 	}
+	
+	@POST
+	@Path("/uploadLocais")
+	@Produces(MediaType.TEXT_PLAIN)
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response uploadLocais(String parans) {
+	    Status statusResponse = Status.OK;
+
+	    try {
+	        JSONArray jsonArray = new JSONArray(parans);
+
+	        if (jsonArray.length() <= 0) {
+	            return Response.status(Status.BAD_REQUEST).entity("JSON vazio").build();
+	        }
+
+	        for (int i = 0; i < jsonArray.length(); i++) {
+	            JSONObject jsonObject = jsonArray.getJSONObject(i);
+
+	            String nomeLocal = jsonObject.optString("nome", null);
+	            Long idCliente = jsonObject.has("idCliente") ? Long.parseLong(jsonObject.getString("idCliente")) : null;
+
+	            if (nomeLocal == null || idCliente == null) {
+	            	 return Response.status(Status.BAD_REQUEST).entity(String.format("Local invalido: nome: %s, idCliente: %s", nomeLocal, idCliente)).build();
+	            }
+	            
+	            LocalEntity local = buscaLocalPeloNomeAndIdCliente(nomeLocal, idCliente);
+
+	            if (local == null) {
+	                local = new LocalEntity();
+	            }
+
+	            local.setNome(nomeLocal);
+
+	            if (local.getCliente() == null) {
+	                ClienteEntity cliente = buscaClientePeloId(idCliente);
+	                local.setCliente(cliente);
+	            }
+
+	            // Removido precisa?
+	            if (jsonObject.has("removido")) {
+	                local.setRemovido(Boolean.valueOf(jsonObject.getString("removido")));
+
+	                if (Boolean.TRUE.equals(local.getRemovido())) {
+	                    local.setDataRemovido(new Date());
+	                }else {
+	                	local.setRemovido(false);
+	                	local.setDataRemovido(null);
+	                }
+	            }
+
+	            // Lista de câmeras
+	            if (jsonObject.has("hikvisionDeviceNames")) {
+	                JSONArray camerasArray = jsonObject.getJSONArray("hikvisionDeviceNames");
+	                List<String> cameraNames = new ArrayList<>();
+	                for (int j = 0; j < camerasArray.length(); j++) {
+	                    cameraNames.add(camerasArray.getString(j));
+	                }
+	                local.setHikivisionDeviceNames(cameraNames);
+	            }
+
+	            // Salvar ou atualizar no banco
+	            getEjb("BaseEJB").alteraObjeto(local);
+	        }
+
+	    } catch (Exception e) {
+	        statusResponse = Status.INTERNAL_SERVER_ERROR;
+	        e.printStackTrace();
+	    }
+
+	    return Response.status(statusResponse).entity("See status code.").build();
+	}
 
 	private PedestreEntity buscaPedestrePorIdTemp(Long idTemp, Long idCliente) {
 		if (idTemp == null || idCliente == null)
@@ -737,6 +848,28 @@ public class DesktopApiService extends BaseService {
 
 		return null;
 	}
+	
+	private LocalEntity buscaLocalPeloNomeAndIdCliente(String nome, Long idCliente ) {
+		Map<String, Object> args = new HashMap<>();
+		args.put("NOME", nome);
+		args.put("ID_CLIENTE", idCliente);
+
+		List<LocalEntity> locais = null;
+
+		try {
+			locais = (List<LocalEntity>) ((BaseEJBRemote) getEjb("BaseEJB"))
+					.pesquisaArgFixos(LocalEntity.class, "findByNameAndLocal", args);
+			if (locais != null)
+				return locais.stream().findFirst().orElse(null);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return null;
+	}
+	
+	
 
 	private void adicionaRegraParaVisitante(PedestreEntity visitante, JSONObject jsonObject) throws Exception {
 		Map<String, Object> arg = new HashMap<>();
@@ -1175,6 +1308,10 @@ public class DesktopApiService extends BaseService {
 		visitante.setCelular(jsonObject.getString("celular"));
 		visitante.setObservacoes(jsonObject.getString("observacoes"));
 
+		if (jsonObject.getString("idLocal") != null && !jsonObject.getString("idLocal").isEmpty()) {
+			visitante.setIdLocal(Long.valueOf(jsonObject.getString("idLocal")));
+		}
+		
 		// Dados da empresa
 		if (jsonObject.getString("idEmpresa") != null && !jsonObject.getString("idEmpresa").isEmpty())
 			visitante.setEmpresa(

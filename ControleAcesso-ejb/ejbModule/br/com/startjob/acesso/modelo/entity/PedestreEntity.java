@@ -199,6 +199,9 @@ public class PedestreEntity extends ClienteBaseEntity {
 
 	@Column(name = "ALTERAR_EM_MASSA", nullable = true)
 	private Boolean alterarEmMassa = null;
+	
+	@Column(name = "ID_LOCAL", nullable = true, length = 50)
+	private Long idLocal;
 
 	@ManyToOne(cascade = { CascadeType.PERSIST }, fetch = FetchType.LAZY)
 	@JoinColumn(name = "ID_ENDERECO", nullable = true)
@@ -875,6 +878,14 @@ public class PedestreEntity extends ClienteBaseEntity {
 
 	public void setAutoAtendimentoAt(Date autoAtendimentoAt) {
 		this.autoAtendimentoAt = autoAtendimentoAt;
+	}
+
+	public Long getIdLocal() {
+		return idLocal;
+	}
+
+	public void setIdLocal(Long idLocal) {
+		this.idLocal = idLocal;
 	}
 
 }
