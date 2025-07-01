@@ -228,8 +228,6 @@ public class DesktopApiService extends BaseService {
 			for(LocalEntity local : locais) {
 				locaisTO.add(new LocalTo(local));
 			}
-			System.out.println(new ObjectMapper().writeValueAsString(locaisTO));
-
 			
 			return Response.status(Status.OK).entity(locaisTO).build();
 
@@ -1308,8 +1306,10 @@ public class DesktopApiService extends BaseService {
 		visitante.setCelular(jsonObject.getString("celular"));
 		visitante.setObservacoes(jsonObject.getString("observacoes"));
 
-		if (jsonObject.getString("idLocal") != null && !jsonObject.getString("idLocal").isEmpty()) {
-			visitante.setIdLocal(Long.valueOf(jsonObject.getString("idLocal")));
+		if(jsonObject.has("idLocal")) {
+			if (jsonObject.getString("idLocal") != null && !jsonObject.getString("idLocal").isEmpty()) {
+				visitante.setIdLocal(Long.valueOf(jsonObject.getString("idLocal")));
+			}
 		}
 		
 		// Dados da empresa
