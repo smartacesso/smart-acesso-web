@@ -73,7 +73,7 @@ public class ResponsibleEJB extends BaseEJB implements ResponsibleEJBRemote {
 		try {
 			@SuppressWarnings("unchecked")
 			List<AcessoEntity> dependentsAccess = (List<AcessoEntity>) this.pesquisaArgFixos(AcessoEntity.class,
-					"findAllByIdPedestre", args);
+					"findAllByIdPedestreSemData", args);
 			
 //			page = Math.max(page, 1); // Garante que o mínimo seja 1
 //			int ini = (page - 1) * size;
