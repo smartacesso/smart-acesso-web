@@ -100,7 +100,7 @@ import br.com.startjob.acesso.modelo.utils.EncryptionUtils;
 				+ " left join fetch obj.cliente c " + "where (obj.removido = false or obj.removido is null) "
 				+ "	   and lower(c.nomeUnidadeOrganizacional) = lower(:UNIDADE_ORGANIZACIONAL) "
 				+ "	   and obj.login = :LOGIN and obj.senha = :SENHA "),
-		@NamedQuery(name = "PedestreEntity.findByMatriculaAndIdEmpresaAndIdCliente", query = "select obj from PedestreEntity obj "
+		@NamedQuery(name = "PedestreEntity.findByMatriculaAndIdEmpresaAndIdCliente", query = "select distinct obj from PedestreEntity obj "
 				+ "left join fetch obj.empresa e " + "left join fetch obj.equipamentos eq "
 				+ "where obj.matricula = :MATRICULA " + "and e.id = :ID_EMPRESA "
 				+ "and obj.cliente.id = :ID_CLIENTE "),
@@ -367,8 +367,7 @@ public class PedestreEntity extends ClienteBaseEntity {
 			this.status = Status.INATIVO;
 		} else {
 			// Atualiza para ativo somente se o status atual não for INATIVO
-			System.out.println("Funcionario sem nenhum impedimento");
-				this.observacoes = "STATUS : ATIVO";
+				this.observacoes = "STATUS : ATIVO  \nALTERACAO : " + this.getDataAlteracao();
 				this.status = Status.ATIVO;
 		}
 	}

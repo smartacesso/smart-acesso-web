@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -27,6 +28,7 @@ import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
+import javax.persistence.OptimisticLockException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 
@@ -177,8 +179,17 @@ public class BaseEJB implements BaseEJBRemote {
 			if (entidadeImp.getDataCriacao() == null) {
 				entidadeImp.setDataCriacao(new Date());
 			}
+			
+	        if (!entidadeImp.isAlterado()) {
+	            entidadeImp.setDataAlteracao(new Date());
+	        } else {
+	            // Adiciona 30 minutos à hora atual (valor setado manualmente será mantido ou substituído aqui)
+	            Calendar calendar = Calendar.getInstance();
+	            calendar.add(Calendar.MINUTE, 60);
+	            entidadeImp.setDataAlteracao(calendar.getTime());
+	        }
 
-			entidadeImp.setDataAlteracao(new Date());
+	        entidadeImp.setAlterado(false); // Resetar após uso
 		}
 
 	}
@@ -384,7 +395,7 @@ public class BaseEJB implements BaseEJBRemote {
 //	}
 
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
-	public String excluiObjetoPorId(Class<? extends BaseEntity> clazz, Long id) throws Exception {
+	public void excluiObjetoPorId(Class<? extends BaseEntity> clazz, Long id) throws Exception {
 		try {
 			if (id == null) {
 				throw new Exception("ID não pode ser nulo.");
@@ -410,8 +421,6 @@ public class BaseEJB implements BaseEJBRemote {
 			em.flush();
 
 			logger.debug("Objeto removido com sucesso!");
-
-			return "Objeto excluído com sucesso.";
 
 		} catch (Exception e) {
 			logger.error("Erro ao excluir objeto por ID.", e);
@@ -1935,63 +1944,83 @@ public class BaseEJB implements BaseEJBRemote {
 		}
 
 		for (AcessoEntity log : logs) {
+
+			// Caso não tenha pedestre, apenas grava
 			if (log.getIdPedestre() == null) {
 				log = (AcessoEntity) gravaObjeto(log)[0];
 				continue;
 			}
 
-			PedestreEntity pedestre = (PedestreEntity) recuperaObjeto(PedestreEntity.class, log.getIdPedestre());
+			PedestreEntity pedestre = null;
+			try {
+				pedestre = (PedestreEntity) recuperaObjeto(PedestreEntity.class, log.getIdPedestre());
+			} catch (OptimisticLockException e) {
+				System.err.println("Conflito de concorrência ao tentar recuperar pedestre " + log.getIdPedestre());
+				continue;
+			}
 
+			// Se não conseguiu recuperar o pedestre, apenas grava o log
 			if (pedestre == null) {
 				log = (AcessoEntity) gravaObjeto(log)[0];
 				continue;
 			}
 
+			// Verifica se o log com essa data já existe
 			if (log.getData() != null) {
 				AcessoEntity acessoExistente = buscaAcessoByIdPedestreAndAccessDate(log.getIdPedestre(), log.getData());
 				if (acessoExistente != null) {
-					System.out.println(
-							"Log de Acesso já existe! " + log.getIdPedestre() + "  com a data " + log.getData());
+					System.out.println("Log de Acesso já existe! " + log.getIdPedestre() + " com a data " + log.getData());
 					continue;
 				}
 			}
 
+			// Verifica se já existe um acesso INDEFINIDO próximo
 			AcessoEntity ultimoAcessoIndefinido = buscaUltimoLogIndefinidoPedestre(pedestre.getId());
 			if (ultimoAcessoIndefinido != null
+					&& ultimoAcessoIndefinido.getData() != null
+					&& log.getData() != null
 					&& isDiferencaMenorQueXSegundos(log.getData(), ultimoAcessoIndefinido.getData())) {
-
 				excluiObjeto(ultimoAcessoIndefinido);
 			}
 
+			// Se o tipo do log não for INDEFINIDO, aplica regras adicionais
 			if (!"INDEFINIDO".equalsIgnoreCase(log.getTipo())) {
+
+				// Verifica e decrementa mensagens pendentes
 				List<MensagemEquipamentoEntity> mensagensPedestre = buscaMensagensPedestre(pedestre.getId());
 				if (mensagensPedestre != null && !mensagensPedestre.isEmpty()) {
 					decrementaQuantidadeDaMensagem(mensagensPedestre);
 				}
 
-				if (!"Regras ignoradas".equals(log.getRazao())
-						&& ("SAIDA".equals(log.getSentido()) || !log.getBloquearSaida())) {
+				// Avalia regras de bloqueio e sentido
+				String razao = log.getRazao();
+				String sentido = log.getSentido();
+				Boolean bloquearSaida = log.getBloquearSaida();
+
+				if (!"Regras ignoradas".equals(razao)
+						&& ("SAIDA".equals(sentido) || Boolean.FALSE.equals(bloquearSaida))) {
+
 					PedestreRegraEntity pedestreRegra = buscaRegraAtiva(pedestre.getId());
 
-					if (pedestre.getTipo().equals(TipoPedestre.VISITANTE)
-							&& Objects.isNull(pedestre.getDataCadastroFotoNaHikivision())) {
+					if (TipoPedestre.VISITANTE.equals(pedestre.getTipo())
+							&& pedestre.getDataCadastroFotoNaHikivision() == null) {
 						apagaDadosCartaoAcessoVisitate(pedestre, pedestreRegra);
 					}
 
-					// decrementaCreditoRegraPedestre(pedestreRegra);
-
-					pedestre = (PedestreEntity) alteraObjeto(pedestre)[0];
-
-					if (pedestreRegra != null) {
-						alteraObjeto(pedestreRegra);
-					}
+					// Trecho comentado, ativar se necessário
+//					pedestre = (PedestreEntity) alteraObjeto(pedestre)[0];
+//					if (pedestreRegra != null) {
+//						alteraObjeto(pedestreRegra);
+//					}
 				}
 			}
 
+			// Associa e grava o log
 			log.setPedestre(pedestre);
 			log = (AcessoEntity) gravaObjeto(log)[0];
 		}
 	}
+
 
 	@SuppressWarnings("unchecked")
 	@Override

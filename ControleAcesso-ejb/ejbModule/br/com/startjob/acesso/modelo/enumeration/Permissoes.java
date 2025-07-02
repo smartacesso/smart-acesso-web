@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.List;
 
 public enum Permissoes {
-	_0(new ArrayList<>(Arrays.asList())),
+	_0(new ArrayList<>(Arrays.asList("MATRIZ","MATRIZ REFEITORIO ENTRADA","MATRIZ REFEITORIO SAIDA", "BELA VISTA ENTRADA", "BELA VISTA SAIDA", "BELA VISTA REFEITORIO SAIDA","BELA VISTA REFEITORIO ENTRADA"))),
 	_1(new ArrayList<>(Arrays.asList("MATRIZ","MATRIZ REFEITORIO ENTRADA","MATRIZ REFEITORIO SAIDA"))), //ADMINISTRATIVO
 	_2(new ArrayList<>(Arrays.asList("MATRIZ","MATRIZ REFEITORIO ENTRADA","MATRIZ REFEITORIO SAIDA"))), //PRODUÇÃO
 	_3(new ArrayList<>(Arrays.asList("MATRIZ","MATRIZ REFEITORIO ENTRADA","MATRIZ REFEITORIO SAIDA"))), //EXPEDICAO
