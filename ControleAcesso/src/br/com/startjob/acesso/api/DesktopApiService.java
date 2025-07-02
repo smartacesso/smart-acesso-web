@@ -208,14 +208,17 @@ public class DesktopApiService extends BaseService {
 	@GET
 	@Path("/requestAllLocais")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response requestAllLocais(@QueryParam("client") Long idClient) {
+	public Response requestAllLocais(@QueryParam("client") Long idClient, @QueryParam("lastsync") Long lastSync) {
 		if (idClient == null) {
 			return Response.status(Status.NOT_FOUND).entity("See status code").build();
 		}
+		Calendar cLastSync = Calendar.getInstance();
+		cLastSync.setTimeInMillis(lastSync);
 
 		try {
 			Map<String, Object> args = new HashMap<String, Object>();
-			args.put("ID_CLIENTE", idClient);
+			args.put("ID_CLIENTE", idClient);			
+			args.put("LAST_SYNC", cLastSync.getTime());
 			
 			List<LocalTo> locaisTO = new ArrayList<LocalTo>();
 			List<LocalEntity> locais = (List<LocalEntity>) ((BaseEJBRemote) getEjb("BaseEJB"))
