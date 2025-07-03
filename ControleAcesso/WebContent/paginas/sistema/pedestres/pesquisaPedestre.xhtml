@@ -80,7 +80,6 @@
     }, 100);
 }"
  />
-
 					<p:selectOneMenu id="filtro-tipoPedestre" rendered="false"
 						value="#{consultaPedestreController.parans['tipo']}"
 						styleClass="filtro-select-menu filtro-tipoPedestre-sync"
@@ -99,10 +98,9 @@
 					</div>
 					<p:commandButton id="acaoFiltroAvancado" icon="pi pi-sliders-h"
 						title="#{msgs['alt.acao.alternar.filtros.avancados']}"
-						process="@this" update="@form" styleClass="col-desktop-only"
+						process="@this" update="containerDeFiltro"
 						action="#{consultaPedestreController.toggleFiltroFlag('procurarPedestre-filtroFlag')}"
-						onclick="alternarFiltrosAvançados(); return false;" />
-
+						styleClass="col-desktop-only" />
 
 				</p:toolbarGroup>
 			</p:toolbar>
@@ -123,143 +121,109 @@
 				})
 			</script>
 
-			<div class="filtros-avancados"
-				style="width: 100%; display: #{consultaPedestreController.getFiltroFlag('procurarPedestre-filtroFlag') ? 'inline-block' : 'none'}">
+			<h:panelGroup id="containerDeFiltro" layout="block">
 
-				<h:panelGrid id="parameters" width="100%" columns="1"
-					headerClass="h-grid-header">
-					<f:facet name="header">
-						#{msgs['title.uc008.filtros.avancados']}				
-					</f:facet>
+				<h:panelGroup id="filtrosAvancadosWrapper" layout="block"
+					rendered="#{consultaPedestreController.getFiltroFlag('procurarPedestre-filtroFlag')}">
+					<p:panelGrid columns="2" layout="grid"
+						styleClass="ui-fluid filtros-avancados">
 
-					<h:panelGrid columns="#{menuController.mobile == true ? 1 : 2}"
-						width="100%">
-						<p:column>
-							<p:outputLabel value="#{msgs['label.uc008.matricula']}"
-								for="filtro-avancado-matricula"
-								rendered="#{consultaPedestreController.permiteCampoAdicionalCrachaMatricula and consultaPedestreController.parans['tipo'] == 'PEDESTRE'}" />
-							<br />
-							<p:inputText id="filtro-avancado-matricula"
-								value="#{consultaPedestreController.parans['matricula']}"
-								size="10" />
-						</p:column>
+						<p:outputLabel for="filtro-avancado-matricula"
+							value="#{msgs['label.uc008.matricula']}" />
 
-						<p:column>
-							<p:outputLabel
-								value="#{msgs['label.uc008.codigo.cartao.acesso']}"
-								for="filtro-avancado-codigo-acesso" />
-							<br />
-							<p:inputText id="filtro-avancado-codigo-acesso"
-								value="#{consultaPedestreController.parans['codigoCartaoAcesso']}" />
-						</p:column>
+						<p:inputText id="filtro-avancado-matricula"
+							value="#{consultaPedestreController.parans['matricula']}"
+							size="20"
+							disabled="#{!(consultaPedestreController.permiteCampoAdicionalCrachaMatricula and consultaPedestreController.parans['tipo'] == 'PEDESTRE')}" />
 
-						<p:column>
-							<p:outputLabel value="#{msgs['label.uc008.nome']}"
-								for="filtro-avancado-nome" />
-							<br />
-							<p:inputText id="filtro-avancado-nome"
-								value="#{consultaPedestreController.parans['nome']}" size="40"
-								onblur="sincronizarFiltro(this, 'filtro-nome-sync');"
-								styleClass="filtro-nome-sync" />
-						</p:column>
+						<p:outputLabel for="filtro-avancado-codigo-acesso"
+							value="#{msgs['label.uc008.codigo.cartao.acesso']}" />
+						<p:inputText id="filtro-avancado-codigo-acesso"
+							value="#{consultaPedestreController.parans['codigoCartaoAcesso']}"
+							size="20" />
 
-						<p:column>
-							<p:outputLabel value="#{msgs['label.uc008.contato']}"
-								for="filtro-avancado-contato" />
-							<br />
-							<p:inputText id="filtro-avancado-contato"
-								value="#{consultaPedestreController.contatoPesquisa}" />
-						</p:column>
+						<p:outputLabel for="filtro-avancado-nome"
+							value="#{msgs['label.uc008.nome']}" />
+						<p:inputText id="filtro-avancado-nome"
+							value="#{consultaPedestreController.parans['nome']}"
+							size="20"
+							onblur="sincronizarFiltro(this, 'filtro-nome-sync');"
+							styleClass="filtro-nome-sync" />
 
-						<p:column>
-							<p:outputLabel value="#{msgs['label.uc008.cpf']}"
-								for="filtro-avancado-cpf" />
-							<br />
-							<p:inputText id="filtro-avancado-cpf"
-								value="#{consultaPedestreController.parans['cpf']}" />
-						</p:column>
+						<p:outputLabel for="filtro-avancado-contato"
+							value="#{msgs['label.uc008.contato']}" />
+						<p:inputText id="filtro-avancado-contato"
+							value="#{consultaPedestreController.contatoPesquisa}" 
+							size="20"/>
 
-						<p:column>
-							<p:outputLabel value="#{msgs['label.uc008.rg']}"
-								for="filtro-avancado-rg" />
-							<br />
-							<p:inputMask id="filtro-avancado-rg"
-								value="#{consultaPedestreController.parans['rg']}"
-								validateMask="false" autoClear="false" />
-							<!--mask="aa-99.999.999"-->
-						</p:column>
+						<p:outputLabel for="filtro-avancado-cpf"
+							value="#{msgs['label.uc008.cpf']}" />
+						<p:inputText id="filtro-avancado-cpf"
+							value="#{consultaPedestreController.parans['cpf']}" 
+							size="20"/>
 
-						<p:column>
-							<p:outputLabel value="#{msgs['label.uc008.tipo']}"
-								for="filtro-avancado-tipo" />
-							<br />
-							<p:selectOneMenu id="filtro-avancado-tipo"
-								value="#{consultaPedestreController.parans['tipo']}"
-								disabled="#{not empty consultaPedestreController.tipo}"
-								styleClass="filtro-tipoPedestre-sync"
-								onchange="sincronizarFiltro(this, 'filtro-tipoPedestre-sync');">
-								<f:selectItems
-									value="#{consultaPedestreController.listaTiposPedestre}" />
-							</p:selectOneMenu>
-						</p:column>
+						<p:outputLabel for="filtro-avancado-rg"
+							value="#{msgs['label.uc008.rg']}" />
+						<p:inputMask id="filtro-avancado-rg"
+							value="#{consultaPedestreController.parans['rg']}"
+							size="20"
+							validateMask="false" 
+							autoClear="false" />
 
-						<p:column>
-							<p:outputLabel value="#{msgs['label.uc008.empresa']}"
-								for="filtro-avancado-emepresa" />
-							<br />
-							<p:selectOneMenu id="filtro-avancado-emepresa"
-								value="#{consultaPedestreController.parans['empresa.id']}"
-								valueChangeListener="#{consultaPedestreController.eventoEmpresaSelecionada}">
+						<p:outputLabel for="filtro-avancado-tipo"
+							value="#{msgs['label.uc008.tipo']}" />
+						<p:selectOneMenu id="filtro-avancado-tipo"
+							value="#{consultaPedestreController.parans['tipo']}"
+							disabled="#{not empty consultaPedestreController.tipo}"
+							styleClass="filtro-tipoPedestre-sync"
+							onchange="sincronizarFiltro(this, 'filtro-tipoPedestre-sync');">
+							<f:selectItems
+								value="#{consultaPedestreController.listaTiposPedestre}" />
+						</p:selectOneMenu>
 
-								<f:selectItems
-									value="#{consultaPedestreController.listaEmpresas}" />
-								<p:ajax process="@this"
-									update="@this filtro-avancado-departamento filtro-avancado-centro filtro-avancado-cargo"
-									event="valueChange" />
-								<f:converter converterId="javax.faces.Long" />
-							</p:selectOneMenu>
-						</p:column>
+						<p:outputLabel for="filtro-avancado-emepresa"
+							value="#{msgs['label.uc008.empresa']}" />
+						<p:selectOneMenu id="filtro-avancado-emepresa"
+							value="#{consultaPedestreController.parans['empresa.id']}"
+							valueChangeListener="#{consultaPedestreController.eventoEmpresaSelecionada}">
+							<f:selectItems
+								value="#{consultaPedestreController.listaEmpresas}" />
+							<p:ajax process="@this"
+								update="@this filtro-avancado-departamento filtro-avancado-centro filtro-avancado-cargo"
+								event="valueChange" />
+							<f:converter converterId="javax.faces.Long" />
+						</p:selectOneMenu>
 
-						<p:column>
-							<p:outputLabel value="#{msgs['label.uc008.departamento']}"
-								for="filtro-avancado-departamento" />
-							<br />
-							<p:selectOneMenu id="filtro-avancado-departamento"
-								value="#{consultaPedestreController.parans['departamento.id']}">
-								<f:selectItems
-									value="#{consultaPedestreController.listaDepartamentos}" />
-								<f:converter converterId="javax.faces.Long" />
-							</p:selectOneMenu>
-						</p:column>
+						<p:outputLabel for="filtro-avancado-departamento"
+							value="#{msgs['label.uc008.departamento']}" />
+						<p:selectOneMenu id="filtro-avancado-departamento"
+							value="#{consultaPedestreController.parans['departamento.id']}">
+							<f:selectItems
+								value="#{consultaPedestreController.listaDepartamentos}" />
+							<f:converter converterId="javax.faces.Long" />
+						</p:selectOneMenu>
 
-						<p:column>
-							<p:outputLabel value="#{msgs['label.uc008.centro.custo']}"
-								for="filtro-avancado-centro" />
-							<br />
-							<p:selectOneMenu id="filtro-avancado-centro"
-								value="#{consultaPedestreController.parans['centroCusto.id']}">
-								<f:selectItems
-									value="#{consultaPedestreController.listaCentrosDeCusto}" />
-								<f:converter converterId="javax.faces.Long" />
-							</p:selectOneMenu>
-						</p:column>
+						<p:outputLabel for="filtro-avancado-centro"
+							value="#{msgs['label.uc008.centro.custo']}" />
+						<p:selectOneMenu id="filtro-avancado-centro"
+							value="#{consultaPedestreController.parans['centroCusto.id']}">
+							<f:selectItems
+								value="#{consultaPedestreController.listaCentrosDeCusto}" />
+							<f:converter converterId="javax.faces.Long" />
+						</p:selectOneMenu>
 
-						<p:column>
-							<p:outputLabel value="#{msgs['label.uc008.cargo']}"
-								for="filtro-avancado-cargo" />
-							<br />
-							<p:selectOneMenu id="filtro-avancado-cargo"
-								value="#{consultaPedestreController.parans['cargo.id']}">
-								<f:selectItems value="#{consultaPedestreController.listaCargos}" />
-								<f:converter converterId="javax.faces.Long" />
-							</p:selectOneMenu>
-						</p:column>
+						<p:outputLabel for="filtro-avancado-cargo"
+							value="#{msgs['label.uc008.cargo']}" />
+						<p:selectOneMenu id="filtro-avancado-cargo"
+							value="#{consultaPedestreController.parans['cargo.id']}">
+							<f:selectItems value="#{consultaPedestreController.listaCargos}" />
+							<f:converter converterId="javax.faces.Long" />
+						</p:selectOneMenu>
 
-					</h:panelGrid>
-				</h:panelGrid>
+					</p:panelGrid>
+				</h:panelGroup>
 
-				<br />
-			</div>
+			</h:panelGroup>
 
 			<h:panelGrid width="100%" columns="1" headerClass="h-grid-header">
 				<f:facet name="header">
