@@ -87,14 +87,12 @@
 						<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
 					</p:calendar>
 
-					<p:commandButton id="acaoFiltrosAvancados" icon="pi pi-sliders-h"
-						action="#{relatorioVisitantesController.toggleFiltroFlag('relatorio-visitantes-filtroFlag')}">
-						<p:ajax process="@this" update="@this"
-							oncomplete="alternarFiltrosAvançados();" />
-					</p:commandButton>
-
-					<p:tooltip for="acaoFiltrosAvancados"
-						value="#{msgs['alt.acao.alternar.filtros.avancados']}" />
+					<p:commandButton id="acaoFiltroAvancado" icon="pi pi-sliders-h"
+						title="#{msgs['alt.acao.alternar.filtros.avancados']}"
+						process="@this" update="containerDeFiltro"
+						action="#{relatorioVisitantesController.toggleFiltroFlag('relatorio-visitantes-filtroFlag')}"
+						styleClass="col-desktop-only" />
+						
 				</p:toolbarGroup>
 			</p:toolbar>
 		</ui:define>
@@ -113,22 +111,16 @@
 					}
 				})
 			</script>
+			<h:panelGroup id="containerDeFiltro" layout="block">
 
-			<div class="filtros-avancados"
-				style="width: 100%; display: #{relatorioVisitantesController.getFiltroFlag('relatorio-visitantes-filtroFlag') ? 'inline-block' : 'none'}">
+				<h:panelGroup id="filtrosAvancadosWrapper" layout="block"
+					rendered="#{relatorioVisitantesController.getFiltroFlag('relatorio-visitantes-filtroFlag')}">
+					<p:panelGrid columns="2" layout="grid"
+						styleClass="ui-fluid filtros-avancados"
+						columnClasses="col-label,col-input">
 
-				<h:panelGrid id="parameters" width="100%" columns="1"
-					headerClass="h-grid-header">
-					<f:facet name="header">
-						#{msgs['title.uc008.filtros.avancados']}				
-					</f:facet>
-
-					<h:panelGrid columns="#{menuController.mobile == true ? 1 : 2}"
-						width="100%">
-						<p:column>
 							<p:outputLabel value="#{msgs['label.uc011.data.inical']}"
 								for="filtro-avancado-dataInicio" />
-							<br />
 							<p:calendar id="filtro-avancado-dataInicio"
 								value="#{relatorioVisitantesController.parans['data_maior_data']}"
 								pattern="dd/MM/yyyy HH:mm" mask="99/99/9999 99:99"
@@ -139,12 +131,9 @@
 								<p:ajax event="change" update="filtro-data-inicio" />
 								<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
 							</p:calendar>
-						</p:column>
-
-						<p:column>
+							
 							<p:outputLabel value="#{msgs['label.uc011.data.final']}"
 								for="filtro-avancado-dataFim" />
-							<br />
 							<p:calendar id="filtro-avancado-dataFim"
 								value="#{relatorioVisitantesController.parans['data_menor_data']}"
 								pattern="dd/MM/yyyy HH:mm" mask="99/99/9999 99:99"
@@ -155,33 +144,24 @@
 								<p:ajax event="change" update="filtro-data-fim" />
 								<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
 							</p:calendar>
-						</p:column>
-
-						<p:column>
+							
 							<p:outputLabel value="#{msgs['label.uc011.nome']}"
 								for="filtro-avancado-nome" />
-							<br />
 							<p:inputText id="filtro-avancado-nome"
 								value="#{relatorioVisitantesController.parans['pedestre.nome']}"
 								size="50" onblur="sincronizarFiltro(this, 'filtro-nome-sync');"
 								styleClass="filtro-nome-sync" />
-						</p:column>
 
-						<p:column>
 							<p:outputLabel value="#{msgs['label.uc011.equipamento']}"
 								for="filtro-avancado-equipamento" />
-							<br />
 							<p:selectOneMenu id="filtro-avancado-equipamento"
 								value="#{relatorioVisitantesController.parans['equipamento']}">
 								<f:selectItems
 									value="#{relatorioVisitantesController.listaEquipamentos}" />
 							</p:selectOneMenu>
-						</p:column>
 
-						<p:column>
 							<p:outputLabel value="#{msgs['label.uc011.empresa']}"
 								for="filtro-avancado-empresa" />
-							<br />
 							<p:selectOneMenu id="filtro-avancado-empresa"
 								value="#{relatorioVisitantesController.parans['pedestre.empresa.id']}"
 								valueChangeListener="#{relatorioVisitantesController.eventoEmpresaSelecionada}">
@@ -192,47 +172,37 @@
 									event="valueChange" />
 								<f:converter converterId="javax.faces.Long" />
 							</p:selectOneMenu>
-						</p:column>
 
-						<p:column>
 							<p:outputLabel value="#{msgs['label.uc011.departamento']}"
 								for="filtro-avancado-departamento" />
-							<br />
 							<p:selectOneMenu id="filtro-avancado-departamento"
 								value="#{relatorioVisitantesController.parans['pedestre.departamento.id']}">
 								<f:selectItems
 									value="#{relatorioVisitantesController.listaDepartamentos}" />
 								<f:converter converterId="javax.faces.Long" />
 							</p:selectOneMenu>
-						</p:column>
-
-						<p:column>
+							
 							<p:outputLabel value="#{msgs['label.uc011.cargo']}"
 								for="filtro-avancado-cargo" />
-							<br />
 							<p:selectOneMenu id="filtro-avancado-cargo"
 								value="#{relatorioVisitantesController.parans['pedestre.cargo.id']}">
 								<f:selectItems
 									value="#{relatorioVisitantesController.listaCargos}" />
 								<f:converter converterId="javax.faces.Long" />
 							</p:selectOneMenu>
-						</p:column>
 
-						<p:column>
 							<p:outputLabel value="#{msgs['label.uc011.centro.custo']}"
 								for="filtro-avancado-centroCusto" />
-							<br />
 							<p:selectOneMenu id="filtro-avancado-centroCusto"
 								value="#{relatorioVisitantesController.parans['pedestre.centroCusto.id']}">
 								<f:selectItems
 									value="#{relatorioVisitantesController.listaCentrosDeCusto}" />
 								<f:converter converterId="javax.faces.Long" />
 							</p:selectOneMenu>
-						</p:column>
+					</p:panelGrid>
 
-					</h:panelGrid>
-				</h:panelGrid>
-			</div>
+				</h:panelGroup>
+			</h:panelGroup>
 
 			<h:panelGrid width="100%" columns="1" headerClass="h-grid-header">
 				<f:facet name="header">

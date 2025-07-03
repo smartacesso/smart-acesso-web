@@ -62,8 +62,6 @@
 				<p:toolbarGroup align="right"
 					styleClass="flex gap-2 flex-wrap justify-end items-center w-full md:w-auto">
 
-
-
 					<p:calendar id="filtro-data-inicio"
 						value="#{relatorioPedestresController.parans['data_maior_data']}"
 						pattern="dd/MM/yyyy HH:mm" mask="99/99/9999 99:99" size="15"
@@ -87,14 +85,12 @@
 						<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
 					</p:calendar>
 
-					<p:commandButton id="acaoFiltrosAvancados" icon="pi pi-sliders-h"
-						action="#{relatorioPedestresController.toggleFiltroFlag('relatorio-pedestres-filtroFlag')}">
-						<p:ajax process="@this" update="@this"
-							oncomplete="alternarFiltrosAvançados();" />
-					</p:commandButton>
+					<p:commandButton id="acaoFiltroAvancado" icon="pi pi-sliders-h"
+						title="#{msgs['alt.acao.alternar.filtros.avancados']}"
+						process="@this" update="containerDeFiltro"
+						action="#{relatorioPedestresController.toggleFiltroFlag('relatorio-pedestres-filtroFlag')}"
+						styleClass="col-desktop-only" />
 
-					<p:tooltip for="acaoFiltrosAvancados"
-						value="#{msgs['alt.acao.alternar.filtros.avancados']}" />
 				</p:toolbarGroup>
 			</p:toolbar>
 		</ui:define>
@@ -114,125 +110,94 @@
 				})
 			</script>
 
-			<div class="filtros-avancados"
-				style="width: 100%; display: #{relatorioPedestresController.getFiltroFlag('relatorio-pedestres-filtroFlag') ? 'inline-block' : 'none'}">
+			<h:panelGroup id="containerDeFiltro" layout="block">
 
-				<h:panelGrid id="parameters" width="100%" columns="1"
-					headerClass="h-grid-header">
-					<f:facet name="header">
-						#{msgs['title.uc008.filtros.avancados']}				
-					</f:facet>
+				<h:panelGroup id="filtrosAvancadosWrapper" layout="block"
+					rendered="#{relatorioPedestresController.getFiltroFlag('relatorio-pedestres-filtroFlag')}">
+					<p:panelGrid columns="2" layout="grid"
+						styleClass="ui-fluid filtros-avancados"
+						columnClasses="col-label,col-input">
 
-					<h:panelGrid columns="#{menuController.mobile == true ? 1 : 2}"
-						width="100%">
-						<p:column>
-							<p:outputLabel value="#{msgs['label.uc009.data.inical']}"
-								for="filtro-avancado-dataInicio" />
-							<br />
-							<p:calendar id="filtro-avancado-dataInicio"
-								value="#{relatorioPedestresController.parans['data_maior_data']}"
-								pattern="dd/MM/yyyy HH:mm" mask="99/99/9999 99:99"
-								navigator="true"
-								valueChangeListener="#{relatorioPedestresController.alteraDataInicio}">
+						<p:outputLabel for="filtro-avancado-dataInicio"
+							value="#{msgs['label.uc009.data.inical']}" />
+						<p:calendar id="filtro-avancado-dataInicio"
+							value="#{relatorioPedestresController.parans['data_maior_data']}"
+							pattern="dd/MM/yyyy HH:mm" mask="99/99/9999 99:99"
+							navigator="true">
+							<p:ajax event="dateSelect" update="@this" />
+							<p:ajax event="change" update="@this" />
+							<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+						</p:calendar>
 
-								<p:ajax event="dateSelect" update="filtro-data-inicio" />
-								<p:ajax event="change" update="filtro-data-inicio" />
-								<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
-							</p:calendar>
-						</p:column>
+						<p:outputLabel for="filtro-avancado-dataFim"
+							value="#{msgs['label.uc009.data.final']}" />
+						<p:calendar id="filtro-avancado-dataFim"
+							value="#{relatorioPedestresController.parans['data_menor_data']}"
+							pattern="dd/MM/yyyy HH:mm" mask="99/99/9999 99:99"
+							navigator="true">
+							<p:ajax event="dateSelect" update="@this" />
+							<p:ajax event="change" update="@this" />
+							<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+						</p:calendar>
 
-						<p:column>
-							<p:outputLabel value="#{msgs['label.uc009.data.final']}"
-								for="filtro-avancado-dataFim" />
-							<br />
-							<p:calendar id="filtro-avancado-dataFim"
-								value="#{relatorioPedestresController.parans['data_menor_data']}"
-								pattern="dd/MM/yyyy HH:mm" mask="99/99/9999 99:99"
-								navigator="true"
-								valueChangeListener="#{relatorioPedestresController.alteraDataFim}">
+						<p:outputLabel for="filtro-avancado-nome"
+							value="#{msgs['label.uc009.nome']}" />
+						<p:inputText id="filtro-avancado-nome"
+							value="#{relatorioPedestresController.parans['pedestre.nome']}"
+							styleClass="filtro-nome-sync" />
 
-								<p:ajax event="dateSelect" update="@this filtro-data-fim" />
-								<p:ajax event="change" update="@this filtro-data-fim" />
-								<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
-							</p:calendar>
-						</p:column>
+						<p:outputLabel for="filtro-avancado-equipamento"
+							value="#{msgs['label.uc009.equipamento']}" />
+						<p:selectOneMenu id="filtro-avancado-equipamento"
+							value="#{relatorioPedestresController.parans['equipamento']}">
+							<f:selectItems
+								value="#{relatorioPedestresController.listaEquipamentos}" />
+						</p:selectOneMenu>
 
-						<p:column>
-							<p:outputLabel value="#{msgs['label.uc009.nome']}"
-								for="filtro-avancado-nome" />
-							<br />
-							<p:inputText id="filtro-avancado-nome"
-								value="#{relatorioPedestresController.parans['pedestre.nome']}"
-								size="50" onblur="sincronizarFiltro(this, 'filtro-nome-sync');"
-								styleClass="filtro-nome-sync" />
-						</p:column>
+						<p:outputLabel for="filtro-avancado-empresa"
+							value="#{msgs['label.uc009.empresa']}" />
+						<p:selectOneMenu id="filtro-avancado-empresa"
+							value="#{relatorioPedestresController.parans['pedestre.empresa.id']}"
+							valueChangeListener="#{relatorioPedestresController.eventoEmpresaSelecionada}">
+							<f:selectItems
+								value="#{relatorioPedestresController.listaEmpresas}" />
+							<p:ajax process="@this"
+								update="@this filtro-avancado-departamento filtro-avancado-centroCusto filtro-avancado-cargo"
+								event="valueChange" />
+							<f:converter converterId="javax.faces.Long" />
+						</p:selectOneMenu>
 
-						<p:column>
-							<p:outputLabel value="#{msgs['label.uc009.equipamento']}"
-								for="filtro-avancado-equipamento" />
-							<br />
-							<p:selectOneMenu id="filtro-avancado-equipamento"
-								value="#{relatorioPedestresController.parans['equipamento']}">
-								<f:selectItems
-									value="#{relatorioPedestresController.listaEquipamentos}" />
-							</p:selectOneMenu>
-						</p:column>
+						<p:outputLabel for="filtro-avancado-departamento"
+							value="#{msgs['label.uc009.departamento']}" />
+						<p:selectOneMenu id="filtro-avancado-departamento"
+							value="#{relatorioPedestresController.parans['pedestre.departamento.id']}">
+							<f:selectItems
+								value="#{relatorioPedestresController.listaDepartamentos}" />
+							<f:converter converterId="javax.faces.Long" />
+						</p:selectOneMenu>
 
-						<p:column>
-							<p:outputLabel value="#{msgs['label.uc009.empresa']}"
-								for="filtro-avancado-empresa" />
-							<br />
-							<p:selectOneMenu id="filtro-avancado-empresa"
-								value="#{relatorioPedestresController.parans['pedestre.empresa.id']}"
-								valueChangeListener="#{relatorioPedestresController.eventoEmpresaSelecionada}">
-								<f:selectItems
-									value="#{relatorioPedestresController.listaEmpresas}" />
-								<p:ajax process="@this"
-									update="@this filtro-avancado-departamento filtro-avancado-centroCusto filtro-avancado-cargo"
-									event="valueChange" />
-								<f:converter converterId="javax.faces.Long" />
-							</p:selectOneMenu>
-						</p:column>
+						<p:outputLabel for="filtro-avancado-cargo"
+							value="#{msgs['label.uc009.cargo']}" />
+						<p:selectOneMenu id="filtro-avancado-cargo"
+							value="#{relatorioPedestresController.parans['pedestre.cargo.id']}">
+							<f:selectItems
+								value="#{relatorioPedestresController.listaCargos}" />
+							<f:converter converterId="javax.faces.Long" />
+						</p:selectOneMenu>
 
-						<p:column>
-							<p:outputLabel value="#{msgs['label.uc009.departamento']}"
-								for="filtro-avancado-departamento" />
-							<br />
-							<p:selectOneMenu id="filtro-avancado-departamento"
-								value="#{relatorioPedestresController.parans['pedestre.departamento.id']}">
-								<f:selectItems
-									value="#{relatorioPedestresController.listaDepartamentos}" />
-								<f:converter converterId="javax.faces.Long" />
-							</p:selectOneMenu>
-						</p:column>
+						<p:outputLabel for="filtro-avancado-centroCusto"
+							value="#{msgs['label.uc009.centro.custo']}" />
+						<p:selectOneMenu id="filtro-avancado-centroCusto"
+							value="#{relatorioPedestresController.parans['pedestre.centroCusto.id']}">
+							<f:selectItems
+								value="#{relatorioPedestresController.listaCentrosDeCusto}" />
+							<f:converter converterId="javax.faces.Long" />
+						</p:selectOneMenu>
 
-						<p:column>
-							<p:outputLabel value="#{msgs['label.uc009.cargo']}"
-								for="filtro-avancado-cargo" />
-							<br />
-							<p:selectOneMenu id="filtro-avancado-cargo"
-								value="#{relatorioPedestresController.parans['pedestre.cargo.id']}">
-								<f:selectItems
-									value="#{relatorioPedestresController.listaCargos}" />
-								<f:converter converterId="javax.faces.Long" />
-							</p:selectOneMenu>
-						</p:column>
+					</p:panelGrid>
 
-						<p:column>
-							<p:outputLabel value="#{msgs['label.uc009.centro.custo']}"
-								for="filtro-avancado-centroCusto" />
-							<br />
-							<p:selectOneMenu id="filtro-avancado-centroCusto"
-								value="#{relatorioPedestresController.parans['pedestre.centroCusto.id']}">
-								<f:selectItems
-									value="#{relatorioPedestresController.listaCentrosDeCusto}" />
-								<f:converter converterId="javax.faces.Long" />
-							</p:selectOneMenu>
-						</p:column>
-
-					</h:panelGrid>
-				</h:panelGrid>
-			</div>
+				</h:panelGroup>
+			</h:panelGroup>
 
 			<h:panelGrid width="100%" columns="1" headerClass="h-grid-header">
 				<f:facet name="header">
