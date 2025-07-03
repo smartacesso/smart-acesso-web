@@ -24,7 +24,6 @@
 			<p:toolbar
 				styleClass="flex flex-col md:flex-row justify-between items-center gap-4 w-full max-w-screen-xl">
 
-				<!-- Botões de ação -->
 				<p:toolbarGroup align="left">
 					<p:inputText id="filtro-nome" placeholder="Filtrar por nome"
 						styleClass="filtro-nome filtro-nome-sync w-48"
@@ -33,11 +32,11 @@
 						onkeypress="if(event.key === 'Enter') { event.preventDefault(); document.getElementById('form:acaoBuscar').click(); }" />
 
 					<p:commandButton id="acaoBuscar"
-						action="#{relatorioPedestresController.buscar()}"
-						process="@this form:filtro-nome" update="@form"
-						title="#{msgs['alt.acao.buscar']}"
-						alt="#{msgs['alt.acao.buscar']}" icon="pi pi-search" />
-
+					    action="#{relatorioPedestresController.buscar()}"
+					    process="@form"
+					    update="@form"
+					    title="#{msgs['alt.acao.buscar']}"
+					    alt="#{msgs['alt.acao.buscar']}" icon="pi pi-search" />
 
 					<p:commandButton id="acaoLimpar"
 						action="#{relatorioPedestresController.limpar()}"
