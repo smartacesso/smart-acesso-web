@@ -10,7 +10,7 @@ import javax.websocket.Session;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 
-@ServerEndpoint("/ws/local/{unidadeId}")
+@ServerEndpoint("/ws/local/{clienteId}")
 public class WebSocketEndpoint {
 	
     public WebSocketEndpoint() {
@@ -20,23 +20,23 @@ public class WebSocketEndpoint {
     private static Map<String, Session> sessoesPorUnidade = new ConcurrentHashMap<>();
 
     @OnOpen
-    public void onOpen(Session session, @PathParam("unidadeId") String unidadeId) {
-        sessoesPorUnidade.put(unidadeId, session);
-        System.out.println("Conexão aberta para unidade: " + unidadeId);
+    public void onOpen(Session session, @PathParam("clienteId") String clienteId) {
+        sessoesPorUnidade.put(clienteId, session);
+        System.out.println("Conexão aberta para Cliente: " + clienteId);
     }
 
     @OnClose
-    public void onClose(Session session, @PathParam("unidadeId") String unidadeId) {
-        sessoesPorUnidade.remove(unidadeId);
-        System.out.println("Conexão fechada para unidade: " + unidadeId);
+    public void onClose(Session session, @PathParam("clienteId") String clienteId) {
+        sessoesPorUnidade.remove(clienteId);
+        System.out.println("Conexão fechada para Cliente: " + clienteId);
     }
 
-    public static void enviarParaLocal(String unidadeId, String json) {
-        Session s = sessoesPorUnidade.get(unidadeId);
+    public static void enviarParaLocal(String clienteId, String json) {
+        Session s = sessoesPorUnidade.get(clienteId);
         if (s != null && s.isOpen()) {
             s.getAsyncRemote().sendText(json);
         } else {
-            System.out.println("Unidade " + unidadeId + " não está conectada.");
+            System.out.println("Cliente " + clienteId + " não está conectada.");
         }
     }
 	

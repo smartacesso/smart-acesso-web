@@ -2,6 +2,7 @@ package br.com.startjob.acesso.controller;
 
 import java.io.ByteArrayInputStream;
 import java.util.Base64;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
@@ -13,7 +14,9 @@ import org.primefaces.event.CaptureEvent;
 import org.primefaces.model.DefaultStreamedContent;
 import org.primefaces.model.StreamedContent;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import br.com.startjob.acesso.api.WebSocketEndpoint;
 import br.com.startjob.acesso.modelo.ejb.BaseEJB;
@@ -21,6 +24,7 @@ import br.com.startjob.acesso.modelo.entity.CadastroExternoEntity;
 import br.com.startjob.acesso.modelo.entity.ClienteEntity;
 import br.com.startjob.acesso.modelo.entity.PedestreEntity;
 import br.com.startjob.acesso.modelo.enumeration.TipoPedestre;
+import br.com.startjob.acesso.to.PedestrianAccessTO;
 
 @SuppressWarnings("serial")
 @Named("cadastroFacialHikivisionController")
@@ -69,30 +73,13 @@ public class CadastroFacialHikivisionController extends BaseController {
 			return "";
 		}
 
-		String cpfNumeros = pedestre.getCpf().replaceAll("\\D", "");
-
-		JsonObject json = new JsonObject();
-		json.addProperty("nome", pedestre.getNome());
-
-		if (pedestre.getCodigoCartaoAcesso() != null) {
-			if (!pedestre.getCodigoCartaoAcesso().isEmpty()) {
-				json.addProperty("cardNumber", pedestre.getCodigoCartaoAcesso());
-			}
-		} else {
-			json.addProperty("cardNumber", cpfNumeros);
-		}
-
-		byte[] fotoBytes = pedestre.getFoto();
-
-		if (fotoBytes != null) {
-			String fotoBase64 = Base64.getEncoder().encodeToString(fotoBytes);
-			json.addProperty("foto", fotoBase64);
-		} else {
-			json.addProperty("foto", "");
-		}
+		Gson gson = new Gson();
+		String jsonStr = gson.toJson(new PedestrianAccessTO(pedestre));
+		JsonObject json = JsonParser.parseString(jsonStr).getAsJsonObject();
 
 		// buscar cliente correto pelo idCliente e pegar unidade organizacional
-		WebSocketEndpoint.enviarParaLocal(cliente.getNomeUnidadeOrganizacional(), json.toString());
+		pedestre.setDataAlteracaoFoto(new Date());
+		WebSocketEndpoint.enviarParaLocal(cliente.getId().toString(), json.toString());
 
 		try {
 			baseEJB.gravaObjeto(pedestre);

@@ -83,8 +83,9 @@ public class PedestrianAccessTO {
 	private String tipoAcesso;
 	private String tipoQRCode;
 	private Date dataCadastroFotoNaHikivision;
+	private String fotoBase64;
 	
-	private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	private transient SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	
 	public PedestrianAccessTO() {}
 	
@@ -180,6 +181,38 @@ public class PedestrianAccessTO {
 		
 		adicionaHorarioPedestreRegra(objects);
 	}
+	
+	  public PedestrianAccessTO(PedestreEntity entity) {
+	        this.id = entity.getId();
+	        this.name = entity.getNome();
+	        this.status = entity.getStatus() != null ? entity.getStatus().name() : null;
+	        this.email = entity.getEmail();
+	        this.cpf = entity.getCpf();
+	        this.rg = entity.getRg();
+	        this.telefone = entity.getTelefone();
+	        this.celular = entity.getCelular();
+	        this.matricula = entity.getMatricula();
+	        this.cardNumber = entity.getCodigoCartaoAcesso();
+	        this.observacoes = entity.getObservacoes();
+	        this.tipoQRCode = entity.getTipoQRCode() != null ? entity.getTipoQRCode().name() : null;
+	        this.qrCodeParaAcesso = entity.getQrCodeParaAcesso();
+	        this.sempreLiberado = entity.getSempreLiberado();
+	        this.habilitarTeclado = entity.getHabilitarTeclado();
+	        this.cadastroFacialObrigatorio = entity.getCadastroFacialObrigatorio();
+	        this.dataNascimento = entity.getDataNascimento();
+	        this.tipo = entity.getTipo() != null ? entity.getTipo().name() : null;
+	        this.genero = entity.getGenero() != null ? entity.getGenero().name() : null;
+	        this.enviaSmsAoPassarNaCatraca = entity.getEnviaSmsAoPassarNaCatraca();
+	        this.idLocal = entity.getIdLocal();
+	        this.luxandIdentifier = entity.getLuxandIdentifier();
+	        this.qtdAcessoAntesSinc = entity.getQtdAcessoAntesSinc();
+	        this.login = entity.getLogin();
+	        this.dataCadastroFotoNaHikivision = entity.getDataCadastroFotoNaHikivision();
+	        this.tipoAcesso = entity.getTipoAcesso();
+
+	        byte[] fotoBytes = entity.getFoto();
+	        this.fotoBase64 = (fotoBytes != null) ? Base64.encodeBase64String(fotoBytes) : "";
+	    }
 
 
 	public void adicionaPedestreRegras(Object[] objects) {
@@ -863,6 +896,14 @@ public class PedestrianAccessTO {
 
 	public void setIdLocal(Long idLocal) {
 		this.idLocal = idLocal;
+	}
+
+	public String getFotoBase64() {
+		return fotoBase64;
+	}
+
+	public void setFotoBase64(String fotoBase64) {
+		this.fotoBase64 = fotoBase64;
 	}
 	
 }
