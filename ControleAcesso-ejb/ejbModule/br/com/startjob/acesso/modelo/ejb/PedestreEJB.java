@@ -112,8 +112,12 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 			for (PedestreEntity pedestre : pedestres) {
 				if (pedestre.getRegras() != null && !pedestre.getRegras().isEmpty()) {
 					for (PedestreRegraEntity pe : pedestre.getRegras()) {
-						if (pe.getRegra() != null)
+						if (pe.getRegra() != null) {
 							pe.getRegra().getId();
+						}
+						for(HorarioEntity h : pe.getHorarios()) {
+							h.getId();
+						}
 					}
 				}
 

@@ -55,11 +55,17 @@ import br.com.startjob.acesso.modelo.utils.EncryptionUtils;
 		@NamedQuery(name = "PedestreEntity.findById", query = "select obj from PedestreEntity obj "
 				+ "where obj.id = :ID order by obj.id asc"),
 		@NamedQuery(name = "PedestreEntity.findByIdComplete", query = "select obj from PedestreEntity obj "
-				+ " left join fetch obj.endereco en " + " left join fetch obj.empresa emp "
-				+ " left join fetch obj.departamento dep " + " left join fetch obj.centroCusto cec "
-				+ " left join fetch obj.cargo ca " + " left join fetch obj.cliente cli " + " left join obj.regras re "
-				+ " left join obj.equipamentos eq " + " left join obj.documentos doc "
-				+ " left join obj.biometrias bio " + " left join obj.mensagensPersonalizadas men "
+				+ " left join fetch obj.endereco en " 
+				+ " left join fetch obj.empresa emp "
+				+ " left join fetch obj.departamento dep " 
+				+ " left join fetch obj.centroCusto cec "
+				+ " left join fetch obj.cargo ca " 
+				+ " left join fetch obj.cliente cli " 
+				+ " left join obj.regras re "
+				+ " left join obj.equipamentos eq " 
+				+ " left join obj.documentos doc "
+				+ " left join obj.biometrias bio " 
+				+ " left join obj.mensagensPersonalizadas men "
 				+ " left join obj.responsaveis res " 
 				+ " left join fetch obj.cotas c "
 				+ "where obj.id = :ID order by obj.id asc"),
@@ -81,8 +87,11 @@ import br.com.startjob.acesso.modelo.utils.EncryptionUtils;
 		@NamedQuery(name = "PedestreEntity.findAllPedestresComEmpresa", query = "select obj from PedestreEntity obj "
 				+ " left join fetch obj.empresa e " + "where (obj.removido = false or obj.removido is null) "
 				+ "and obj.tipo = 'PEDESTRE' " + "order by obj.id asc"),
-		@NamedQuery(name = "PedestreEntity.findPedestresByIdComRegras", query = "select obj from PedestreEntity obj "
-				+ "left join fetch obj.endereco " + "left join fetch obj.regras " + "where obj.id = :ID "),
+		@NamedQuery(name = "PedestreEntity.findPedestresByIdComRegras", 
+					query = "select obj from PedestreEntity obj "
+						+ "left join fetch obj.endereco " 
+						+ "left join fetch obj.regras " 
+						+ "where obj.id = :ID "),
 		@NamedQuery(name = "PedestreEntity.findByIdPedestreAndIdCliente", query = "select obj from PedestreEntity obj "
 				+ " left join fetch obj.empresa e " + "where obj.id = :ID " + "and obj.cliente.id = :ID_CLIENTE "
 				+ "order by obj.id asc"),
@@ -106,7 +115,17 @@ import br.com.startjob.acesso.modelo.utils.EncryptionUtils;
 				+ "and obj.cliente.id = :ID_CLIENTE "),
 		
 		@NamedQuery(name = "PedestreEntity.findAllAutoAtendimentoAtivo", query = "select obj " + "from PedestreEntity obj "
-				+ "where (obj.removido = false or obj.removido is null) and obj.autoAtendimento = true " + "order by obj.id asc")
+				+ "where (obj.removido = false or obj.removido is null) and obj.autoAtendimento = true " + "order by obj.id asc"),
+		@NamedQuery(name = "PedestreEntity.findByIdWithEmpRegrasAndHorarios",
+				query = "select distinct obj from PedestreEntity obj "
+						+ "left join fetch obj.cliente c "
+						+ "left join fetch obj.empresa emp "
+						+ "left join fetch obj.regras r "
+						+ "where obj.id = :ID "
+						+ "and obj.cliente.id = :ID_CLIENTE "
+						+ "and (obj.removido = false or obj.removido is null) "
+						+ "and (r.removido = false or r.removido is null) "
+						+ "order by obj.id asc")
 })
 
 @SuppressWarnings("serial")

@@ -2,6 +2,10 @@ package br.com.startjob.acesso.to;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+import br.com.startjob.acesso.modelo.entity.PedestreRegraEntity;
 
 public class PedestreRegraTO {
 
@@ -27,6 +31,26 @@ public class PedestreRegraTO {
 		this.diasValidadeCredito = diasValidadeCredito;
 		this.dataInicioPeriodo = dataInicioPeriodo;
 		this.dataFimPeriodo = dataFimPeriodo;
+	}
+	
+	public static PedestreRegraTO fromDomain(PedestreRegraEntity pedestreRegraEntity) {
+		final PedestreRegraTO pedestreRegraTO = new PedestreRegraTO();
+		pedestreRegraTO.id = pedestreRegraEntity.getId();
+		pedestreRegraTO.idRegra = pedestreRegraEntity.getRegra().getId();
+		pedestreRegraTO.validade = pedestreRegraEntity.getValidade();
+		pedestreRegraTO.qtdeDeCreditos = pedestreRegraEntity.getQtdeDeCreditos();
+		pedestreRegraTO.qtdeTotalDeCreditos = pedestreRegraEntity.getQtdeTotalDeCreditos();
+		pedestreRegraTO.diasValidadeCredito = pedestreRegraEntity.getDiasValidadeCredito();
+		pedestreRegraTO.dataInicioPeriodo = pedestreRegraEntity.getDataInicioPeriodo();
+		pedestreRegraTO.dataFimPeriodo = pedestreRegraEntity.getDataFimPeriodo();
+		
+		if(Objects.nonNull(pedestreRegraEntity.getHorarios())) {
+			pedestreRegraTO.horarios = pedestreRegraEntity.getHorarios().stream()
+				.map(HorarioTO::new)
+				.collect(Collectors.toList());
+		}
+		
+		return pedestreRegraTO;
 	}
 	
 	public Long getId() {
