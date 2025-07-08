@@ -1,20 +1,32 @@
 package br.com.startjob.acesso.to.TotvsEdu;
 
 public class MensagemResponseTO {
-	   private String mensagem;
 
-	    public MensagemResponseTO() {}
+	private int status;
+	private String mensagem;
 
-	    public MensagemResponseTO(String mensagem) {
-	        this.mensagem = mensagem;
-	    }
+	public MensagemResponseTO() {
+	}
 
-	    public String getMensagem() {
-	        return mensagem;
-	    }
+	public MensagemResponseTO(Integer status, String mensagem) {
+		this.mensagem = mensagem;
+		this.setStatus(status);
+	}
 
-	    public void setMensagem(String mensagem) {
-	        this.mensagem = mensagem;
-	    }
+	public String getMensagem() {
+		return mensagem;
+	}
+
+	public void setMensagem(String mensagem) {
+		this.mensagem = mensagem;
+	}
+
+	public int getStatus() {
+		return status;
+	}
+
+	public void setStatus(int status) {
+		this.status = status;
+	}
 
 }
