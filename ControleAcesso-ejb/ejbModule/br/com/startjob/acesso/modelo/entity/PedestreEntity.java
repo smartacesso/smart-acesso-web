@@ -125,7 +125,13 @@ import br.com.startjob.acesso.modelo.utils.EncryptionUtils;
 						+ "and obj.cliente.id = :ID_CLIENTE "
 						+ "and (obj.removido = false or obj.removido is null) "
 						+ "and (r.removido = false or r.removido is null) "
-						+ "order by obj.id asc")
+						+ "order by obj.id asc"),
+		@NamedQuery(name = "PedestreEntity.findByCPFOnBlur", query = "select distinct obj from PedestreEntity obj "
+				+ "where obj.cpf = :CPF " + "order by obj.id asc"),
+
+		@NamedQuery(name = "PedestreEntity.findByRGOnBlur", query = "select distinct obj from PedestreEntity obj "
+				+ "where obj.rg = :RG " + "order by obj.id asc")
+
 })
 
 @SuppressWarnings("serial")
