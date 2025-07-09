@@ -43,7 +43,9 @@ import org.primefaces.model.CroppedImage;
 import org.primefaces.model.DefaultStreamedContent;
 import org.primefaces.model.StreamedContent;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import br.com.startjob.acesso.annotations.UseCase;
 import br.com.startjob.acesso.api.WebSocketEndpoint;
@@ -82,6 +84,7 @@ import br.com.startjob.acesso.modelo.enumeration.TipoRegra;
 import br.com.startjob.acesso.modelo.utils.AppAmbienteUtils;
 import br.com.startjob.acesso.modelo.utils.EncryptionUtils;
 import br.com.startjob.acesso.modelo.utils.MailUtils;
+import br.com.startjob.acesso.to.WebSocketPedestrianAccessTO;
 import br.com.startjob.acesso.utils.ResourceBundleUtils;
 import br.com.startjob.acesso.utils.Utils;
 
@@ -188,6 +191,7 @@ public class CadastroPedestreController extends CadastroBaseController {
 	private List<AcessoEntity> listaRelatorios = new ArrayList<>();
 	
 	private String linkGerado;
+	private final Gson gson = new Gson();
 	
 	@PostConstruct
 	@Override
@@ -469,7 +473,15 @@ public class CadastroPedestreController extends CadastroBaseController {
 			mensagemFatal("", "msg.fatal.pedestre.nao.gravado");
 			return "";
 		}
+		
+		pedestre.setDataAlteracaoFoto(new Date());
+		String jsonStr = gson.toJson(WebSocketPedestrianAccessTO.fromPedestre(pedestre));
+		JsonObject json = JsonParser.parseString(jsonStr).getAsJsonObject();
 
+		// buscar cliente correto pelo idCliente e pegar unidade organizacional
+		WebSocketEndpoint.enviarParaLocal(pedestre.getCliente().getId().toString(), json.toString());
+		
+		
 		String retornoStr = "";
 		if (cadastroEmLote) {
 			retornoStr = "/paginas/sistema/pedestres/cadastroPedestre.xhtml?acao=OK";
@@ -1099,6 +1111,11 @@ public class CadastroPedestreController extends CadastroBaseController {
 	private PedestreEntity getPedestreAtual() {
 		return (PedestreEntity) getEntidade();
 	}
+	
+	private void setPedestreAtual(PedestreEntity pedestre) {
+		setEntidade(pedestre);
+	}
+
 
 	private void montaListaStatus() {
 		listaStatus = new ArrayList<SelectItem>();
@@ -1296,6 +1313,109 @@ public class CadastroPedestreController extends CadastroBaseController {
 		}
 		return null;
 	}
+	
+	@SuppressWarnings("unchecked")
+	public void onCpfBlur() {
+		PedestreEntity pedestre = getPedestreAtual();
+		List<PedestreEntity> existente = null;
+
+		String cpf = pedestre.getCpf();
+		if (cpf == null || cpf.trim().isEmpty()) {
+			cpf = "";
+		}
+
+		cpf = cpf.replace(".", "").replace("-", "").trim();
+
+		Map<String, Object> args = new HashMap<String, Object>();
+		args.put("CPF", cpf);
+
+		try {
+			existente = (List<PedestreEntity>) baseEJB.pesquisaArgFixos(PedestreEntity.class, "findByCPFOnBlur", args);
+			if (existente != null && !existente.isEmpty()) {
+				PedestreEntity encontrado = existente.get(0);
+
+				if (pedestre.getId() != null && pedestre.getId().equals(encontrado.getId())) {
+					return;
+				}
+
+				if (encontrado.isVisitante()) {
+					urlNovoRegistro = "/paginas/sistema/pedestres/cadastroPedestre.xhtml?tipo=vi";
+				} else {
+					urlNovoRegistro = "/paginas/sistema/pedestres/cadastroPedestre.xhtml?tipo=pe";
+				}
+				editar(encontrado.getId());
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	
+	@SuppressWarnings("unchecked")
+	public void onRgBlur() {
+		PedestreEntity pedestre = getPedestreAtual();
+		List<PedestreEntity> existente = null;
+	    
+	    String rg = pedestre.getRg();
+	    if (rg == null || rg.trim().isEmpty()) {
+	        rg="";
+	    }
+
+		Map<String, Object> args = new HashMap<String, Object>();
+		args.put("RG", rg);
+		
+	    try {
+			existente = (List<PedestreEntity>) baseEJB.pesquisaArgFixos(PedestreEntity.class, "findByRGOnBlur", args);
+			if (existente != null && !existente.isEmpty()) {
+	            PedestreEntity encontrado = existente.get(0);
+
+	            if (pedestre.getId() != null && pedestre.getId().equals(encontrado.getId())) {
+	                return;
+	            }
+
+				if(encontrado.isVisitante()) {
+					urlNovoRegistro = "/paginas/sistema/pedestres/cadastroPedestre.xhtml?tipo=vi";
+				}else {
+					urlNovoRegistro = "/paginas/sistema/pedestres/cadastroPedestre.xhtml?tipo=pe";
+				}
+				editar(encontrado.getId());
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void preencherCartaoAutomatico() {
+		PedestreEntity pedestre = getPedestreAtual();
+
+		String cartaoAtual = pedestre.getCodigoCartaoAcesso();
+
+		// Considera "vazio" se for null, vazio ou só zeros
+		boolean cartaoVazioOuInvalido = cartaoAtual == null ||
+		                                 cartaoAtual.trim().isEmpty() ||
+		                                 cartaoAtual.replace("0", "").isEmpty();
+
+		System.out.println("pedestre cartao : " + cartaoAtual);
+
+		if (cartaoVazioOuInvalido) {
+			String codigo = null;
+
+			if (pedestre.getMatricula() != null && !pedestre.getMatricula().trim().isEmpty()) {
+				codigo = pedestre.getMatricula().replaceAll("\\D", ""); // apenas números
+			} else if (pedestre.getCpf() != null && !pedestre.getCpf().trim().isEmpty()) {
+				codigo = pedestre.getCpf().replaceAll("\\D", "");
+			}
+
+			if (codigo != null && !codigo.isEmpty()) {
+				pedestre.setCodigoCartaoAcesso(codigo);
+			} else {
+				// fallback: gerar número randômico com 8 dígitos
+				pedestre.setCodigoCartaoAcesso(String.format("%08d", new Random().nextInt(100000000)));
+			}
+		}
+	}
+
+
 
 	public String gerarLinkCadastroFacialExterno() {
 		ultimoCadastroExterno = buscaUltimoCadastroExterno();

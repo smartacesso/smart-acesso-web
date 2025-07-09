@@ -26,30 +26,36 @@ public class WebSocketPedestrianAccessTO {
 	
 	public static WebSocketPedestrianAccessTO fromPedestre(PedestreEntity pedestre) {
 		WebSocketPedestrianAccessTO object = new WebSocketPedestrianAccessTO();
+
 		object.setId(pedestre.getId());
-		object.setName(pedestre.getNome());
-		object.setCardNumber(pedestre.getCodigoCartaoAcesso());
-		object.setTipo(pedestre.getTipo().toString());
-		object.setStatus(pedestre.getStatus().toString());
-		object.setCpf(pedestre.getCpf());
-		object.setRg(pedestre.getRg());
-		object.setSempreLiberado(pedestre.getSempreLiberado());
-		
-        byte[] fotoBytes = pedestre.getFoto();
-        object.setFotoBase64((fotoBytes != null) ? Base64.encodeBase64String(fotoBytes) : "");
-		
-        object.setIdLocal(pedestre.getIdLocal());
-        object.setIdEmpresa(pedestre.getEmpresa().getId());
-        
-        if(Objects.nonNull(pedestre.getRegras())) {
-        	final List<PedestreRegraTO> pedestreRegraTO = pedestre.getRegras()
-        			.stream()
-        			.map(PedestreRegraTO::fromDomain)
-        			.collect(Collectors.toList());
-        	
-        	object.setPedestreRegras(pedestreRegraTO);
-        }
-        
+
+		object.setName(Objects.nonNull(pedestre.getNome()) ? pedestre.getNome() : null);
+		object.setCardNumber(Objects.nonNull(pedestre.getCodigoCartaoAcesso()) ? pedestre.getCodigoCartaoAcesso() : null);
+
+		object.setTipo(Objects.nonNull(pedestre.getTipo()) ? pedestre.getTipo().toString() : null);
+		object.setStatus(Objects.nonNull(pedestre.getStatus()) ? pedestre.getStatus().toString() : null);
+
+		object.setCpf(Objects.nonNull(pedestre.getCpf()) ? pedestre.getCpf() : null);
+		object.setRg(Objects.nonNull(pedestre.getRg()) ? pedestre.getRg() : null);
+
+		object.setSempreLiberado(Objects.nonNull(pedestre.getSempreLiberado()) ? pedestre.getSempreLiberado() : false);
+
+		byte[] fotoBytes = pedestre.getFoto();
+		object.setFotoBase64(fotoBytes != null ? Base64.encodeBase64String(fotoBytes) : "");
+
+		object.setIdLocal(Objects.nonNull(pedestre.getIdLocal()) ? pedestre.getIdLocal() : null);
+		object.setIdEmpresa(Objects.nonNull(pedestre.getEmpresa()) ? pedestre.getEmpresa().getId() : null);
+
+		if (Objects.nonNull(pedestre.getRegras())) {
+			List<PedestreRegraTO> pedestreRegraTO = pedestre.getRegras()
+				.stream()
+				.filter(Objects::nonNull)
+				.map(PedestreRegraTO::fromDomain)
+				.collect(Collectors.toList());
+
+			object.setPedestreRegras(pedestreRegraTO);
+		}
+
 		return object;
 	}
 

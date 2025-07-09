@@ -58,7 +58,12 @@
 							required="#{cadastroPedestreController.verificaObrigatorio('cpf')}"
 							disabled="#{not cadastroPedestreController.usuarioTemPermissao()}"
 							rendered="#{cadastroPedestreController.usuarioTemPermissao()}"
-							style="width: 100%" />
+							style="width: 100%" >
+
+							<p:ajax event="blur" process="@this"
+								update="nome dataNascimento email genero rg telefone celular observacoes"
+								listener="#{cadastroPedestreController.onCpfBlur}" />
+						</p:inputMask>
 						<h:outputText
 							value="#{cadastroPedestreController.getCpfMascarado()}"
 							rendered="#{not cadastroPedestreController.usuarioTemPermissao()}" />
@@ -84,7 +89,12 @@
 							disabled="#{not cadastroPedestreController.usuarioTemPermissao()}"
 							onkeyup="$(this).val($(this).val().replace(/[^0-9a-zA-Z]/g, ''));"
 							rendered="#{cadastroPedestreController.usuarioTemPermissao()}"
-							style="width: 100%" />
+							style="width: 100%">
+
+							<p:ajax event="blur" process="@this"
+								update="nome dataNascimento email genero rg telefone celular observacoes"
+								listener="#{cadastroPedestreController.onRgBlur}" />
+						</p:inputText>
 						<h:outputText
 							value="#{cadastroPedestreController.getRgMascarado()}"
 							rendered="#{not cadastroPedestreController.usuarioTemPermissao()}" />
