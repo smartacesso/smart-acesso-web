@@ -2,6 +2,7 @@ package br.com.startjob.acesso.api;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -41,7 +42,7 @@ public class TotvsEducacionalApiService extends BaseService {
 	                .build();
 	    }
 	    
-	    processaAlunosTotvs(alunos);
+//	    processaAlunosTotvs(alunos);
 	    
 	    return Response.status(Response.Status.CREATED)
 	    		.entity(new MensagemResponseTO(201,"Alunos processados com sucesso."))
@@ -58,10 +59,12 @@ public class TotvsEducacionalApiService extends BaseService {
 
 		// Busca todas as unidades de uma vez
 		List<ClienteEntity> unidades = buscaClientesPorUnicades(nomesUnidades);
-
+		Map<String, ClienteEntity> unidadeMap = null;
 		// Mapeia nome -> entidade
-		Map<String, ClienteEntity> unidadeMap = unidades.stream()
-				.collect(Collectors.toMap(c -> c.getNome().trim().toLowerCase(), Function.identity()));
+		if(Objects.nonNull(unidades)) {
+			unidadeMap = unidades.stream()
+					.collect(Collectors.toMap(c -> c.getNome().trim().toLowerCase(), Function.identity()));
+		}
 
 		try {
 			salvaOuAtualizaAlunosPorUnidade(alunosPorUnidade, unidadeMap);
