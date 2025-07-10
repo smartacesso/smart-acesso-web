@@ -18,6 +18,7 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Index;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.Lob;
@@ -48,7 +49,14 @@ import br.com.startjob.acesso.modelo.enumeration.TipoQRCode;
 import br.com.startjob.acesso.modelo.utils.EncryptionUtils;
 
 @Entity
-@Table(name = "TB_PEDESTRE")
+@Table(name = "TB_PEDESTRE",
+indexes = {
+		@Index(name = "idx_pedestrian_nome", columnList = "NOME"),
+		@Index(name = "idx_pedestrian_cpf", columnList = "CPF"),
+		@Index(name = "idx_pedestrian_rg", columnList = "RG"),
+		@Index(name = "idx_pedestrian_matricula", columnList = "MATRICULA"),
+		@Index(name = "idx_pedestrian_card_number", columnList = "CARTAO_ACESSO"),
+		})
 @NamedQueries({
 		@NamedQuery(name = "PedestreEntity.findAll", query = "select obj " + "from PedestreEntity obj "
 				+ "where (obj.removido = false or obj.removido is null) " + "order by obj.id asc"),
@@ -127,10 +135,14 @@ import br.com.startjob.acesso.modelo.utils.EncryptionUtils;
 						+ "and (r.removido = false or r.removido is null) "
 						+ "order by obj.id asc"),
 		@NamedQuery(name = "PedestreEntity.findByCPFOnBlur", query = "select distinct obj from PedestreEntity obj "
-				+ "where obj.cpf = :CPF " + "order by obj.id asc"),
+				+ "where obj.cpf = :CPF "
+				+ "and obj.cliente.id = :ID_CLIENTE "
+				+ "order by obj.id asc"),
 
 		@NamedQuery(name = "PedestreEntity.findByRGOnBlur", query = "select distinct obj from PedestreEntity obj "
-				+ "where obj.rg = :RG " + "order by obj.id asc")
+				+ "where obj.rg = :RG " 
+				+ "and obj.cliente.id = :ID_CLIENTE "
+				+ "order by obj.id asc")
 
 })
 
