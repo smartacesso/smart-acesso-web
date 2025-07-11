@@ -436,6 +436,35 @@
 						
 						</p:tab>
 						
+												<p:tab title="#{msgs['label.uc001.integracao.ad']}">
+
+							<p:panelGrid columns="2" style="width: 100%;">
+
+								<p:column >
+									<p:outputLabel value="#{msgs['label.uc001.url.ad']}" for="urlAD" indicateRequired="false"/>
+									<br />
+									<p:inputText id="urlAD" value="#{cadastroClienteController.entidade.integracaoAD.url}"
+												 required="false"/>
+								</p:column>
+
+								<p:column >
+									<p:outputLabel value="#{msgs['label.uc001.usuario.ad']}" for="usuarioAD" indicateRequired="false"/>
+									<br />
+									<p:inputText id="usuarioAD" value="#{cadastroClienteController.entidade.integracaoAD.usuario}"
+												 required="false"/>
+								</p:column>
+
+								<p:column >
+									<p:outputLabel value="#{msgs['label.uc001.senha.ad']}" for="senhaAD" indicateRequired="false"/>
+									<br />
+									<p:password id="senhaAD" value="#{cadastroClienteController.entidade.integracaoAD.senha}"
+												required="false"/>
+								</p:column>
+
+							</p:panelGrid>
+
+						</p:tab>
+						
 						<p:tab title="#{msgs['label.uc001.integracao.totvs']}">
 						
 							<p:panelGrid columns="6" style="width: 100%;">
