@@ -5,13 +5,12 @@
 	xmlns:p="http://primefaces.org/ui">
 
 	<style>
-	
-	.bloco-pedestre{
-	display:flex;
-    flex-direction: column;
-    align-items:center;
-    justify-content:center;
-	}
+.bloco-pedestre {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+}
 
 .whiteIcon .ui-icon, .whiteIcon .ui-button-text {
 	color: #fff;
@@ -42,10 +41,9 @@
 }
 
 @media screen and (max-width: 600px) {
-	
 	.form-section {
 		padding: 0.5rem;
-		width:100%;
+		width: 100%;
 	}
 }
 
@@ -57,7 +55,7 @@
 	background-color: #f8f9fa;
 	border: 1px solid #ccc;
 	border-radius: 10px;
-	box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 	flex-wrap: wrap;
 	margin-bottom: 20px;
 }
@@ -65,7 +63,7 @@
 .foto-horizontal img {
 	width: 180px;
 	border-radius: 10px;
-	box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 	display: block;
 	cursor: pointer;
 }
@@ -85,7 +83,6 @@
 	margin-top: 10px;
 	display: inline-block;
 }
-
 </style>
 
 	<h:panelGroup layout="block" styleClass="painel-horizontal-lateral">
@@ -139,11 +136,12 @@
 						autocomplete="off" styleClass="left-zeros"
 						style="width: calc(100% - 70px); display: inline-block;" />
 
-					<p:commandButton 
+					<p:commandButton
 						action="#{cadastroPedestreController.preencherCartaoAutomatico}"
-						update="cartao" icon="pi pi-arrow-right"
-						styleClass="ui-button-secondary"
+						update="cartao" process="@this" immediate="true"
+						icon="pi pi-arrow-right" styleClass="ui-button-secondary"
 						style="margin-left: 5px; width: 50px;" />
+
 				</h:panelGroup>
 			</h:panelGrid>
 

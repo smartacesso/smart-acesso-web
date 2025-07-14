@@ -60,8 +60,7 @@
 							rendered="#{cadastroPedestreController.usuarioTemPermissao()}"
 							style="width: 100%" >
 
-							<p:ajax event="blur" process="@this"
-								update="nome dataNascimento email genero rg telefone celular observacoes"
+							<p:ajax event="change" process="@this"
 								listener="#{cadastroPedestreController.onCpfBlur}" />
 						</p:inputMask>
 						<h:outputText
@@ -91,8 +90,7 @@
 							rendered="#{cadastroPedestreController.usuarioTemPermissao()}"
 							style="width: 100%">
 
-							<p:ajax event="blur" process="@this"
-								update="nome dataNascimento email genero rg telefone celular observacoes"
+							<p:ajax event="change" process="@this"
 								listener="#{cadastroPedestreController.onRgBlur}" />
 						</p:inputText>
 						<h:outputText

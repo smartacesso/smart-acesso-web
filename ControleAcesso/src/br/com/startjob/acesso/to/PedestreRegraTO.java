@@ -6,6 +6,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import br.com.startjob.acesso.modelo.entity.PedestreRegraEntity;
+import br.com.startjob.acesso.modelo.enumeration.TipoRegra;
 
 public class PedestreRegraTO {
 
@@ -45,9 +46,11 @@ public class PedestreRegraTO {
 		pedestreRegraTO.dataFimPeriodo = pedestreRegraEntity.getDataFimPeriodo();
 		
 		if(Objects.nonNull(pedestreRegraEntity.getHorarios())) {
-			pedestreRegraTO.horarios = pedestreRegraEntity.getHorarios().stream()
-				.map(HorarioTO::new)
-				.collect(Collectors.toList());
+			if(pedestreRegraEntity.getRegra().getTipo() == TipoRegra.ACESSO_HORARIO) {
+				pedestreRegraTO.horarios = pedestreRegraEntity.getHorarios().stream()
+						.map(HorarioTO::new)
+						.collect(Collectors.toList());
+			}
 		}
 		
 		return pedestreRegraTO;

@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -465,6 +466,7 @@ public class CadastroPedestreController extends CadastroBaseController {
 		}
 
 		pedestre.setUsuario(getUsuarioLogado());
+		pedestre.setDataAlteracaoFoto(new Date());
 			
 		validaListasPedestre(pedestre);
 		String retorno = super.salvar();
@@ -474,7 +476,24 @@ public class CadastroPedestreController extends CadastroBaseController {
 			return "";
 		}
 		
-		pedestre.setDataAlteracaoFoto(new Date());
+		pedestre = (PedestreEntity) getEntidade();
+		
+		try {
+			pedestre = (PedestreEntity) baseEJB.recuperaObjeto(PedestreEntity.class, pedestre.getId());
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		if (Objects.nonNull(pedestre) && Objects.nonNull(pedestre.getRegras())) {
+			for (PedestreRegraEntity p : pedestre.getRegras()) {
+				if (Objects.nonNull(p.getRegra()) && p.getRegra().getTipo() == TipoRegra.ACESSO_HORARIO) {
+					List<HorarioEntity> horarios = buscaHorariosByIdPedestreRegra(p.getId());
+					p.setHorarios(horarios);
+				}
+			}
+		}
+		
 		String jsonStr = gson.toJson(WebSocketPedestrianAccessTO.fromPedestre(pedestre));
 		JsonObject json = JsonParser.parseString(jsonStr).getAsJsonObject();
 
@@ -1314,6 +1333,26 @@ public class CadastroPedestreController extends CadastroBaseController {
 		return null;
 	}
 	
+	private List<HorarioEntity> buscaHorariosByIdPedestreRegra(Long id) {
+		HashMap<String, Object> args = new HashMap<>();
+		args.put("ID", id);
+
+		try {
+			@SuppressWarnings("unchecked")
+			List<PedestreRegraEntity> pedestreRegras = (List<PedestreRegraEntity>) pedestreEJB
+					.pesquisaArgFixos(PedestreRegraEntity.class, "findByIdComHorarios", args);
+
+			if (pedestreRegras != null && !pedestreRegras.isEmpty()) {
+				return pedestreRegras.get(0).getHorarios();
+			}
+		} catch (Exception e) {
+			System.err.println("Erro ao buscar horários do pedestre: " + e.getMessage());
+			e.printStackTrace();
+		}
+
+		return Collections.emptyList();
+	}
+	
 	@SuppressWarnings("unchecked")
 	public void onCpfBlur() {
 		PedestreEntity pedestre = getPedestreAtual();
@@ -1325,9 +1364,16 @@ public class CadastroPedestreController extends CadastroBaseController {
 		}
 
 		cpf = cpf.replace(".", "").replace("-", "").trim();
+		
+		
+		if(Objects.isNull(cpf) || cpf.isEmpty() || "".equals(cpf)){
+			return;
+		}
+
 
 		Map<String, Object> args = new HashMap<String, Object>();
 		args.put("CPF", cpf);
+		args.put("ID_CLIENTE", getUsuarioLogado().getCliente().getId());
 
 		try {
 			existente = (List<PedestreEntity>) baseEJB.pesquisaArgFixos(PedestreEntity.class, "findByCPFOnBlur", args);
@@ -1360,9 +1406,14 @@ public class CadastroPedestreController extends CadastroBaseController {
 	    if (rg == null || rg.trim().isEmpty()) {
 	        rg="";
 	    }
+		
+		if(Objects.isNull(rg) || rg.isEmpty() || "".equals(rg)){
+			return;
+		}
 
 		Map<String, Object> args = new HashMap<String, Object>();
 		args.put("RG", rg);
+		args.put("ID_CLIENTE", getUsuarioLogado().getCliente().getId());
 		
 	    try {
 			existente = (List<PedestreEntity>) baseEJB.pesquisaArgFixos(PedestreEntity.class, "findByRGOnBlur", args);
