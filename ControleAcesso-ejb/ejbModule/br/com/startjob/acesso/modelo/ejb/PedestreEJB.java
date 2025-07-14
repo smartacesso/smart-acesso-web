@@ -240,28 +240,27 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 				"		pd.RG as rg, " + // 26
 				"		pd.TELEFONE as telefone, " + // 27
 				"		pd.CELULAR as celular, " + // 28
-				"		pd.ID_RESPONSAVEL as responsavel, " + // 29
-				"		pd.OBSERVACOES as observacoes, " + // 30
-				"		e.CEP as cep, " + // 31
-				"		e.LOGRADOURO as logradouro, " + // 32
-				"		e.NUMERO as numero, " + // 33
-				"		e.COMPLEMENTO as complemento, " + // 34
-				"		e.BAIRRO as bairro, " + // 35
-				"		e.CIDADE as cidade, " + // 36
-				"		e.ESTADO as estado,  " + // 37
-				"		pd.MATRICULA as matricula, " + // 38
-				"		pd.REMOVIDO as removido, " + // 39
-				"		pd.SEMPRE_LIBERADO as sempreLiberado, " + // 40
-				"		pd.HABILITAR_TECLADO as habilitarTeclado, " + // 41
-				"		pd.ID_TEMP as idTemp, " + // 42
-				"		pd.QR_CODE_PARA_ACESSO as qrCodeParaAcesso, " + // 43
-				"		pd.CADASTRO_FACIAL_OBRIGATORIO as cadFacialObrig, " + // 44
-				"		emp.ID_EMPRESA as idEmpresa, " + // 45
-				"		cargo.ID_CARGO as idCargo, " + // 46
-				"		cc.ID_CENTRO_CUSTO as idCentroCusto, " + // 47
-				"		dp.ID_DEPARTAMENTO as idDepartamento, " + // 48
-				"		pd.ENVIAR_SMS_AO_PASSAR_NA_CATRACA as enviaSMS, " + // 49
-				"		pd.LUXAND_IDENTIFIER as luxandID " + // 50
+				"		pd.OBSERVACOES as observacoes, " + // 29
+				"		e.CEP as cep, " + // 30
+				"		e.LOGRADOURO as logradouro, " + // 31
+				"		e.NUMERO as numero, " + // 32
+				"		e.COMPLEMENTO as complemento, " + // 33
+				"		e.BAIRRO as bairro, " + // 34
+				"		e.CIDADE as cidade, " + // 35
+				"		e.ESTADO as estado,  " + // 36
+				"		pd.MATRICULA as matricula, " + // 37
+				"		pd.REMOVIDO as removido, " + // 38
+				"		pd.SEMPRE_LIBERADO as sempreLiberado, " + // 39
+				"		pd.HABILITAR_TECLADO as habilitarTeclado, " + // 40
+				"		pd.ID_TEMP as idTemp, " + // 41
+				"		pd.QR_CODE_PARA_ACESSO as qrCodeParaAcesso, " + // 42
+				"		pd.CADASTRO_FACIAL_OBRIGATORIO as cadFacialObrig, " + // 43
+				"		emp.ID_EMPRESA as idEmpresa, " + // 44
+				"		cargo.ID_CARGO as idCargo, " + // 45
+				"		cc.ID_CENTRO_CUSTO as idCentroCusto, " + // 46
+				"		dp.ID_DEPARTAMENTO as idDepartamento, " + // 47
+				"		pd.ENVIAR_SMS_AO_PASSAR_NA_CATRACA as enviaSMS, " + // 48
+				"		pd.LUXAND_IDENTIFIER as luxandID " + // 49
 				"from " + schema + "TB_PEDESTRE pd " + "		left join " + schema
 				+ "TB_ENDERECO e on e.ID_ENDERECO = pd.ID_ENDERECO " + "		left join " + schema
 				+ "TB_EMPRESA emp on emp.ID_EMPRESA = pd.ID_EMPRESA " + "		left join " + schema
@@ -338,56 +337,55 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 				"		pd.RG as rg, " + // 26
 				"		pd.TELEFONE as telefone, " + // 27
 				"		pd.CELULAR as celular, " + // 28
-				"		pd.ID_RESPONSAVEL as responsavel, " + // 29
-				"		pd.OBSERVACOES as observacoes, " + // 30
-				"		e.CEP as cep, " + // 31
-				"		e.LOGRADOURO as logradouro, " + // 32
-				"		e.NUMERO as numero, " + // 33
-				"		e.COMPLEMENTO as complemento, " + // 34
-				"		e.BAIRRO as bairro, " + // 35
-				"		e.CIDADE as cidade, " + // 36
-				"		e.ESTADO as estado,  " + // 37
-				"		pd.MATRICULA as matricula, " + // 38
-				"		pd.REMOVIDO as removido, " + // 39
-				"		pd.SEMPRE_LIBERADO as sempreLiberado, " + // 40
-				"		pd.HABILITAR_TECLADO as habilitarTeclado, " + // 41
-				"		pd.ID_TEMP as idTemp, " + // 42
-				"		pd.QR_CODE_PARA_ACESSO as qrCodeParaAcesso, " + // 43
-				"		pd.CADASTRO_FACIAL_OBRIGATORIO as cadFacialObrig, " + // 44
-				"		emp.ID_EMPRESA as idEmpresa, " + // 45
-				"		cargo.ID_CARGO as idCargo, " + // 46
-				"		cc.ID_CENTRO_CUSTO as idCentroCusto, " + // 47
-				"		dp.ID_DEPARTAMENTO as idDepartamento, " + // 48
-				"		pd.ENVIAR_SMS_AO_PASSAR_NA_CATRACA as enviaSMS, " + // 49
-				"		pd.LUXAND_IDENTIFIER as luxandID, " + // 50
-				"		mp.NOME as nomeMensagem, " + // 51
-				"		mp.STATUS as statusMensagem, " + // 52
-				"		mp.VALIDADE as validadeMensagem, " + // 53
-				"		ep.ID_PEDESTRE_EQUIPAMENTO as idEquipamento, " + // 54
-				"		ep.VALIDADE as validadeEquipamento, " + // 55
-				"		teq.NOME as nomeEquipamento, " + // 56
-				"		doc.ID_DOCUMENTO as idDoc, " + // 57
-				"		doc.NOME as nomeDoc, " + // 58
-				"		doc.VALIDADE as validadeDoc, " + // 59
-				"		r.ID_REGRA as idRegra, " + // 60
-				"		rp.VALIDADE as validadeRegra, " + // 61
-				"		rp.QTDE_TOTAL_CREDITOS as qtdeTotalCreditos, " + // 62
-				"		pd.QUANTIDADE_ACESSO_ANTES_SINC as qtdeAcessosAntesSinc, " + // 63
-				"		usuario.ID_USUARIO as idUsuario, " + // 64
-				" 		rp.BLOQUEADO AS bloqueioRegra, " + // 65
-				"       pd.senha as senha, " + // 66
-				"       pd.TIPO_ACESSO as tipoAcesso, " + // 67
-				"       pd.TIPO_QRCODE as tipoQRCode, " + // 68
-				"		pd.DATA_CADASTRO_FOTO_HIKIVISION as dataCadastroFotoHikivision, " + // 69
-				"		h2.ID_PEDESTRE_REGRA as idPedestreRegraPR, " + // 70
-				"		h2.ID_HORARIO as idHorarioPR, " + // 71
-				"		h2.QTDE_CREDITOS as qtdeCreditosPR, " + // 72
-				"		h2.DIAS_SEMANA diasSemanaPR, " + // 73
-				"		h2.NOME as nomeRegraPR, " + // 74
-				"		h2.HORARIO_INI as horarioInicioPR, " + // 75
-				"		h2.HORARIO_FIM as horarioFim,  " + // 76
-				"		h2.STATUS as statusPR, " + // 77
-				"		pd.ID_LOCAL as idLocal " + // 78
+				"		pd.OBSERVACOES as observacoes, " + // 29
+				"		e.CEP as cep, " + // 30
+				"		e.LOGRADOURO as logradouro, " + // 31
+				"		e.NUMERO as numero, " + // 32
+				"		e.COMPLEMENTO as complemento, " + // 33
+				"		e.BAIRRO as bairro, " + // 34
+				"		e.CIDADE as cidade, " + // 35
+				"		e.ESTADO as estado,  " + // 36
+				"		pd.MATRICULA as matricula, " + // 37
+				"		pd.REMOVIDO as removido, " + // 38
+				"		pd.SEMPRE_LIBERADO as sempreLiberado, " + // 39
+				"		pd.HABILITAR_TECLADO as habilitarTeclado, " + // 40
+				"		pd.ID_TEMP as idTemp, " + // 41
+				"		pd.QR_CODE_PARA_ACESSO as qrCodeParaAcesso, " + // 42
+				"		pd.CADASTRO_FACIAL_OBRIGATORIO as cadFacialObrig, " + // 43
+				"		emp.ID_EMPRESA as idEmpresa, " + // 44
+				"		cargo.ID_CARGO as idCargo, " + // 45
+				"		cc.ID_CENTRO_CUSTO as idCentroCusto, " + // 46
+				"		dp.ID_DEPARTAMENTO as idDepartamento, " + // 47
+				"		pd.ENVIAR_SMS_AO_PASSAR_NA_CATRACA as enviaSMS, " + // 48
+				"		pd.LUXAND_IDENTIFIER as luxandID, " + // 49
+				"		mp.NOME as nomeMensagem, " + // 50
+				"		mp.STATUS as statusMensagem, " + // 51
+				"		mp.VALIDADE as validadeMensagem, " + // 52
+				"		ep.ID_PEDESTRE_EQUIPAMENTO as idEquipamento, " + // 53
+				"		ep.VALIDADE as validadeEquipamento, " + // 54
+				"		teq.NOME as nomeEquipamento, " + // 55
+				"		doc.ID_DOCUMENTO as idDoc, " + // 56
+				"		doc.NOME as nomeDoc, " + // 57
+				"		doc.VALIDADE as validadeDoc, " + // 58
+				"		r.ID_REGRA as idRegra, " + // 59
+				"		rp.VALIDADE as validadeRegra, " + // 60
+				"		rp.QTDE_TOTAL_CREDITOS as qtdeTotalCreditos, " + // 61
+				"		pd.QUANTIDADE_ACESSO_ANTES_SINC as qtdeAcessosAntesSinc, " + // 62
+				"		usuario.ID_USUARIO as idUsuario, " + // 63
+				" 		rp.BLOQUEADO AS bloqueioRegra, " + // 64
+				"       pd.senha as senha, " + // 65
+				"       pd.TIPO_ACESSO as tipoAcesso, " + // 66
+				"       pd.TIPO_QRCODE as tipoQRCode, " + // 67
+				"		pd.DATA_CADASTRO_FOTO_HIKIVISION as dataCadastroFotoHikivision, " + // 68
+				"		h2.ID_PEDESTRE_REGRA as idPedestreRegraPR, " + // 69
+				"		h2.ID_HORARIO as idHorarioPR, " + // 70
+				"		h2.QTDE_CREDITOS as qtdeCreditosPR, " + // 71
+				"		h2.DIAS_SEMANA diasSemanaPR, " + // 72
+				"		h2.NOME as nomeRegraPR, " + // 73
+				"		h2.HORARIO_INI as horarioInicioPR, " + // 74
+				"		h2.HORARIO_FIM as horarioFim,  " + // 75
+				"		h2.STATUS as statusPR, " + // 76
+				"		pd.ID_LOCAL as idLocal " + // 77
 				"from " + schema + "TB_PEDESTRE pd " + "		left join " + schema
 				+ "TB_ENDERECO e on e.ID_ENDERECO = pd.ID_ENDERECO " + "		left join " + schema
 				+ "TB_EMPRESA emp on emp.ID_EMPRESA = pd.ID_EMPRESA " + "		left join " + schema

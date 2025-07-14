@@ -105,34 +105,33 @@ public class PedestrianAccessTO {
 		this.rg				= objects[26] == null ? null : objects[26].toString();
 		this.telefone		= objects[27] == null ? null : objects[27].toString();
 		this.celular		= objects[28] == null ? null : objects[28].toString();
-		this.responsavel	= objects[29] == null ? null : objects[29].toString();
-		this.observacoes	= objects[30] == null ? null : objects[30].toString();
-		this.matricula		= objects[38] == null ? null : objects[38].toString();
-		this.removido		= objects[39] == null ? false : Boolean.valueOf(objects[39].toString());
-		this.sempreLiberado   = objects[40] == null ? false : Boolean.valueOf(objects[40].toString());
-		this.habilitarTeclado = objects[41] == null ? false : Boolean.valueOf(objects[41].toString());
-		this.idTemp			= objects[42] == null ? null : Long.valueOf(objects[42].toString());
-		this.qrCodeParaAcesso = objects[43] == null ? null : objects[43].toString();
-		this.cadastroFacialObrigatorio = objects[44] == null ? false : Boolean.valueOf(objects[44].toString());
+		this.observacoes	= objects[29] == null ? null : objects[29].toString();
+		this.matricula		= objects[37] == null ? null : objects[37].toString();
+		this.removido		= objects[38] == null ? false : Boolean.valueOf(objects[38].toString());
+		this.sempreLiberado   = objects[39] == null ? false : Boolean.valueOf(objects[39].toString());
+		this.habilitarTeclado = objects[40] == null ? false : Boolean.valueOf(objects[40].toString());
+		this.idTemp			= objects[41] == null ? null : Long.valueOf(objects[41].toString());
+		this.qrCodeParaAcesso = objects[42] == null ? null : objects[42].toString();
+		this.cadastroFacialObrigatorio = objects[43] == null ? false : Boolean.valueOf(objects[43].toString());
 		
 		//endereco
-		this.cep			  = objects[31] == null ? null : objects[31].toString();
-		this.logradouro		  = objects[32] == null ? null : objects[32].toString();
-		this.numero			  = objects[33] == null ? null : objects[33].toString();
-		this.complemento	  = objects[34] == null ? null : objects[34].toString();
-		this.bairro			  = objects[35] == null ? null : objects[35].toString();
-		this.cidade			  = objects[36] == null ? null : objects[36].toString();
-		this.estado			  = objects[37] == null ? null : objects[37].toString();
+		this.cep			  = objects[30] == null ? null : objects[30].toString();
+		this.logradouro		  = objects[31] == null ? null : objects[31].toString();
+		this.numero			  = objects[32] == null ? null : objects[32].toString();
+		this.complemento	  = objects[33] == null ? null : objects[33].toString();
+		this.bairro			  = objects[34] == null ? null : objects[34].toString();
+		this.cidade			  = objects[35] == null ? null : objects[35].toString();
+		this.estado			  = objects[36] == null ? null : objects[36].toString();
 		
-		this.idLocal 		  = objects[78] == null ? null : Long.valueOf(objects[78].toString());
+		this.idLocal 		  = objects[77] == null ? null : Long.valueOf(objects[77].toString());
 		
-		this.idEmpresa = objects[45] == null ? null : Long.valueOf(objects[45].toString());
-		this.idCargo = objects[46] == null ? null : Long.valueOf(objects[46].toString());
-		this.idCentroCusto = objects[47] == null ? null : Long.valueOf(objects[47].toString());
-		this.idDepartamento = objects[48] == null ? null : Long.valueOf(objects[48].toString());
-		this.luxandIdentifier = objects[50] == null ? null : objects[50].toString();
+		this.idEmpresa = objects[44] == null ? null : Long.valueOf(objects[44].toString());
+		this.idCargo = objects[45] == null ? null : Long.valueOf(objects[45].toString());
+		this.idCentroCusto = objects[46] == null ? null : Long.valueOf(objects[46].toString());
+		this.idDepartamento = objects[47] == null ? null : Long.valueOf(objects[47].toString());
+		this.luxandIdentifier = objects[49] == null ? null : objects[49].toString();
 		
-		this.enviaSmsAoPassarNaCatraca = objects[49] == null ? false : Boolean.valueOf(objects[49].toString());
+		this.enviaSmsAoPassarNaCatraca = objects[48] == null ? false : Boolean.valueOf(objects[48].toString());
 		
 		//digitais cadastradas
 		adicionaBiometria(objects);
@@ -146,27 +145,27 @@ public class PedestrianAccessTO {
 		this.dataInicioPeriodo = objects[21] == null ? null : criaData(objects[21], sdf);
 		this.dataFimPeriodo = objects[22] == null ? null : criaData(objects[22], sdf);
 		try {
-			this.qtdAcessoAntesSinc = objects[63] == null ? null : Integer.valueOf(objects[63].toString());
+			this.qtdAcessoAntesSinc = objects[62] == null ? null : Integer.valueOf(objects[62].toString());
 		}catch (Exception e) {}
 		try {
-			this.idUsuario = objects[64] == null ? null : Long.valueOf(objects[64].toString());
+			this.idUsuario = objects[63] == null ? null : Long.valueOf(objects[63].toString());
+		}catch (Exception e) {}
+//		try {
+//			this.login = objects[65 - 1] == null ? null : objects[65 - 1].toString();
+//		}catch (Exception e) {}
+		try {
+			this.senha = objects[65] == null ? null : objects[65].toString();
 		}catch (Exception e) {}
 		try {
-			this.login = objects[65] == null ? null : objects[65].toString();
+			this.tipoAcesso = objects[66] == null ? null : objects[66].toString();
 		}catch (Exception e) {}
 		try {
-			this.senha = objects[66] == null ? null : objects[66].toString();
+			this.tipoQRCode = objects[67] == null ? null : objects[67].toString();
 		}catch (Exception e) {}
 		try {
-			this.tipoAcesso = objects[67] == null ? null : objects[67].toString();
+			this.bloqueado = objects[64] == null ? null : Boolean.valueOf(objects[64].toString());
 		}catch (Exception e) {}
-		try {
-			this.tipoQRCode = objects[68] == null ? null : objects[68].toString();
-		}catch (Exception e) {}
-		try {
-			this.bloqueado = objects[65] == null ? null : Boolean.valueOf(objects[64].toString());
-		}catch (Exception e) {}
-		this.dataCadastroFotoNaHikivision  = objects[69] == null ? null : criaData(objects[69], sdf);
+		this.dataCadastroFotoNaHikivision  = objects[68] == null ? null : criaData(objects[68], sdf);
 		
 		//horários permitidos
 		adicionaHorarios(objects);
@@ -229,9 +228,9 @@ public class PedestrianAccessTO {
 		Date validade = null;
 		Long qtdeTotalDeCreditos = null;
 		try {
-			idRegra = objects[60] == null ? null : Long.valueOf(objects[60].toString());
-			validade = objects[61] == null ? null : criaData(objects[61], sdf);
-			qtdeTotalDeCreditos = objects[62] == null ? null : Long.valueOf(objects[62].toString());
+			idRegra = objects[59] == null ? null : Long.valueOf(objects[59].toString());
+			validade = objects[60] == null ? null : criaData(objects[60], sdf);
+			qtdeTotalDeCreditos = objects[61] == null ? null : Long.valueOf(objects[61].toString());
 		}catch (Exception e) {
 		}
 
@@ -260,18 +259,18 @@ public class PedestrianAccessTO {
 		}
 		
 		
-		if(Objects.isNull(objects[70])) {
+		if(Objects.isNull(objects[69])) {
 			return;
 		}
 		
-		final Long idPedestreRegra = Objects.isNull(objects[70]) ? null : Long.valueOf(objects[70].toString());
-		final Long idHorario = Objects.isNull(objects[71]) ? null : Long.valueOf(objects[71].toString());
-		final String diasSemana = Objects.isNull(objects[73]) ? null : objects[73].toString();
-		final Date horarioInicio = Objects.isNull(objects[75]) ? null : criaData(objects[75], sdf);
-		final Date horarioFim = Objects.isNull(objects[76]) ? null : criaData(objects[76], sdf);
-		final String nomeRegra = Objects.isNull(objects[74]) ? null : objects[74].toString();
-		final Long qtdeCreditos = Objects.isNull(objects[72]) ? null : Long.valueOf(objects[72].toString());
-		final String status = Objects.isNull(objects[77]) ? null : objects[77].toString();
+		final Long idPedestreRegra = Objects.isNull(objects[69]) ? null : Long.valueOf(objects[69].toString());
+		final Long idHorario = Objects.isNull(objects[70]) ? null : Long.valueOf(objects[70].toString());
+		final String diasSemana = Objects.isNull(objects[72]) ? null : objects[72].toString();
+		final Date horarioInicio = Objects.isNull(objects[74]) ? null : criaData(objects[74], sdf);
+		final Date horarioFim = Objects.isNull(objects[75]) ? null : criaData(objects[75], sdf);
+		final String nomeRegra = Objects.isNull(objects[73]) ? null : objects[73].toString();
+		final Long qtdeCreditos = Objects.isNull(objects[71]) ? null : Long.valueOf(objects[71].toString());
+		final String status = Objects.isNull(objects[76]) ? null : objects[76].toString();
 		
 		for(PedestreRegraTO pr : this.pedestreRegras) {
 			if(!pr.getId().equals(idPedestreRegra)) {
@@ -299,7 +298,7 @@ public class PedestrianAccessTO {
 	
 	public void adicionaDocumentos(Object[] objects) {
 		try {
-			if(objects[57] == null)
+			if(objects[56] == null)
 				return;
 		}catch (Exception e) {
 			return;
@@ -308,9 +307,9 @@ public class PedestrianAccessTO {
 		if(this.documentos == null)
 			this.documentos = new ArrayList<>();
 		
-		Long id = Long.valueOf(objects[57].toString());
-		String nomeDoc = objects[58] == null ? null : objects[58].toString();
-		Date validadeDoc = objects[59] == null ? null : criaData(objects[59], sdf);
+		Long id = Long.valueOf(objects[56].toString());
+		String nomeDoc = objects[57] == null ? null : objects[57].toString();
+		Date validadeDoc = objects[58] == null ? null : criaData(objects[58], sdf);
 		
 		boolean add = true;
 		
@@ -335,9 +334,9 @@ public class PedestrianAccessTO {
 		Long id = Long.valueOf(objects[18].toString());
 		String message = objects[19] == null ? null : objects[19].toString();
 		Long qtde = objects[20] == null ? null : Long.valueOf(objects[20].toString());
-		String nome = objects[51] == null ? null : objects[51].toString();
-		String status = objects[52] == null ? null : objects[52].toString();
-		Date validade = objects[53] == null ? null : criaData(objects[53].toString(), sdf);
+		String nome = objects[50] == null ? null : objects[50].toString();
+		String status = objects[51] == null ? null : objects[51].toString();
+		Date validade = objects[52] == null ? null : criaData(objects[52].toString(), sdf);
 		
 		boolean add = true;
 		
@@ -365,9 +364,9 @@ public class PedestrianAccessTO {
 		Date validadeEquipamento = null;
 		String nomeEquipamento = null;
 		try {
-			id = Long.valueOf(objects[54].toString());
-			validadeEquipamento = objects[55] == null ? null : criaData(objects[55], sdf);
-			nomeEquipamento = objects[56] == null ? null : objects[56].toString();
+			id = Long.valueOf(objects[53].toString());
+			validadeEquipamento = objects[54] == null ? null : criaData(objects[54], sdf);
+			nomeEquipamento = objects[55] == null ? null : objects[55].toString();
 		}catch (Exception e) {
 		}
 		
