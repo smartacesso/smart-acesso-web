@@ -81,6 +81,7 @@ public class GerenciarParametrosController extends BaseController {
 
 		if (all != null) {
 			boolean preencherCartaoComMatricula = false;
+			boolean preencherCartaoAuto = false;
 			boolean gerarMatriculaSequencial = false;
 			boolean escolherDigitos = false;
 			boolean permitirCampoAdicionalMatricula = false;
@@ -111,6 +112,10 @@ public class GerenciarParametrosController extends BaseController {
 				parametrosGerais.add(item);
 				if (item.getNome().equals(BaseConstant.PARAMETERS_NAME.PREENCHER_CARTAO_COM_MATRICULA)) {
 					preencherCartaoComMatricula = true;
+				}
+				
+				if (item.getNome().equals(BaseConstant.PARAMETERS_NAME.PREENCHER_CARTAO_AUTO)) {
+					preencherCartaoAuto = true;
 				}
 
 				if (item.getNome().equals(BaseConstant.PARAMETERS_NAME.HORARIO_DISPARO_SOC)) {
@@ -188,6 +193,12 @@ public class GerenciarParametrosController extends BaseController {
 			}
 			if (!preencherCartaoComMatricula) {
 				ParametroEntity p = new ParametroEntity(BaseConstant.PARAMETERS_NAME.PREENCHER_CARTAO_COM_MATRICULA,
+						"false", getUsuarioLogado().getCliente());
+				parametrosGerais.add(p);
+			}
+			
+			if (!preencherCartaoAuto) {
+				ParametroEntity p = new ParametroEntity(BaseConstant.PARAMETERS_NAME.PREENCHER_CARTAO_AUTO,
 						"false", getUsuarioLogado().getCliente());
 				parametrosGerais.add(p);
 			}
