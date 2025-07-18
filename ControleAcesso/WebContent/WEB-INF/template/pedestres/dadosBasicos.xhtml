@@ -129,12 +129,7 @@
 							required="#{cadastroPedestreController.verificaObrigatorio('observacoes')}"
 							rows="4" maxlength="300" autoResize="false" style="width: 100%" />
 					</div>
-				</div>
-			</p:tab>
-
-			<!-- ABA: Dados Empresa -->
-			<p:tab title="Dados Empresa">
-				<div class="ui-g">
+					<!-- ABA: Dados Empresa -->
 					<!-- Empresa -->
 					<div class="ui-g-12 ui-md-6">
 						<p:outputLabel value="#{msgs['label.uc008.empresa']}"
@@ -236,4 +231,13 @@
 			</p:tab>
 		</p:accordionPanel>
 	</p:panelGrid>
+	<h:outputScript>
+  $(document).on('focus', '.ui-inputmask', function () {
+    var input = this;
+    setTimeout(function () {
+      input.setSelectionRange(0, 0);
+    }, 50);
+  });
+</h:outputScript>
+
 </ui:composition>

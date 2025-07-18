@@ -130,7 +130,7 @@
 				<p:outputLabel value="Cartão:" for="cartao" />
 				<h:panelGroup layout="block">
 					<p:inputText id="cartao"
-						value="#{cadastroPedestreController.entidade.codigoCartaoAcesso}"
+						value="#{cadastroPedestreController.codigoCartao}"
 						maxlength="#{cadastroPedestreController.qtdeDigitosCartao}"
 						required="#{cadastroPedestreController.verificaObrigatorio('cartao.acesso')}"
 						autocomplete="off" styleClass="left-zeros"
@@ -138,9 +138,9 @@
 
 					<p:commandButton
 						action="#{cadastroPedestreController.preencherCartaoAutomatico}"
-						update="cartao" process="@this" immediate="true"
-						icon="pi pi-arrow-right" styleClass="ui-button-secondary"
-						style="margin-left: 5px; width: 50px;" />
+						value = "Gerar" update="cartao" process="@this" immediate="true"
+						styleClass="ui-button-secondary"
+						style="width: 60px;" />
 
 				</h:panelGroup>
 			</h:panelGrid>
@@ -245,8 +245,10 @@
 				value="#{cadastroPedestreController.croppedImage}"
 				rendered="#{cadastroPedestreController.exibeCrop}"
 				image="#{menuController.urlMain}/resources/upload/#{cadastroPedestreController.fileNameTemp}"
-				initialCoords="0,0,150,150" aspectRatio="1.0" guides="true"
-				minSize="150,150"
+				initialCoords="75,0,350,350"
+				aspectRatio="1.0" 
+				guides="true"
+				minSize="200,200"
 				onerror="console.error('Erro ao carregar imagem no cropper');"
 				onsuccess="console.log('Cropper inicializado com sucesso');" />
 
