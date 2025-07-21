@@ -170,6 +170,7 @@ public class CadastroPedestreController extends CadastroBaseController {
 	private boolean exibeCampoSempreLiberadoParaTodos = false;
 	private boolean exibeCampoLinkCadastroFacialExterno = false;
 	private boolean habilitaAppPedestre = false;
+	private boolean gerarCartaoAutomatico = false;
 
 	private TipoQRCode tipoPadraoQrCode = null;
 
@@ -229,6 +230,8 @@ public class CadastroPedestreController extends CadastroBaseController {
 
 		montaListaEmpresas();
 		montaListaEquipamentosDisponiveis();
+		
+		pedestre.setCodigoCartaoAcesso(gerarCartao(pedestre));
 	}
 
 	private void montaTipoQRCode() {
@@ -339,6 +342,10 @@ public class CadastroPedestreController extends CadastroBaseController {
 				getUsuarioLogado().getCliente().getId());
 		if (param != null)
 			habilitaAppPedestre = Boolean.valueOf(param.getValor());
+		param = baseEJB.getParametroSistema(BaseConstant.PARAMETERS_NAME.PREENCHER_CARTAO_AUTO,
+				getUsuarioLogado().getCliente().getId());
+		if (param != null)
+			gerarCartaoAutomatico = Boolean.valueOf(param.getValor());
 	}
 
 	public boolean verificaObrigatorio(String campo) {
@@ -938,7 +945,7 @@ public class CadastroPedestreController extends CadastroBaseController {
 		byte[] data = event.getData();
 		fileNameTemp = getRandomImageName() + ".png";
 		exibeCrop = true;
-
+		System.out.println("caminho : " + BaseConstant.URL_APLICACAO);
 		criarArquivo(data, fileNameTemp);
 	}
 
@@ -966,11 +973,12 @@ public class CadastroPedestreController extends CadastroBaseController {
 	}
 
 	public void crop() {
-		System.out.println(croppedImage);
 		if(croppedImage == null) {
 
 			return;
 		}
+		System.out.println("caminho : " + menuController.getUrlMain());
+		
 		PedestreEntity pedestre = (PedestreEntity) getEntidade();
 		pedestre.setFoto(croppedImage.getBytes());
 		pedestre.setDataAlteracaoFoto(new Date());
@@ -1464,6 +1472,38 @@ public class CadastroPedestreController extends CadastroBaseController {
 				pedestre.setCodigoCartaoAcesso(String.format("%08d", new Random().nextInt(100000000)));
 			}
 		}
+	}
+	
+	public String gerarCartao(PedestreEntity pedestre) {
+		if(gerarCartaoAutomatico) {
+			String cartaoAtual = pedestre.getCodigoCartaoAcesso();
+
+			// Considera "vazio" se for null, vazio ou só zeros
+			boolean cartaoVazioOuInvalido = cartaoAtual == null ||
+			                                 cartaoAtual.trim().isEmpty() ||
+			                                 cartaoAtual.replace("0", "").isEmpty();
+
+			System.out.println("pedestre cartao : " + cartaoAtual);
+
+			if (cartaoVazioOuInvalido) {
+				String codigo = null;
+
+				if (pedestre.getMatricula() != null && !pedestre.getMatricula().trim().isEmpty()) {
+					codigo = pedestre.getMatricula().replaceAll("\\D", ""); // apenas números
+				} else if (pedestre.getCpf() != null && !pedestre.getCpf().trim().isEmpty()) {
+					codigo = pedestre.getCpf().replaceAll("\\D", "");
+				}
+
+				if (codigo != null && !codigo.isEmpty()) {
+					pedestre.setCodigoCartaoAcesso(codigo);
+				} else {
+					// fallback: gerar número randômico com 8 dígitos
+					pedestre.setCodigoCartaoAcesso(String.format("%08d", new Random().nextInt(100000000)));
+				}
+			}
+		}
+		
+		return pedestre.getCodigoCartaoAcesso();
 	}
 
 
@@ -2369,4 +2409,13 @@ public class CadastroPedestreController extends CadastroBaseController {
 	public void setLinkGerado(String linkGerado) {
 	    this.linkGerado = linkGerado;
 	}
+	
+	public String getCodigoCartao() {
+	    return getPedestreAtual().getCodigoCartaoAcesso();
+	}
+
+	public void setCodigoCartao(String codigo) {
+	    getPedestreAtual().setCodigoCartaoAcesso(codigo);
+	}
+
 }

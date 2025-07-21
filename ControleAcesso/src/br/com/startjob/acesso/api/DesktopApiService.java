@@ -896,8 +896,18 @@ public class DesktopApiService extends BaseService {
 
 		PedestreRegraEntity pedestreRegra = new PedestreRegraEntity();
 		pedestreRegra.setRegra(regraVisitante);
-		pedestreRegra.setQtdeDeCreditos(Long.parseLong(jsonObject.getString("qtdeCreditos")));
-		pedestreRegra.setQtdeTotalDeCreditos(Long.parseLong(jsonObject.getString("qtdeCreditos")));
+
+		String qtdeCreditosStr = jsonObject.optString("qtdeCreditos", "").trim();
+
+		Long qtdeCreditos = null;
+		if (!qtdeCreditosStr.isEmpty()) {
+		    qtdeCreditos = Long.parseLong(qtdeCreditosStr);
+		} else {
+		    qtdeCreditos = 1L;
+		}
+
+		pedestreRegra.setQtdeDeCreditos(qtdeCreditos);
+		pedestreRegra.setQtdeTotalDeCreditos(qtdeCreditos);
 		pedestreRegra.setPedestre(visitante);
 
 		visitante.setRegras(new ArrayList<>());

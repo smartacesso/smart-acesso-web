@@ -73,7 +73,7 @@ function customExtender() {
     }
 }
 
-var startTime   = 60*120
+var startTime   = 60*120*4
 var currentTime = 0
 var myTimer
 var myTimerSpeed = 1000 // 1 s
