@@ -142,7 +142,10 @@ indexes = {
 		@NamedQuery(name = "PedestreEntity.findByRGOnBlur", query = "select distinct obj from PedestreEntity obj "
 				+ "where obj.rg = :RG " 
 				+ "and obj.cliente.id = :ID_CLIENTE "
-				+ "order by obj.id asc")
+				+ "order by obj.id asc"),
+		@NamedQuery(name = "PedestreEntity.findByMatriculaAndIdCliente", query = "select distinct obj from PedestreEntity obj "
+				+ "where obj.matricula = :MATRICULA "
+				+ "and obj.cliente.id = :ID_CLIENTE ")
 
 })
 
