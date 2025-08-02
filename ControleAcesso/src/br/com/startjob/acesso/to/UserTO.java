@@ -30,7 +30,7 @@ public class UserTO {
 		this.name = usuario.getNome() != null ? usuario.getNome() : "";
 		this.removed = usuario.getRemovido();
 		this.dataRemovido = usuario.getDataRemovido();
-		this.perfilAcesso = usuario.getPerfil().name();
+		this.perfilAcesso = usuario.getPerfil() != null ? usuario.getPerfil().name() : null;
 	}
 	
 	public Long getId() {

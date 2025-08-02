@@ -2,18 +2,25 @@ package com.totvs.services;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.lang.reflect.Type;
+import java.io.OutputStream;
+import java.io.StringReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Objects;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-import com.totvs.dto.ApiResponse;
 import com.totvs.dto.FuncionarioTotvsDto;
 
 import br.com.startjob.acesso.modelo.entity.ClienteEntity;
@@ -24,100 +31,117 @@ public class IntegracaoTotvsService {
 	private final static Gson gson = new Gson();
 	private static final SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy'T'HH:mm:ss");
 	
-	private final String usuario;
-	private final String senha;
 	private final String baseUrl; //= "http://10.1.2.63:9500/rest";
-	private final String product;
-	private final String companyid;
-	private final String branchId;
+	private final String basicAuth;
 
 	public IntegracaoTotvsService(ClienteEntity cliente) {
-		this.usuario = cliente.getIntegracaoTotvs().getUsuario();
-		this.senha = cliente.getIntegracaoTotvs().getSenha();
+		this.basicAuth = cliente.getIntegracaoTotvs().getSenha();
 		this.baseUrl = cliente.getIntegracaoTotvs().getUrl();
-		this.product = cliente.getIntegracaoTotvs().getProduct();
-		this.companyid = cliente.getIntegracaoTotvs().getCompanyid();
-		this.branchId = cliente.getIntegracaoTotvs().getBranchId();
-	}
-	
-	
-	private String buildFuncionariosUrl(String lastUpdate) {
-		StringBuilder urlBuilder = new StringBuilder(baseUrl);
-		urlBuilder.append("/rh/v1/employeeDataContent?");
-		urlBuilder.append("product=").append(product);
-		urlBuilder.append("&companyid=").append(companyid);
-		urlBuilder.append("&branchId=").append(branchId);
 
-		if (lastUpdate != null && !lastUpdate.isEmpty()) {
-			urlBuilder.append("&data=").append(lastUpdate);
-		}
-		return urlBuilder.toString();
 	}
 
-	// Método comum para realizar a requisição SOAP
-	private String getFuncionarios(final String lastUpdate) {
+	
+	private String getFuncionarios() {
 	    try {
-	        final String requestUrl = buildFuncionariosUrl(lastUpdate);
-	        System.out.println("URL gerada: " + requestUrl);
-
-	        final URL url = new URL(requestUrl);
+	        final URL url = new URL(baseUrl); //"http://10.1.2.63:8300/ws/WS_RH.apw"
 	        final HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
 	        connection.setDoOutput(true);
-	        connection.setRequestMethod("GET");
+	        connection.setRequestMethod("POST");
 
-	        // Adicionando cabeçalhos
-	        connection.setRequestProperty("Authorization", "Basic dXNyX3Jlc3RfcHJvZDpxbVN1N3VyYWh2dG5jNUY=");
-	        connection.setRequestProperty("Accept-Encoding", "identity");
-	        connection.setRequestProperty("Host", "10.1.2.63:9500");
-	        connection.setRequestProperty("Connection", "Keep-Alive");
-	        connection.setRequestProperty("User-Agent", "Apache-HttpClient/4.5.5 (Java/17.0.12)");
-	        connection.setRequestProperty("Accept", "application/json"); // Se a API esperar JSON
+	        // Cabeçalhos
+	        connection.setRequestProperty("Content-Type", "text/xml; charset=utf-8");
+	        connection.setRequestProperty("SOAPAction", "http://10.1.2.63:8300/ws/WS_RH.apw/VIEWSRA");
+	        connection.setRequestProperty("Authorization", basicAuth); //"Basic dXNyX3Jlc3RfcHJvZDp3QUVBVTJ1YQ=="
+	        connection.setRequestProperty("Cookie", "SESSIONID=578363793a9afc639f9505fe8ebd79fd");
 
-	        // Verificando resposta
+	        // Corpo SOAP
+	        String xmlRequest =
+	            "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" " +
+	                                 "xmlns:wsr=\"http://10.1.2.63:8300/ws/WS_RH.apw\">" +
+	                "<soapenv:Header/>" +
+	                "<soapenv:Body>" +
+	                    "<wsr:VIEWSRA>" +
+	                        "<wsr:FILTRO></wsr:FILTRO>" +
+	                    "</wsr:VIEWSRA>" +
+	                "</soapenv:Body>" +
+	            "</soapenv:Envelope>";
+
+	        // Envia a requisição
+	        try (OutputStream os = connection.getOutputStream()) {
+	            byte[] input = xmlRequest.getBytes("utf-8");
+	            os.write(input, 0, input.length);
+	        }
+
+	        // Resposta
 	        int responseCode = connection.getResponseCode();
 	        System.out.println("Response Code: " + responseCode);
 
-	        if (responseCode == 200) { 
-	            BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-	            StringBuilder response = new StringBuilder();
-	            String inputLine;
-
-	            while ((inputLine = in.readLine()) != null) {
-	                response.append(inputLine);
-	            }
-	            in.close();
-	            return response.toString();
+	        BufferedReader reader;
+	        if (responseCode == 200) {
+	            reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 	        } else {
-	            System.out.println("Erro na requisição: Código " + responseCode);
-	            BufferedReader errorStream = new BufferedReader(new InputStreamReader(connection.getErrorStream()));
-	            StringBuilder errorResponse = new StringBuilder();
-	            String line;
-	            while ((line = errorStream.readLine()) != null) {
-	                errorResponse.append(line);
-	            }
-	            System.out.println("Resposta do erro: " + errorResponse.toString());
-	            return null;
+	            reader = new BufferedReader(new InputStreamReader(connection.getErrorStream()));
 	        }
+
+	        StringBuilder response = new StringBuilder();
+	        String line;
+	        while ((line = reader.readLine()) != null) {
+	            response.append(line);
+	        }
+	        reader.close();
+
+	        return response.toString();
+
 	    } catch (Exception e) {
 	        e.printStackTrace();
 	        return null;
 	    }
 	}
 
-	
-	@SuppressWarnings("unchecked")
+
 	public List<FuncionarioTotvsDto> buscarFuncionarios(final Date lastUpdate) {
-	    String reponse = getFuncionarios(Objects.nonNull(lastUpdate) ? sdf.format(lastUpdate) : null);
+	    String responseXml = getFuncionarios(); // ou com parâmetro formatado
 
-	    if (reponse != null) {	        
-	        // Agora, desserializamos para a classe ApiResponse
-	        ApiResponse apiResponse = gson.fromJson(reponse, ApiResponse.class);
+	    if (responseXml != null && !responseXml.isEmpty()) {
+	        List<FuncionarioTotvsDto> funcionarios = new ArrayList<>();
 
-	        // Retornamos a lista de Funcionarios
-	        return apiResponse.getItems();
+	        try {
+	            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+	            DocumentBuilder builder = factory.newDocumentBuilder();
+	            InputSource is = new InputSource(new StringReader(responseXml));
+	            Document doc = builder.parse(is);
+	            NodeList wsretrhList = doc.getElementsByTagName("WSRETRH");
+
+	            for (int i = 0; i < wsretrhList.getLength(); i++) {
+	                Element element = (Element) wsretrhList.item(i);
+	                FuncionarioTotvsDto dto = new FuncionarioTotvsDto();
+
+	                dto.setCodigoHorario(getElementValue(element, "CODIGOHORARIO"));
+	                dto.setMatricula(getElementValue(element, "MATRICULA"));
+	                dto.setNome(getElementValue(element, "NOME"));
+	                dto.setNomeHorario(getElementValue(element, "NOMEHORARIO"));
+	                dto.setSituacaoFolha(getElementValue(element, "SITUACAOFOLHA"));
+
+	                funcionarios.add(dto);
+	            }
+
+	            return funcionarios;
+
+	        } catch (Exception e) {
+	            e.printStackTrace(); // ou logar corretamente
+	        }
 	    }
-	    
+
+	    return null;
+	}
+
+	private String getElementValue(Element parent, String tagName) {
+	    NodeList nodeList = parent.getElementsByTagName(tagName);
+	    if (nodeList != null && nodeList.getLength() > 0) {
+	        Node node = nodeList.item(0);
+	        return node.getTextContent();
+	    }
 	    return null;
 	}
 
