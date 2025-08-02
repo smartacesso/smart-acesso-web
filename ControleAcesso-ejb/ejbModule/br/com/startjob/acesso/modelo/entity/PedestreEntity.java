@@ -410,21 +410,20 @@ public class PedestreEntity extends ClienteBaseEntity {
 	}
 	
 	public void updateFuncionarioTotvs(final FuncionarioTotvsDto funcionarioTotvsDto) {
-		this.nome = funcionarioTotvsDto.getName();
-		this.matricula = funcionarioTotvsDto.getCode();
-		this.email = funcionarioTotvsDto.getEmail();
-		this.cpf = funcionarioTotvsDto.getEmployeeCpf();
+		this.nome = funcionarioTotvsDto.getNome();
+		this.matricula = funcionarioTotvsDto.getMatricula();
+
 		this.tipo = TipoPedestre.PEDESTRE;
 		this.setCliente(cliente);
 		this.setDataAlteracao(new Date());
 		this.setExistente(true);
 		
-		if(funcionarioTotvsDto.getEmployeeSituation().trim().equals("")) {
+		if(funcionarioTotvsDto.getSituacaoFolha().trim().equals("OK")) {
 			this.setStatus(Status.ATIVO);
 			this.observacoes =  "atualizado dia " + LocalDate.now().toString();
 		}else {
 			this.setStatus(Status.INATIVO);
-			this.observacoes = "Funcionario com situação : " + funcionarioTotvsDto.getEmployeeSituation();
+			this.observacoes = "Funcionario com situação : " + funcionarioTotvsDto.getSituacaoFolha();
 		}		
 	}
 
