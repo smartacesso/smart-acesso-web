@@ -122,7 +122,7 @@ public class TotvsEducacionalApiService extends BaseService {
 		}
 
 		// verifica situação
-		boolean isPermitido = PermissoesEduTotvs.isPermitido(Integer.valueOf(aluno.getCodStatus()));
+		boolean isPermitido = false;
 		if (isPermitido) {
 			pedestre.setStatus(Status.ATIVO);
 		}else {
