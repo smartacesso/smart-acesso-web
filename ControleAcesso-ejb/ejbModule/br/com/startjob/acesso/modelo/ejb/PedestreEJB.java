@@ -67,7 +67,7 @@ import com.senior.services.dto.FuncionarioSeniorDto;
 import com.senior.services.dto.HorarioPedestreDto;
 import com.senior.services.dto.RegraSeniorDto;
 import com.totvs.dto.FuncionarioTotvsDto;
-import com.totvs.services.IntegracaoTotvsService;
+import com.totvs.services.IntegracaoTotvsProtheusService;
 
 import br.com.startjob.acesso.modelo.BaseConstant;
 import br.com.startjob.acesso.modelo.entity.AcessoEntity;
@@ -1821,7 +1821,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 	
 	private List<FuncionarioTotvsDto> buscaTodosOsFuncionariosDaTotvs(final ClienteEntity cliente) {
 	    System.out.println("Buscando todos os funcionários do cliente TOTVS: " + cliente.getId());
-	    final IntegracaoTotvsService integracaoTotvsService = new IntegracaoTotvsService(cliente);
+	    final IntegracaoTotvsProtheusService integracaoTotvsService = new IntegracaoTotvsProtheusService(cliente);
 	    return integracaoTotvsService.buscarFuncionarios(cliente.getIntegracaoTotvs().getUltimaImportacao());
 	}
 	
