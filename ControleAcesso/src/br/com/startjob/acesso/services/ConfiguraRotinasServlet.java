@@ -19,6 +19,7 @@ import br.com.startjob.acesso.modelo.utils.AppAmbienteUtils;
 import br.com.startjob.acesso.tasks.ActivatedTasks;
 import br.com.startjob.acesso.tasks.AutoAtendimentoResetTask;
 import br.com.startjob.acesso.tasks.ImportacaoSocTask;
+import br.com.startjob.acesso.tasks.ImportarSalesianoTask;
 import br.com.startjob.acesso.tasks.ImportarTotvsTask;
 import br.com.startjob.acesso.tasks.ExportacaoSocTask;
 import br.com.startjob.acesso.tasks.ImportaSeniorTask;
@@ -45,6 +46,7 @@ public class ConfiguraRotinasServlet extends BaseServlet {
 		registraTimersParaSenior();
 		registraTimersParaTovs();
 		registraTimersAutoAtendimento();
+		registraTimerSalesiano();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -135,6 +137,28 @@ public class ConfiguraRotinasServlet extends BaseServlet {
 	    ActivatedTasks.getInstancia().timers.put("importacaoTOTVS_cliente", timer);
 	}
 
+	private void registraTimerSalesiano() {
+		log.info("Registra Integração Salesiano");
+
+	    ActivatedTasks.getInstancia().limpaTimersTovs();
+
+	    // Define o período para 30 minutos (30 * 60 * 1000 ms)
+	    Long period =  24 * 60 * 60 * 1000L;
+	    Timer timer = new Timer();
+	    
+	    try {
+	    	TimerTask salesianoTask = new ImportarSalesianoTask();
+	    	timer.scheduleAtFixedRate(salesianoTask, 0, period);
+		    
+		    log.info("Registrando rotina da Salesiano");
+
+		    ActivatedTasks.getInstancia().timers.put("importacaoSalesiano_cliente", timer);
+		    
+	    } catch (Exception e) {
+	    	log.info("Erro ao instanciar base ejb para salesiano task");
+		}
+	    
+	}
 	
 	private void registraTimersAutoAtendimento() {
 		log.info("Registrando rotina de reset do autoAtendimento...");
@@ -149,8 +173,6 @@ public class ConfiguraRotinasServlet extends BaseServlet {
 
 		ActivatedTasks.getInstancia().timers.put("AUTO_ATENDIMENTO", timer);
 	}
-
-	
 
 	private Calendar getInicio(final String hourOfDay) {
 		Calendar inicio = Calendar.getInstance();
