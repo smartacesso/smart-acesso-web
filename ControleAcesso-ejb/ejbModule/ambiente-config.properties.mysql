@@ -18,17 +18,17 @@ config.ambiente.main.link=https://www.smartacesso.com.br/
 config.ambiente.nome.app=sistema
 
 
-# Configuracoes de identificação
+# Configura��es de identificação
 config.ambiente.support.email=suporte@startjobtec.com.br
 config.ambiente.noreply.email=noreply@startjobtec.com.br
 config.ambiente.site=https://www.smartempresarial.com.br/
 
 # Configura��o de academia gestora
-# as configurações "include" e "exclude" nao
+# as configurações "include" e "exclude" n�o
 # podem ser setadas juntas, elas funcionando 
 # separadamente.
 # - include: ID da academia gestora quando h� um path indicado
-# - exclude: ID's das academias gestoras existentes quendo nao h� um 
+# - exclude: ID's das academias gestoras existentes quendo n�o h� um 
 #			 path indicado
 #config.management.academy.path=/flavours/xxxx
 #config.management.academy.include.id=1
@@ -39,9 +39,6 @@ config.resources.folder.prod=C:/ambiente/servers/wildfly-20.0.0.Final/welcome-co
 config.resources.folder.dev=/home/gustavo/ambiente/servers/wildfly-20.0.0.Final/welcome-content/resources/
 
 config.tempo.dispositivo=10
-config.sgdb.utilizado=plsql
-config.schema.name=smartacesso.
-#actech
-#config.schema.name=dbo. 
-#actech
-config.sqlserver.version=2012
+#config.sgdb.utilizado=plsql
+config.schema.name=controle_acesso.
+config.sqlserver.version=0
