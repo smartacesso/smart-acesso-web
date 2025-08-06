@@ -888,28 +888,9 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		String rg = "";
 		String cpf = "";
 
-//		DepartamentoEntity departamento = new DepartamentoEntity();
-//		CentroCustoEntity centroCusto = new CentroCustoEntity();
-//		CargoEntity cargo = new CargoEntity();
-//		String matriculaPedestre = "";
-//		Date dataNascimento = new Date();
-//		String logradouro = "";
-//		String numero = "";
-//		String complemento = "";
-//		String bairro = "";
-//		String cidade = "";
-//		String uf = "";
-//		String cep = "";
-
-//		String telefone = "";
-
 		Date horaInicial = new Date();
 		Date dataInicial = new Date();
-//		Date horaFinal = new Date();
-//		Date dataFinal = new Date();
 
-//		String nomeResponsavel = "";
-//		String numeroCartao = "";
 		RegraEntity regra = null;
 		HorarioEntity horario = null;
 		String nomeRegra = null;
@@ -1087,6 +1068,27 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 			args.put("ID_CLIENTE", IdCliente);
 
 			List<RegraEntity> listaRegra = (List<RegraEntity>) pesquisaArgFixos(RegraEntity.class, "findByNome", args);
+
+			if (listaRegra != null && !listaRegra.isEmpty()) {
+				regra = listaRegra.get(0);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return regra;
+	}
+	
+	@SuppressWarnings("unchecked")
+	private RegraEntity buscarRegraPeloNomeCompleto(String nomeRegra, Long IdCliente) {
+		RegraEntity regra = null;
+
+		try {
+			Map<String, Object> args = new HashMap<String, Object>();
+			args.put("NOME_REGRA", nomeRegra);
+			args.put("ID_CLIENTE", IdCliente);
+
+			List<RegraEntity> listaRegra = (List<RegraEntity>) pesquisaArgFixos(RegraEntity.class, "findAllByNome", args);
 
 			if (listaRegra != null && !listaRegra.isEmpty()) {
 				regra = listaRegra.get(0);
@@ -1742,7 +1744,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		
 	}
 	
-
+	
 	@SuppressWarnings("unchecked")
 	@Override
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
@@ -1795,30 +1797,6 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 	    return empresa;
 	}
 	
-//	private CargoEntity buscaCargoTotvs(String nomeCargo, EmpresaEntity empresa) {
-//		CargoEntity cargo = buscaCargoPeloNome(nomeCargo, empresa.getId());
-//
-//		if (cargo == null) {
-//		    cargo = new CargoEntity();
-//		    cargo.setEmpresa(empresa);
-//		    cargo.setNome(nomeCargo);
-//		    cargo.setStatus(Status.ATIVO);
-//
-//		    try {
-//		        cargo = (CargoEntity) gravaObjeto(cargo)[0]; // já faz merge aqui
-//		    } catch (Exception e) {
-//		        throw new RuntimeException("Erro ao criar cargo para cliente ", e);
-//		    }
-//		} else {
-//		    cargo = em.merge(cargo); // <<< ESSA LINHA É ESSENCIAL!
-//		}
-//
-//		// Agora, com cargo attached, pode adicionar:
-//		return cargo;
-//
-//	}
-
-	
 	private List<FuncionarioTotvsDto> buscaTodosOsFuncionariosDaTotvs(final ClienteEntity cliente) {
 	    System.out.println("Buscando todos os funcionários do cliente TOTVS: " + cliente.getId());
 	    final IntegracaoTotvsProtheusService integracaoTotvsService = new IntegracaoTotvsProtheusService(cliente);
@@ -1828,10 +1806,9 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 
 	private void salvarOuAtualizarFuncionario(final FuncionarioTotvsDto funcionarioTotvsDto, EmpresaEntity empresa, ClienteEntity cliente) {
 	    try {
-	    	System.out.println("code : " + funcionarioTotvsDto.getCode());
 	        Map<String, Object> args = new HashMap<>();
-	        args.put("MATRICULA", funcionarioTotvsDto.getCode());
-	        
+	        args.put("MATRICULA", funcionarioTotvsDto.getMatricula());
+
 	        @SuppressWarnings("unchecked")
 			List<PedestreEntity> pedestres = (List<PedestreEntity>) pesquisaArgFixos(PedestreEntity.class, "findById_matricula", args);
 	        PedestreEntity pedestre = (pedestres == null || pedestres.isEmpty()) ? funcionarioTotvsDto.toPedestreEntity(cliente) : pedestres.get(0);
@@ -1848,9 +1825,33 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 	            pedestre = (PedestreEntity) alteraObjeto(pedestre)[0];
 	            System.out.println("atualizando funcionario : " +  pedestre.getNome() + ", matricula : " + pedestre.getMatricula() + ", id : " + pedestre.getId());
 	        }
+	        
+	        processarRegrasPorFuncionarioTotvs(pedestre, cliente, funcionarioTotvsDto);
+	        
 	    } catch (Exception e) {
-	        throw new RuntimeException("Erro ao processar funcionário TOTVS: " + funcionarioTotvsDto.getCode(), e);
+	        throw new RuntimeException("Erro ao processar funcionário TOTVS: " + funcionarioTotvsDto.getMatricula(), e);
 	    }
+	}
+	
+	
+	private void processarRegrasPorFuncionarioTotvs(PedestreEntity pedestre, ClienteEntity cliente, FuncionarioTotvsDto funcionario) {
+		System.out.println("Atualizando regras do funcionario id : " + pedestre.getId() +" nome : " + pedestre.getNome());
+		RegraEntity regra = buscarRegraPeloNomeCompleto(funcionario.getCodigoHorario(), cliente.getId());
+		
+		if (Objects.nonNull(regra)) {
+			PedestreRegraEntity pedestreRegra = new PedestreRegraEntity();
+			
+			pedestreRegra.setRegra(regra);
+			pedestreRegra.setPedestre(pedestre);
+			
+			try {
+				gravaObjeto(pedestreRegra);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}else {
+			System.out.println("Regra nao encontrada id : " + funcionario.getCodigoHorario());
+		}
 	}
 
 	@SuppressWarnings("unchecked")
