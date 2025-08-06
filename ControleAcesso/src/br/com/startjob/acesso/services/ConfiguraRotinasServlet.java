@@ -42,11 +42,11 @@ public class ConfiguraRotinasServlet extends BaseServlet {
 
 		log.info("Registra rotinas recorrentes...");
 
-//		registraTimersParaSOC();
+		registraTimersParaSOC();
 		registraTimersParaSenior();
-//		registraTimersParaTovs();
-//		registraTimersAutoAtendimento();
-//		registraTimerSalesiano();
+		registraTimersParaTovs();
+		registraTimersAutoAtendimento();
+		registraTimerSalesiano();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -99,7 +99,7 @@ public class ConfiguraRotinasServlet extends BaseServlet {
 	    ActivatedTasks.getInstancia().limpaTimersSenior();
 
 	    // Define o período para 30 minutos (30 * 60 * 1000 ms)
-	    Long period =  60 * 60 * 1000L;
+	    Long period = 4 * 60 * 60 * 1000L;
 	    Timer timer = new Timer();
 	    
 	    // Define a nova tarefa
@@ -174,7 +174,7 @@ public class ConfiguraRotinasServlet extends BaseServlet {
 
 	private Calendar getInicio(final String hourOfDay) {
 		Calendar inicio = Calendar.getInstance();
-		inicio.set(Calendar.DAY_OF_MONTH, inicio.get(Calendar.DAY_OF_MONTH));
+		inicio.set(Calendar.DAY_OF_MONTH, inicio.get(Calendar.DAY_OF_MONTH) + 1);
 		inicio.set(Calendar.HOUR_OF_DAY, Integer.parseInt(hourOfDay));
 		inicio.set(Calendar.MINUTE, 0);
 		inicio.set(Calendar.SECOND, 0);
