@@ -407,7 +407,7 @@ public class BaseEJB implements BaseEJBRemote {
 				throw new Exception("Objeto não encontrado para exclusão.");
 			}
 
-			logger.debug("Objeto encontrado para exclusão: " + entidade);
+//			logger.debug("Objeto encontrado para exclusão: " + entidade);
 
 			// Se for um PedestreRegraEntity, excluir os registros filhos antes
 			if (clazz.equals(PedestreRegraEntity.class)) {
@@ -420,7 +420,7 @@ public class BaseEJB implements BaseEJBRemote {
 					.executeUpdate();
 			em.flush();
 
-			logger.debug("Objeto removido com sucesso!");
+//			logger.debug("Objeto removido com sucesso!");
 
 		} catch (Exception e) {
 			logger.error("Erro ao excluir objeto por ID.", e);
