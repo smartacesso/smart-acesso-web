@@ -21,10 +21,10 @@ import com.totvs.dto.CadastroDTO;
 import com.totvs.services.IntegracaoTotvsEducacionalService;
 
 import br.com.startjob.acesso.modelo.ejb.BaseEJBRemote;
-import br.com.startjob.acesso.modelo.entity.CargoEntity;
 import br.com.startjob.acesso.modelo.entity.ClienteEntity;
 import br.com.startjob.acesso.modelo.entity.DepartamentoEntity;
 import br.com.startjob.acesso.modelo.entity.EmpresaEntity;
+import br.com.startjob.acesso.modelo.entity.IntegracaoSalesianoEntity;
 import br.com.startjob.acesso.modelo.entity.PedestreEntity;
 import br.com.startjob.acesso.modelo.entity.PlanoEntity;
 import br.com.startjob.acesso.modelo.entity.UsuarioEntity;
@@ -63,38 +63,59 @@ public class ImportarSalesianoTask extends TimerTask {
 
 	private void processaSalesiano() {
 		try {
-			long inicioBusca = System.currentTimeMillis();
+			List<CadastroDTO> cadastros = new ArrayList<CadastroDTO>();
 			// buscar linha da tabela Salesiano pelo id 1
-			// se o campo lastUpdate for nulo passar uma data default
-			// 01/01/2000 00:00:00
-			// se não for nulo passar o campo para o getCadastros
+			IntegracaoSalesianoEntity integracaoSalesianoEntity = buscaIntegracaoSalesianoPorId(1L);
+
+			if (integracaoSalesianoEntity == null) {
+			    logger.info("Não encontrou a configuração de integração para Salesiano (ID 1)");
+			    return;
+			}
 			
 			// criar data de backup: new Date();
-			String resultado = integracaoTotvsEducacionalService.getCadastros();
-			List<CadastroDTO> cadastros = new ArrayList<CadastroDTO>();
+			Date updateAt = new Date();
+			String resultado = integracaoTotvsEducacionalService.getCadastros(integracaoSalesianoEntity.getLastUpate());
 			
 			try {
 				cadastros = integracaoTotvsEducacionalService.parseCadastros(resultado);
-				System.out.println("Quantidade de cadastros : " + cadastros.size());
-
+				System.out.println("quantidade de cadastros : " + cadastros.size());
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 
 			if (Objects.isNull(cadastros) || cadastros.isEmpty()) {
+				//Mesmo vindo vazio salva?
+				integracaoSalesianoEntity.setLastUpate(updateAt);
+				baseEJB.gravaObjeto(integracaoSalesianoEntity);
+				
 				logger.info("Sem alunos Salesiano para processar");
 				return;
 			}
-			System.out.println("fim do busca e mapeamento DTO: " + (System.currentTimeMillis() - inicioBusca));
-			System.out.println("inicio do salvamento no banco: ");
 			processaAlunosTotvs(cadastros);
 			
 			// atulizar a linha da tabela salesiano com o campo de backup criado acima
-
+			integracaoSalesianoEntity.setLastUpate(updateAt);
+			baseEJB.alteraObjeto(integracaoSalesianoEntity);
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
+	}
+
+	private IntegracaoSalesianoEntity buscaIntegracaoSalesianoPorId(Long id) throws Exception {
+		Map<String, Object> args = new HashMap<String, Object>();
+		args.put("ID", id);
+
+		@SuppressWarnings("unchecked")
+		List<IntegracaoSalesianoEntity> importacao = (List<IntegracaoSalesianoEntity>) baseEJB.pesquisaArgFixos(IntegracaoSalesianoEntity.class,
+				"findById", args);
+
+		if (importacao != null && !importacao.isEmpty()) {
+			return importacao.get(0);
+		}
+
+		return null;
 	}
 
 	private void processaAlunosTotvs(List<CadastroDTO> cadastros) {
@@ -183,11 +204,6 @@ public class ImportarSalesianoTask extends TimerTask {
 	
 	private void salvarCadastro(CadastroDTO cadastro, ClienteEntity cliente) throws Exception {
 	    DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-//	    boolean isPermitido = PermissoesEduTotvs.isPermitido(cadastro.getCodStatus());
-//	    if(!isPermitido) {
-//	    	return;
-//	    }
-	    
 	    PedestreEntity novoCadastro = buscaPedestrePorMatricula(cadastro.getMatricula(), cliente.getId());
 
 	    if (novoCadastro == null) {
@@ -196,7 +212,7 @@ public class ImportarSalesianoTask extends TimerTask {
 	        String nome = cadastro.getNome();
 	        String cpf = cadastro.getCpf();
 	        String matricula = cadastro.getMatricula();
-	        String codigoCartao = matricula.replaceAll("\\D", ""); // garante só números
+	        String codigoCartao = matricula.replaceAll("\\D", "");
 
 	        EmpresaEntity empresa = recuperaEmpresa(cadastro.getNomeColigada(), cliente);
 
@@ -342,48 +358,48 @@ public class ImportarSalesianoTask extends TimerTask {
 		return null;
 	}
 
-	@SuppressWarnings("unchecked")
-	private CargoEntity recuperaCargo(String nomeCargo, EmpresaEntity empresa) throws Exception {
-		if (nomeCargo == null || "".equals(nomeCargo)) {
-			return null;
-		}
-
-		if (empresa == null) {
-			return null;
-		}
-
-		try {
-			Map<String, Object> args = new HashMap<String, Object>();
-			args.put("nome_equals", nomeCargo);
-			args.put("empresa.id", empresa.getId());
-
-			List<CargoEntity> lista = (List<CargoEntity>) baseEJB.pesquisaSimplesLimitado(CargoEntity.class, "findAll",
-					args, 0, 1);
-
-			CargoEntity cargo = null;
-			if (lista != null && !lista.isEmpty()) {
-				cargo = lista.get(0);
-			}
-
-			if (cargo == null) {
-				// cria empresa
-				cargo = new CargoEntity();
-				cargo.setNome(nomeCargo);
-				cargo.setEmpresa(empresa);
-				cargo.setStatus(Status.ATIVO);
-
-				cargo = (CargoEntity) baseEJB.gravaObjeto(cargo)[0];
-				cargo = (CargoEntity) baseEJB.recuperaObjeto(CargoEntity.class, cargo.getId());
-
-			}
-
-			return cargo;
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return null;
-	}
+//	@SuppressWarnings("unchecked")
+//	private CargoEntity recuperaCargo(String nomeCargo, EmpresaEntity empresa) throws Exception {
+//		if (nomeCargo == null || "".equals(nomeCargo)) {
+//			return null;
+//		}
+//
+//		if (empresa == null) {
+//			return null;
+//		}
+//
+//		try {
+//			Map<String, Object> args = new HashMap<String, Object>();
+//			args.put("nome_equals", nomeCargo);
+//			args.put("empresa.id", empresa.getId());
+//
+//			List<CargoEntity> lista = (List<CargoEntity>) baseEJB.pesquisaSimplesLimitado(CargoEntity.class, "findAll",
+//					args, 0, 1);
+//
+//			CargoEntity cargo = null;
+//			if (lista != null && !lista.isEmpty()) {
+//				cargo = lista.get(0);
+//			}
+//
+//			if (cargo == null) {
+//				// cria empresa
+//				cargo = new CargoEntity();
+//				cargo.setNome(nomeCargo);
+//				cargo.setEmpresa(empresa);
+//				cargo.setStatus(Status.ATIVO);
+//
+//				cargo = (CargoEntity) baseEJB.gravaObjeto(cargo)[0];
+//				cargo = (CargoEntity) baseEJB.recuperaObjeto(CargoEntity.class, cargo.getId());
+//
+//			}
+//
+//			return cargo;
+//
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//		return null;
+//	}
 
 	@SuppressWarnings("unchecked")
 	private DepartamentoEntity recuperaDepartamento(String nomeSetor, EmpresaEntity empresa) throws Exception {
