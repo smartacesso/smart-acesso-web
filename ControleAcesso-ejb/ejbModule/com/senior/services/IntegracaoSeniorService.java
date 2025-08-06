@@ -50,7 +50,6 @@ public class IntegracaoSeniorService {
 
 			// Verificando a resposta
 			int responseCode = connection.getResponseCode();
-			System.out.println("Response Code: " + responseCode);
 
 			if (responseCode == 200) { // Se a resposta for 200
 				BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));

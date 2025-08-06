@@ -25,7 +25,7 @@ import com.totvs.dto.FuncionarioTotvsDto;
 
 import br.com.startjob.acesso.modelo.entity.ClienteEntity;
 
-public class IntegracaoTotvsService {
+public class IntegracaoTotvsProtheusService {
 
 	//private final static String getFuncionariosUrl = "/rh/v1/employeeDataContent?product=Protheus&companyid=01&branchId=01";
 	private final static Gson gson = new Gson();
@@ -34,12 +34,12 @@ public class IntegracaoTotvsService {
 	private final String baseUrl; //= "http://10.1.2.63:9500/rest";
 	private final String basicAuth;
 
-	public IntegracaoTotvsService(ClienteEntity cliente) {
+
+	public IntegracaoTotvsProtheusService(ClienteEntity cliente) {
 		this.basicAuth = cliente.getIntegracaoTotvs().getSenha();
 		this.baseUrl = cliente.getIntegracaoTotvs().getUrl();
 
 	}
-
 	
 	private String getFuncionarios() {
 	    try {

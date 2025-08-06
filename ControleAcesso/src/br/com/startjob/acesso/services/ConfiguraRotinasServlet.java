@@ -19,6 +19,7 @@ import br.com.startjob.acesso.modelo.utils.AppAmbienteUtils;
 import br.com.startjob.acesso.tasks.ActivatedTasks;
 import br.com.startjob.acesso.tasks.AutoAtendimentoResetTask;
 import br.com.startjob.acesso.tasks.ImportacaoSocTask;
+import br.com.startjob.acesso.tasks.ImportarSalesianoTask;
 import br.com.startjob.acesso.tasks.ImportarTotvsTask;
 import br.com.startjob.acesso.tasks.ExportacaoSocTask;
 import br.com.startjob.acesso.tasks.ImportaSeniorTask;
@@ -41,10 +42,11 @@ public class ConfiguraRotinasServlet extends BaseServlet {
 
 		log.info("Registra rotinas recorrentes...");
 
-		registraTimersParaSOC();
+//		registraTimersParaSOC();
 		registraTimersParaSenior();
-		registraTimersParaTovs();
-		registraTimersAutoAtendimento();
+//		registraTimersParaTovs();
+//		registraTimersAutoAtendimento();
+//		registraTimerSalesiano();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -90,7 +92,6 @@ public class ConfiguraRotinasServlet extends BaseServlet {
 		ActivatedTasks.getInstancia().timers.put("exportacaoSOC_cliente", timer);
 	}
 	
-	@SuppressWarnings("unchecked")
 	private void registraTimersParaSenior() {
 	    log.info("Registra Integração Senior");
 
@@ -98,7 +99,7 @@ public class ConfiguraRotinasServlet extends BaseServlet {
 	    ActivatedTasks.getInstancia().limpaTimersSenior();
 
 	    // Define o período para 30 minutos (30 * 60 * 1000 ms)
-	    Long period =  2 * 60 * 1000L;
+	    Long period =  60 * 60 * 1000L;
 	    Timer timer = new Timer();
 	    
 	    // Define a nova tarefa
@@ -113,7 +114,6 @@ public class ConfiguraRotinasServlet extends BaseServlet {
 	}
 	
 	
-	@SuppressWarnings("unchecked")
 	private void registraTimersParaTovs() {
 	    log.info("Registra Integração Totvs");
 
@@ -135,6 +135,28 @@ public class ConfiguraRotinasServlet extends BaseServlet {
 	    ActivatedTasks.getInstancia().timers.put("importacaoTOTVS_cliente", timer);
 	}
 
+	private void registraTimerSalesiano() {
+		log.info("Registra Integração Salesiano");
+
+	    ActivatedTasks.getInstancia().limpaTimersTovs();
+
+	    // Define o período para 2 minutos (30 * 60 * 1000 ms)
+	    Long period =  3  * 60 * 1000L;
+	    Timer timer = new Timer();
+	    
+	    try {
+	    	TimerTask salesianoTask = new ImportarSalesianoTask();
+	    	timer.scheduleAtFixedRate(salesianoTask, 0, period);
+		    
+		    log.info("Registrando rotina da Salesiano");
+
+		    ActivatedTasks.getInstancia().timers.put("importacaoSalesiano_cliente", timer);
+		    
+	    } catch (Exception e) {
+	    	log.info("Erro ao instanciar base ejb para salesiano task");
+		}
+	    
+	}
 	
 	private void registraTimersAutoAtendimento() {
 		log.info("Registrando rotina de reset do autoAtendimento...");
@@ -149,8 +171,6 @@ public class ConfiguraRotinasServlet extends BaseServlet {
 
 		ActivatedTasks.getInstancia().timers.put("AUTO_ATENDIMENTO", timer);
 	}
-
-	
 
 	private Calendar getInicio(final String hourOfDay) {
 		Calendar inicio = Calendar.getInstance();

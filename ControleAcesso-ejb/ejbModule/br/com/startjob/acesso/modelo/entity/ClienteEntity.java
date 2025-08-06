@@ -81,6 +81,11 @@ import br.com.startjob.acesso.modelo.enumeration.Status;
 					  + "join fetch obj.integracaoAD i "
 					  + "where (obj.removido = false or obj.removido is null) "
 					  + "order by obj.id asc"),
+	@NamedQuery(name = "ClienteEntity.findComFilialAndColigadaTotvs",
+	query = "select obj from ClienteEntity obj "
+		  + "where (obj.removido = false or obj.removido is null) "
+		  + "and obj.codfilial = :CFILIAL_TOTVS and obj.codcoligad = :CCOLIGADA_TOTVS "
+		  + "order by obj.id asc"),
 
 })
 @SuppressWarnings("serial")
@@ -150,13 +155,17 @@ public class ClienteEntity extends BaseEntity {
 	@JoinColumn(name="ID_INTEGRACAO_AD", nullable=true)
 	private IntegracaoSeniorEntity integracaoAD;
 
-	
 	@Column(name="ORGANIZACAO_TEKNISA", nullable=true, length=60)
 	private String organizacaoTeknisa;
 	
 	@Column(name="FILIAL_TEKNISA", nullable=true, length=60)
 	private String filialTeknisa;
 
+	@Column(name="CFILIAL_TOTVS", nullable=true, length=60)
+	private String codfilial;
+	
+	@Column(name="CCOLIGADA_TOTVS", nullable=true, length=60)
+	private String codcoligad;
 
 	public String getNome() {
 		return nome;
@@ -259,6 +268,24 @@ public class ClienteEntity extends BaseEntity {
 	}
 	public void setIntegracaoTotvs(IntegracaoTotvsEntity integracaoTotvs) {
 		this.integracaoTotvs = integracaoTotvs;
+	}
+	public IntegracaoSeniorEntity getIntegracaoAD() {
+		return integracaoAD;
+	}
+	public void setIntegracaoAD(IntegracaoSeniorEntity integracaoAD) {
+		this.integracaoAD = integracaoAD;
+	}
+	public String getCodfilial() {
+		return codfilial;
+	}
+	public void setCodfilial(String codfilial) {
+		this.codfilial = codfilial;
+	}
+	public String getCodcoligad() {
+		return codcoligad;
+	}
+	public void setCodcoligad(String codcoligad) {
+		this.codcoligad = codcoligad;
 	}
 
 	
