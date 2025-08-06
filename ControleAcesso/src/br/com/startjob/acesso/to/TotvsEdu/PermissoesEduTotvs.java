@@ -2,8 +2,14 @@ package br.com.startjob.acesso.to.TotvsEdu;
 
 public enum PermissoesEduTotvs {
 
+	STATUS_174("174", "LIBERADO"),
     STATUS_176("176", "LIBERADO"),
     STATUS_177("177", "LIBERADO"),
+    STATUS_180("180", "LIBERADO"),
+    STATUS_181("181", "LIBERADO"),
+    STATUS_182("182", "LIBERADO"),
+    STATUS_183("183", "LIBERADO"),
+    STATUS_184("184", "LIBERADO"),
     STATUS_222("222", "LIBERADO"),
     STATUS_236("236", "LIBERADO"),
     STATUS_239("239", "LIBERADO"),
