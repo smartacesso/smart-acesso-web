@@ -1577,7 +1577,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		List<HorarioPedestreDto> escala = integracaoSeniorService.buscarHorariosPedestre(dataString, matricula,1,1);
 		
 		if(escala != null && !escala.isEmpty()) {
-			return  escala.get(0);
+			return escala.get(0);
 		}
 		
 		return null;
@@ -1986,15 +1986,12 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		    System.out.println("Quantidade de funcionários processados: " + funcionarios.size());
 		    LocalDate hoje = LocalDate.now();
 		    
-		    funcionarios.forEach(funcionario -> {
-		    	
+		    funcionarios.forEach(funcionario -> { 
+		    	logger.info("===== ======== =====");
+
 		    	System.out.println("DTO recebido: matrícula = " + funcionario.getNumeroMatricula()
 		        + ", nome = " + funcionario.getNome()
 		        + ", codPermissao = " + funcionario.getCodPrm());
-		    	
-		    	if(funcionario.getNumeroMatricula().equals("11")) {
-		    		System.out.println("teste");
-		    	}
 		    	
 		        Optional<PedestreEntity> pedestreExistente = buscaPedestreExistente(funcionario.getNumeroMatricula(), funcionario.getNumCracha(), empresaExistente);
 		        
@@ -2079,11 +2076,11 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 	
 
 	private void processarRegrasPorFuncionario(PedestreEntity pedestre, ClienteEntity cliente, FuncionarioSeniorDto funcionario) {
-		System.out.println("Atualizando regras do funcionario id : " + pedestre.getId() +" nome : " + pedestre.getNome());
 		HorarioPedestreDto escala = buscaEscalaPedestre(pedestre.getMatricula(), cliente);
 		List<HorarioSeniorDto> horarios = new ArrayList<>();
-
+		
 		if (Objects.nonNull(escala)) {
+			System.out.println("Atualizando regras do funcionario id : " + pedestre.getId() +" nome : " + pedestre.getNome() + "ESCALA : " + escala.getIdescala());
 			
 			horarios = buscaHorariosEscala(escala.getIdescala(), cliente); 
 			if (Objects.nonNull(horarios) && !horarios.isEmpty()) {
@@ -2093,12 +2090,13 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 				criarHorarioPedestreRegra(horarios, pedestreRegra, funcionario);
 				
 			}else {
-				System.out.println("criar horario padrão");
+				//buscar horario pelo id da
+				System.out.println("Atualizando regras do funcionario id : " + pedestre.getId() +" nome : " + pedestre.getNome() + "SEM HORARIO, CRIANDO REGRA");
 				
 				criaRegraPadrao(pedestre, cliente, horarios, funcionario);
 			}
 		}else {
-			System.out.println("criar horario padrão");
+			System.out.println("Atualizando regras do funcionario id : " + pedestre.getId() +" nome : " + pedestre.getNome() + "SEM ESCALA, CRIANDO REGRA");
 			//criar regra folga
 			criaRegraPadrao(pedestre, cliente, horarios, funcionario);
 		}
