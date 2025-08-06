@@ -7,8 +7,10 @@ import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -24,16 +26,33 @@ public class IntegracaoTotvsEducacionalService {
     private static final String ENDPOINT_CONSULTA = "https://inspetoriasao142787.rm.cloudtotvs.com.br:1503/wsConsultaSQL/IwsConsultaSQL";
     private static final String USER = "suporte.smart";
     private static final String PASS = "Senha@1234";
-
-    public String getCadastros() {
+    private static final SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+    
+    public String getCadastros(Date lastUpdate) {
         String codSentenca = "RDC.API.002";
         String codColigada = "0";
         String codSistema = "S";
-        //primeira importarcao passar FILTAR_STATUS E FILTRAR_SITUACAO_FUNC = 0 e data do inicio do ano,
-        //demais importacao passar como =  1 e filtrar a data
-        //data = MM/DD/YYYY
-        String parameters = "$CODCOLIGADA=1;$FILTRAR_STATUS="+ "0" + ";$DATAALTERACAO=" + "07/02/2025 16:09:04" + ";$FILTRAR_SITUACAO_FUNC="+ "0";
-
+        String parameters;
+             	
+        if(Objects.isNull(lastUpdate)) {
+            // 01/01/ANO ATUAL 00:00:00
+            Calendar calendar = Calendar.getInstance();
+            calendar.set(Calendar.MONTH, Calendar.JANUARY);
+            calendar.set(Calendar.DAY_OF_MONTH, 1);
+            calendar.set(Calendar.HOUR_OF_DAY, 0);
+            calendar.set(Calendar.MINUTE, 0);
+            calendar.set(Calendar.SECOND, 0);
+            calendar.set(Calendar.MILLISECOND, 0);
+            String dataDefault = sdf.format(calendar.getTime());
+        	
+        	parameters = "$CODCOLIGADA=1;$FILTRAR_STATUS="+ "1" + ";$DATAALTERACAO=" + dataDefault + ";$FILTRAR_SITUACAO_FUNC="+ "1";
+        	System.out.println("Primeira importacao. Apenas ativos");
+        	
+        } else {
+        	String dataFormatada = sdf.format(lastUpdate);
+        	parameters = "$CODCOLIGADA=1;$FILTRAR_STATUS="+ "0" + ";$DATAALTERACAO=" + dataFormatada + ";$FILTRAR_SITUACAO_FUNC="+ "0";
+        	System.out.println("Atualizando...");
+        }
 
         // Monta a string base64 para Basic Auth
         String auth = Base64.getEncoder().encodeToString((USER + ":" + PASS).getBytes(StandardCharsets.UTF_8));
@@ -181,19 +200,4 @@ public class IntegracaoTotvsEducacionalService {
             return null;
         }
     }
-
-	public static void main(String[] args) {
-		IntegracaoTotvsEducacionalService service = new IntegracaoTotvsEducacionalService();
-
-		String resultado = service.getCadastros();
-		List<CadastroDTO> cadastros;
-		try {
-			cadastros = service.parseCadastros(resultado);
-
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-	}
 }
