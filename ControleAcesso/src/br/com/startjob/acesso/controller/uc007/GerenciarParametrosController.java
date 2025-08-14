@@ -84,6 +84,7 @@ public class GerenciarParametrosController extends BaseController {
 			boolean preencherCartaoAuto = false;
 			boolean gerarMatriculaSequencial = false;
 			boolean escolherDigitos = false;
+			boolean tempoToleranciaEntrada = false;
 			boolean permitirCampoAdicionalMatricula = false;
 			boolean formatoDataImportacao = false;
 			boolean formatoHoraImportacao = false;
@@ -188,7 +189,9 @@ public class GerenciarParametrosController extends BaseController {
 				if (item.getNome().equals(BaseConstant.PARAMETERS_NAME.REMOVE_CARTAO_EXCLUIDO)) {
 					removerCartaoPedestreRemovidos = true;
 				}
-				
+				if (item.getNome().equals(BaseConstant.PARAMETERS_NAME.TEMPO_TOLERANCIA_ENTRADA_E_SAIDA)) {
+					tempoToleranciaEntrada = true;
+				}
 
 			}
 			if (!preencherCartaoComMatricula) {
@@ -324,6 +327,12 @@ public class GerenciarParametrosController extends BaseController {
 
 			if (!removerCartaoPedestreRemovidos) {
 				ParametroEntity p = new ParametroEntity(BaseConstant.PARAMETERS_NAME.REMOVE_CARTAO_EXCLUIDO, "false",
+						getUsuarioLogado().getCliente());
+				parametrosGerais.add(p);
+			}
+			
+			if (!tempoToleranciaEntrada) {
+				ParametroEntity p = new ParametroEntity(BaseConstant.PARAMETERS_NAME.TEMPO_TOLERANCIA_ENTRADA_E_SAIDA, "5",
 						getUsuarioLogado().getCliente());
 				parametrosGerais.add(p);
 			}

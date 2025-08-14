@@ -424,7 +424,7 @@ public class PedestreEntity extends ClienteBaseEntity {
 		this.setDataAlteracao(new Date());
 		this.setExistente(true);
 		
-		if(funcionarioTotvsDto.getSituacaoFolha().trim().equals("OK")) {
+		if(funcionarioTotvsDto.getSituacaoFolha().trim().equals("OK") && "Trabalhado".equalsIgnoreCase(funcionarioTotvsDto.getStatusTrabalho())) {
 			this.setStatus(Status.ATIVO);
 			this.observacoes =  "atualizado dia " + LocalDate.now().toString();
 		}else {

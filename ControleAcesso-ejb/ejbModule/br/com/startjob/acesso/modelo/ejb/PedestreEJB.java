@@ -67,6 +67,7 @@ import com.senior.services.dto.FuncionarioSeniorDto;
 import com.senior.services.dto.HorarioPedestreDto;
 import com.senior.services.dto.RegraSeniorDto;
 import com.totvs.dto.FuncionarioTotvsDto;
+import com.totvs.dto.HorarioTotvsProtheusDTO;
 import com.totvs.services.IntegracaoTotvsProtheusService;
 
 import br.com.startjob.acesso.modelo.BaseConstant;
@@ -1085,9 +1086,9 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 
 		try {
 			Map<String, Object> args = new HashMap<String, Object>();
-			args.put("NOME_REGRA", nomeRegra);
+			args.put("NOME", nomeRegra);
 			args.put("ID_CLIENTE", IdCliente);
-
+			args.put("TIPO_PEDESTRE", TipoPedestre.PEDESTRE);
 			List<RegraEntity> listaRegra = (List<RegraEntity>) pesquisaArgFixos(RegraEntity.class, "findAllByNome", args);
 
 			if (listaRegra != null && !listaRegra.isEmpty()) {
@@ -1129,7 +1130,28 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 			args.put("ID_REGRA", IdRegra);
 			args.put("ID_HORARIO_SENIOR", idHorario);
 
+			@SuppressWarnings("unchecked")
 			List<HorarioEntity> listaHorario = (List<HorarioEntity>) pesquisaArgFixos(HorarioEntity.class, "findAllWithRemovidosByIdRegraSenior", args);
+
+			if (listaHorario != null && !listaHorario.isEmpty()) {
+				horario = listaHorario.get(0);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return horario;		
+	}
+	
+	private HorarioEntity buscarHorarioPorRegra(Long IdRegra) {
+
+		HorarioEntity horario = null;
+		try {
+			Map<String, Object> args = new HashMap<String, Object>();
+			args.put("ID_REGRA", IdRegra);
+
+			@SuppressWarnings("unchecked")
+			List<HorarioEntity> listaHorario = (List<HorarioEntity>) pesquisaArgFixos(HorarioEntity.class, "findAllWithRemovidosByIdRegra", args);
 
 			if (listaHorario != null && !listaHorario.isEmpty()) {
 				horario = listaHorario.get(0);
@@ -1562,9 +1584,6 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 	
 	private List<HorarioSeniorDto> buscaHorariosEscala(final String escala, final ClienteEntity cliente) {
 		System.out.println("buscando todos horarios da escala :" + escala);
-		if(escala.equalsIgnoreCase("24")) {
-			System.out.println("buscando todos horarios da escala :" + escala);
-		}
 		IntegracaoSeniorService integracaoSeniorService = new IntegracaoSeniorService(cliente);
 
 		return integracaoSeniorService.buscarHorarios(escala);
@@ -1760,6 +1779,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 
 	    for (ClienteEntity cliente : clientes) {
 	        try {
+	        	System.out.println("Iniciando processo de importacao TOTVS");
 	            cliente.getIntegracaoTotvs().setUltimaImportacao(new Date());
 
 	            List<FuncionarioTotvsDto> funcionariosTotvs = buscaTodosOsFuncionariosDaTotvs(cliente);
@@ -1834,24 +1854,75 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 	}
 	
 	
-	private void processarRegrasPorFuncionarioTotvs(PedestreEntity pedestre, ClienteEntity cliente, FuncionarioTotvsDto funcionario) {
-		System.out.println("Atualizando regras do funcionario id : " + pedestre.getId() +" nome : " + pedestre.getNome());
-		RegraEntity regra = buscarRegraPeloNomeCompleto(funcionario.getCodigoHorario(), cliente.getId());
-		
-		if (Objects.nonNull(regra)) {
-			PedestreRegraEntity pedestreRegra = new PedestreRegraEntity();
+	private void processarRegrasPorFuncionarioTotvs(PedestreEntity pedestre, ClienteEntity cliente,
+			FuncionarioTotvsDto funcionario) {
+		System.out.println(
+				"Atualizando regras do funcionario id : " + pedestre.getId() + " nome : " + pedestre.getNome());
+		RegraEntity regra;
+
+		if ("065".equalsIgnoreCase(funcionario.getCodigoHorario())) {
+			if("7".equalsIgnoreCase(funcionario.getHoraInicial())) {
+				regra = buscarRegraPeloNomeCompleto("066", cliente.getId());
+			}else {
+				regra = buscarRegraPeloNomeCompleto("067", cliente.getId());
+			}
 			
+		} else {
+			regra = buscarRegraPeloNomeCompleto(funcionario.getCodigoHorario(), cliente.getId());
+		}
+		apagaPedetreRegras(pedestre.getId());
+		
+		if(!"Trabalhado".equalsIgnoreCase(funcionario.getStatusTrabalho())) {
+			System.out.println("Folga");
+			return;
+		}
+		
+		if (Objects.nonNull(regra) && TipoRegra.ACESSO_HORARIO.equals(regra.getTipo())) {
+			HorarioTotvsProtheusDTO horario;
+			ParametroEntity param = getParametroSistema(BaseConstant.PARAMETERS_NAME.TEMPO_TOLERANCIA_ENTRADA_E_SAIDA,
+					cliente.getId());
+
+			if (param != null) {
+				Integer tolerancia = Integer.valueOf(param.getValor());
+				horario = new HorarioTotvsProtheusDTO(funcionario.getHoraInicial(), funcionario.getHoraFinal(),
+						tolerancia);
+			} else {
+				horario = new HorarioTotvsProtheusDTO(funcionario.getHoraInicial(), funcionario.getHoraFinal(), 0);
+			}
+
+			processaRegraComHorarioTotvs(horario, regra.getId());
+
+			PedestreRegraEntity pedestreRegra = new PedestreRegraEntity();
+
 			pedestreRegra.setRegra(regra);
 			pedestreRegra.setPedestre(pedestre);
-			
+
 			try {
 				gravaObjeto(pedestreRegra);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-		}else {
-			System.out.println("Regra nao encontrada id : " + funcionario.getCodigoHorario());
+		} else {
+			System.out.println("Regra invalida ou não encontrada : " + funcionario.getCodigoHorario());
 		}
+	}
+
+	private void processaRegraComHorarioTotvs(HorarioTotvsProtheusDTO dto, Long idRegra) {
+		
+		 HorarioEntity horarioExistente = buscarHorarioPorRegra(idRegra);
+		 
+	        if (horarioExistente == null) {
+	        	System.out.println("Sem horario existente");
+	        	return;
+	        }else{	        
+	        	horarioExistente.update(dto);
+	            try {
+					alteraObjeto(horarioExistente);
+				} catch (Exception e) {
+					System.out.println("Erro ao dar update no horario");
+				}
+	        }
+	        return;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -2205,10 +2276,13 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 			}
 			horarioPedestre.setPedestreRegra(pedestreRegra);
 			
-//			if(funcionario.getUsaRef() != null && funcionario.getUsaRef().equals("N")) {
-//				System.out.println("Não usa refeitório");
-//				horarioPedestre.setQtdeDeCreditos(0L);
-//			}
+			if (funcionario != null 
+			        && "N".equals(funcionario.getUsaRef()) 
+			        && horarioPedestre != null) {
+
+			    System.out.println("Não usa refeitório");
+			    horarioPedestre.setQtdeDeCreditos(0L);
+			}
 			
 			try {
 				horarioPedestre.setAlterado(true);
@@ -2236,16 +2310,18 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 	}
 	
 	private void apagaPedetreRegras(Long idPedestre) {
-		PedestreRegraEntity pedestreRegra = buscaRegraAtiva(idPedestre);
-
-		if (Objects.isNull(pedestreRegra)) {
+		List<PedestreRegraEntity> listaPedestreRegra = buscaAllpedestreRegras(idPedestre);
+		if (Objects.isNull(listaPedestreRegra)) {
+			System.out.println("Sem pedesre regra");
 			return;
 		}
 
-		try {
-			excluiObjetoPorId(PedestreRegraEntity.class ,pedestreRegra.getId());
-		} catch (Exception e) {
-			e.printStackTrace();
+		for (PedestreRegraEntity pedestreRegra : listaPedestreRegra) {
+			try {
+				excluiObjetoPorId(PedestreRegraEntity.class, pedestreRegra.getId());
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
 
 	}
@@ -2270,6 +2346,26 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		}
 		
 		return pedestreRegra;
+	}
+	
+	@SuppressWarnings("unchecked")
+	private List<PedestreRegraEntity> buscaAllpedestreRegras(Long idPedestre) {
+		try {
+			Map<String, Object> args = new HashMap<String, Object>();
+			args.put("ID_PEDESTRE", idPedestre);
+
+			List<PedestreRegraEntity> listaPedestreRegra = (List<PedestreRegraEntity>) 
+								pesquisaArgFixos(PedestreRegraEntity.class, "findPedestreRegraAtivo", args);
+			
+			if(listaPedestreRegra != null && !listaPedestreRegra.isEmpty()) {
+				return listaPedestreRegra;
+			}
+			
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		
+		return null;
 	}
 
 	
