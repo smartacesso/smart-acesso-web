@@ -203,57 +203,103 @@ public class ImportarSalesianoTask extends TimerTask {
 	
 	
 	private void salvarCadastro(CadastroDTO cadastro, ClienteEntity cliente) throws Exception {
-	    DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-	    PedestreEntity novoCadastro = buscaPedestrePorMatricula(cadastro.getMatricula(), cliente.getId());
+		System.out.println("Salvando, nome : " + cadastro.getNome() + ", matricula : " + cadastro.getMatricula());
+	    PedestreEntity pedestre = buscaPedestrePorMatricula(cadastro.getMatricula(), cliente.getId());
 
-	    if (novoCadastro == null) {
-	        String tipo = TipoTotvsEdu.fromTabelaRm(cadastro.getOrigem()).getDesc();
-
-	        String nome = cadastro.getNome();
-	        String cpf = cadastro.getCpf();
-	        String matricula = cadastro.getMatricula();
-	        String codigoCartao = matricula.replaceAll("\\D", "");
-
-	        EmpresaEntity empresa = recuperaEmpresa(cadastro.getNomeColigada(), cliente);
-
-	        novoCadastro = criarPedestre(nome, cpf, codigoCartao, tipo, cliente, empresa);
-	        novoCadastro.setMatricula(matricula);
-
-			// caso especial: responsável
-			if (tipo == TipoTotvsEdu.ALUNO.getDesc() && NivelDeEnsino.EDUCACAO_BASICA.getNivel().equals(cadastro.getNivelEnsino())
-					&& cadastro.getCpfCnpfResponsavel() != null && !cadastro.getCpfCnpfResponsavel().isEmpty()) {
-				PedestreEntity responsavel = buscaPedestrePorCpf(cadastro.getCpfCnpfResponsavel(), cliente.getId());
-
-				if (responsavel == null) {
-					String cpfResp = cadastro.getCpfCnpfResponsavel().replaceAll("\\D", "");
-					responsavel = criarPedestre(cadastro.getNomeResponsavel(), cadastro.getCpfCnpfResponsavel(),
-							cpfResp, "RESPONSAVEL", cliente, empresa);
-
-					boolean isPermitido = PermissoesEduTotvs.isPermitido(cadastro.getCodStatus());
-					responsavel.setStatus(isPermitido ? Status.ATIVO : Status.INATIVO);
-
-					try {
-						baseEJB.gravaObjeto(responsavel);
-					} catch (Exception e) {
-						System.out.println("Erro ao salvar pedestre: {}" + cpfResp);
-						throw e;
-					}
-				}
-			}
-		}
-
-	    // Atualiza status
-	    boolean isPermitido = PermissoesEduTotvs.isPermitido(cadastro.getCodStatus());
-	    novoCadastro.setStatus(isPermitido ? Status.ATIVO : Status.INATIVO);
-
-	    novoCadastro.setObservacoes("Atualizado em: " + LocalDateTime.now().format(dtf));
+	    if (pedestre == null) {
+	        pedestre = criarNovoCadastro(cadastro, cliente);
+	    } else {
+	        atualizarCadastroExistente(pedestre, cadastro, cliente);
+	    }
 
 	    try {
-	        novoCadastro = (PedestreEntity) baseEJB.gravaObjeto(novoCadastro)[0];
+	        pedestre = (PedestreEntity) baseEJB.gravaObjeto(pedestre)[0];
 	    } catch (Exception e) {
-	        System.out.println("Erro ao salvar pedestre: {}" + novoCadastro.getCpf());
+	        System.out.println("Erro ao salvar pedestre: " + pedestre.getCpf());
 	        throw e;
 	    }
+	}
+
+	private PedestreEntity criarNovoCadastro(CadastroDTO cadastro, ClienteEntity cliente) throws Exception {
+	    String tipo = TipoTotvsEdu.fromTabelaRm(cadastro.getOrigem()).getDesc();
+	    String nome = cadastro.getNome();
+	    String cpf = cadastro.getCpf();
+	    String matricula = cadastro.getMatricula();
+	    String codigoCartao = matricula.replaceAll("\\D", "");
+
+	    EmpresaEntity empresa = recuperaEmpresa(cadastro.getNomeColigada(), cliente);
+
+	    PedestreEntity novoCadastro = criarPedestre(nome, cpf, codigoCartao, tipo, cliente, empresa);
+	    novoCadastro.setMatricula(matricula);
+
+	    // Caso especial: responsável
+	    verificarOuCriarResponsavel(cadastro, cliente, empresa, tipo);
+
+	    // Aplica campos comuns
+	    atualizarCamposComuns(novoCadastro, cadastro);
+
+	    return novoCadastro;
+	}
+
+	private void atualizarCadastroExistente(PedestreEntity pedestre, CadastroDTO cadastro, ClienteEntity cliente) throws Exception {
+	    String tipo = TipoTotvsEdu.fromTabelaRm(cadastro.getOrigem()).getDesc();
+
+	    // Atualiza campos básicos
+	    pedestre.setNome(cadastro.getNome());
+	    pedestre.setCpf(cadastro.getCpf());
+	    pedestre.setMatricula(cadastro.getMatricula());
+	    pedestre.setEmpresa(recuperaEmpresa(cadastro.getNomeColigada(), cliente));
+
+	    // Atualiza cartão
+	    String codigoCartao = cadastro.getMatricula().replaceAll("\\D", "");
+	    pedestre.setCodigoCartaoAcesso(codigoCartao);
+
+	    // Caso especial: responsável
+	    verificarOuCriarResponsavel(cadastro, cliente, pedestre.getEmpresa(), tipo);
+
+	    // Aplica campos comuns
+	    atualizarCamposComuns(pedestre, cadastro);
+	}
+
+	private void verificarOuCriarResponsavel(CadastroDTO cadastro, ClienteEntity cliente, EmpresaEntity empresa, String tipo) throws Exception {
+	    if (tipo.equals(TipoTotvsEdu.ALUNO.getDesc())
+	            && NivelDeEnsino.EDUCACAO_BASICA.getNivel().equals(cadastro.getNivelEnsino())
+	            && cadastro.getCpfCnpfResponsavel() != null
+	            && !cadastro.getCpfCnpfResponsavel().isEmpty()) {
+
+	        PedestreEntity responsavel = buscaPedestrePorCpf(cadastro.getCpfCnpfResponsavel(), cliente.getId());
+
+	        if (responsavel == null) {
+	            String cpfResp = cadastro.getCpfCnpfResponsavel().replaceAll("\\D", "");
+	            responsavel = criarPedestre(
+	                    cadastro.getNomeResponsavel(),
+	                    cadastro.getCpfCnpfResponsavel(),
+	                    cpfResp,
+	                    "RESPONSAVEL",
+	                    cliente,
+	                    empresa
+	            );
+
+	            boolean isPermitido = PermissoesEduTotvs.isPermitido(cadastro.getCodStatus());
+	            responsavel.setStatus(isPermitido ? Status.ATIVO : Status.INATIVO);
+
+	            try {
+	                baseEJB.gravaObjeto(responsavel);
+	            } catch (Exception e) {
+	                System.out.println("Erro ao salvar responsável: " + cpfResp);
+	                throw e;
+	            }
+	        }
+	    }
+	}
+
+	private void atualizarCamposComuns(PedestreEntity pedestre, CadastroDTO cadastro) {
+	    DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+
+	    boolean isPermitido = PermissoesEduTotvs.isPermitido(cadastro.getCodStatus());
+	    pedestre.setStatus(isPermitido ? Status.ATIVO : Status.INATIVO);
+
+	    pedestre.setObservacoes("Atualizado em: " + LocalDateTime.now().format(dtf));
 	}
 
 	private PedestreEntity criarPedestre(String nome, String cpf, String codigoCartao, String tipoDepartamento, ClienteEntity cliente, EmpresaEntity empresa) throws Exception {
