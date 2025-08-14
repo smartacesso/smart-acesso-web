@@ -152,6 +152,8 @@ public interface BaseConstant {
 		public static final String HABILITA_APP_PEDESTRE = "Habilita App do Pedestre";
 		
 		public static final String REMOVE_CARTAO_EXCLUIDO = "Remove o cartão dos Pedestres removidos";
+		
+		public static final String TEMPO_TOLERANCIA_ENTRADA_E_SAIDA = "Tempo de tolerancia (Entrada/Saida)";
 
 	}
 	

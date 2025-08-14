@@ -5,6 +5,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Calendar;
@@ -27,14 +29,30 @@ public class IntegracaoTotvsEducacionalService {
     private static final String USER = "suporte.smart";
     private static final String PASS = "Senha@1234";
     private static final SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+    private LocalDate ultimaImportacaoCompleta = null;
     
     public String getCadastros(Date lastUpdate) {
         String codSentenca = "RDC.API.002";
         String codColigada = "0";
         String codSistema = "S";
         String parameters;
-             	
-        if(Objects.isNull(lastUpdate)) {
+
+        LocalDate hoje = LocalDate.now();
+        boolean rodarImportacaoCompleta = false;
+
+        // Primeira execução ou sem histórico de update
+        if (Objects.isNull(lastUpdate)) {
+            rodarImportacaoCompleta = true;
+        }
+
+        // Executa a completa se for um novo dia e ainda não fez hoje
+        if (ultimaImportacaoCompleta == null || !ultimaImportacaoCompleta.equals(hoje)) {
+            if (LocalTime.now().isBefore(LocalTime.of(0, 5))) { // Janela de 5 min após meia-noite
+                rodarImportacaoCompleta = true;
+            }
+        }
+        
+        if(rodarImportacaoCompleta) {
             // 01/01/ANO ATUAL 00:00:00
             Calendar calendar = Calendar.getInstance();
             calendar.set(Calendar.MONTH, Calendar.JANUARY);

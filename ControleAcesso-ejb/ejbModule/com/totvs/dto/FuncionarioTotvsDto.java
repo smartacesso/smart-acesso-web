@@ -12,10 +12,13 @@ import br.com.startjob.acesso.modelo.enumeration.TipoPedestre;
 public class FuncionarioTotvsDto {
 
     private String codigoHorario;
+    private String horaFinal;
+    private String horaInicial;
     private String matricula;
     private String nome;
     private String nomeHorario;
     private String situacaoFolha;
+    private String StatusTrabalho;
 
 	public PedestreEntity toPedestreEntity(ClienteEntity cliente) {
 		PedestreEntity pedestre = new PedestreEntity();
@@ -29,7 +32,7 @@ public class FuncionarioTotvsDto {
 		pedestre.setExistente(true);
 		pedestre.setVersao(0);
 		
-		if(situacaoFolha.trim().equals("OK")) {
+		if("OK".equalsIgnoreCase(situacaoFolha) && "Trabalhado".equalsIgnoreCase(StatusTrabalho)) {
 			pedestre.setObservacoes("Importado dia " + LocalDate.now().toString());
 			pedestre.setStatus(Status.ATIVO);
 
@@ -47,6 +50,22 @@ public class FuncionarioTotvsDto {
 
 	public void setCodigoHorario(String codigoHorario) {
 		this.codigoHorario = codigoHorario;
+	}
+
+	public String getHoraFinal() {
+		return horaFinal;
+	}
+
+	public void setHoraFinal(String horaFinal) {
+		this.horaFinal = horaFinal;
+	}
+
+	public String getHoraInicial() {
+		return horaInicial;
+	}
+
+	public void setHoraInicial(String horaInicial) {
+		this.horaInicial = horaInicial;
 	}
 
 	public String getMatricula() {
@@ -80,5 +99,15 @@ public class FuncionarioTotvsDto {
 	public void setSituacaoFolha(String situacaoFolha) {
 		this.situacaoFolha = situacaoFolha;
 	}
+
+	public String getStatusTrabalho() {
+		return StatusTrabalho;
+	}
+
+	public void setStatusTrabalho(String statusTrabalho) {
+		StatusTrabalho = statusTrabalho;
+	}
+
+	
 
 }

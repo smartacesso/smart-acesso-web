@@ -38,15 +38,14 @@ public class ConfiguraRotinasServlet extends BaseServlet {
 			log.info("Não registra rotinas no ambiente de desenvolvimento.");
 			return;
 		}
-		
 
 		log.info("Registra rotinas recorrentes...");
 
-		registraTimersParaSOC();
-		registraTimersParaSenior();
-		registraTimersParaTovs();
-		registraTimersAutoAtendimento();
-		registraTimerSalesiano();
+//		registraTimersParaSOC();
+//		registraTimersParaSenior();
+//		registraTimersParaTotvs();
+//		registraTimersAutoAtendimento();
+//		registraTimerSalesiano();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -59,7 +58,8 @@ public class ConfiguraRotinasServlet extends BaseServlet {
 		List<ClienteEntity> clientes = null;
 		try {
 			BaseEJBRemote ejb = getEjb(BaseEJBRemote.class);
-			clientes = (List<ClienteEntity>) ejb.pesquisaSimples(ClienteEntity.class, "findAllComIntegracaoSOC", new HashMap<>());
+			clientes = (List<ClienteEntity>) ejb.pesquisaSimples(ClienteEntity.class, "findAllComIntegracaoSOC",
+					new HashMap<>());
 
 		} catch (Exception e) {
 			log.warning("Erro ao procurar ambientes configurados, rotinas não serão executadas");
@@ -69,95 +69,91 @@ public class ConfiguraRotinasServlet extends BaseServlet {
 			log.info("Nenhum cliente com integração SOC configurada");
 			return;
 		}
-		
+
 		Calendar inicio = getInicio("2");
 		Long periodExpirar = 24 * 60 * 60 * 1000L;
 		Timer timer = new Timer();
-		
+
 		TimerTask uTimerTask = new ImportacaoSocTask();
 		timer.scheduleAtFixedRate(uTimerTask, inicio.getTime(), periodExpirar.longValue());
-		
+
 		log.info("Registrando rotina de importação SOC");
 
 		ActivatedTasks.getInstancia().timers.put("importacaoSOC_cliente", timer);
-		
+
 		inicio = getInicio("3");
 		timer = new Timer();
-		
+
 		uTimerTask = new ExportacaoSocTask(clientes);
 		timer.scheduleAtFixedRate(uTimerTask, inicio.getTime(), periodExpirar.longValue());
-		
+
 		log.info("Registrando rotina de exportação SOC");
 
 		ActivatedTasks.getInstancia().timers.put("exportacaoSOC_cliente", timer);
 	}
-	
+
 	private void registraTimersParaSenior() {
-	    log.info("Registra Integração Senior");
+		log.info("Registra Integração Senior");
 
 //	     Limpa os timers anteriores relacionados à nova função
-	    ActivatedTasks.getInstancia().limpaTimersSenior();
+		ActivatedTasks.getInstancia().limpaTimersSenior();
 
-	    // Define o período para 30 minutos (30 * 60 * 1000 ms)
-	    Long period = 4 * 60 * 60 * 1000L;
-	    Timer timer = new Timer();
-	    
-	    // Define a nova tarefa
-	    TimerTask SeniorTask = new ImportaSeniorTask();
-	    
-	    // Agenda a tarefa para rodar a cada 30 minutos
-	    timer.scheduleAtFixedRate(SeniorTask, 0, period);
-	    
-	    log.info("Registrando rotina da Senior");
+		// Define o período para 30 minutos (30 * 60 * 1000 ms)
+		Long period = 4 * 60 * 60 * 1000L;
+		Timer timer = new Timer();
 
-	    ActivatedTasks.getInstancia().timers.put("importacaoSENIOR_cliente", timer);
+		// Define a nova tarefa
+		TimerTask SeniorTask = new ImportaSeniorTask();
+
+		// Agenda a tarefa para rodar a cada 30 minutos
+		timer.scheduleAtFixedRate(SeniorTask, 0, period);
+
+		log.info("Registrando rotina da Senior");
+
+		ActivatedTasks.getInstancia().timers.put("importacaoSENIOR_cliente", timer);
 	}
-	
-	
-	private void registraTimersParaTovs() {
-	    log.info("Registra Integração Totvs");
+
+	private void registraTimersParaTotvs() {
+		log.info("Registra Integração TOTVS PROTHEUS");
 
 //	     Limpa os timers anteriores relacionados à nova função
-	    ActivatedTasks.getInstancia().limpaTimersTovs();
+		ActivatedTasks.getInstancia().limpaTimersTovs();
 
-	    // Define o período para 30 minutos (30 * 60 * 1000 ms)
-	    Long period =  24 * 60 * 60 * 1000L;
-	    Timer timer = new Timer();
-	    
-	    // Define a nova tarefa
-	    TimerTask TotvsTask = new ImportarTotvsTask();
-	    
-	    // Agenda a tarefa para rodar a cada 30 minutos
-	    timer.scheduleAtFixedRate(TotvsTask, 0, period);
-	    
-	    log.info("Registrando rotina da Totvs");
+		Calendar inicio = getInicio("0");
+		Long periodExpirar = 24 * 60 * 60 * 1000L;
+		Timer timer = new Timer();
 
-	    ActivatedTasks.getInstancia().timers.put("importacaoTOTVS_cliente", timer);
+		TimerTask totvsTask = new ImportarTotvsTask();
+		timer.scheduleAtFixedRate(totvsTask, inicio.getTime(), periodExpirar.longValue());
+
+		log.info("Registrando rotina da TOVS PROTHEUS");
+
+		ActivatedTasks.getInstancia().timers.put("importacaoTOTVS_cliente", timer);
 	}
 
 	private void registraTimerSalesiano() {
 		log.info("Registra Integração Salesiano");
 
-	    ActivatedTasks.getInstancia().limpaTimersTovs();
+		ActivatedTasks.getInstancia().limpaTimersTovs();
 
-	    // Define o período para 2 minutos (30 * 60 * 1000 ms)
-	    Long period =  3  * 60 * 1000L;
-	    Timer timer = new Timer();
-	    
-	    try {
-	    	TimerTask salesianoTask = new ImportarSalesianoTask();
-	    	timer.scheduleAtFixedRate(salesianoTask, 0, period);
-		    
-		    log.info("Registrando rotina da Salesiano");
+		// Define o período para 2 minutos (30 * 60 * 1000 ms)
+		Long period = 3 * 60 * 1000L;
+		Timer timer = new Timer();
 
-		    ActivatedTasks.getInstancia().timers.put("importacaoSalesiano_cliente", timer);
-		    
-	    } catch (Exception e) {
-	    	log.info("Erro ao instanciar base ejb para salesiano task");
+		try {
+			TimerTask salesianoTask = new ImportarSalesianoTask();
+			timer.scheduleAtFixedRate(salesianoTask, 0, period);
+
+			log.info("Registrando rotina da Salesiano");
+
+			ActivatedTasks.getInstancia().timers.put("importacaoSalesiano_cliente", timer);
+
+		} catch (Exception e) {
+			log.info("Erro ao instanciar base ejb para salesiano task");
 		}
-	    
+
 	}
-	
+
 	private void registraTimersAutoAtendimento() {
 		log.info("Registrando rotina de reset do autoAtendimento...");
 
@@ -174,11 +170,11 @@ public class ConfiguraRotinasServlet extends BaseServlet {
 
 	private Calendar getInicio(final String hourOfDay) {
 		Calendar inicio = Calendar.getInstance();
-		inicio.set(Calendar.DAY_OF_MONTH, inicio.get(Calendar.DAY_OF_MONTH) + 1);
+		inicio.set(Calendar.DAY_OF_MONTH, inicio.get(Calendar.DAY_OF_MONTH));
 		inicio.set(Calendar.HOUR_OF_DAY, Integer.parseInt(hourOfDay));
 		inicio.set(Calendar.MINUTE, 0);
 		inicio.set(Calendar.SECOND, 0);
-		
+
 		return inicio;
 	}
 

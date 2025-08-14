@@ -21,6 +21,8 @@ import javax.persistence.Transient;
 
 import org.hibernate.annotations.FilterDef;
 
+import com.totvs.dto.HorarioTotvsProtheusDTO;
+
 import br.com.startjob.acesso.modelo.ejb.HorarioSeniorDto;
 import br.com.startjob.acesso.modelo.entity.base.BaseEntity;
 import br.com.startjob.acesso.modelo.enumeration.Status;
@@ -255,9 +257,14 @@ public class HorarioEntity extends BaseEntity {
 	}
 
 	public void update(HorarioSeniorDto dto) {
-		// TODO Auto-generated method stub
 		this.horarioInicio = dto.getInicio();
 		this.horarioFim = dto.getFim();
+		
+	}
+	
+	public void update(HorarioTotvsProtheusDTO dto) {
+		this.horarioInicio = dto.getHoraInicio();
+		this.horarioFim = dto.getHoraFim();
 		
 	}
 

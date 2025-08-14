@@ -38,12 +38,12 @@ public class IntegracaoTotvsProtheusService {
 	public IntegracaoTotvsProtheusService(ClienteEntity cliente) {
 		this.basicAuth = cliente.getIntegracaoTotvs().getSenha();
 		this.baseUrl = cliente.getIntegracaoTotvs().getUrl();
-
 	}
 	
 	private String getFuncionarios() {
 	    try {
-	        final URL url = new URL(baseUrl); //"http://10.1.2.63:8300/ws/WS_RH.apw"
+	    	System.out.println(">> Buscando funcionanário");
+	        final URL url = new URL("http://10.1.2.63:8300/ws/WS_RH.apw"); //"http://10.1.2.63:8300/ws/WS_RH.apw"
 	        final HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 
 	        connection.setDoOutput(true);
@@ -52,7 +52,7 @@ public class IntegracaoTotvsProtheusService {
 	        // Cabeçalhos
 	        connection.setRequestProperty("Content-Type", "text/xml; charset=utf-8");
 	        connection.setRequestProperty("SOAPAction", "http://10.1.2.63:8300/ws/WS_RH.apw/VIEWSRA");
-	        connection.setRequestProperty("Authorization", basicAuth); //"Basic dXNyX3Jlc3RfcHJvZDp3QUVBVTJ1YQ=="
+	        connection.setRequestProperty("Authorization", "Basic dXNyX3Jlc3RfcHJvZDp3QUVBVTJ1YQ=="); //"Basic dXNyX3Jlc3RfcHJvZDp3QUVBVTJ1YQ=="
 	        connection.setRequestProperty("Cookie", "SESSIONID=578363793a9afc639f9505fe8ebd79fd");
 
 	        // Corpo SOAP
@@ -118,11 +118,14 @@ public class IntegracaoTotvsProtheusService {
 	                FuncionarioTotvsDto dto = new FuncionarioTotvsDto();
 
 	                dto.setCodigoHorario(getElementValue(element, "CODIGOHORARIO"));
+	                dto.setHoraFinal(getElementValue(element, "HORAFINAL"));
+	                dto.setHoraInicial(getElementValue(element, "HORAINICIAL"));
 	                dto.setMatricula(getElementValue(element, "MATRICULA"));
 	                dto.setNome(getElementValue(element, "NOME"));
 	                dto.setNomeHorario(getElementValue(element, "NOMEHORARIO"));
 	                dto.setSituacaoFolha(getElementValue(element, "SITUACAOFOLHA"));
-
+	                dto.setStatusTrabalho(getElementValue(element, "STATUSTRABALHO"));
+	                
 	                funcionarios.add(dto);
 	            }
 

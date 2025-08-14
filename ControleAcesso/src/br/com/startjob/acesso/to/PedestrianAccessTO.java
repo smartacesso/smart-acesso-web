@@ -390,8 +390,11 @@ public class PedestrianAccessTO {
 	public void adicionaHorarios(Object[] objects) {
 		if(objects[13] != null) {
 			String dias = objects[14] != null ? objects[14].toString() : "1234567";
-			if(this.horariosPermitidos == null)
+			if(this.horariosPermitidos == null) {
 				this.horariosPermitidos = new ArrayList<AllowedTimeTO>();
+			}
+			System.out.println(objects[15].toString());
+			System.out.println(objects[16].toString());
 			this.horariosPermitidos.add(new AllowedTimeTO(objects[15].toString(), objects[16].toString(), dias));
 		}
 	}
