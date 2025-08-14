@@ -122,17 +122,8 @@ public class ClienteEntity extends BaseEntity {
 	@JoinColumn(name = "ID_INTEGRACAO_TOTVS", nullable = true)
 	private IntegracaoTotvsEntity integracaoTotvs;
 
-	/*
-	 * @JsonIgnore
-	 * 
-	 * @OneToOne(cascade={CascadeType.ALL}, fetch=FetchType.LAZY)
-	 * 
-	 * @JoinColumn(name="ID_INTEGRACAO_AD", nullable=true) private
-	 * IntegracaoSeniorEntity integracaoAD;
-	 */
-
 	@JsonIgnore
-	@OneToOne(cascade = { CascadeType.ALL }, fetch = FetchType.LAZY)
+	@OneToOne(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER)
 	@JoinColumn(name = "ID_INTEGRACAO_AD", nullable = true)
 	private IntegracaoADEntity integracaoAD;
 
@@ -276,6 +267,14 @@ public class ClienteEntity extends BaseEntity {
 
 	public void setIntegracaoTotvs(IntegracaoTotvsEntity integracaoTotvs) {
 		this.integracaoTotvs = integracaoTotvs;
+	}
+
+	public IntegracaoADEntity getIntegracaoAD() {
+		return integracaoAD;
+	}
+
+	public void setIntegracaoAD(IntegracaoADEntity integracaoAD) {
+		this.integracaoAD = integracaoAD;
 	}
 
 }

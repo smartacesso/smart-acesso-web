@@ -17,10 +17,8 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -30,17 +28,15 @@ import java.util.concurrent.TimeUnit;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
 import javax.persistence.Column;
-import javax.persistence.EntityManager;
 import javax.persistence.JoinColumn;
-import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.xml.ws.soap.MTOMFeature;
 
 import org.hibernate.proxy.HibernateProxy;
 import org.jboss.ejb3.annotation.TransactionTimeout;
 
+import com.ad.service.ActiveDirectoryService;
 import com.age.soc.services.exportaDados.ExportaDadosWs;
 import com.age.soc.services.exportaDados.ExportaDadosWsService;
 import com.age.soc.services.exportaDados.ExportaDadosWsVo;
@@ -64,7 +60,6 @@ import com.senior.services.Enum.ModoImportacaoFuncionario;
 import com.senior.services.dto.EmpresaSeniorDto;
 import com.senior.services.dto.FuncionarioSeniorDto;
 import com.senior.services.dto.HorarioPedestreDto;
-import com.senior.services.dto.RegraSeniorDto;
 import com.totvs.dto.FuncionarioTotvsDto;
 import com.totvs.services.IntegracaoTotvsService;
 
@@ -80,7 +75,6 @@ import br.com.startjob.acesso.modelo.entity.EquipamentoEntity;
 import br.com.startjob.acesso.modelo.entity.HorarioEntity;
 import br.com.startjob.acesso.modelo.entity.ImportacaoEntity;
 import br.com.startjob.acesso.modelo.entity.IntegracaoSOCEntity;
-import br.com.startjob.acesso.modelo.entity.IntegracaoTotvsEntity;
 import br.com.startjob.acesso.modelo.entity.ParametroEntity;
 import br.com.startjob.acesso.modelo.entity.PedestreEntity;
 import br.com.startjob.acesso.modelo.entity.PedestreEquipamentoEntity;
@@ -91,7 +85,9 @@ import br.com.startjob.acesso.modelo.enumeration.Permissoes;
 import br.com.startjob.acesso.modelo.enumeration.Status;
 import br.com.startjob.acesso.modelo.enumeration.TipoPedestre;
 import br.com.startjob.acesso.modelo.enumeration.TipoRegra;
+import br.com.startjob.acesso.modelo.to.UsuarioADTO;
 import br.com.startjob.acesso.modelo.utils.AppAmbienteUtils;
+import br.com.startjob.acesso.modelo.utils.UsuarioAdToPedestreConverter;
 
 @Stateless
 @TransactionAttribute(TransactionAttributeType.REQUIRED)
@@ -921,6 +917,17 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		}
 
 		return entidade;
+	}
+
+	public void saveOrUpdateForName(PedestreEntity pedestrian) throws Exception {
+		PedestreEntity pedestrianPersisted = buscaPedestrePorNome(pedestrian.getNome());
+
+		if (Objects.nonNull(pedestrianPersisted)) {
+			pedestrian = (PedestreEntity) alteraObjeto(pedestrianPersisted)[0];
+		} else {
+			pedestrian = (PedestreEntity) gravaObjeto(pedestrian)[0];
+		}
+
 	}
 
 	@SuppressWarnings("unchecked")
@@ -2002,7 +2009,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 				"findAllComIntegracaoAD", new HashMap<>());
 
 		if (Objects.isNull(clientes) || clientes.isEmpty()) {
-			System.out.println("Não existem clientes com integração Senior");
+			System.out.println("Não existem clientes com integração AD");
 			return;
 		}
 
@@ -2012,28 +2019,46 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 	}
 
 	private void importarFuncionariosAD(ClienteEntity cliente) {
-		private void importarFuncionariosAD(ClienteEntity cliente) {
-			try {
-				String baseDn = "cn=Users,dc=smart,dc=local";
-				String username = "cn=Administrator,cn=Users,dc=smart,dc=local";
-				String password = "desenvolvimento@2024";
+		try {
 
-				ActiveDirectoryService activeDirectoryService = new ActiveDirectoryService(username, password, baseDn);
+			// estes usuarios que devem ser trocados da variãvel de url
 
-				List<String> usuarios = ActiveDirectoryService.buscarUsuarios();
-				usuarios.forEach(System.out::println);
+			/*
+			 * String baseDn = "cn=Users,dc=smart,dc=local"; String username =
+			 * "cn=Administrator,cn=Users,dc=smart,dc=local"; String password =
+			 * "desenvolvimento@2024";
+			 */
 
-				UsuariosADTO user = new UsuariosADTO();
-
-				List<UsuariosADTO> users = user.convertUser(usuarios);
-
-				List<PedestreEntity> pedestrians = UsuarioAdToPedestreConverter.converterLista(users);
-
-				pedestrians.forEach(pedestrian -> salvarObjeto(pedestrian));
-
-			} catch (Exception e) {
-				e.printStackTrace();
+			if (Objects.isNull(cliente.getIntegracaoAD().getUrl())) {
+				return;
 			}
+
+			ActiveDirectoryService activeDirectoryService = new ActiveDirectoryService(
+					cliente.getIntegracaoAD().getUsuario(), cliente.getIntegracaoAD().getSenha(),
+					cliente.getIntegracaoAD().getBase(), cliente.getIntegracaoAD().getUrl());
+
+			List<String> usuarios = ActiveDirectoryService.buscarUsuarios();
+			usuarios.forEach(System.out::println);
+
+			UsuarioADTO user = new UsuarioADTO();
+
+			List<UsuarioADTO> users = user.convertUser(usuarios);
+
+			List<PedestreEntity> pedestrians = UsuarioAdToPedestreConverter.converterLista(users);
+
+			pedestrians.forEach(pedestrian -> {
+				try {
+					saveOrUpdateForName(pedestrian);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			});
+
+			System.out.println("pedestres da integracao AD salvos com suceso");
+
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 
