@@ -36,6 +36,7 @@ public class PedestrianAccessTO {
 	private String matricula;
 	private Boolean removido;
 	private Boolean sempreLiberado;
+	private Boolean acessoLivre;
 	private Boolean habilitarTeclado;
 	private String qrCodeParaAcesso;
 	private Boolean cadastroFacialObrigatorio;
@@ -109,6 +110,7 @@ public class PedestrianAccessTO {
 		this.matricula		= objects[37] == null ? null : objects[37].toString();
 		this.removido		= objects[38] == null ? false : Boolean.valueOf(objects[38].toString());
 		this.sempreLiberado   = objects[39] == null ? false : Boolean.valueOf(objects[39].toString());
+		this.acessoLivre   = objects[78] == null ? false : Boolean.valueOf(objects[78].toString());
 		this.habilitarTeclado = objects[40] == null ? false : Boolean.valueOf(objects[40].toString());
 		this.idTemp			= objects[41] == null ? null : Long.valueOf(objects[41].toString());
 		this.qrCodeParaAcesso = objects[42] == null ? null : objects[42].toString();
@@ -196,6 +198,7 @@ public class PedestrianAccessTO {
 	        this.tipoQRCode = entity.getTipoQRCode() != null ? entity.getTipoQRCode().name() : null;
 	        this.qrCodeParaAcesso = entity.getQrCodeParaAcesso();
 	        this.sempreLiberado = entity.getSempreLiberado();
+	        this.acessoLivre = entity.getAcessoLivre();
 	        this.habilitarTeclado = entity.getHabilitarTeclado();
 	        this.cadastroFacialObrigatorio = entity.getCadastroFacialObrigatorio();
 	        this.dataNascimento = entity.getDataNascimento();
@@ -906,6 +909,14 @@ public class PedestrianAccessTO {
 
 	public void setFotoBase64(String fotoBase64) {
 		this.fotoBase64 = fotoBase64;
+	}
+
+	public Boolean getAcessoLivre() {
+		return acessoLivre;
+	}
+
+	public void setAcessoLivre(Boolean acessoLivre) {
+		this.acessoLivre = acessoLivre;
 	}
 	
 }
