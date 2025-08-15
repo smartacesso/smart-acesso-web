@@ -386,7 +386,8 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 				"		h2.HORARIO_INI as horarioInicioPR, " + // 74
 				"		h2.HORARIO_FIM as horarioFim,  " + // 75
 				"		h2.STATUS as statusPR, " + // 76
-				"		pd.ID_LOCAL as idLocal " + // 77
+				"		pd.ID_LOCAL as idLocal, " + // 77
+				"		pd.ACESSO_LIVRE as acessoLivre " + // 78
 				"from " + schema + "TB_PEDESTRE pd " + "		left join " + schema
 				+ "TB_ENDERECO e on e.ID_ENDERECO = pd.ID_ENDERECO " + "		left join " + schema
 				+ "TB_EMPRESA emp on emp.ID_EMPRESA = pd.ID_EMPRESA " + "		left join " + schema

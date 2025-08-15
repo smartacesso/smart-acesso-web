@@ -203,6 +203,9 @@ public class PedestreEntity extends ClienteBaseEntity {
 
 	@Column(name = "SEMPRE_LIBERADO", nullable = true)
 	private Boolean sempreLiberado;
+	
+	@Column(name = "ACESSO_LIVRE", nullable = true)
+	private Boolean acessoLivre;
 
 	@Column(name = "HABILITAR_TECLADO", nullable = true)
 	private Boolean habilitarTeclado;
@@ -927,6 +930,14 @@ public class PedestreEntity extends ClienteBaseEntity {
 
 	public void setIdLocal(Long idLocal) {
 		this.idLocal = idLocal;
+	}
+
+	public Boolean getAcessoLivre() {
+		return acessoLivre;
+	}
+
+	public void setAcessoLivre(Boolean acessoLivre) {
+		this.acessoLivre = acessoLivre;
 	}
 
 }
