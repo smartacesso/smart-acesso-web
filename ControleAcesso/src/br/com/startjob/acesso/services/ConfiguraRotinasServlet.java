@@ -43,7 +43,7 @@ public class ConfiguraRotinasServlet extends BaseServlet {
 
 //		registraTimersParaSOC();
 //		registraTimersParaSenior();
-//		registraTimersParaTotvs();
+		registraTimersParaTotvs();
 //		registraTimersAutoAtendimento();
 //		registraTimerSalesiano();
 	}
@@ -119,12 +119,20 @@ public class ConfiguraRotinasServlet extends BaseServlet {
 //	     Limpa os timers anteriores relacionados à nova função
 		ActivatedTasks.getInstancia().limpaTimersTovs();
 
-		Calendar inicio = getInicio("0");
-		Long periodExpirar = 24 * 60 * 60 * 1000L;
+//		Calendar inicio = getInicio("0");
+//		Long periodExpirar = 24 * 60 * 60 * 1000L;
+//		Timer timer = new Timer();
+		
+//		TimerTask totvsTask = new ImportarTotvsTask();
+//		timer.scheduleAtFixedRate(totvsTask, inicio.getTime(), periodExpirar.longValue());
+		
+		// Define o período para 30 minutos (30 * 60 * 1000 ms)
+		Long period =  30 * 60 * 1000L;
 		Timer timer = new Timer();
 
 		TimerTask totvsTask = new ImportarTotvsTask();
-		timer.scheduleAtFixedRate(totvsTask, inicio.getTime(), periodExpirar.longValue());
+		timer.scheduleAtFixedRate(totvsTask, 0, period);
+
 
 		log.info("Registrando rotina da TOVS PROTHEUS");
 
