@@ -14,6 +14,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -1012,6 +1013,8 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 
 	private void salvarOuAtualizarFuncionario(final FuncionarioTotvsDto funcionarioTotvsDto, EmpresaEntity empresa, ClienteEntity cliente) {
 	    try {
+	    	System.out.println(">>>>>>");
+	    	
 	        Map<String, Object> args = new HashMap<>();
 	        args.put("MATRICULA", funcionarioTotvsDto.getMatricula());
 
@@ -1040,12 +1043,86 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 	}
 	
 	
-	private void processarRegrasPorFuncionarioTotvs(PedestreEntity pedestre, ClienteEntity cliente,
-			FuncionarioTotvsDto funcionario) {
-		System.out.println(
-				"Atualizando regras do funcionario id : " + pedestre.getId() + " nome : " + pedestre.getNome());
-		RegraEntity regra;
+	private void processarRegrasPorFuncionarioTotvs(PedestreEntity pedestre, ClienteEntity cliente, FuncionarioTotvsDto funcionario) {
+		
+		System.out.println("Atualizando regras");
+		
+		RegraEntity regra = defineRegraPedestre(cliente, funcionario);
 
+		if (Objects.nonNull(regra) && TipoRegra.ACESSO_HORARIO.equals(regra.getTipo())) {
+
+			HorarioEntity horarioExistente = buscarHorarioPorRegra(regra.getId());
+			LocalTime agora = LocalTime.now();
+
+			boolean trabalhandoAgora = estaNoTurno(horarioExistente.getHorarioInicio(),
+					horarioExistente.getHorarioFim(), agora);
+
+			if (trabalhandoAgora) {
+				System.out.println("Funcionario em horario de trabalho...");
+			} else {
+
+				apagaPedetreRegras(pedestre.getId());
+
+				if (!"Trabalhado".equalsIgnoreCase(funcionario.getStatusTrabalho())) {
+					System.out.println("Funcionario em folga...");
+					return;
+				}
+				
+				System.out.println("Funcionario ira trabalhar, atualizando horarios...");
+
+				HorarioTotvsProtheusDTO horario;
+				ParametroEntity param = getParametroSistema(
+						BaseConstant.PARAMETERS_NAME.TEMPO_TOLERANCIA_ENTRADA_E_SAIDA, cliente.getId());
+
+				if (param != null) {
+					Integer tolerancia = Integer.valueOf(param.getValor());
+					horario = new HorarioTotvsProtheusDTO(funcionario.getHoraInicial(), funcionario.getHoraFinal(),
+							tolerancia);
+				} else {
+					horario = new HorarioTotvsProtheusDTO(funcionario.getHoraInicial(), funcionario.getHoraFinal(), 0);
+				}
+
+				atualizaRegraComHorarioTotvs(horario, regra.getId());
+
+				PedestreRegraEntity pedestreRegra = new PedestreRegraEntity();
+
+				pedestreRegra.setRegra(regra);
+				pedestreRegra.setPedestre(pedestre);
+
+				try {
+					gravaObjeto(pedestreRegra);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		} else {
+			System.out.println("Regra invalida ou não encontrada : " + funcionario.getCodigoHorario());
+		}
+	}
+
+	private boolean estaNoTurno(Date horarioInicio, Date horarioFim, LocalTime agora) {
+	    if (horarioInicio == null || horarioFim == null || agora == null) {
+	        return false; // evita NullPointerException
+	    }
+
+	    LocalTime inicio = horarioInicio.toInstant()
+	            .atZone(ZoneId.systemDefault())
+	            .toLocalTime();
+	    LocalTime fim = horarioFim.toInstant()
+	            .atZone(ZoneId.systemDefault())
+	            .toLocalTime();
+
+	    // Caso o turno não atravesse a meia-noite
+	    if (!fim.isBefore(inicio)) {
+	        return !agora.isBefore(inicio) && !agora.isAfter(fim);
+	    } else {
+	        // Caso o turno atravesse a meia-noite (ex: 22:00 às 06:00)
+	        return !agora.isBefore(inicio) || !agora.isAfter(fim);
+	    }
+	}
+
+	private RegraEntity defineRegraPedestre(ClienteEntity cliente, FuncionarioTotvsDto funcionario) {
+		RegraEntity regra;
 		if ("065".equalsIgnoreCase(funcionario.getCodigoHorario())) {
 			if("7".equalsIgnoreCase(funcionario.getHoraInicial())) {
 				regra = buscarRegraPeloNomeCompleto("066", cliente.getId());
@@ -1056,44 +1133,10 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		} else {
 			regra = buscarRegraPeloNomeCompleto(funcionario.getCodigoHorario(), cliente.getId());
 		}
-		apagaPedetreRegras(pedestre.getId());
-		
-		if(!"Trabalhado".equalsIgnoreCase(funcionario.getStatusTrabalho())) {
-			System.out.println("Folga");
-			return;
-		}
-		
-		if (Objects.nonNull(regra) && TipoRegra.ACESSO_HORARIO.equals(regra.getTipo())) {
-			HorarioTotvsProtheusDTO horario;
-			ParametroEntity param = getParametroSistema(BaseConstant.PARAMETERS_NAME.TEMPO_TOLERANCIA_ENTRADA_E_SAIDA,
-					cliente.getId());
-
-			if (param != null) {
-				Integer tolerancia = Integer.valueOf(param.getValor());
-				horario = new HorarioTotvsProtheusDTO(funcionario.getHoraInicial(), funcionario.getHoraFinal(),
-						tolerancia);
-			} else {
-				horario = new HorarioTotvsProtheusDTO(funcionario.getHoraInicial(), funcionario.getHoraFinal(), 0);
-			}
-
-			processaRegraComHorarioTotvs(horario, regra.getId());
-
-			PedestreRegraEntity pedestreRegra = new PedestreRegraEntity();
-
-			pedestreRegra.setRegra(regra);
-			pedestreRegra.setPedestre(pedestre);
-
-			try {
-				gravaObjeto(pedestreRegra);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		} else {
-			System.out.println("Regra invalida ou não encontrada : " + funcionario.getCodigoHorario());
-		}
+		return regra;
 	}
 
-	private void processaRegraComHorarioTotvs(HorarioTotvsProtheusDTO dto, Long idRegra) {
+	private void atualizaRegraComHorarioTotvs(HorarioTotvsProtheusDTO dto, Long idRegra) {
 		
 		 HorarioEntity horarioExistente = buscarHorarioPorRegra(idRegra);
 		 
