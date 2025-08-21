@@ -1052,49 +1052,52 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		if (Objects.nonNull(regra) && TipoRegra.ACESSO_HORARIO.equals(regra.getTipo())) {
 
 			HorarioEntity horarioExistente = buscarHorarioPorRegra(regra.getId());
+			PedestreRegraEntity pedestreRegra = buscaRegraAtiva(pedestre.getId());
+
 			LocalTime agora = LocalTime.now();
 
 			boolean trabalhandoAgora = estaNoTurno(horarioExistente.getHorarioInicio(),
 					horarioExistente.getHorarioFim(), agora);
 
-			if (trabalhandoAgora) {
+			if (trabalhandoAgora && Objects.nonNull(pedestreRegra)) {
 				System.out.println("Funcionario em horario de trabalho...");
-			} else {
-
-				apagaPedetreRegras(pedestre.getId());
-
-				if (!"Trabalhado".equalsIgnoreCase(funcionario.getStatusTrabalho())) {
-					System.out.println("Funcionario em folga...");
-					return;
-				}
-				
-				System.out.println("Funcionario ira trabalhar, atualizando horarios...");
-
-				HorarioTotvsProtheusDTO horario;
-				ParametroEntity param = getParametroSistema(
-						BaseConstant.PARAMETERS_NAME.TEMPO_TOLERANCIA_ENTRADA_E_SAIDA, cliente.getId());
-
-				if (param != null) {
-					Integer tolerancia = Integer.valueOf(param.getValor());
-					horario = new HorarioTotvsProtheusDTO(funcionario.getHoraInicial(), funcionario.getHoraFinal(),
-							tolerancia);
-				} else {
-					horario = new HorarioTotvsProtheusDTO(funcionario.getHoraInicial(), funcionario.getHoraFinal(), 0);
-				}
-
-				atualizaRegraComHorarioTotvs(horario, regra.getId());
-
-				PedestreRegraEntity pedestreRegra = new PedestreRegraEntity();
-
-				pedestreRegra.setRegra(regra);
-				pedestreRegra.setPedestre(pedestre);
-
-				try {
-					gravaObjeto(pedestreRegra);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+				return;
 			}
+
+			apagaPedetreRegras(pedestre.getId());
+
+			if ("Nao Trabalhado".equalsIgnoreCase(funcionario.getStatusTrabalho())) {
+				System.out.println("Funcionario em folga...");
+				return;
+			}
+
+			System.out.println("Funcionario ira trabalhar, atualizando horarios...");
+
+			HorarioTotvsProtheusDTO horario;
+			ParametroEntity param = getParametroSistema(BaseConstant.PARAMETERS_NAME.TEMPO_TOLERANCIA_ENTRADA_E_SAIDA,
+					cliente.getId());
+
+			if (param != null) {
+				Integer tolerancia = Integer.valueOf(param.getValor());
+				horario = new HorarioTotvsProtheusDTO(funcionario.getHoraInicial(), funcionario.getHoraFinal(),
+						tolerancia);
+			} else {
+				horario = new HorarioTotvsProtheusDTO(funcionario.getHoraInicial(), funcionario.getHoraFinal(), 0);
+			}
+
+			atualizaRegraComHorarioTotvs(horario, regra.getId());
+
+			PedestreRegraEntity newPedestreRegra = new PedestreRegraEntity();
+
+			newPedestreRegra.setRegra(regra);
+			newPedestreRegra.setPedestre(pedestre);
+
+			try {
+				gravaObjeto(newPedestreRegra);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
 		} else {
 			System.out.println("Regra invalida ou não encontrada : " + funcionario.getCodigoHorario());
 		}
