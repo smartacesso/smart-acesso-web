@@ -1470,13 +1470,23 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		}
 		System.out.println("Processo Senior iniciado");
 		clientes.forEach(cliente -> {
-			importarEmpresasComControle(cliente);
+			if(cliente.getIntegracaoSenior().getId() != null) {
+				importarSeniorCedro();
+			}else {
+				importarEmpresasComControle(cliente);
+			}
+			
 		});
 		System.out.println("Processo Senior finalizado");
 	}
 	
 	
-    private void importarEmpresasComControle(ClienteEntity cliente) {
+    private void importarSeniorCedro() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	private void importarEmpresasComControle(ClienteEntity cliente) {
         long agora = System.currentTimeMillis();
         long ultimaImportacaoCompleta = ultimaImportacaoCompletaPorCliente.getOrDefault(cliente.getId(), 0L);
 
@@ -1494,7 +1504,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
     }
     
     private void importarEmpresasSenior(final ClienteEntity cliente, ModoImportacaoFuncionario modo) {
-        EmpresaSeniorDto empresaSenior = buscaTodasEmpresasSenior(cliente);
+        EmpresaSeniorDto empresaSenior = buscaTodasEmpresasSenior(cliente).get(0);
         if (Objects.isNull(empresaSenior)) {
             return;
         }
@@ -1526,12 +1536,10 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
         }
     }
     
-	private EmpresaSeniorDto buscaTodasEmpresasSenior(final ClienteEntity cliente) {
-		// IntegracaoSeniorService integracaoSeniorService = new
-		// IntegracaoSeniorService("smartwsintegra", "Sm4rt@s3n10r#");
+	private List<EmpresaSeniorDto> buscaTodasEmpresasSenior(final ClienteEntity cliente) {
 		IntegracaoSeniorService integracaoSeniorService = new IntegracaoSeniorService(cliente);
 
-		return integracaoSeniorService.buscarEmpresas().get(0);
+		return integracaoSeniorService.buscarEmpresas();
 	}
     
 	private void importaFuncionariosSenior(final EmpresaEntity empresaExistente, final ClienteEntity cliente, ModoImportacaoFuncionario modo) {
