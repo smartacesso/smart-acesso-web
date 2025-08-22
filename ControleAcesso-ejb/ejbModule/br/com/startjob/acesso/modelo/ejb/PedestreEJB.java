@@ -1456,7 +1456,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 	}
 
 	private static final Map<Long, LocalDate> cacheExecucaoRegras = new HashMap<>();
-    private static final long OITO_HORAS_EM_MILLIS = 25 * 60  * 1000L;
+    private static final long OITO_HORAS_EM_MILLIS = 8 * 60 * 60  * 1000L;
     private static Map<Long, Long> ultimaImportacaoCompletaPorCliente = new HashMap<>();
 	
 	@SuppressWarnings("unchecked")
@@ -1473,20 +1473,13 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		}
 		System.out.println("Processo Senior iniciado");
 		clientes.forEach(cliente -> {
-			if(cliente.getIntegracaoSenior().getId() != null) {
-				importarSeniorCedro();
-			}else {
+			if (cliente.getIntegracaoSenior().getId() != null) {
+
 				importarEmpresasComControle(cliente);
+
 			}
-			
 		});
 		System.out.println("Processo Senior finalizado");
-	}
-	
-	
-    private void importarSeniorCedro() {
-		// TODO Auto-generated method stub
-		
 	}
 
 	private void importarEmpresasComControle(ClienteEntity cliente) {
@@ -1505,38 +1498,91 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
             ultimaImportacaoCompletaPorCliente.put(cliente.getId(), agora);
         }
     }
+	
+	private List<FuncionarioSeniorDto> buscaTodosOsFuncioriosDaEmpresa(final String numEmp,
+			final ClienteEntity cliente) {
+		System.out.println("buscando todos funcionarios da empresa :" + numEmp);
+		IntegracaoSeniorService integracaoSeniorService = new IntegracaoSeniorService(cliente);
+
+		return integracaoSeniorService.buscarFuncionarios(numEmp);
+	}
+	
+	private List<FuncionarioSeniorDto> buscaTodosOsFuncioriosDaEmpresaDoDia(final String numEmp,
+			final ClienteEntity cliente) {
+		System.out.println("buscando todos funcionarios da empresa :" + numEmp);
+		
+		LocalDate data = LocalDate.now();
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+		String dataString = data.format(formatter);
+		
+		IntegracaoSeniorService integracaoSeniorService = new IntegracaoSeniorService(cliente);
+
+		return integracaoSeniorService.buscarFuncionariosAtualizadosNoDia(numEmp, dataString);
+	}
+
+	private List<FuncionarioSeniorDto> buscarFuncionariosDemitidos(String numEmp, final ClienteEntity cliente) {
+		System.out.println("buscando todos funcionarios demitidos no dia no empresa" + numEmp);
+
+		LocalDate data = LocalDate.now();
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+		String dataString = data.format(formatter);
+
+		IntegracaoSeniorService integracaoSeniorService = new IntegracaoSeniorService(cliente);
+
+		return integracaoSeniorService.buscarFuncionariosDemitidos(numEmp, dataString);
+	}
+
+	private List<FuncionarioSeniorDto> buscarFuncionariosAdmitidos(String numEmp, final ClienteEntity cliente) {
+		System.out.println("buscando todos funcionarios demitidos no dia no empresa" + numEmp);
+
+		LocalDate data = LocalDate.now();
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+		String dataString = data.format(formatter);
+
+		IntegracaoSeniorService integracaoSeniorService = new IntegracaoSeniorService(cliente);
+
+		return integracaoSeniorService.buscarFuncionariosAdmitidos(numEmp, dataString);
+	}
     
     private void importarEmpresasSenior(final ClienteEntity cliente, ModoImportacaoFuncionario modo) {
-        EmpresaSeniorDto empresaSenior = buscaTodasEmpresasSenior(cliente).get(0);
-        if (Objects.isNull(empresaSenior)) {
+    	List< EmpresaSeniorDto> empresasSenior = buscaTodasEmpresasSenior(cliente);
+    	
+
+        if (Objects.isNull(empresasSenior)) {
             return;
         }
+        
+		empresasSenior.forEach(empresaSenior -> {
 
-        Optional<EmpresaEntity> empresaExistenteOpt = buscaEmpresaExistente(empresaSenior.getNumEmp(), cliente.getId());
-        EmpresaEntity empresaExistente = empresaExistenteOpt.orElseGet(() -> {
-            EmpresaEntity novaEmpresa = new EmpresaEntity(empresaSenior, false, cliente);
-            try {
-                return (EmpresaEntity) gravaObjeto(novaEmpresa)[0];
-            } catch (Exception e) {
-                System.out.println("Erro ao salvar empresa");
-                return null;
-            }
-        });
+			Optional<EmpresaEntity> empresaExistenteOpt = buscaEmpresaExistente(empresaSenior.getNumEmp(), cliente.getId());
+			EmpresaEntity empresaExistente = empresaExistenteOpt.orElseGet(() -> {
+				EmpresaEntity novaEmpresa = new EmpresaEntity(empresaSenior, false, cliente);
+				try {
+					return (EmpresaEntity) gravaObjeto(novaEmpresa)[0];
+				} catch (Exception e) {
+					System.out.println("Erro ao salvar empresa");
+					return null;
+				}
+			});
 
-        if (empresaExistente == null) return;
+			if (empresaExistente == null) {
+				return;
+			}
 
-        System.out.println("Importando empresa: " + empresaSenior.getNumEmp() + ", nome: " + empresaSenior.getNomEmp());
-        importaFuncionariosSenior(empresaExistente, cliente, modo);
+			System.out.println(
+					"Importando empresa: " + empresaSenior.getNumEmp() + ", nome: " + empresaSenior.getNomEmp());
+			importaFuncionariosSenior(empresaExistente, cliente, modo);
 
-        if (Objects.isNull(empresaExistente.getPrimeiroImportacaoFuncionarioSeniorSucesso())
-                || Boolean.FALSE.equals(empresaExistente.getPrimeiroImportacaoFuncionarioSeniorSucesso())) {
-            empresaExistente.setPrimeiroImportacaoFuncionarioSeniorSucesso(true);
-            try {
-                empresaExistente = (EmpresaEntity) gravaObjeto(empresaExistente)[0];
-            } catch (Exception e) {
-                System.out.println("Erro ao salvar empresa");
-            }
-        }
+			if (Objects.isNull(empresaExistente.getPrimeiroImportacaoFuncionarioSeniorSucesso())
+					|| Boolean.FALSE.equals(empresaExistente.getPrimeiroImportacaoFuncionarioSeniorSucesso())) {
+				empresaExistente.setPrimeiroImportacaoFuncionarioSeniorSucesso(true);
+				try {
+					empresaExistente = (EmpresaEntity) gravaObjeto(empresaExistente)[0];
+				} catch (Exception e) {
+					System.out.println("Erro ao salvar empresa");
+				}
+			}
+		});
     }
     
 	private List<EmpresaSeniorDto> buscaTodasEmpresasSenior(final ClienteEntity cliente) {
@@ -1583,10 +1629,14 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 					
 					em.flush();
 
-					atualizarPermissao(cliente, pedestre);
-
 					if (!hoje.equals(cacheExecucaoRegras.get(pedestre.getId()))) {
-						processarRegrasPorFuncionario(pedestre, cliente, funcionario);
+						if(cliente.getIntegracaoSenior().isPermissaoHabilitada()) {
+							atualizarPermissao(cliente, pedestre);
+						}
+						
+						if(cliente.getIntegracaoSenior().isRegraHabilitada()) {
+							processarRegrasPorFuncionario(pedestre, cliente, funcionario);
+						}
 						cacheExecucaoRegras.put(pedestre.getId(), hoje);
 					}
 				} catch (Exception e) {
@@ -1594,52 +1644,6 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 					e.printStackTrace();
 				}
 		    });
-	}
-	
-
-	private List<FuncionarioSeniorDto> buscaTodosOsFuncioriosDaEmpresa(final String numEmp,
-			final ClienteEntity cliente) {
-		System.out.println("buscando todos funcionarios da empresa :" + numEmp);
-		IntegracaoSeniorService integracaoSeniorService = new IntegracaoSeniorService(cliente);
-
-		return integracaoSeniorService.buscarFuncionarios(numEmp);
-	}
-	
-	private List<FuncionarioSeniorDto> buscaTodosOsFuncioriosDaEmpresaDoDia(final String numEmp,
-			final ClienteEntity cliente) {
-		System.out.println("buscando todos funcionarios da empresa :" + numEmp);
-		
-		LocalDate data = LocalDate.now();
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-		String dataString = data.format(formatter);
-		
-		IntegracaoSeniorService integracaoSeniorService = new IntegracaoSeniorService(cliente);
-
-		return integracaoSeniorService.buscarFuncionariosAtualizadosNoDia(numEmp, dataString);
-	}
-
-	private List<FuncionarioSeniorDto> buscarFuncionariosDemitidos(String numEmp, final ClienteEntity cliente) {
-		System.out.println("buscando todos funcionarios demitidos no dia no empresa" + numEmp);
-
-		LocalDate data = LocalDate.now();
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-		String dataString = data.format(formatter);
-
-		IntegracaoSeniorService integracaoSeniorService = new IntegracaoSeniorService(cliente);
-
-		return integracaoSeniorService.buscarFuncionariosDemitidos(numEmp, dataString);
-	}
-
-	private List<FuncionarioSeniorDto> buscarFuncionariosAdmitidos(String numEmp, final ClienteEntity cliente) {
-		System.out.println("buscando todos funcionarios demitidos no dia no empresa" + numEmp);
-
-		LocalDate data = LocalDate.now();
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-		String dataString = data.format(formatter);
-
-		IntegracaoSeniorService integracaoSeniorService = new IntegracaoSeniorService(cliente);
-
-		return integracaoSeniorService.buscarFuncionariosAdmitidos(numEmp, dataString);
 	}
 	
 	private boolean isPermissaoAlterada(final PedestreEntity pedestre, final FuncionarioSeniorDto funcionario) {
@@ -1676,13 +1680,13 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		
 	}
 	
-
 	private void processarRegrasPorFuncionario(PedestreEntity pedestre, ClienteEntity cliente, FuncionarioSeniorDto funcionario) {
 		HorarioPedestreDto escala = buscaEscalaPedestre(pedestre.getMatricula(), cliente);
 		List<HorarioSeniorDto> horarios = new ArrayList<>();
+
 		
-		if (Objects.nonNull(escala)) {
-			System.out.println("Atualizando regras do funcionario id : " + pedestre.getId() +" nome : " + pedestre.getNome() + "ESCALA : " + escala.getIdescala());
+	if (Objects.nonNull(escala) && !"0".equals(escala.getIdescala())) {
+			System.out.println("Atualizando regras do funcionario id : " + pedestre.getId() +" nome : " + pedestre.getNome() + ", ESCALA : " + escala.getIdescala());
 			
 			horarios = buscaHorariosEscala(escala.getIdescala(), cliente); 
 			if (Objects.nonNull(horarios) && !horarios.isEmpty()) {
@@ -1692,15 +1696,12 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 				criarHorarioPedestreRegra(horarios, pedestreRegra, funcionario);
 				
 			}else {
-				//buscar horario pelo id da
-				System.out.println("Atualizando regras do funcionario id : " + pedestre.getId() +" nome : " + pedestre.getNome() + "SEM HORARIO, CRIANDO REGRA");
-				
-				criaRegraPadrao(pedestre, cliente, horarios, funcionario);
+				System.out.println("ESCALA SEM HORARIO");
+//				criaRegraPadrao(pedestre, cliente, horarios, funcionario);
 			}
 		}else {
-			System.out.println("Atualizando regras do funcionario id : " + pedestre.getId() +" nome : " + pedestre.getNome() + "SEM ESCALA, CRIANDO REGRA");
-			//criar regra folga
-			criaRegraPadrao(pedestre, cliente, horarios, funcionario);
+			System.out.println("Funcionario id : " + pedestre.getId() +" nome : " + pedestre.getNome() + "SEM ESCALA, FOLGA");
+			criaRegraFolga(pedestre, cliente, horarios, funcionario);
 		}
 	}
 	
@@ -1729,6 +1730,14 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 	private void criaRegraPadrao(PedestreEntity pedestre, ClienteEntity cliente, List<HorarioSeniorDto> horarios, FuncionarioSeniorDto funcionario) {
 
 		horarios.add(HorarioSeniorDto.criaHorarioPadrao());
+		RegraEntity regra = processaRegraComHorarios(horarios, cliente);
+		PedestreRegraEntity pedestreRegra = criarPedestreRegraEVincularRegra(regra, pedestre);
+		criarHorarioPedestreRegra(horarios, pedestreRegra, funcionario);
+	}
+	
+	private void criaRegraFolga(PedestreEntity pedestre, ClienteEntity cliente, List<HorarioSeniorDto> horarios, FuncionarioSeniorDto funcionario) {
+
+		horarios.add(HorarioSeniorDto.criarHorarioFolga());
 		RegraEntity regra = processaRegraComHorarios(horarios, cliente);
 		PedestreRegraEntity pedestreRegra = criarPedestreRegraEVincularRegra(regra, pedestre);
 		criarHorarioPedestreRegra(horarios, pedestreRegra, funcionario);

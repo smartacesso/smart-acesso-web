@@ -396,7 +396,9 @@ public class PedestreEntity extends ClienteBaseEntity {
 		this.nome = funcionarioSeniorDto.getNome();
 		this.matricula = funcionarioSeniorDto.getNumeroMatricula();
 		this.telefone = funcionarioSeniorDto.getDddtelefone() + funcionarioSeniorDto.getNumtelefone();
-		this.codigoCartaoAcesso = funcionarioSeniorDto.getNumCracha();
+		
+		this.codigoCartaoAcesso = isCrachaSeniorValido(funcionarioSeniorDto) ? funcionarioSeniorDto.getNumCracha() : funcionarioSeniorDto.getNumeroMatricula();
+		
 		this.rg = funcionarioSeniorDto.getRg();
 		this.codigoPermissao = funcionarioSeniorDto.getCodPrm(); // codigo permissao
 		this.setDataAlteracao(new Date());
@@ -458,6 +460,10 @@ public class PedestreEntity extends ClienteBaseEntity {
 		if (string.isEmpty())
 			return true;
 		return false;
+	}
+	
+	private boolean isCrachaSeniorValido(FuncionarioSeniorDto funcionario) {
+		return Objects.nonNull(funcionario.getNumCracha()) && !funcionario.getNumCracha().isEmpty() && !"0".equals(funcionario.getNumCracha());
 	}
 	
 	public boolean isVisitante() {
