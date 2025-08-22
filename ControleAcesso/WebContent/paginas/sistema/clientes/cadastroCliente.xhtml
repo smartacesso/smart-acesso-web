@@ -93,16 +93,16 @@
 								</p:column>
 								
 								<p:column>
-									<p:outputLabel value="#{msgs['label.uc001.email']}" for="email" indicateRequired="true"/>
+									<p:outputLabel value="#{msgs['label.uc001.email']}" for="email" indicateRequired="false"/>
 									<br />
-									<p:inputText id="email" value="#{cadastroClienteController.entidade.email}" required="true" size="40" validator="emailValidator"/>
+									<p:inputText id="email" value="#{cadastroClienteController.entidade.email}" required="false" size="40" validator="emailValidator"/>
 								</p:column>
 								
 								<p:column>
-									<p:outputLabel value="#{msgs['label.uc001.cnpj']}" for="cnpj" indicateRequired="true"/>
+									<p:outputLabel value="#{msgs['label.uc001.cnpj']}" for="cnpj" indicateRequired="false"/>
 									<br />
 									<p:inputMask id="cnpj" value="#{cadastroClienteController.entidade.cnpj}" mask="99.999.999/9999-99"
-											required="true" converter="cnpjConverter"/>
+											required="false" converter="cnpjConverter"/>
 								</p:column>
 		
 								<p:column>
@@ -112,10 +112,10 @@
 								</p:column>
 		
 								<p:column>
-									<p:outputLabel value="#{msgs['label.uc001.celular']}" for="celular" indicateRequired="true"/>
+									<p:outputLabel value="#{msgs['label.uc001.celular']}" for="celular" indicateRequired="false"/>
 									<br />
 									<p:inputMask id="celular" value="#{cadastroClienteController.entidade.celular}" mask="(999) 9 9999-9999"
-											required="true"/>
+											required="false"/>
 								</p:column>
 		
 								<p:column>
@@ -409,7 +409,7 @@
 						
 						<p:tab title="#{msgs['label.uc001.integracao.senior']}">
 						
-							<p:panelGrid columns="2" style="width: 100%;">
+							<p:panelGrid columns="5" style="width: 100%;">
 							
 								<p:column >
 									<p:outputLabel value="#{msgs['label.uc001.url.senior']}" for="urlSenior" indicateRequired="false"/>
@@ -431,7 +431,23 @@
 									<p:password id="senhaSenior" value="#{cadastroClienteController.entidade.integracaoSenior.senha}" 
 												 required="false"/>
 								</p:column>
+
+								<p:column>
+								    <p:outputLabel value="Habilita permissoes SENIOR"
+								                   for="permissaoSenior" indicateRequired="false" />
+								    <br />
+								    <p:inputSwitch id="permissaoSenior"
+								        value="#{cadastroClienteController.entidade.integracaoSenior.habilitaPermissao}" />
+								</p:column>
 								
+								<p:column>
+								    <p:outputLabel value="Habilita regras de horario SENIOR"
+								                   for="regraSenior" indicateRequired="false" />
+								    <br />
+								    <p:inputSwitch id="regraSenior"
+								        value="#{cadastroClienteController.entidade.integracaoSenior.habilitaRegrasDeHorario}" />
+								</p:column>
+
 							</p:panelGrid>
 						
 						</p:tab>
