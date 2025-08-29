@@ -2048,6 +2048,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 
 			pedestrians.forEach(pedestrian -> {
 				try {
+					pedestrian.setCliente(cliente);
 					saveOrUpdateForName(pedestrian);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
