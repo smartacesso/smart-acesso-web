@@ -22,7 +22,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import br.com.startjob.acesso.api.WebSocketEndpoint;
+import br.com.startjob.acesso.api.WebSocketCadastroEndpoint;
 import br.com.startjob.acesso.modelo.ejb.BaseEJB;
 import br.com.startjob.acesso.modelo.ejb.PedestreEJBRemote;
 import br.com.startjob.acesso.modelo.entity.CadastroExternoEntity;
@@ -100,7 +100,7 @@ public class CadastroFacialHikivisionController extends BaseController {
 		JsonObject json = JsonParser.parseString(jsonStr).getAsJsonObject();
 
 		// buscar cliente correto pelo idCliente e pegar unidade organizacional
-		WebSocketEndpoint.enviarParaLocal(pedestre.getCliente().getId().toString(), json.toString());
+		WebSocketCadastroEndpoint.enviarParaLocal(pedestre.getCliente().getId().toString(), json.toString());
 		try {
 			baseEJB.gravaObjeto(pedestre);
 		} catch (Exception e) {

@@ -49,7 +49,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import br.com.startjob.acesso.annotations.UseCase;
-import br.com.startjob.acesso.api.WebSocketEndpoint;
+import br.com.startjob.acesso.api.WebSocketCadastroEndpoint;
 import br.com.startjob.acesso.controller.CadastroBaseController;
 import br.com.startjob.acesso.controller.MenuController;
 import br.com.startjob.acesso.modelo.BaseConstant;
@@ -505,7 +505,7 @@ public class CadastroPedestreController extends CadastroBaseController {
 		JsonObject json = JsonParser.parseString(jsonStr).getAsJsonObject();
 
 		// buscar cliente correto pelo idCliente e pegar unidade organizacional
-		WebSocketEndpoint.enviarParaLocal(pedestre.getCliente().getId().toString(), json.toString());
+		WebSocketCadastroEndpoint.enviarParaLocal(pedestre.getCliente().getId().toString(), json.toString());
 		
 		
 		String retornoStr = "";
