@@ -11,6 +11,7 @@ import javax.inject.Named;
 
 import br.com.startjob.acesso.annotations.UseCase;
 import br.com.startjob.acesso.controller.BaseController;
+import br.com.startjob.acesso.modelo.ejb.BaseEJB;
 import br.com.startjob.acesso.modelo.entity.ResponsibleEntity;
 
 @Named("consultaResponsavelController")
@@ -58,6 +59,14 @@ public class ConsultaResponsavelController  extends BaseController {
 	
 	public void excluirResponsavel() {
 		if(responsavelSelecionado != null) {
+			responsavelSelecionado.setLogin(null);
+			responsavelSelecionado.setPassword(null);
+			try {
+				baseEJB.alteraObjeto(responsavelSelecionado);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			super.excluir(responsavelSelecionado.getId());
 		}
 	}

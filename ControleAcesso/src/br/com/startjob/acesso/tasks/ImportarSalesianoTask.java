@@ -251,8 +251,8 @@ public class ImportarSalesianoTask extends TimerTask {
 	    pedestre.setEmpresa(recuperaEmpresa(cadastro.getNomeColigada(), cliente));
 
 	    // Atualiza cartão
-	    String codigoCartao = cadastro.getMatricula().replaceAll("\\D", "");
-	    pedestre.setCodigoCartaoAcesso(codigoCartao);
+//	    String codigoCartao = cadastro.getMatricula().replaceAll("\\D", "");
+//	    pedestre.setCodigoCartaoAcesso(codigoCartao);
 
 	    // Caso especial: responsável
 	    verificarOuCriarResponsavel(cadastro, cliente, pedestre.getEmpresa(), tipo);
@@ -266,11 +266,11 @@ public class ImportarSalesianoTask extends TimerTask {
 	            && NivelDeEnsino.EDUCACAO_BASICA.getNivel().equals(cadastro.getNivelEnsino())
 	            && cadastro.getCpfCnpfResponsavel() != null
 	            && !cadastro.getCpfCnpfResponsavel().isEmpty()) {
-
-	        PedestreEntity responsavel = buscaPedestrePorCpf(cadastro.getCpfCnpfResponsavel(), cliente.getId());
+	    	
+	    	String cpfResp = cadastro.getCpfCnpfResponsavel().replaceAll("\\D", "");
+	        PedestreEntity responsavel = buscaPedestrePorCpf(cpfResp, cliente.getId());
 
 	        if (responsavel == null) {
-	            String cpfResp = cadastro.getCpfCnpfResponsavel().replaceAll("\\D", "");
 	            responsavel = criarPedestre(
 	                    cadastro.getNomeResponsavel(),
 	                    cadastro.getCpfCnpfResponsavel(),

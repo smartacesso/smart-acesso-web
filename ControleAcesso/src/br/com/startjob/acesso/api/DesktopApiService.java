@@ -1359,7 +1359,9 @@ public class DesktopApiService extends BaseService {
 		visitante.setMatricula(jsonObject.getString("matricula"));
 		visitante.setCodigoCartaoAcesso(jsonObject.getString("numeroCartao"));
 		visitante.setSempreLiberado(Boolean.valueOf(jsonObject.getString("sempreLiberado")));
-		visitante.setAcessoLivre(Boolean.valueOf(jsonObject.getString("acessoLivre")));
+		visitante.setAcessoLivre(
+			    Boolean.valueOf(jsonObject.optString("acessoLivre", "false"))
+			);
 		visitante.setHabilitarTeclado(Boolean.valueOf(jsonObject.getString("habilitarTeclado")));
 		visitante.setEnviaSmsAoPassarNaCatraca(Boolean.valueOf(jsonObject.getString("enviaSmsAoPassarNaCatraca")));
 
