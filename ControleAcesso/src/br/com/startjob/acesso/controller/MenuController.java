@@ -162,10 +162,12 @@ public class MenuController extends BaseController {
 				
 				this.criaMenuAdministracao();
 				
+				this.criaMenuCameras();
+			
 				this.criaMenuAjuda();
 				
 				this.montaMenuUsuario();
-			
+
 			}
 			
 			//retiraMenusVazios();
@@ -355,6 +357,24 @@ public class MenuController extends BaseController {
 		}
         
         menu.getElements().add(cadastros);
+	}
+	
+	private void criaMenuCameras() {
+		// nao cria menu cadastro para responsavel
+		if (PerfilAcesso.RESPONSAVEL.equals(usuarioLogado.getPerfil()))
+			return;
+
+		DefaultSubMenu cameras = DefaultSubMenu.builder()
+				.label(resource.recuperaChave("menu.cameras", getFacesContext())).build();
+
+		DefaultMenuItem hikivision = DefaultMenuItem.builder()
+				.value(resource.recuperaChave("menu.cameras.hikivision", getFacesContext()))
+				.url(BaseConstant.URL_APLICACAO + "/paginas/sistema/cameras/cameras.xhtml")
+				.styleClass("ui-simple-menu").build();
+
+		cameras.getElements().add(hikivision);
+		
+		menu.getElements().add(cameras);
 	}
 
 	private void montaMenuUsuario() {

@@ -96,7 +96,6 @@ public class HorarioSeniorDto {
 		RegraEntity regra =  new RegraEntity();
 		regra.setDataAlteracao(new Date());
 		regra.setDataCriacao(new Date());
-		regra.setNome("Escala " + getIdEscala());
 		regra.setIdEscala(Integer.parseInt(getIdEscala()));
 		regra.setStatus(Status.ATIVO);
 		regra.setTipoPedestre(TipoPedestre.PEDESTRE);

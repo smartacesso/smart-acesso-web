@@ -1,5 +1,7 @@
 package com.senior.services.dto;
 
+import java.util.Objects;
+
 public class FuncionarioSeniorDto {
 	
     String codPrm;   // cod permissão
@@ -166,4 +168,44 @@ public class FuncionarioSeniorDto {
 		this.usaRef = usaRef;
 	}
 	
+	 @Override
+	    public boolean equals(Object o) {
+	        if (this == o) return true;
+	        if (!(o instanceof FuncionarioSeniorDto)) return false;
+	        FuncionarioSeniorDto that = (FuncionarioSeniorDto) o;
+
+	        // sempre compara matrícula + empresa
+	        boolean baseEquals = Objects.equals(numeroMatricula, that.numeroMatricula)
+	                && Objects.equals(numEmpresa, that.numEmpresa);
+
+	        // se ambos tiverem cartão preenchido, também compara cartão
+	        if (this.numCracha != null && that.numCracha != null) {
+	            return baseEquals && Objects.equals(numCracha, that.numCracha);
+	        }
+
+	        // senão, usa só matrícula + empresa
+	        return baseEquals;
+	    }
+
+	    @Override
+	    public int hashCode() {
+	        // hash sempre de matrícula + empresa
+	        int result = Objects.hash(numeroMatricula, numEmpresa);
+
+	        // se tiver cartão, inclui no hash
+	        if (numCracha != null) {
+	            result = 31 * result + numCracha.hashCode();
+	        }
+	        return result;
+	    }
+
+	    @Override
+	    public String toString() {
+	        return "FuncionarioSeniorDto{" +
+	                "matricula='" + numeroMatricula + '\'' +
+	                ", empresa='" + numEmpresa + '\'' +
+	                ", cracha='" + numCracha + '\'' +
+	                ", nome='" + Nome + '\'' +
+	                '}';
+	    }
 }

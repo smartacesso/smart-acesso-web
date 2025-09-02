@@ -32,7 +32,7 @@ public class FuncionarioTotvsDto {
 		pedestre.setExistente(true);
 		pedestre.setVersao(0);
 		
-		if("OK".equalsIgnoreCase(situacaoFolha) && ("Trabalhado".equalsIgnoreCase(StatusTrabalho) || StatusTrabalho.isEmpty())) {
+		if("OK".equalsIgnoreCase(situacaoFolha) && ("0".equals(horaInicial) && "0".equals(horaFinal))) {
 			pedestre.setObservacoes("Importado dia " + LocalDate.now().toString());
 			pedestre.setStatus(Status.ATIVO);
 

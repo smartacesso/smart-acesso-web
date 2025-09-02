@@ -349,7 +349,12 @@ public class IntegracaoSeniorService {
 		for (String retornoXml : retornos) {
 			if (retornoXml.contains("</retorno>")) {
 				HorarioPedestreDto horarioPed = new HorarioPedestreDto();
-				horarioPed.setIdescala(getTagValue("escala", retornoXml));
+				horarioPed.setIdescala(getTagValue("escalaSmart", retornoXml));
+				horarioPed.setEscalaSenior(getTagValue("escalaSenior", retornoXml));
+				horarioPed.setEscalaSeniorDesc(getTagValue("escalaSeniorDesc", retornoXml));
+				horarioPed.setHorarioSenior(getTagValue("horarioSenior", retornoXml));
+				horarioPed.setHorarioSeniorDesc(getTagValue("horarioSeniorDesc", retornoXml));
+				horarioPed.setIntervaloSenior(getTagValue("intervaloSenior", retornoXml));
 	
 				horariosPedestre.add(horarioPed);
 			}

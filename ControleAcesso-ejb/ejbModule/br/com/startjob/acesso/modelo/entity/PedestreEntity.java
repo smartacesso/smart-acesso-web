@@ -397,7 +397,8 @@ public class PedestreEntity extends ClienteBaseEntity {
 		this.matricula = funcionarioSeniorDto.getNumeroMatricula();
 		this.telefone = funcionarioSeniorDto.getDddtelefone() + funcionarioSeniorDto.getNumtelefone();
 		
-		this.codigoCartaoAcesso = isCrachaSeniorValido(funcionarioSeniorDto) ? funcionarioSeniorDto.getNumCracha() : funcionarioSeniorDto.getNumeroMatricula();
+		System.out.println("numero do cracha update : " + funcionarioSeniorDto.getNumCracha());
+		this.codigoCartaoAcesso = funcionarioSeniorDto.getNumCracha();
 		
 		this.rg = funcionarioSeniorDto.getRg();
 		this.codigoPermissao = funcionarioSeniorDto.getCodPrm(); // codigo permissao
@@ -429,7 +430,7 @@ public class PedestreEntity extends ClienteBaseEntity {
 		this.setDataAlteracao(new Date());
 		this.setExistente(true);
 		
-		if(funcionarioTotvsDto.getSituacaoFolha().trim().equals("OK") && ("Trabalhado".equalsIgnoreCase(funcionarioTotvsDto.getStatusTrabalho()) || funcionarioTotvsDto.getStatusTrabalho().isEmpty())) {
+		if(funcionarioTotvsDto.getSituacaoFolha().trim().equals("OK") && ("0".equals(funcionarioTotvsDto.getHoraInicial()) && "0".equals(funcionarioTotvsDto.getHoraFinal()))) {
 			this.setStatus(Status.ATIVO);
 			this.observacoes =  "atualizado dia " + LocalDate.now().toString();
 		}else {

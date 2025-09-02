@@ -110,7 +110,7 @@ public class PedestrianAccessTO {
 		this.matricula		= objects[37] == null ? null : objects[37].toString();
 		this.removido		= objects[38] == null ? false : Boolean.valueOf(objects[38].toString());
 		this.sempreLiberado   = objects[39] == null ? false : Boolean.valueOf(objects[39].toString());
-		this.acessoLivre   = objects[78] == null ? false : Boolean.valueOf(objects[78].toString());
+		this.acessoLivre   = toBoolean(objects[78]);
 		this.habilitarTeclado = objects[40] == null ? false : Boolean.valueOf(objects[40].toString());
 		this.idTemp			= objects[41] == null ? null : Long.valueOf(objects[41].toString());
 		this.qrCodeParaAcesso = objects[42] == null ? null : objects[42].toString();
@@ -396,8 +396,6 @@ public class PedestrianAccessTO {
 			if(this.horariosPermitidos == null) {
 				this.horariosPermitidos = new ArrayList<AllowedTimeTO>();
 			}
-			System.out.println(objects[15].toString());
-			System.out.println(objects[16].toString());
 			this.horariosPermitidos.add(new AllowedTimeTO(objects[15].toString(), objects[16].toString(), dias));
 		}
 	}
@@ -917,6 +915,17 @@ public class PedestrianAccessTO {
 
 	public void setAcessoLivre(Boolean acessoLivre) {
 		this.acessoLivre = acessoLivre;
+	}
+	
+	private Boolean toBoolean(Object val) {
+	    if (val == null) return false;
+
+	    if (val instanceof Boolean) return (Boolean) val;
+
+	    if (val instanceof Number) return ((Number) val).intValue() == 1;
+
+	    String s = val.toString().trim();
+	    return "1".equals(s) || "true".equalsIgnoreCase(s);
 	}
 	
 }
