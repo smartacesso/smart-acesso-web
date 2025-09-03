@@ -273,7 +273,7 @@ public class ImportarSalesianoTask extends TimerTask {
 	        if (responsavel == null) {
 	            responsavel = criarPedestre(
 	                    cadastro.getNomeResponsavel(),
-	                    cadastro.getCpfCnpfResponsavel(),
+	                    cpfResp,
 	                    cpfResp,
 	                    "RESPONSAVEL",
 	                    cliente,

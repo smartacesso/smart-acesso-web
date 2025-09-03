@@ -1024,18 +1024,22 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 			List<PedestreEntity> pedestres = (List<PedestreEntity>) pesquisaArgFixos(PedestreEntity.class, "findById_matricula", args);
 	        PedestreEntity pedestre = (pedestres == null || pedestres.isEmpty()) ? funcionarioTotvsDto.toPedestreEntity(cliente) : pedestres.get(0);
 	        
-	        if(Objects.nonNull(empresa)) {
-	        	pedestre.setEmpresa(empresa);
+	        if (Objects.nonNull(empresa)) {
+	            empresa = em.merge(empresa); // reanexa
+	            pedestre.setEmpresa(empresa);
 	        }
 	        
 	        if (pedestres == null || pedestres.isEmpty()) {
+	        	pedestre.setAlterado(true);
 	        	pedestre = (PedestreEntity) gravaObjeto(pedestre)[0];
 	            System.out.println("salvando funcionario : " +  pedestre.getNome() + ", matricula : " + pedestre.getMatricula() + ", id : " + pedestre.getId());
 	        } else {
 	            pedestre.updateFuncionarioTotvs(funcionarioTotvsDto);
+	            pedestre.setAlterado(true);
 	            pedestre = (PedestreEntity) alteraObjeto(pedestre)[0];
 	            System.out.println("atualizando funcionario : " +  pedestre.getNome() + ", matricula : " + pedestre.getMatricula() + ", id : " + pedestre.getId());
 	        }
+	        System.out.println("Status : " + pedestre.getStatus());
 	        
 	        processarRegrasPorFuncionarioTotvs(pedestre, cliente, funcionarioTotvsDto);
 	        
@@ -1058,17 +1062,17 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 
 			LocalTime agora = LocalTime.now();
 
-			boolean trabalhandoAgora = estaNoTurno(horarioExistente.getHorarioInicio(),
-					horarioExistente.getHorarioFim(), agora);
-
-			if (trabalhandoAgora && Objects.nonNull(pedestreRegra)) {
-				System.out.println("Funcionario em horario de trabalho...");
-				return;
-			}
+//			boolean trabalhandoAgora = estaNoTurno(horarioExistente.getHorarioInicio(),
+//					horarioExistente.getHorarioFim(), agora);
+//
+//			if (trabalhandoAgora && Objects.nonNull(pedestreRegra)) {
+//				System.out.println("Funcionario em horario de trabalho...");
+//				return;
+//			}
 
 			apagaPedetreRegras(pedestre.getId());
 
-			if ("Nao Trabalhado".equalsIgnoreCase(funcionario.getStatusTrabalho())) {
+			if (("0".equals(funcionario.getHoraInicial()) && "0".equals(funcionario.getHoraFinal()))) {
 				System.out.println("Funcionario em folga...");
 				return;
 			}
@@ -1087,15 +1091,17 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 				horario = new HorarioTotvsProtheusDTO(funcionario.getHoraInicial(), funcionario.getHoraFinal(), 0);
 			}
 
-			atualizaRegraComHorarioTotvs(horario, regra.getId());
-
+			HorarioEntity horarioEncontrado = atualizaRegraComHorarioTotvs(horario, regra.getId());
 			PedestreRegraEntity newPedestreRegra = new PedestreRegraEntity();
 
 			newPedestreRegra.setRegra(regra);
 			newPedestreRegra.setPedestre(pedestre);
-
+			
 			try {
+				newPedestreRegra.setAlterado(true);
 				gravaObjeto(newPedestreRegra);
+				em.flush();
+				criarHorarioPedestreRegraValido(horarioEncontrado, newPedestreRegra);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
@@ -1136,27 +1142,51 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 			}
 			
 		} else {
+			if(funcionario.getCodigoHorario().equals("01")) {
+				System.out.println(".");
+			}
 			regra = buscarRegraPeloNomeCompleto(funcionario.getCodigoHorario(), cliente.getId());
 		}
 		return regra;
 	}
 
-	private void atualizaRegraComHorarioTotvs(HorarioTotvsProtheusDTO dto, Long idRegra) {
+	private HorarioEntity atualizaRegraComHorarioTotvs(HorarioTotvsProtheusDTO dto, Long idRegra) {
 		
 		 HorarioEntity horarioExistente = buscarHorarioPorRegra(idRegra);
 		 
 	        if (horarioExistente == null) {
 	        	System.out.println("Sem horario existente");
-	        	return;
+	        	return null;
 	        }else{	        
 	        	horarioExistente.update(dto);
 	            try {
+	            	horarioExistente.setAlterado(true);
 					alteraObjeto(horarioExistente);
 				} catch (Exception e) {
 					System.out.println("Erro ao dar update no horario");
 				}
 	        }
-	        return;
+	        return horarioExistente;
+	}
+	
+	private void criarHorarioPedestreRegraValido(HorarioEntity horario,
+			PedestreRegraEntity pedestreRegra) {
+		
+		if (horario == null) {
+			System.out.println("Sem horario");
+			return;
+		}
+		
+		HorarioEntity horarioPedestre = new HorarioEntity(horario);
+		horarioPedestre.setPedestreRegra(pedestreRegra);
+	
+		try {
+			horarioPedestre.setAlterado(true);
+			gravaObjeto(horarioPedestre);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	@SuppressWarnings("unchecked")
@@ -1624,9 +1654,10 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 
 		    	System.out.println("DTO recebido: matrícula = " + funcionario.getNumeroMatricula()
 		        + ", nome = " + funcionario.getNome()
+		        + ", RG = " + funcionario.getRg()
 		        + ", codPermissao = " + funcionario.getCodPrm());
 		    	
-		        Optional<PedestreEntity> pedestreExistente = buscaPedestreExistente(funcionario.getNumeroMatricula(), funcionario.getNumCracha(), empresaExistente);
+		        Optional<PedestreEntity> pedestreExistente = buscaPedestreExistente(funcionario.getNumeroMatricula(), funcionario.getRg(), empresaExistente);
 		        
 		        if (pedestreExistente.isPresent()) {
 		            System.out.println("Pedestre encontrado: ID " + pedestreExistente.get().getId() + ", nome: " + pedestreExistente.get().getNome());
@@ -1701,11 +1732,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 	
 	private void processarRegrasPorFuncionario(PedestreEntity pedestre, ClienteEntity cliente,
 			FuncionarioSeniorDto funcionario) {
-		if(funcionario.getNumeroMatricula().equals("319")) {
-			System.out.println(".");
-		}
 
-		
 		HorarioPedestreDto escala = buscaEscalaPedestre(pedestre.getMatricula(), cliente);
 		List<HorarioSeniorDto> horarios = new ArrayList<>();
 		
@@ -2522,8 +2549,8 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 //	}
 	
 	@SuppressWarnings("unchecked")
-	private Optional<PedestreEntity> buscaPedestreExistente(String numeroMatricula, String cartao, EmpresaEntity empresa) {
-		System.out.println("numero matricula : " + numeroMatricula + ", numero cracha recebido : " + cartao);
+	private Optional<PedestreEntity> buscaPedestreExistente(String numeroMatricula, String rg, EmpresaEntity empresa) {
+		System.out.println("numero matricula : " + numeroMatricula + ", numero de RG recebido : " + rg);
 		
 	    Map<String, Object> args = new HashMap<>();
 	    args.put("MATRICULA", numeroMatricula);
@@ -2552,20 +2579,19 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 
 	        // Fallback: tentar por Cracha (ou outro campo único)
 
-	        if (cartao != null && !cartao.trim().isEmpty()) {
-	            String cartaoTrim = cartao.trim();
+	        if (rg != null && !rg.trim().isEmpty() && !"0".equals(rg)) {
 
-	            PedestreEntity pedestre = buscaPedestrePorCartao(cartaoTrim);
+	            PedestreEntity pedestre = buscaPedestrePorRg(rg);
 
 	            if (pedestre != null) {
-	                System.out.println("Fallback por CARTAO retornou pedestre: " + pedestre.getNome());
+	                System.out.println("Fallback por RG retornou pedestre: " + pedestre.getNome());
 	                return Optional.of(pedestre);
 	            }
 	        }
 
 
 	        // Se não encontrou por CPF, retorna o primeiro mesmo (com alerta)
-	        System.err.println("[Aviso] Fallback por CARTAO falhou, retornando primeiro da lista para matrícula: " + numeroMatricula);
+	        System.err.println("[Aviso] Fallback por RG falhou, retornando primeiro da lista para matrícula: " + numeroMatricula);
 	        return Optional.of(listaPedestres.get(0));
 
 	    } catch (Exception e) {
@@ -3018,6 +3044,28 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 
 		return atualizaPedestre;
 	}
+	
+	@SuppressWarnings("unchecked")
+	private PedestreEntity buscaPedestrePorRg(String rg) {
+		PedestreEntity atualizaPedestre = null;
+
+		try {
+			Map<String, Object> args = new HashMap<String, Object>();
+			args.put("RG", rg);
+
+			List<PedestreEntity> listaPedestre = (List<PedestreEntity>) pesquisaArgFixos(PedestreEntity.class,
+					"findByRg", args);
+
+			if (listaPedestre != null && !listaPedestre.isEmpty()) {
+				atualizaPedestre = listaPedestre.get(0);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return atualizaPedestre;
+	}
+	
 	
 	private String formataHora(String sgdb, String campo) {
 		String hora = " DATE_FORMAT(" + campo + ", '%H:%i')"; // padrão para MySQL
