@@ -112,6 +112,15 @@ public class HorarioEntity extends BaseEntity {
 	
 	public HorarioEntity() {
 	}
+	
+	public HorarioEntity(HorarioEntity horario) {
+		this.setNome(horario.getNome());
+		this.setStatus(horario.getStatus());
+		this.setDiasSemana(horario.getDiasSemana());
+		this.setHorarioInicio(horario.getHorarioInicio());
+		this.setHorarioFim(horario.getHorarioFim());
+		this.setQtdeDeCreditos(horario.getQtdeDeCreditos());
+	}
 
 	public HorarioEntity newHorarioEntity(final PedestreRegraEntity pedestreRegraEntity) {
 		final HorarioEntity newHorarioEntity = new HorarioEntity();
