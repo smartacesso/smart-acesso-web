@@ -82,10 +82,15 @@ import br.com.startjob.acesso.modelo.enumeration.Status;
 					  + "where (obj.removido = false or obj.removido is null) "
 					  + "order by obj.id asc"),
 	@NamedQuery(name = "ClienteEntity.findComFilialAndColigadaTotvs",
-	query = "select obj from ClienteEntity obj "
-		  + "where (obj.removido = false or obj.removido is null) "
-		  + "and obj.codfilial = :CFILIAL_TOTVS and obj.codcoligad = :CCOLIGADA_TOTVS "
-		  + "order by obj.id asc"),
+				query = "select obj from ClienteEntity obj "
+					  + "where (obj.removido = false or obj.removido is null) "
+					  + "and obj.codfilial = :CFILIAL_TOTVS and obj.codcoligad = :CCOLIGADA_TOTVS "
+					  + "order by obj.id asc"),
+	@NamedQuery(name = "ClienteEntity.findByUnidadeOrganizacional",
+				query = "select obj from ClienteEntity obj "
+					  + "where (obj.removido = false or obj.removido is null) "
+					  + "and obj.nomeUnidadeOrganizacional = :UNIDADE_ORGANIZACIONAL and (obj.removido = false or obj.removido is null) "
+					  + "order by obj.id asc"),
 
 })
 @SuppressWarnings("serial")

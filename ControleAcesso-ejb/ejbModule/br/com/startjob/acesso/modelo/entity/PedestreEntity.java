@@ -400,7 +400,7 @@ public class PedestreEntity extends ClienteBaseEntity {
 		this.matricula = funcionarioSeniorDto.getNumeroMatricula();
 		this.telefone = funcionarioSeniorDto.getDddtelefone() + funcionarioSeniorDto.getNumtelefone();
 		
-		System.out.println("numero do cracha update : " + funcionarioSeniorDto.getNumCracha());
+//		System.out.println("numero do cracha update : " + funcionarioSeniorDto.getNumCracha());
 //		this.codigoCartaoAcesso = funcionarioSeniorDto.getNumCracha();
 		
 		this.rg = funcionarioSeniorDto.getRg();
