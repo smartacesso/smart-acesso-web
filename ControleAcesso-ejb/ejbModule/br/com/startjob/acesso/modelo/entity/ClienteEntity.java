@@ -30,9 +30,6 @@ import br.com.startjob.acesso.modelo.enumeration.Status;
 @Entity
 @Table(name = "TB_CLIENTE")
 @NamedQueries({
-	@NamedQuery(name = "ClienteEntity.findAllComIntegracaoAD", query = "select obj from ClienteEntity obj "
-				+ "join fetch obj.integracaoAD i " + "where (obj.removido = false or obj.removido is null) "
-				+ "order by obj.id asc"),
 	@NamedQuery(name  = "ClienteEntity.findAll", 
 				query = "select obj "
 				      + "from ClienteEntity obj "
