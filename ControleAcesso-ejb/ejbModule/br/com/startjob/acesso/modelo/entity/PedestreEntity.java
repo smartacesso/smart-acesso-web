@@ -83,6 +83,9 @@ indexes = {
 		@NamedQuery(name = "PedestreEntity.findByCpf", query = "select obj from PedestreEntity obj "
 				+ "where obj.cpf = :CPF_PEDESTRE " + " and (obj.removido = false or obj.removido is null) "
 				+ " order by obj.id asc"),
+		@NamedQuery(name = "PedestreEntity.findByRg", query = "select obj from PedestreEntity obj "
+				+ "where obj.rg = :RG " + " and (obj.removido = false or obj.removido is null) "
+				+ " order by obj.id asc"),
 		@NamedQuery(name = "PedestreEntity.findUltimoPedestreCadastrado", query = "select obj from PedestreEntity obj "
 				+ "where obj.cliente.id = :ID_CLIENTE " + "and obj.matricula is not null " + "and obj.matricula <> '' "
 				+ "order by obj.id desc"),
@@ -397,8 +400,8 @@ public class PedestreEntity extends ClienteBaseEntity {
 		this.matricula = funcionarioSeniorDto.getNumeroMatricula();
 		this.telefone = funcionarioSeniorDto.getDddtelefone() + funcionarioSeniorDto.getNumtelefone();
 		
-		System.out.println("numero do cracha update : " + funcionarioSeniorDto.getNumCracha());
-		this.codigoCartaoAcesso = funcionarioSeniorDto.getNumCracha();
+//		System.out.println("numero do cracha update : " + funcionarioSeniorDto.getNumCracha());
+//		this.codigoCartaoAcesso = funcionarioSeniorDto.getNumCracha();
 		
 		this.rg = funcionarioSeniorDto.getRg();
 		this.codigoPermissao = funcionarioSeniorDto.getCodPrm(); // codigo permissao
@@ -430,7 +433,11 @@ public class PedestreEntity extends ClienteBaseEntity {
 		this.setDataAlteracao(new Date());
 		this.setExistente(true);
 		
-		if(funcionarioTotvsDto.getSituacaoFolha().trim().equals("OK") && ("0".equals(funcionarioTotvsDto.getHoraInicial()) && "0".equals(funcionarioTotvsDto.getHoraFinal()))) {
+		System.out.println("situacaoFolha=" + funcionarioTotvsDto.getSituacaoFolha()
+	    + ", horaInicial=[" + funcionarioTotvsDto.getHoraInicial() + "]"
+	    + ", horaFinal=[" + funcionarioTotvsDto.getHoraFinal() + "]");
+		
+		if(funcionarioTotvsDto.getSituacaoFolha().trim().equals("OK") && !("0".equals(funcionarioTotvsDto.getHoraInicial()) && "0".equals(funcionarioTotvsDto.getHoraFinal()))) {
 			this.setStatus(Status.ATIVO);
 			this.observacoes =  "atualizado dia " + LocalDate.now().toString();
 		}else {
