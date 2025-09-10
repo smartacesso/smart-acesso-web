@@ -523,7 +523,6 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 			formatoHora = param.getValor();
 		}
 
-//		removepedestresSenai();
 		String linha = null;
 		try (BufferedReader bf = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8))) {
 
@@ -1062,13 +1061,13 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 
 			LocalTime agora = LocalTime.now();
 
-//			boolean trabalhandoAgora = estaNoTurno(horarioExistente.getHorarioInicio(),
-//					horarioExistente.getHorarioFim(), agora);
-//
-//			if (trabalhandoAgora && Objects.nonNull(pedestreRegra)) {
-//				System.out.println("Funcionario em horario de trabalho...");
-//				return;
-//			}
+			boolean trabalhandoAgora = estaNoTurno(horarioExistente.getHorarioInicio(),
+					horarioExistente.getHorarioFim(), agora);
+
+			if (trabalhandoAgora && Objects.nonNull(pedestreRegra)) {
+				System.out.println("Funcionario em horario de trabalho...");
+				return;
+			}
 
 			apagaPedetreRegras(pedestre.getId());
 
@@ -1782,10 +1781,11 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 
 	private void criaRegraPadrao(PedestreEntity pedestre, ClienteEntity cliente, List<HorarioSeniorDto> horarios, FuncionarioSeniorDto funcionario) {
 		HorarioPedestreDto escala = new HorarioPedestreDto();
-		escala.setEscalaSenior("padrão");
-		escala.setEscalaSeniorDesc("regra padrão");
-		escala.setHorarioSeniorDesc("regra padrão");
+		escala.setEscalaSenior("Sem intervalo - segue escala ");
+		escala.setEscalaSeniorDesc("Sem intervalo - segue escala ");
+		escala.setHorarioSeniorDesc("Sem intervalo - segue escala ");
 		escala.setHorarioSenior("");
+		escala.setIntervaloSenior("");
 		horarios.add(HorarioSeniorDto.criaHorarioPadrao());
 		RegraEntity regra = processaRegraComHorarios(escala, horarios, cliente);
 		PedestreRegraEntity pedestreRegra = criarPedestreRegraEVincularRegra(regra, pedestre);
@@ -1798,75 +1798,88 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		escala.setEscalaSeniorDesc("folga");
 		escala.setHorarioSeniorDesc("foga");
 		escala.setHorarioSenior("");
+		escala.setIntervaloSenior("");
 		horarios.add(HorarioSeniorDto.criarHorarioFolga());
 		RegraEntity regra = processaRegraComHorarios(escala, horarios, cliente);
 		PedestreRegraEntity pedestreRegra = criarPedestreRegraEVincularRegra(regra, pedestre);
 		criarHorarioPedestreRegra(horarios, pedestreRegra, funcionario);
 	}
 
-	public RegraEntity processaRegraComHorarios(HorarioPedestreDto escala, List<HorarioSeniorDto> horariosDto, ClienteEntity cliente) {
-	    if (horariosDto == null || horariosDto.isEmpty()) {
-	        throw new IllegalArgumentException("A lista de horários não pode estar vazia.");
-	    }
-	    System.out.println("cadastrando regra");
-	    // Todas as entradas compartilham a mesma ID de escala, então pegamos a primeira
-	    Integer idEscala = Integer.parseInt(horariosDto.get(0).getIdEscala());
+	public RegraEntity processaRegraComHorarios(HorarioPedestreDto escala, List<HorarioSeniorDto> horariosDto,
+			ClienteEntity cliente) {
+		
+		if (horariosDto == null || horariosDto.isEmpty()) {
+			throw new IllegalArgumentException("A lista de horários não pode estar vazia.");
+		}
+		
+		List<HorarioSeniorDto> filtrados = new ArrayList<>();
+		List<HorarioEntity> horarios = new ArrayList<>();
+		
+		System.out.println("Buscando regra");
+		Integer idEscala = Integer.parseInt(horariosDto.get(0).getIdEscala());
 
-	    // Buscar ou criar a regra
-	    RegraEntity regra = buscarRegraPeloIdEscala(idEscala, cliente.getId());
+		RegraEntity regra = buscarRegraPeloIdEscala(idEscala, cliente.getId());
 
-	    if (regra == null) {
-	        regra = horariosDto.get(0).toRegraEntity();
-	        regra.setNome("Escala : " + escala.getEscalaSenior() + ", intervalo : " + escala.getHorarioSenior());
-	        regra.setDescricao(escala.getEscalaSeniorDesc() + "\t  " + escala.getHorarioSeniorDesc());
-	        regra.setCliente(cliente);
+		if (regra == null) {
+			regra = horariosDto.get(0).toRegraEntity();
+			regra.setNome("Escala : " + escala.getEscalaSenior() + ", intervalo : " + escala.getHorarioSenior() + ", codSmart : " + escala.getIdescala());
+			regra.setDescricao(escala.getEscalaSeniorDesc() + "\t  " + escala.getIntervaloSenior());
+			regra.setCliente(cliente);
 			regra.setDataAlteracao(new Date());
 			regra.setDataCriacao(new Date());
-	        try {
-	        	regra.setAlterado(true);
+			try {
+				regra.setAlterado(true);
 				gravaObjeto(regra);
 			} catch (Exception e) {
 				System.out.println("Erro ao salvar regra");
 			}
-	    }
+		}
 
-	    // Criar os horários e associá-los à regra
-	    List<HorarioEntity> horarios = new ArrayList<>();
-	    for (HorarioSeniorDto dto : horariosDto) {
-	        HorarioEntity horarioExistente = buscarHorarioPorRegraEHorario(regra.getId(), Integer.parseInt(dto.getIdHorario()));
+		// Pega o primeiro "Inicio"
+		horariosDto.stream().filter(h -> h.getNome().equalsIgnoreCase("Inicio")).findFirst().ifPresent(filtrados::add);
+		
+		// Pega o primeiro "Refeicao"
+		horariosDto.stream().filter(h -> h.getNome().equalsIgnoreCase("Refeicao")).findFirst().ifPresent(filtrados::add);
 
-	        if (horarioExistente == null) {
-	            HorarioEntity horario = dto.toHorarioEntity();
-	            if(horario == null) {
-	            	continue;
-	            }
-	            
-	            horario.setRegra(regra); // Vincula o horário à regra
-	            horarios.add(horario);
-	            
-	            try {
-	            	horario.setAlterado(true);
+		// Pega todos os "Termino"
+		horariosDto.stream().filter(h -> h.getNome().equalsIgnoreCase("Termino")).findFirst().ifPresent(filtrados::add);
+
+		for (HorarioSeniorDto horarioSeniorDto : filtrados) {
+			HorarioEntity horarioExistente = buscarHorarioPorRegraEHorario(regra.getId(),
+					Integer.parseInt(horarioSeniorDto.getIdHorario()));
+
+			if (horarioExistente == null) {
+				HorarioEntity horario = horarioSeniorDto.toHorarioEntity();
+				if (horario == null) {
+					continue;
+				}
+
+				horario.setRegra(regra); // Vincula o horário à regra
+				horarios.add(horario);
+
+				try {
+					horario.setAlterado(true);
 					gravaObjeto(horario);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					System.out.println("Erro ao salvar horario");
 				}
-	            
-	        }else{	        	
-	        	
-	        	horarioExistente.update(dto);
-	            try {
-	            	horarioExistente.setAlterado(true);
+
+			} else {
+
+				horarioExistente.update(horarioSeniorDto);
+				try {
+					horarioExistente.setAlterado(true);
 					alteraObjeto(horarioExistente);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					System.out.println("Erro ao dar update no horario");
 				}
-	        }
-	        
-	    }
+			}
 
-	    return regra;
+		}
+
+		return regra;
 	}
 	
 	private PedestreRegraEntity criarPedestreRegraEVincularRegra(RegraEntity regra, PedestreEntity pedestre ) {	
