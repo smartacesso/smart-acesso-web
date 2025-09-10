@@ -23,6 +23,7 @@ import br.com.startjob.acesso.tasks.ImportarSalesianoTask;
 import br.com.startjob.acesso.tasks.ImportarTotvsTask;
 import br.com.startjob.acesso.tasks.ImportarUsuarioTask;
 import br.com.startjob.acesso.tasks.ExportacaoSocTask;
+import br.com.startjob.acesso.tasks.ImportaADTask;
 import br.com.startjob.acesso.tasks.ImportaSeniorTask;
 
 @SuppressWarnings("serial")
@@ -48,6 +49,7 @@ public class ConfiguraRotinasServlet extends BaseServlet {
 		registraTimersParaTotvs();
 		registraTimersAutoAtendimento();
 		registraTimerSalesiano();
+		timerRegisterAD();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -236,6 +238,28 @@ public class ConfiguraRotinasServlet extends BaseServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
+	}
+	
+	@SuppressWarnings("unchecked")
+	private void timerRegisterAD() {
+		log.info("Registra Integração AD");
+
+//	     Limpa os timers anteriores relacionados à nova função
+		ActivatedTasks.getInstancia().limpaTimersAD();
+
+		// Define o período para 30 minutos (30 * 60 * 1000 ms)
+		Long period = 5 * 60 * 1000L;
+		Timer timer = new Timer();
+
+		// Define a nova tarefa
+		TimerTask aDTask = new ImportaADTask();
+
+		// Agenda a tarefa para rodar a cada 30 minutos
+		timer.scheduleAtFixedRate(aDTask, 0, period);
+
+		log.info("Registrando rotina da AD");
+
+		ActivatedTasks.getInstancia().timers.put("importacaoAD_cliente", timer);
 	}
 
 }
