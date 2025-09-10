@@ -41,7 +41,13 @@ import br.com.startjob.acesso.modelo.entity.base.BaseEntity;
 					  + "left join fetch obj.regra r "
 					  + "left join fetch obj.pedestre p "
 					  + "where p.id = :ID_PEDESTRE "
-					  + "and (obj.removido = false or obj.removido is null) ")
+					  + "and (obj.removido = false or obj.removido is null) "),
+	@NamedQuery(name = "PedestreRegraEntity.findByIdComHorarios",
+				query = "select obj from PedestreRegraEntity obj "
+					+ "left join fetch obj.horarios h "
+					+ "where obj.id = :ID "
+					+ "and (obj.removido = false or obj.removido is null) "
+					+ "order by obj.id asc")
 })
 @SuppressWarnings("serial")
 public class PedestreRegraEntity extends BaseEntity {

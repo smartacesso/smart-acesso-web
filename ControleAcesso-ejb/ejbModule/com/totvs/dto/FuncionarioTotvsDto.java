@@ -11,64 +11,20 @@ import br.com.startjob.acesso.modelo.enumeration.TipoPedestre;
 
 public class FuncionarioTotvsDto {
 
-	private String companyKey;
-	private String branch;
-	private String code;
-	private String id;
-	private String name;
-	private String fullName;
-	private String badgeNumber;
-	private String departamentCode;
-	private String departamentInternalId;
-	private String departmentDescription;
-	private String hiringDate;
-	private String demissionDate;
-	private String birthDate;
-	private String gender;
-	private String street;
-	private String streetNumber;
-	private String complement;
-	private String neighborhood;
-	private String homeState;
-	private String naturalCity;
-	private String employeeSituation;
-	private String city;
-	private String zipCode;
-	private String areaCode;
-	private String telephone;
-	private String areaCodeMobile;
-	private String mobileNumber;
-	private String socialIntegProgCode;
-	private String workCardNumber;
-	private String workCardSerie;
-	private String workCardStateIssuing;
-	private String costCenterCode;
-	private String costCenterInternalId;
-	private String costCenterDescription;
-	private String employeePositionCode;
-	private String employeePositionCodeInternalId;
-	private String employeePositionDescription;
-	private String salaryCategory;
-	private String workShiftCode;
-	private String workShiftInternalId;
-	private String workshiftDescription;
-	private String workShiftSequence;
-	private String roleCode;
-	private String roleInternalId;
-	private String roleDescription;
-	private String contractEnd;
-	private String email;
-	private String employeeCpf;
-	private String esocialCategoryCode;
-	// Getters and Setters
+    private String codigoHorario;
+    private String horaFinal;
+    private String horaInicial;
+    private String matricula;
+    private String nome;
+    private String nomeHorario;
+    private String situacaoFolha;
+    private String StatusTrabalho;
 
 	public PedestreEntity toPedestreEntity(ClienteEntity cliente) {
 		PedestreEntity pedestre = new PedestreEntity();
-		pedestre.setNome(name);
-		pedestre.setMatricula(code);
-		pedestre.setCodigoCartaoAcesso(code);
-		pedestre.setCpf(employeeCpf);
-		pedestre.setEmail(email);
+		pedestre.setNome(nome);
+		pedestre.setMatricula(matricula);
+		pedestre.setCodigoCartaoAcesso(matricula);
 		pedestre.setEmpresa(null);
 		pedestre.setCargo(null);
 		pedestre.setCliente(cliente);
@@ -76,72 +32,86 @@ public class FuncionarioTotvsDto {
 		pedestre.setExistente(true);
 		pedestre.setVersao(0);
 		
-		if(employeeSituation.trim().equals("")) {
+		System.out.println("situacaoFolha=" + situacaoFolha
+	    + ", horaInicial=[" + horaInicial + "]"
+	    + ", horaFinal=[" + horaFinal + "]");
+		
+		if("OK".equalsIgnoreCase(situacaoFolha) && !("0".equals(horaInicial) && "0".equals(horaFinal))) {
 			pedestre.setObservacoes("Importado dia " + LocalDate.now().toString());
 			pedestre.setStatus(Status.ATIVO);
 
 		}else {
 			pedestre.setStatus(Status.INATIVO);
-			pedestre.setObservacoes("Funcionario com situação : " + employeeSituation);
+			pedestre.setObservacoes("Funcionario com situação : " + situacaoFolha);
 		}
 		
 		return pedestre;
 	}
 
-	public String getCode() {
-		return code;
+	public String getCodigoHorario() {
+		return codigoHorario;
 	}
 
-	public void setCode(String code) {
-		this.code = code;
+	public void setCodigoHorario(String codigoHorario) {
+		this.codigoHorario = codigoHorario;
 	}
 
-	public String getFullName() {
-		return fullName;
+	public String getHoraFinal() {
+		return horaFinal;
 	}
 
-	public void setFullName(String fullName) {
-		this.fullName = fullName;
+	public void setHoraFinal(String horaFinal) {
+		this.horaFinal = horaFinal;
 	}
 
-	public String getEmail() {
-		return email;
+	public String getHoraInicial() {
+		return horaInicial;
 	}
 
-	public void setEmail(String email) {
-		this.email = email;
+	public void setHoraInicial(String horaInicial) {
+		this.horaInicial = horaInicial;
 	}
 
-	public String getEmployeeCpf() {
-		return employeeCpf;
+	public String getMatricula() {
+		return matricula;
 	}
 
-	public void setEmployeeCpf(String employeeCpf) {
-		this.employeeCpf = employeeCpf;
+	public void setMatricula(String matricula) {
+		this.matricula = matricula;
 	}
 
-	public String getRoleDescription() {
-		return roleDescription;
+	public String getNome() {
+		return nome;
 	}
 
-	public void setRoleDescription(String roleDescription) {
-		this.roleDescription = roleDescription;
+	public void setNome(String nome) {
+		this.nome = nome;
 	}
 
-	public String getName() {
-		return name.trim().replaceAll("\\s+", " ");
+	public String getNomeHorario() {
+		return nomeHorario;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public void setNomeHorario(String nomeHorario) {
+		this.nomeHorario = nomeHorario;
 	}
 
-	public String getEmployeeSituation() {
-		return employeeSituation;
+	public String getSituacaoFolha() {
+		return situacaoFolha;
 	}
 
-	public void setEmployeeSituation(String employeeSituation) {
-		this.employeeSituation = employeeSituation;
+	public void setSituacaoFolha(String situacaoFolha) {
+		this.situacaoFolha = situacaoFolha;
 	}
+
+	public String getStatusTrabalho() {
+		return StatusTrabalho;
+	}
+
+	public void setStatusTrabalho(String statusTrabalho) {
+		StatusTrabalho = statusTrabalho;
+	}
+
 	
+
 }

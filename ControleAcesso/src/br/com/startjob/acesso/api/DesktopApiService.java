@@ -208,14 +208,17 @@ public class DesktopApiService extends BaseService {
 	@GET
 	@Path("/requestAllLocais")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response requestAllLocais(@QueryParam("client") Long idClient) {
+	public Response requestAllLocais(@QueryParam("client") Long idClient, @QueryParam("lastsync") Long lastSync) {
 		if (idClient == null) {
 			return Response.status(Status.NOT_FOUND).entity("See status code").build();
 		}
+		Calendar cLastSync = Calendar.getInstance();
+		cLastSync.setTimeInMillis(lastSync);
 
 		try {
 			Map<String, Object> args = new HashMap<String, Object>();
-			args.put("ID_CLIENTE", idClient);
+			args.put("ID_CLIENTE", idClient);			
+			args.put("LAST_SYNC", cLastSync.getTime());
 			
 			List<LocalTo> locaisTO = new ArrayList<LocalTo>();
 			List<LocalEntity> locais = (List<LocalEntity>) ((BaseEJBRemote) getEjb("BaseEJB"))
@@ -228,8 +231,6 @@ public class DesktopApiService extends BaseService {
 			for(LocalEntity local : locais) {
 				locaisTO.add(new LocalTo(local));
 			}
-			System.out.println(new ObjectMapper().writeValueAsString(locaisTO));
-
 			
 			return Response.status(Status.OK).entity(locaisTO).build();
 
@@ -895,8 +896,18 @@ public class DesktopApiService extends BaseService {
 
 		PedestreRegraEntity pedestreRegra = new PedestreRegraEntity();
 		pedestreRegra.setRegra(regraVisitante);
-		pedestreRegra.setQtdeDeCreditos(Long.parseLong(jsonObject.getString("qtdeCreditos")));
-		pedestreRegra.setQtdeTotalDeCreditos(Long.parseLong(jsonObject.getString("qtdeCreditos")));
+
+		String qtdeCreditosStr = jsonObject.optString("qtdeCreditos", "").trim();
+
+		Long qtdeCreditos = null;
+		if (!qtdeCreditosStr.isEmpty()) {
+		    qtdeCreditos = Long.parseLong(qtdeCreditosStr);
+		} else {
+		    qtdeCreditos = 1L;
+		}
+
+		pedestreRegra.setQtdeDeCreditos(qtdeCreditos);
+		pedestreRegra.setQtdeTotalDeCreditos(qtdeCreditos);
 		pedestreRegra.setPedestre(visitante);
 
 		visitante.setRegras(new ArrayList<>());
@@ -1308,8 +1319,10 @@ public class DesktopApiService extends BaseService {
 		visitante.setCelular(jsonObject.getString("celular"));
 		visitante.setObservacoes(jsonObject.getString("observacoes"));
 
-		if (jsonObject.getString("idLocal") != null && !jsonObject.getString("idLocal").isEmpty()) {
-			visitante.setIdLocal(Long.valueOf(jsonObject.getString("idLocal")));
+		if(jsonObject.has("idLocal")) {
+			if (jsonObject.getString("idLocal") != null && !jsonObject.getString("idLocal").isEmpty()) {
+				visitante.setIdLocal(Long.valueOf(jsonObject.getString("idLocal")));
+			}
 		}
 		
 		// Dados da empresa
@@ -1346,6 +1359,9 @@ public class DesktopApiService extends BaseService {
 		visitante.setMatricula(jsonObject.getString("matricula"));
 		visitante.setCodigoCartaoAcesso(jsonObject.getString("numeroCartao"));
 		visitante.setSempreLiberado(Boolean.valueOf(jsonObject.getString("sempreLiberado")));
+		visitante.setAcessoLivre(
+			    Boolean.valueOf(jsonObject.optString("acessoLivre", "false"))
+			);
 		visitante.setHabilitarTeclado(Boolean.valueOf(jsonObject.getString("habilitarTeclado")));
 		visitante.setEnviaSmsAoPassarNaCatraca(Boolean.valueOf(jsonObject.getString("enviaSmsAoPassarNaCatraca")));
 

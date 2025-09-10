@@ -139,6 +139,8 @@ public interface BaseConstant {
 		
 		
 		public static final String PREENCHER_CARTAO_COM_MATRICULA = "preencher cartao com matricula";
+		
+		public static final String PREENCHER_CARTAO_AUTO = "preencher cartao automaticamente (8 digitos)";
 
 		
 		public static final String TIPO_QR_CODE = "Permitir acesso via QR Code: Habilita QRCode dinâmico";
@@ -150,6 +152,8 @@ public interface BaseConstant {
 		public static final String HABILITA_APP_PEDESTRE = "Habilita App do Pedestre";
 		
 		public static final String REMOVE_CARTAO_EXCLUIDO = "Remove o cartão dos Pedestres removidos";
+		
+		public static final String TEMPO_TOLERANCIA_ENTRADA_E_SAIDA = "Tempo de tolerancia (Entrada/Saida)";
 
 	}
 	

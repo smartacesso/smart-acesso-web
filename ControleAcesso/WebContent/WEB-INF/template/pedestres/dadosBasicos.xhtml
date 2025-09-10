@@ -58,7 +58,11 @@
 							required="#{cadastroPedestreController.verificaObrigatorio('cpf')}"
 							disabled="#{not cadastroPedestreController.usuarioTemPermissao()}"
 							rendered="#{cadastroPedestreController.usuarioTemPermissao()}"
-							style="width: 100%" />
+							style="width: 100%" >
+
+							<p:ajax event="change" process="@this"
+								listener="#{cadastroPedestreController.onCpfBlur}" />
+						</p:inputMask>
 						<h:outputText
 							value="#{cadastroPedestreController.getCpfMascarado()}"
 							rendered="#{not cadastroPedestreController.usuarioTemPermissao()}" />
@@ -84,7 +88,11 @@
 							disabled="#{not cadastroPedestreController.usuarioTemPermissao()}"
 							onkeyup="$(this).val($(this).val().replace(/[^0-9a-zA-Z]/g, ''));"
 							rendered="#{cadastroPedestreController.usuarioTemPermissao()}"
-							style="width: 100%" />
+							style="width: 100%">
+
+							<p:ajax event="change" process="@this"
+								listener="#{cadastroPedestreController.onRgBlur}" />
+						</p:inputText>
 						<h:outputText
 							value="#{cadastroPedestreController.getRgMascarado()}"
 							rendered="#{not cadastroPedestreController.usuarioTemPermissao()}" />
@@ -121,12 +129,7 @@
 							required="#{cadastroPedestreController.verificaObrigatorio('observacoes')}"
 							rows="4" maxlength="300" autoResize="false" style="width: 100%" />
 					</div>
-				</div>
-			</p:tab>
-
-			<!-- ABA: Dados Empresa -->
-			<p:tab title="Dados Empresa">
-				<div class="ui-g">
+					<!-- ABA: Dados Empresa -->
 					<!-- Empresa -->
 					<div class="ui-g-12 ui-md-6">
 						<p:outputLabel value="#{msgs['label.uc008.empresa']}"
@@ -228,4 +231,13 @@
 			</p:tab>
 		</p:accordionPanel>
 	</p:panelGrid>
+	<h:outputScript>
+  $(document).on('focus', '.ui-inputmask', function () {
+    var input = this;
+    setTimeout(function () {
+      input.setSelectionRange(0, 0);
+    }, 50);
+  });
+</h:outputScript>
+
 </ui:composition>

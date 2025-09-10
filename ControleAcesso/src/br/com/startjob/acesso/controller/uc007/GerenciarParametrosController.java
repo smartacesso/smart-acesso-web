@@ -81,8 +81,10 @@ public class GerenciarParametrosController extends BaseController {
 
 		if (all != null) {
 			boolean preencherCartaoComMatricula = false;
+			boolean preencherCartaoAuto = false;
 			boolean gerarMatriculaSequencial = false;
 			boolean escolherDigitos = false;
+			boolean tempoToleranciaEntrada = false;
 			boolean permitirCampoAdicionalMatricula = false;
 			boolean formatoDataImportacao = false;
 			boolean formatoHoraImportacao = false;
@@ -111,6 +113,10 @@ public class GerenciarParametrosController extends BaseController {
 				parametrosGerais.add(item);
 				if (item.getNome().equals(BaseConstant.PARAMETERS_NAME.PREENCHER_CARTAO_COM_MATRICULA)) {
 					preencherCartaoComMatricula = true;
+				}
+				
+				if (item.getNome().equals(BaseConstant.PARAMETERS_NAME.PREENCHER_CARTAO_AUTO)) {
+					preencherCartaoAuto = true;
 				}
 
 				if (item.getNome().equals(BaseConstant.PARAMETERS_NAME.HORARIO_DISPARO_SOC)) {
@@ -183,11 +189,19 @@ public class GerenciarParametrosController extends BaseController {
 				if (item.getNome().equals(BaseConstant.PARAMETERS_NAME.REMOVE_CARTAO_EXCLUIDO)) {
 					removerCartaoPedestreRemovidos = true;
 				}
-				
+				if (item.getNome().equals(BaseConstant.PARAMETERS_NAME.TEMPO_TOLERANCIA_ENTRADA_E_SAIDA)) {
+					tempoToleranciaEntrada = true;
+				}
 
 			}
 			if (!preencherCartaoComMatricula) {
 				ParametroEntity p = new ParametroEntity(BaseConstant.PARAMETERS_NAME.PREENCHER_CARTAO_COM_MATRICULA,
+						"false", getUsuarioLogado().getCliente());
+				parametrosGerais.add(p);
+			}
+			
+			if (!preencherCartaoAuto) {
+				ParametroEntity p = new ParametroEntity(BaseConstant.PARAMETERS_NAME.PREENCHER_CARTAO_AUTO,
 						"false", getUsuarioLogado().getCliente());
 				parametrosGerais.add(p);
 			}
@@ -313,6 +327,12 @@ public class GerenciarParametrosController extends BaseController {
 
 			if (!removerCartaoPedestreRemovidos) {
 				ParametroEntity p = new ParametroEntity(BaseConstant.PARAMETERS_NAME.REMOVE_CARTAO_EXCLUIDO, "false",
+						getUsuarioLogado().getCliente());
+				parametrosGerais.add(p);
+			}
+			
+			if (!tempoToleranciaEntrada) {
+				ParametroEntity p = new ParametroEntity(BaseConstant.PARAMETERS_NAME.TEMPO_TOLERANCIA_ENTRADA_E_SAIDA, "5",
 						getUsuarioLogado().getCliente());
 				parametrosGerais.add(p);
 			}

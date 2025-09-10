@@ -18,11 +18,13 @@ import br.com.startjob.acesso.modelo.entity.ClienteEntity;
 import br.com.startjob.acesso.modelo.utils.AppAmbienteUtils;
 import br.com.startjob.acesso.tasks.ActivatedTasks;
 import br.com.startjob.acesso.tasks.AutoAtendimentoResetTask;
+import br.com.startjob.acesso.tasks.ImportacaoSocTask;
+import br.com.startjob.acesso.tasks.ImportarSalesianoTask;
+import br.com.startjob.acesso.tasks.ImportarTotvsTask;
+import br.com.startjob.acesso.tasks.ImportarUsuarioTask;
 import br.com.startjob.acesso.tasks.ExportacaoSocTask;
 import br.com.startjob.acesso.tasks.ImportaADTask;
 import br.com.startjob.acesso.tasks.ImportaSeniorTask;
-import br.com.startjob.acesso.tasks.ImportacaoSocTask;
-import br.com.startjob.acesso.tasks.ImportarTotvsTask;
 
 @SuppressWarnings("serial")
 @WebServlet(loadOnStartup = 1, asyncSupported = true, urlPatterns = { "/configuraRotinas" })
@@ -41,11 +43,13 @@ public class ConfiguraRotinasServlet extends BaseServlet {
 
 		log.info("Registra rotinas recorrentes...");
 
-		registraTimersParaSOC();
+		registraPrimeiroUsuario();
 		registraTimersParaSenior();
-		timerRegisterAD();
-		registraTimersParaTovs();
+		registraTimersParaSOC();
+		registraTimersParaTotvs();
 		registraTimersAutoAtendimento();
+		registraTimerSalesiano();
+		timerRegisterAD();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -92,7 +96,6 @@ public class ConfiguraRotinasServlet extends BaseServlet {
 		ActivatedTasks.getInstancia().timers.put("exportacaoSOC_cliente", timer);
 	}
 
-	@SuppressWarnings("unchecked")
 	private void registraTimersParaSenior() {
 		log.info("Registra Integração Senior");
 
@@ -100,7 +103,7 @@ public class ConfiguraRotinasServlet extends BaseServlet {
 		ActivatedTasks.getInstancia().limpaTimersSenior();
 
 		// Define o período para 30 minutos (30 * 60 * 1000 ms)
-		Long period = 60 * 60 * 1000L;
+		Long period = 5 * 60 * 1000L;
 		Timer timer = new Timer();
 
 		// Define a nova tarefa
@@ -114,48 +117,53 @@ public class ConfiguraRotinasServlet extends BaseServlet {
 		ActivatedTasks.getInstancia().timers.put("importacaoSENIOR_cliente", timer);
 	}
 
-	@SuppressWarnings("unchecked")
-	private void timerRegisterAD() {
-		log.info("Registra Integração AD");
-
-//	     Limpa os timers anteriores relacionados à nova função
-		ActivatedTasks.getInstancia().limpaTimersAD();
-
-		// Define o período para 30 minutos (30 * 60 * 1000 ms)
-		Long period = 5 * 60 * 1000L;
-		Timer timer = new Timer();
-
-		// Define a nova tarefa
-		TimerTask aDTask = new ImportaADTask();
-
-		// Agenda a tarefa para rodar a cada 30 minutos
-		timer.scheduleAtFixedRate(aDTask, 0, period);
-
-		log.info("Registrando rotina da AD");
-
-		ActivatedTasks.getInstancia().timers.put("importacaoAD_cliente", timer);
-	}
-
-	@SuppressWarnings("unchecked")
-	private void registraTimersParaTovs() {
-		log.info("Registra Integração Totvs");
+	private void registraTimersParaTotvs() {
+		log.info("Registra Integração TOTVS PROTHEUS");
 
 //	     Limpa os timers anteriores relacionados à nova função
 		ActivatedTasks.getInstancia().limpaTimersTovs();
 
+//		Calendar inicio = getInicio("0");
+//		Long periodExpirar = 24 * 60 * 60 * 1000L;
+//		Timer timer = new Timer();
+		
+//		TimerTask totvsTask = new ImportarTotvsTask();
+//		timer.scheduleAtFixedRate(totvsTask, inicio.getTime(), periodExpirar.longValue());
+		
 		// Define o período para 30 minutos (30 * 60 * 1000 ms)
-		Long period = 12 * 60 * 60 * 1000L;
+		Long period =  30 * 60 * 1000L;
 		Timer timer = new Timer();
 
-		// Define a nova tarefa
-		TimerTask TotvsTask = new ImportarTotvsTask();
+		TimerTask totvsTask = new ImportarTotvsTask();
+		timer.scheduleAtFixedRate(totvsTask, 0, period);
 
-		// Agenda a tarefa para rodar a cada 30 minutos
-		timer.scheduleAtFixedRate(TotvsTask, 0, period);
 
-		log.info("Registrando rotina da Totvs");
+		log.info("Registrando rotina da TOVS PROTHEUS");
 
 		ActivatedTasks.getInstancia().timers.put("importacaoTOTVS_cliente", timer);
+	}
+
+	private void registraTimerSalesiano() {
+		log.info("Registra Integração Salesiano");
+
+		ActivatedTasks.getInstancia().limpaTimersTovs();
+
+		// Define o período para 2 minutos (30 * 60 * 1000 ms)
+		Long period = 3 * 60 * 1000L;
+		Timer timer = new Timer();
+
+		try {
+			TimerTask salesianoTask = new ImportarSalesianoTask();
+			timer.scheduleAtFixedRate(salesianoTask, 0, period);
+
+			log.info("Registrando rotina da Salesiano");
+
+			ActivatedTasks.getInstancia().timers.put("importacaoSalesiano_cliente", timer);
+
+		} catch (Exception e) {
+			log.info("Erro ao instanciar base ejb para salesiano task");
+		}
+
 	}
 
 	private void registraTimersAutoAtendimento() {
@@ -170,6 +178,30 @@ public class ConfiguraRotinasServlet extends BaseServlet {
 		timer.scheduleAtFixedRate(task, 0, period);
 
 		ActivatedTasks.getInstancia().timers.put("AUTO_ATENDIMENTO", timer);
+	}
+	
+	
+	private void registraPrimeiroUsuario() {
+		log.info("Registra Integração primeiro usuario");
+
+		ActivatedTasks.getInstancia().limpaTimersTovs();
+
+		// Define o período para 2 minutos (30 * 60 * 1000 ms)
+		Long period = 24 * 60 * 60 * 60 * 1000L;
+		Timer timer = new Timer();
+
+		try {
+			TimerTask usuarioTask = new ImportarUsuarioTask();
+			timer.scheduleAtFixedRate(usuarioTask, 0, period);
+
+			log.info("Registrando rotina da Usuario");
+
+			ActivatedTasks.getInstancia().timers.put("importacaoUsuario_cliente", timer);
+
+		} catch (Exception e) {
+			log.info("Erro ao instanciar base ejb para salesiano task");
+		}
+
 	}
 
 	private Calendar getInicio(final String hourOfDay) {
@@ -206,6 +238,28 @@ public class ConfiguraRotinasServlet extends BaseServlet {
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 
+	}
+	
+	@SuppressWarnings("unchecked")
+	private void timerRegisterAD() {
+		log.info("Registra Integração AD");
+
+//	     Limpa os timers anteriores relacionados à nova função
+		ActivatedTasks.getInstancia().limpaTimersAD();
+
+		// Define o período para 30 minutos (30 * 60 * 1000 ms)
+		Long period = 5 * 60 * 1000L;
+		Timer timer = new Timer();
+
+		// Define a nova tarefa
+		TimerTask aDTask = new ImportaADTask();
+
+		// Agenda a tarefa para rodar a cada 30 minutos
+		timer.scheduleAtFixedRate(aDTask, 0, period);
+
+		log.info("Registrando rotina da AD");
+
+		ActivatedTasks.getInstancia().timers.put("importacaoAD_cliente", timer);
 	}
 
 }

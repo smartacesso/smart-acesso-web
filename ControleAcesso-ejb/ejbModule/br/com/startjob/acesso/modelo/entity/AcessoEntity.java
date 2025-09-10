@@ -76,6 +76,11 @@ import br.com.startjob.acesso.modelo.entity.base.ClienteBaseEntity;
 				            "AND (:DATA_INICIO IS NULL OR obj.data >= :DATA_INICIO) " +
 				            "AND (:DATA_FIM IS NULL OR obj.data <= :DATA_FIM) " +
 				            "and (obj.removido = false or obj.removido is null) " +
+				            "order by obj.data desc"),
+		@NamedQuery(name = "AcessoEntity.findAllByIdPedestreSemData",
+				    query = "select obj from AcessoEntity obj " +
+				            "where obj.pedestre.id = :ID_PEDESTRE " +
+				            "and (obj.removido = false or obj.removido is null) " +
 				            "order by obj.data desc")
 })
 @SuppressWarnings("serial")

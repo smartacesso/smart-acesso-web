@@ -167,7 +167,6 @@ public class ConsultaPedestreController extends BaseController {
 		
 		getParans().put("cliente.id", getUsuarioLogado().getCliente().getId());
 		setNamedQueryPesquisa("findAllComEmpresa");
-		System.out.println(getResult());
 		return super.buscar();
 	}
 	

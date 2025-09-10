@@ -39,6 +39,7 @@ import br.com.startjob.acesso.modelo.entity.base.ClienteBaseEntity;
 			    query = "select distinct obj FROM LocalEntity obj "
 			          + "left join fetch obj.hikivisionDeviceNames "
 			          + "where obj.cliente.id = :ID_CLIENTE "
+			          + "and obj.dataAlteracao >= :LAST_SYNC "
 			          + "and (obj.removido = false OR obj.removido IS NULL) "
 			          + "order BY obj.id ASC")
 

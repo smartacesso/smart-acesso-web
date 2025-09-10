@@ -630,8 +630,6 @@ public final class DateUtils {
 		
 		Calendar c = Calendar.getInstance();
 		c.add(Calendar.DATE, -2);
-		
-		System.out.println(c.getTimeInMillis());
 	}
 	
 	

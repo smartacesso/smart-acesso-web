@@ -2,10 +2,15 @@ package br.com.startjob.acesso.controller;
 
 import java.io.ByteArrayInputStream;
 import java.util.Base64;
+import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
+import javax.ejb.EJB;
 import javax.faces.view.ViewScoped;
 import javax.inject.Named;
 
@@ -13,22 +18,34 @@ import org.primefaces.event.CaptureEvent;
 import org.primefaces.model.DefaultStreamedContent;
 import org.primefaces.model.StreamedContent;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
-import br.com.startjob.acesso.api.WebSocketEndpoint;
+import br.com.startjob.acesso.api.WebSocketCadastroEndpoint;
 import br.com.startjob.acesso.modelo.ejb.BaseEJB;
+import br.com.startjob.acesso.modelo.ejb.PedestreEJBRemote;
 import br.com.startjob.acesso.modelo.entity.CadastroExternoEntity;
 import br.com.startjob.acesso.modelo.entity.ClienteEntity;
+import br.com.startjob.acesso.modelo.entity.HorarioEntity;
 import br.com.startjob.acesso.modelo.entity.PedestreEntity;
+import br.com.startjob.acesso.modelo.entity.PedestreRegraEntity;
 import br.com.startjob.acesso.modelo.enumeration.TipoPedestre;
+import br.com.startjob.acesso.modelo.enumeration.TipoRegra;
+import br.com.startjob.acesso.to.PedestrianAccessTO;
+import br.com.startjob.acesso.to.WebSocketPedestrianAccessTO;
 
 @SuppressWarnings("serial")
 @Named("cadastroFacialHikivisionController")
 @ViewScoped
 public class CadastroFacialHikivisionController extends BaseController {
+	
+	@EJB
+	private PedestreEJBRemote pedestreEJB;
+	
 	private PedestreEntity pedestre;
-	private ClienteEntity cliente;
 	private CadastroExternoEntity cadastroExterno;
+	private final Gson gson = new Gson();
 
 	private final Integer qtdeFotosNecessarias = 3;
 
@@ -38,6 +55,8 @@ public class CadastroFacialHikivisionController extends BaseController {
 
 	@PostConstruct
 	public void init() {
+		baseEJB = pedestreEJB;
+		
 		try {
 			idPedestre = Long.valueOf(getRequest().getParameter("idPedestre"));
 			idCliente = Long.valueOf(getRequest().getParameter("cliente"));
@@ -49,8 +68,16 @@ public class CadastroFacialHikivisionController extends BaseController {
 		}
 
 		pedestre = buscaPedestrePeloId(idPedestre, idCliente);
-		cliente = buscaClientePeloId(idCliente);
 
+//		if(Objects.nonNull(pedestre) && Objects.nonNull(pedestre.getRegras())) {	
+//			for(PedestreRegraEntity p : pedestre.getRegras()) {
+//				if(Objects.nonNull(p.getRegra()) && p.getRegra().getTipo() == TipoRegra.ACESSO_HORARIO) {
+//					List<HorarioEntity> horarios = buscaHorariosByIdPedestreRegra(p.getId());
+//					p.setHorarios(horarios);
+//				}
+//			}
+//		}
+		
 		if (pedestre == null) {
 			return;
 		}
@@ -63,37 +90,17 @@ public class CadastroFacialHikivisionController extends BaseController {
 
 	@Override
 	public String salvar() {
-
 		if (!pedestre.autoAtendimentoLiberado()) {
 			mensagemFatal("", "msg.fatal.pedestre.nao.gravado");
 			return "";
 		}
 
-		String cpfNumeros = pedestre.getCpf().replaceAll("\\D", "");
-
-		JsonObject json = new JsonObject();
-		json.addProperty("nome", pedestre.getNome());
-
-		if (pedestre.getCodigoCartaoAcesso() != null) {
-			if (!pedestre.getCodigoCartaoAcesso().isEmpty()) {
-				json.addProperty("cardNumber", pedestre.getCodigoCartaoAcesso());
-			}
-		} else {
-			json.addProperty("cardNumber", cpfNumeros);
-		}
-
-		byte[] fotoBytes = pedestre.getFoto();
-
-		if (fotoBytes != null) {
-			String fotoBase64 = Base64.getEncoder().encodeToString(fotoBytes);
-			json.addProperty("foto", fotoBase64);
-		} else {
-			json.addProperty("foto", "");
-		}
+		pedestre.setDataAlteracaoFoto(new Date());
+		String jsonStr = gson.toJson(WebSocketPedestrianAccessTO.fromPedestre(pedestre));
+		JsonObject json = JsonParser.parseString(jsonStr).getAsJsonObject();
 
 		// buscar cliente correto pelo idCliente e pegar unidade organizacional
-		WebSocketEndpoint.enviarParaLocal(cliente.getNomeUnidadeOrganizacional(), json.toString());
-
+		WebSocketCadastroEndpoint.enviarParaLocal(pedestre.getCliente().getId().toString(), json.toString());
 		try {
 			baseEJB.gravaObjeto(pedestre);
 		} catch (Exception e) {
@@ -114,11 +121,12 @@ public class CadastroFacialHikivisionController extends BaseController {
 		args.put("ID_CLIENTE", idCliente);
 
 		try {
-			List<PedestreEntity> pedestres = (List<PedestreEntity>) baseEJB
-					.pesquisaArgFixosLimitado(PedestreEntity.class, "findByIdPedestreAndIdCliente", args, 0, 1);
+			List<PedestreEntity> pedestres = (List<PedestreEntity>) pedestreEJB
+					.pesquisaArgFixos(PedestreEntity.class, "findByIdWithEmpRegrasAndHorarios", args);
 
-			if (pedestres != null)
+			if (pedestres != null) {
 				return pedestres.stream().findFirst().orElse(null);
+			}
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -126,25 +134,27 @@ public class CadastroFacialHikivisionController extends BaseController {
 
 		return null;
 	}
-
-	@SuppressWarnings("unchecked")
-	private ClienteEntity buscaClientePeloId(Long idCliente) {
+	
+	private List<HorarioEntity> buscaHorariosByIdPedestreRegra(Long id) {
 		HashMap<String, Object> args = new HashMap<>();
-		args.put("ID", idCliente);
+		args.put("ID", id);
 
 		try {
-			List<ClienteEntity> clientes = (List<ClienteEntity>) baseEJB.pesquisaArgFixosLimitado(ClienteEntity.class,
-					"findById", args, 0, 1);
+			@SuppressWarnings("unchecked")
+			List<PedestreRegraEntity> pedestreRegras = (List<PedestreRegraEntity>) pedestreEJB
+					.pesquisaArgFixos(PedestreRegraEntity.class, "findByIdComHorarios", args);
 
-			if (clientes != null)
-				return clientes.stream().findFirst().orElse(null);
-
+			if (pedestreRegras != null && !pedestreRegras.isEmpty()) {
+				return pedestreRegras.get(0).getHorarios();
+			}
 		} catch (Exception e) {
+			System.err.println("Erro ao buscar horários do pedestre: " + e.getMessage());
 			e.printStackTrace();
 		}
 
-		return null;
+		return Collections.emptyList();
 	}
+
 
 	public void onCapture(CaptureEvent event) {
 		byte[] fotoBase64 = event.getData();

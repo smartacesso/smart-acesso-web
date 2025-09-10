@@ -128,36 +128,38 @@ public class MenuController extends BaseController {
 	 * @throws Exception e
 	 */
 	public void montaMenu() throws Exception {
+		
+		//if(menu == null){
+			//inicializa lista
+			this.menu = new DefaultMenuModel();
+			
+			usuarioLogado = getUsuarioLogado();
+	
+			/*
+			 * Adiciona os menus do primeiro nÃ­vel
+			 * NOTA: Colocar um método para cada grupo de menus
+			 */
+			if(usuarioLogado != null) {
+				verificaTipoAcesso();
+				
+				this.criaMenuCadastro();
+				
+				this.criaMenuRelatorio();
+				
+				this.criaMenuConfiguracao();
+				
+				this.criaMenuAdministracao();
+				
+				this.criaMenuCameras();
+			
+				this.criaMenuAjuda();
+				
+				this.montaMenuUsuario();
 
-		// if(menu == null){
-		// inicializa lista
-		this.menu = new DefaultMenuModel();
-
-		usuarioLogado = getUsuarioLogado();
-
-		/*
-		 * Adiciona os menus do primeiro nÃ­vel NOTA: Colocar um método para cada grupo
-		 * de menus
-		 */
-		if (usuarioLogado != null) {
-			verificaTipoAcesso();
-
-			this.criaMenuCadastro();
-
-			this.criaMenuRelatorio();
-
-			this.criaMenuConfiguracao();
-
-			this.criaMenuAdministracao();
-
-			this.criaMenuAjuda();
-
-			this.montaMenuUsuario();
-
-		}
-
-		// retiraMenusVazios();
-
+			}
+			
+			//retiraMenusVazios();
+			
 	}
 
 	private void criaMenuAdministracao() {
@@ -326,6 +328,24 @@ public class MenuController extends BaseController {
 		}
 
 		menu.getElements().add(cadastros);
+	}
+	
+	private void criaMenuCameras() {
+		// nao cria menu cadastro para responsavel
+		if (PerfilAcesso.RESPONSAVEL.equals(usuarioLogado.getPerfil()))
+			return;
+
+		DefaultSubMenu cameras = DefaultSubMenu.builder()
+				.label(resource.recuperaChave("menu.cameras", getFacesContext())).build();
+
+		DefaultMenuItem hikivision = DefaultMenuItem.builder()
+				.value(resource.recuperaChave("menu.cameras.hikivision", getFacesContext()))
+				.url(BaseConstant.URL_APLICACAO + "/paginas/sistema/cameras/cameras.xhtml")
+				.styleClass("ui-simple-menu").build();
+
+		cameras.getElements().add(hikivision);
+		
+		menu.getElements().add(cameras);
 	}
 
 	private void montaMenuUsuario() {

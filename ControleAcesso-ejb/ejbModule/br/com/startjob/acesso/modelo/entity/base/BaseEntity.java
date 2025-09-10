@@ -42,6 +42,9 @@ public class BaseEntity implements Serializable {
 	@Temporal( TemporalType.TIMESTAMP)
 	@Column(name="DATA_REMOVIDO", nullable=true, length=11)
 	private Date dataRemovido = null;
+	
+	@Transient
+	private boolean alterado = false;
 
 	public Boolean getExistente() {
 		return existente;
@@ -90,7 +93,13 @@ public class BaseEntity implements Serializable {
 	public void setDataRemovido(Date dataRemovido) {
 		this.dataRemovido = dataRemovido;
 	}
-	
-	
 
+	public boolean isAlterado() {
+		return alterado;
+	}
+
+	public void setAlterado(boolean alterado) {
+		this.alterado = alterado;
+	}
+	
 }

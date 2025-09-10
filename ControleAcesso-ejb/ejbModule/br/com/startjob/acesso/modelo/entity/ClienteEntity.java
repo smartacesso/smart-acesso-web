@@ -30,37 +30,69 @@ import br.com.startjob.acesso.modelo.enumeration.Status;
 @Entity
 @Table(name = "TB_CLIENTE")
 @NamedQueries({
-		@NamedQuery(name = "ClienteEntity.findAll", query = "select obj " + "from ClienteEntity obj "
-				+ "where (obj.removido = false or obj.removido is null) " + "order by obj.id asc"),
-		@NamedQuery(name = "ClienteEntity.findById", query = "select obj from ClienteEntity obj "
-				+ "where obj.id = :ID order by obj.id asc"),
-		@NamedQuery(name = "ClienteEntity.findByIdComplete", query = "select obj from ClienteEntity obj "
-				+ " left join fetch obj.endereco e " + " left join fetch obj.planos p "
-				+ "where obj.id = :ID order by obj.id asc"),
-		@NamedQuery(name = "ClienteEntity.findByIdComConfiguracoes", query = "select obj from ClienteEntity obj "
-				+ " left join fetch obj.configuracoesDesktop e " + "where obj.id = :ID_CLIENTE order by obj.id asc"),
-		@NamedQuery(name = "ClienteEntity.findByNomeUnidadeOrganizacional", query = "select obj from ClienteEntity obj "
-				+ "where lower(obj.nomeUnidadeOrganizacional) = lower(:UNIDADE_ORGANIZACIONAL) "
-				+ "and (obj.removido = false or obj.removido is null) "),
-		@NamedQuery(name = "ClienteEntity.findAllComIntegracaoSOC", query = "select obj from ClienteEntity obj "
-				+ "join fetch obj.integracaoSoc i "
-				+ "where ((obj.removido = false or obj.removido is null) and (i.empresa is not null or i.empresa = '')) "
-				+ "order by obj.id asc"),
-		@NamedQuery(name = "ClienteEntity.findAllComIntegracaoSenior", query = "select obj from ClienteEntity obj "
-				+ "join fetch obj.integracaoSenior i " + "where ((obj.removido = false or obj.removido is null) "
-				+ "and (i.usuario is not null or i.usuario = '') " + "and (i.senha is not null or i.senha = '') "
-				+ "and (i.url is not null or i.url = '')) " + "order by obj.id asc"),
-		@NamedQuery(name = "ClienteEntity.findAllComIntegracaoTotvs", query = "select obj from ClienteEntity obj "
-				+ "join fetch obj.integracaoTotvs i " + "where ((obj.removido = false or obj.removido is null) "
-				+ "and (i.url is not null or i.url = '')) " + "order by obj.id asc"),
-		@NamedQuery(name = "ClienteEntity.findComFilialTeknisa", query = "select obj from ClienteEntity obj "
-				+ "where (obj.removido = false or obj.removido is null) "
-				+ "and obj.organizacaoTeknisa = :ORGANIZACAO_TEKNISA and obj.filialTeknisa = :FILIAL_TEKNISA "
-				+ "order by obj.id asc"),
-		@NamedQuery(name = "ClienteEntity.findAllComIntegracaoAD", query = "select obj from ClienteEntity obj "
+	@NamedQuery(name = "ClienteEntity.findAllComIntegracaoAD", query = "select obj from ClienteEntity obj "
 				+ "join fetch obj.integracaoAD i " + "where (obj.removido = false or obj.removido is null) "
 				+ "order by obj.id asc"),
-
+	@NamedQuery(name  = "ClienteEntity.findAll", 
+				query = "select obj "
+				      + "from ClienteEntity obj "
+					  + "where (obj.removido = false or obj.removido is null) "
+					  + "order by obj.id asc"),
+	@NamedQuery(name  = "ClienteEntity.findById", 
+				query = "select obj from ClienteEntity obj "
+					  + "where obj.id = :ID order by obj.id asc"),
+	@NamedQuery(name  = "ClienteEntity.findByIdComplete", 
+				query = "select obj from ClienteEntity obj "
+					  + " left join fetch obj.endereco e "
+					  + " left join fetch obj.planos p "
+					  + "where obj.id = :ID order by obj.id asc"),
+	@NamedQuery(name  = "ClienteEntity.findByIdComConfiguracoes", 
+				query = "select obj from ClienteEntity obj "
+					  + " left join fetch obj.configuracoesDesktop e "
+					  + "where obj.id = :ID_CLIENTE order by obj.id asc"),
+	@NamedQuery(name = "ClienteEntity.findByNomeUnidadeOrganizacional",
+				query = "select obj from ClienteEntity obj "
+					  + "where lower(obj.nomeUnidadeOrganizacional) = lower(:UNIDADE_ORGANIZACIONAL) "
+					  + "and (obj.removido = false or obj.removido is null) "),
+	@NamedQuery(name = "ClienteEntity.findAllComIntegracaoSOC",
+				query = "select obj from ClienteEntity obj "
+					  + "join fetch obj.integracaoSoc i "
+					  + "where ((obj.removido = false or obj.removido is null) and (i.empresa is not null or i.empresa = '')) "
+					  + "order by obj.id asc"),
+	@NamedQuery(name = "ClienteEntity.findAllComIntegracaoSenior",
+				query = "select obj from ClienteEntity obj "
+					  + "join fetch obj.integracaoSenior i "
+					  + "where ((obj.removido = false or obj.removido is null) "
+					  + "and (i.usuario is not null or i.usuario = '') "
+					  + "and (i.senha is not null or i.senha = '') "
+					  + "and (i.url is not null or i.url = '')) "
+					  + "order by obj.id asc"),
+	@NamedQuery(name = "ClienteEntity.findAllComIntegracaoTotvs",
+				query = "select obj from ClienteEntity obj "
+					  + "join fetch obj.integracaoTotvs i "
+					  + "where ((obj.removido = false or obj.removido is null) "
+					  + "and (i.url is not null or i.url = '')) "
+					  + "order by obj.id asc"),
+	@NamedQuery(name = "ClienteEntity.findComFilialTeknisa",
+				query = "select obj from ClienteEntity obj "
+					  + "where (obj.removido = false or obj.removido is null) "
+					  + "and obj.organizacaoTeknisa = :ORGANIZACAO_TEKNISA and obj.filialTeknisa = :FILIAL_TEKNISA "
+					  + "order by obj.id asc"),
+	@NamedQuery(name = "ClienteEntity.findAllComIntegracaoAD",
+				query = "select obj from ClienteEntity obj "
+					  + "join fetch obj.integracaoAD i "
+					  + "where (obj.removido = false or obj.removido is null) "
+					  + "order by obj.id asc"),
+	@NamedQuery(name = "ClienteEntity.findComFilialAndColigadaTotvs",
+				query = "select obj from ClienteEntity obj "
+					  + "where (obj.removido = false or obj.removido is null) "
+					  + "and obj.codfilial = :CFILIAL_TOTVS and obj.codcoligad = :CCOLIGADA_TOTVS "
+					  + "order by obj.id asc"),
+	@NamedQuery(name = "ClienteEntity.findByUnidadeOrganizacional",
+				query = "select obj from ClienteEntity obj "
+					  + "where (obj.removido = false or obj.removido is null) "
+					  + "and obj.nomeUnidadeOrganizacional = :UNIDADE_ORGANIZACIONAL and (obj.removido = false or obj.removido is null) "
+					  + "order by obj.id asc"),
 })
 @SuppressWarnings("serial")
 public class ClienteEntity extends BaseEntity {
@@ -132,6 +164,12 @@ public class ClienteEntity extends BaseEntity {
 
 	@Column(name = "FILIAL_TEKNISA", nullable = true, length = 60)
 	private String filialTeknisa;
+	
+	@Column(name="CFILIAL_TOTVS", nullable=true, length=60)
+	private String codfilial;
+	
+	@Column(name="CCOLIGADA_TOTVS", nullable=true, length=60)
+	private String codcoligad;
 
 	public String getNome() {
 		return nome;
@@ -267,6 +305,19 @@ public class ClienteEntity extends BaseEntity {
 
 	public void setIntegracaoTotvs(IntegracaoTotvsEntity integracaoTotvs) {
 		this.integracaoTotvs = integracaoTotvs;
+	}
+
+	public String getCodfilial() {
+		return codfilial;
+	}
+	public void setCodfilial(String codfilial) {
+		this.codfilial = codfilial;
+	}
+	public String getCodcoligad() {
+		return codcoligad;
+	}
+	public void setCodcoligad(String codcoligad) {
+		this.codcoligad = codcoligad;
 	}
 
 	public IntegracaoADEntity getIntegracaoAD() {

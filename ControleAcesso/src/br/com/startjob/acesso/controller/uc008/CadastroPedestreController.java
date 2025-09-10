@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
@@ -43,10 +44,12 @@ import org.primefaces.model.CroppedImage;
 import org.primefaces.model.DefaultStreamedContent;
 import org.primefaces.model.StreamedContent;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 import br.com.startjob.acesso.annotations.UseCase;
-import br.com.startjob.acesso.api.WebSocketEndpoint;
+import br.com.startjob.acesso.api.WebSocketCadastroEndpoint;
 import br.com.startjob.acesso.controller.CadastroBaseController;
 import br.com.startjob.acesso.controller.MenuController;
 import br.com.startjob.acesso.modelo.BaseConstant;
@@ -82,6 +85,7 @@ import br.com.startjob.acesso.modelo.enumeration.TipoRegra;
 import br.com.startjob.acesso.modelo.utils.AppAmbienteUtils;
 import br.com.startjob.acesso.modelo.utils.EncryptionUtils;
 import br.com.startjob.acesso.modelo.utils.MailUtils;
+import br.com.startjob.acesso.to.WebSocketPedestrianAccessTO;
 import br.com.startjob.acesso.utils.ResourceBundleUtils;
 import br.com.startjob.acesso.utils.Utils;
 
@@ -166,6 +170,7 @@ public class CadastroPedestreController extends CadastroBaseController {
 	private boolean exibeCampoSempreLiberadoParaTodos = false;
 	private boolean exibeCampoLinkCadastroFacialExterno = false;
 	private boolean habilitaAppPedestre = false;
+	private boolean gerarCartaoAutomatico = false;
 
 	private TipoQRCode tipoPadraoQrCode = null;
 
@@ -188,6 +193,7 @@ public class CadastroPedestreController extends CadastroBaseController {
 	private List<AcessoEntity> listaRelatorios = new ArrayList<>();
 	
 	private String linkGerado;
+	private final Gson gson = new Gson();
 	
 	@PostConstruct
 	@Override
@@ -224,6 +230,8 @@ public class CadastroPedestreController extends CadastroBaseController {
 
 		montaListaEmpresas();
 		montaListaEquipamentosDisponiveis();
+		
+		pedestre.setCodigoCartaoAcesso(gerarCartao(pedestre));
 	}
 
 	private void montaTipoQRCode() {
@@ -334,6 +342,10 @@ public class CadastroPedestreController extends CadastroBaseController {
 				getUsuarioLogado().getCliente().getId());
 		if (param != null)
 			habilitaAppPedestre = Boolean.valueOf(param.getValor());
+		param = baseEJB.getParametroSistema(BaseConstant.PARAMETERS_NAME.PREENCHER_CARTAO_AUTO,
+				getUsuarioLogado().getCliente().getId());
+		if (param != null)
+			gerarCartaoAutomatico = Boolean.valueOf(param.getValor());
 	}
 
 	public boolean verificaObrigatorio(String campo) {
@@ -461,6 +473,7 @@ public class CadastroPedestreController extends CadastroBaseController {
 		}
 
 		pedestre.setUsuario(getUsuarioLogado());
+		pedestre.setDataAlteracaoFoto(new Date());
 			
 		validaListasPedestre(pedestre);
 		String retorno = super.salvar();
@@ -469,7 +482,32 @@ public class CadastroPedestreController extends CadastroBaseController {
 			mensagemFatal("", "msg.fatal.pedestre.nao.gravado");
 			return "";
 		}
+		
+		pedestre = (PedestreEntity) getEntidade();
+		
+		try {
+			pedestre = (PedestreEntity) baseEJB.recuperaObjeto(PedestreEntity.class, pedestre.getId());
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		if (Objects.nonNull(pedestre) && Objects.nonNull(pedestre.getRegras())) {
+			for (PedestreRegraEntity p : pedestre.getRegras()) {
+				if (Objects.nonNull(p.getRegra()) && p.getRegra().getTipo() == TipoRegra.ACESSO_HORARIO) {
+					List<HorarioEntity> horarios = buscaHorariosByIdPedestreRegra(p.getId());
+					p.setHorarios(horarios);
+				}
+			}
+		}
+		
+		String jsonStr = gson.toJson(WebSocketPedestrianAccessTO.fromPedestre(pedestre));
+		JsonObject json = JsonParser.parseString(jsonStr).getAsJsonObject();
 
+		// buscar cliente correto pelo idCliente e pegar unidade organizacional
+		WebSocketCadastroEndpoint.enviarParaLocal(pedestre.getCliente().getId().toString(), json.toString());
+		
+		
 		String retornoStr = "";
 		if (cadastroEmLote) {
 			retornoStr = "/paginas/sistema/pedestres/cadastroPedestre.xhtml?acao=OK";
@@ -907,7 +945,7 @@ public class CadastroPedestreController extends CadastroBaseController {
 		byte[] data = event.getData();
 		fileNameTemp = getRandomImageName() + ".png";
 		exibeCrop = true;
-
+		System.out.println("caminho : " + BaseConstant.URL_APLICACAO);
 		criarArquivo(data, fileNameTemp);
 	}
 
@@ -935,11 +973,12 @@ public class CadastroPedestreController extends CadastroBaseController {
 	}
 
 	public void crop() {
-		System.out.println(croppedImage);
 		if(croppedImage == null) {
 
 			return;
 		}
+		System.out.println("caminho : " + menuController.getUrlMain());
+		
 		PedestreEntity pedestre = (PedestreEntity) getEntidade();
 		pedestre.setFoto(croppedImage.getBytes());
 		pedestre.setDataAlteracaoFoto(new Date());
@@ -1099,6 +1138,11 @@ public class CadastroPedestreController extends CadastroBaseController {
 	private PedestreEntity getPedestreAtual() {
 		return (PedestreEntity) getEntidade();
 	}
+	
+	private void setPedestreAtual(PedestreEntity pedestre) {
+		setEntidade(pedestre);
+	}
+
 
 	private void montaListaStatus() {
 		listaStatus = new ArrayList<SelectItem>();
@@ -1296,6 +1340,173 @@ public class CadastroPedestreController extends CadastroBaseController {
 		}
 		return null;
 	}
+	
+	private List<HorarioEntity> buscaHorariosByIdPedestreRegra(Long id) {
+		HashMap<String, Object> args = new HashMap<>();
+		args.put("ID", id);
+
+		try {
+			@SuppressWarnings("unchecked")
+			List<PedestreRegraEntity> pedestreRegras = (List<PedestreRegraEntity>) pedestreEJB
+					.pesquisaArgFixos(PedestreRegraEntity.class, "findByIdComHorarios", args);
+
+			if (pedestreRegras != null && !pedestreRegras.isEmpty()) {
+				return pedestreRegras.get(0).getHorarios();
+			}
+		} catch (Exception e) {
+			System.err.println("Erro ao buscar horários do pedestre: " + e.getMessage());
+			e.printStackTrace();
+		}
+
+		return Collections.emptyList();
+	}
+	
+	@SuppressWarnings("unchecked")
+	public void onCpfBlur() {
+		PedestreEntity pedestre = getPedestreAtual();
+		List<PedestreEntity> existente = null;
+
+		String cpf = pedestre.getCpf();
+		if (cpf == null || cpf.trim().isEmpty()) {
+			cpf = "";
+		}
+
+		cpf = cpf.replace(".", "").replace("-", "").trim();
+		
+		
+		if(Objects.isNull(cpf) || cpf.isEmpty() || "".equals(cpf)){
+			return;
+		}
+
+
+		Map<String, Object> args = new HashMap<String, Object>();
+		args.put("CPF", cpf);
+		args.put("ID_CLIENTE", getUsuarioLogado().getCliente().getId());
+
+		try {
+			existente = (List<PedestreEntity>) baseEJB.pesquisaArgFixos(PedestreEntity.class, "findByCPFOnBlur", args);
+			if (existente != null && !existente.isEmpty()) {
+				PedestreEntity encontrado = existente.get(0);
+
+				if (pedestre.getId() != null && pedestre.getId().equals(encontrado.getId())) {
+					return;
+				}
+
+				if (encontrado.isVisitante()) {
+					urlNovoRegistro = "/paginas/sistema/pedestres/cadastroPedestre.xhtml?tipo=vi";
+				} else {
+					urlNovoRegistro = "/paginas/sistema/pedestres/cadastroPedestre.xhtml?tipo=pe";
+				}
+				editar(encontrado.getId());
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	
+	@SuppressWarnings("unchecked")
+	public void onRgBlur() {
+		PedestreEntity pedestre = getPedestreAtual();
+		List<PedestreEntity> existente = null;
+	    
+	    String rg = pedestre.getRg();
+	    if (rg == null || rg.trim().isEmpty()) {
+	        rg="";
+	    }
+		
+		if(Objects.isNull(rg) || rg.isEmpty() || "".equals(rg)){
+			return;
+		}
+
+		Map<String, Object> args = new HashMap<String, Object>();
+		args.put("RG", rg);
+		args.put("ID_CLIENTE", getUsuarioLogado().getCliente().getId());
+		
+	    try {
+			existente = (List<PedestreEntity>) baseEJB.pesquisaArgFixos(PedestreEntity.class, "findByRGOnBlur", args);
+			if (existente != null && !existente.isEmpty()) {
+	            PedestreEntity encontrado = existente.get(0);
+
+	            if (pedestre.getId() != null && pedestre.getId().equals(encontrado.getId())) {
+	                return;
+	            }
+
+				if(encontrado.isVisitante()) {
+					urlNovoRegistro = "/paginas/sistema/pedestres/cadastroPedestre.xhtml?tipo=vi";
+				}else {
+					urlNovoRegistro = "/paginas/sistema/pedestres/cadastroPedestre.xhtml?tipo=pe";
+				}
+				editar(encontrado.getId());
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void preencherCartaoAutomatico() {
+		PedestreEntity pedestre = getPedestreAtual();
+
+		String cartaoAtual = pedestre.getCodigoCartaoAcesso();
+
+		// Considera "vazio" se for null, vazio ou só zeros
+		boolean cartaoVazioOuInvalido = cartaoAtual == null ||
+		                                 cartaoAtual.trim().isEmpty() ||
+		                                 cartaoAtual.replace("0", "").isEmpty();
+
+		System.out.println("pedestre cartao : " + cartaoAtual);
+
+		if (cartaoVazioOuInvalido) {
+			String codigo = null;
+
+			if (pedestre.getMatricula() != null && !pedestre.getMatricula().trim().isEmpty()) {
+				codigo = pedestre.getMatricula().replaceAll("\\D", ""); // apenas números
+			} else if (pedestre.getCpf() != null && !pedestre.getCpf().trim().isEmpty()) {
+				codigo = pedestre.getCpf().replaceAll("\\D", "");
+			}
+
+			if (codigo != null && !codigo.isEmpty()) {
+				pedestre.setCodigoCartaoAcesso(codigo);
+			} else {
+				// fallback: gerar número randômico com 8 dígitos
+				pedestre.setCodigoCartaoAcesso(String.format("%08d", new Random().nextInt(100000000)));
+			}
+		}
+	}
+	
+	public String gerarCartao(PedestreEntity pedestre) {
+		if(gerarCartaoAutomatico) {
+			String cartaoAtual = pedestre.getCodigoCartaoAcesso();
+
+			// Considera "vazio" se for null, vazio ou só zeros
+			boolean cartaoVazioOuInvalido = cartaoAtual == null ||
+			                                 cartaoAtual.trim().isEmpty() ||
+			                                 cartaoAtual.replace("0", "").isEmpty();
+
+			System.out.println("pedestre cartao : " + cartaoAtual);
+
+			if (cartaoVazioOuInvalido) {
+				String codigo = null;
+
+				if (pedestre.getMatricula() != null && !pedestre.getMatricula().trim().isEmpty()) {
+					codigo = pedestre.getMatricula().replaceAll("\\D", ""); // apenas números
+				} else if (pedestre.getCpf() != null && !pedestre.getCpf().trim().isEmpty()) {
+					codigo = pedestre.getCpf().replaceAll("\\D", "");
+				}
+
+				if (codigo != null && !codigo.isEmpty()) {
+					pedestre.setCodigoCartaoAcesso(codigo);
+				} else {
+					// fallback: gerar número randômico com 8 dígitos
+					pedestre.setCodigoCartaoAcesso(String.format("%08d", new Random().nextInt(100000000)));
+				}
+			}
+		}
+		
+		return pedestre.getCodigoCartaoAcesso();
+	}
+
+
 
 	public String gerarLinkCadastroFacialExterno() {
 		ultimoCadastroExterno = buscaUltimoCadastroExterno();
@@ -2198,4 +2409,13 @@ public class CadastroPedestreController extends CadastroBaseController {
 	public void setLinkGerado(String linkGerado) {
 	    this.linkGerado = linkGerado;
 	}
+	
+	public String getCodigoCartao() {
+	    return getPedestreAtual().getCodigoCartaoAcesso();
+	}
+
+	public void setCodigoCartao(String codigo) {
+	    getPedestreAtual().setCodigoCartaoAcesso(codigo);
+	}
+
 }

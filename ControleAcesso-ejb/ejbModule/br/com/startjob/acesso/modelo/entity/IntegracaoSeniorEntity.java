@@ -39,6 +39,12 @@ public class IntegracaoSeniorEntity extends BaseEntity {
 	
 	@Column(name="SENHA", nullable=true, length=255)
 	private String senha;
+	
+	@Column(name = "HABILITAR_PERMISSAO", nullable = true)
+	private Boolean habilitaPermissao;
+	
+	@Column(name = "HABILITAR_REGRAS_HORARIO", nullable = true)
+	private Boolean habilitaRegrasDeHorario;
 
 	public Long getId() {
 		return id;
@@ -70,5 +76,29 @@ public class IntegracaoSeniorEntity extends BaseEntity {
 
 	public void setUrl(String url) {
 		this.url = url;
+	}
+
+	public Boolean getHabilitaPermissao() {
+		return habilitaPermissao;
+	}
+
+	public void setHabilitaPermissao(Boolean habilitaPermissao) {
+		this.habilitaPermissao = habilitaPermissao;
+	}
+
+	public Boolean getHabilitaRegrasDeHorario() {
+		return habilitaRegrasDeHorario;
+	}
+
+	public void setHabilitaRegrasDeHorario(Boolean habilitaRegrasDeHorario) {
+		this.habilitaRegrasDeHorario = habilitaRegrasDeHorario;
+	}
+
+	public boolean isPermissaoHabilitada() {
+		return getHabilitaPermissao() != null ? habilitaPermissao : false;
+	}
+
+	public boolean isRegraHabilitada() {
+		return getHabilitaRegrasDeHorario() != null ? habilitaRegrasDeHorario : false;
 	}
 }

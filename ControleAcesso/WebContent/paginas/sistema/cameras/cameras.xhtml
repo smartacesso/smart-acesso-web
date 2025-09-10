@@ -1,0 +1,74 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui">
+
+<ui:composition template="/tema/templates/template.xhtml">
+
+	<!-- Título -->
+	<ui:define name="titulo">
+        Cameras hikivision
+    </ui:define>
+
+	<!-- Breadcrumb -->
+	<ui:define name="breadcrumb">
+		<a target="_top"
+			href="/#{menuController.appName}/paginas/principal.xhtml"> <h:outputText
+				value="#{msgs['title.principal']}" />
+		</a> > <h:outputText value="#{msgs['title.uc008.cameras']}" />
+	</ui:define>
+
+	<!-- Conteúdo -->
+	<ui:define name="conteudo">
+
+		<p:panelGrid columns="1" styleClass="form-grid ui-fluid"
+			style="width: 100%;">
+			<div class="ui-g ui-g-nopad"
+				style="justify-content: center; display: flex; flex-wrap: wrap;">
+				<ui:repeat value="#{cameraController.listaCameras}" var="camera">
+					<div class="ui-g-12 ui-md-3"
+						style="padding: 0.25rem; display: flex; justify-content: center;">
+						<p:panel header="#{camera.devName}"
+							style="width: 100%; height: 200px; margin: 0;">
+							<img src="/sistema/tema/img/facial.png" />
+							<br />
+							<p:commandButton value="Liberar"
+								action="#{cameraController.liberarCamera(camera)}"
+								styleClass="ui-button-success rounded-button"
+								style="width: 100%;" />
+						</p:panel>
+					</div>
+				</ui:repeat>
+			</div>
+		</p:panelGrid>
+
+		<!-- Mensagem quando não há câmeras -->
+		<h:outputText value="#{msgs['msg.nenhum.item.encontrado']}"
+			escape="false" rendered="#{empty cameraController.listaCameras}"
+			style="text-align: center; margin-top: 2rem;" />
+
+	</ui:define>
+
+	<!-- Estilos para responsividade -->
+	<style>
+@media screen and (max-width: 768px) {
+	.ui-g-12.ui-md-3 {
+		max-width: 100% !important;
+	}
+}
+
+.rounded-button {
+	border-radius: 5px !important;
+}
+
+/* Cards mais próximos */
+.ui-panel {
+	margin-bottom: 0.5rem !important;
+}
+</style>
+
+</ui:composition>
+</html>
