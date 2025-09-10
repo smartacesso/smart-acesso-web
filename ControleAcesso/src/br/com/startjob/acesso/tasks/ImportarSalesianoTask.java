@@ -251,8 +251,10 @@ public class ImportarSalesianoTask extends TimerTask {
 	    pedestre.setEmpresa(recuperaEmpresa(cadastro.getNomeColigada(), cliente));
 
 	    // Atualiza cartão
-//	    String codigoCartao = cadastro.getMatricula().replaceAll("\\D", "");
-//	    pedestre.setCodigoCartaoAcesso(codigoCartao);
+	    String somenteNumeros = cadastro.getMatricula().replaceAll("\\D", "");
+	    String codigoCartao = somenteNumeros.isEmpty() ? "0" : String.valueOf(Long.parseLong(somenteNumeros));
+
+	    pedestre.setCodigoCartaoAcesso(codigoCartao);
 
 	    // Caso especial: responsável
 	    verificarOuCriarResponsavel(cadastro, cliente, pedestre.getEmpresa(), tipo);
