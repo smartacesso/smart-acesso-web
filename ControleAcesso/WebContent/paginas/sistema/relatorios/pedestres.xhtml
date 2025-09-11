@@ -288,6 +288,10 @@
 						<h:outputFormat
 							value="#{pedestre.tipo == 'ATIVO' ? pedestre.sentido : '---'}" />
 					</p:column>
+					
+					<p:column headerText="#{msgs['label.uc010.periodo']}" style="text-align: center">
+    					<h:outputText value="#{pedestre.periodo}" />
+				    </p:column>
 
 					<p:column headerText="#{msgs['alt.acao.visualizar']}"
 						styleClass="col-desktop-only" style="text-align: center"
