@@ -53,25 +53,37 @@
 
 			<p:dialog id="alteraSenhaDialog" widgetVar="alteraSenha"
 				header="#{msgs['header.alterar.dados.login']}" modal="true">
-				<p:panelGrid columns="3">
-					<p:column>
-						<h:outputText value="#{msgs['label.novo.login']}" />
-						<p:inputText value="#{cadastroUsuarioController.usuarioLogin}">
-							<f:validateRegex pattern="[a-zA-Z0-9]+" />
-						</p:inputText>
-					</p:column>
 
-					<p:column>
-						<h:outputText value="#{msgs['label.nova.senha']}" />
-						<p:inputText value="#{cadastroUsuarioController.usuarioSenha}" />
-					</p:column>
+				<h:form id="formAlteraSenha">
+					<p:panelGrid columns="3">
+						<p:column>
+							<h:outputText value="#{msgs['label.novo.login']}" />
+							<p:inputText value="#{cadastroUsuarioController.usuarioLogin}">
+								<f:validateRegex pattern="[a-zA-Z0-9]+" />
+							</p:inputText>
+						</p:column>
 
-					<p:column>
-						<p:commandButton value="#{msgs['alt.acao.alterar']}"
-							action="#{cadastroUsuarioController.alterarLoginSenhaUsuarioUsuario()}"
-							oncomplete="PF('alteraSenha').hide();" />
-					</p:column>
-				</p:panelGrid>
+						<p:column>
+							<h:outputText value="#{msgs['label.nova.senha']}" />
+							<p:password id="alteraSenha"
+								value="#{cadastroUsuarioController.usuarioSenha}"
+								feedback="true" 
+								redisplay="true"
+								promptLabel="Digite sua senha" weakLabel="Fraca" goodLabel="Boa"
+								strongLabel="Forte" validatorMessage="Senha inválida (fraca)">
+								<f:validateRegex
+									pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[@$!%*?&amp;])[A-Za-z0-9@$!%*?&amp;]{8,}$" />
+							</p:password>
+						</p:column>
+
+						<p:column>
+							<p:commandButton value="#{msgs['alt.acao.alterar']}"
+								action="#{cadastroUsuarioController.alterarLoginSenhaUsuarioUsuario()}"
+								process="@form" update="@form"
+								oncomplete="PF('alteraSenha').hide();" />
+						</p:column>
+					</p:panelGrid>
+				</h:form>
 			</p:dialog>
 
 
@@ -122,12 +134,32 @@
 									</div>
 
 									<div class="ui-g-12 ui-md-6">
-										<p:outputLabel value="#{msgs['label.uc004.senha']}"
-											for="senha" indicateRequired="true" />
-										<p:inputText id="senha"
+
+										<p:outputLabel for="senha" value="Senha:"
+											indicateRequired="true" />
+										<p:password id="senha"
 											value="#{cadastroUsuarioController.entidade.senha}"
-											required="true" />
+											required="true" feedback="true" redisplay="true"
+											match="confirmarSenha" promptLabel="Digite sua senha"
+											weakLabel="Fraca" goodLabel="Boa" strongLabel="Forte"
+											validatorMessage="Senha inválida">
+											<f:validateRegex
+												pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[@$!%*?&amp;])[A-Za-z0-9@$!%*?&amp;]{8,}$" />
+										</p:password>
+
+										<p:outputLabel for="confirmarSenha" value="Confirmar Senha:"
+											indicateRequired="true" />
+										<p:password id="confirmarSenha"
+											value="#{cadastroUsuarioController.confirmarSenha}"
+											redisplay="true" required="true" feedback="false"
+											validatorMessage="Confirmação obrigatória" />
+
+										<p:message for="senha" />
+										<p:message for="confirmarSenha" />
+
 									</div>
+
+
 								</h:panelGroup>
 
 								<div class="ui-g-12 ui-md-6">
@@ -139,19 +171,16 @@
 								</div>
 
 								<div class="ui-g-12 ui-md-6">
-									<p:outputLabel value="#{msgs['label.uc004.cpf']}" for="cpf"
-										indicateRequired="true" />
+									<p:outputLabel value="#{msgs['label.uc004.cpf']}" for="cpf" />
 									<p:inputMask id="cpf"
 										value="#{cadastroUsuarioController.entidade.cpf}"
-										mask="999.999.999-99" required="true" converter="cpfConverter" />
+										mask="999.999.999-99" converter="cpfConverter" />
 								</div>
 
 								<div class="ui-g-12 ui-md-6">
-									<p:outputLabel value="#{msgs['label.uc004.rg']}" for="rg"
-										indicateRequired="true" />
+									<p:outputLabel value="#{msgs['label.uc004.rg']}" for="rg" />
 									<p:inputMask id="rg"
-										value="#{cadastroUsuarioController.entidade.rg}"
-										required="true" />
+										value="#{cadastroUsuarioController.entidade.rg}" />
 								</div>
 
 								<div class="ui-g-12 ui-md-6">
@@ -164,10 +193,10 @@
 
 								<div class="ui-g-12 ui-md-6">
 									<p:outputLabel value="#{msgs['label.uc004.celular.usuario']}"
-										for="celular" indicateRequired="true" />
+										for="celular" />
 									<p:inputMask id="celular"
 										value="#{cadastroUsuarioController.entidade.celular}"
-										mask="(99) 9 9999-9999" required="true" />
+										mask="(99) 9 9999-9999" />
 								</div>
 
 								<div class="ui-g-12 ui-md-6">

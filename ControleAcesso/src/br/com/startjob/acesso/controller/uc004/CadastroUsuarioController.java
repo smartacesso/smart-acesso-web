@@ -29,6 +29,8 @@ public class CadastroUsuarioController extends CadastroBaseController {
 	
 	private String usuarioLogin;
 	private String usuarioSenha;
+	private String confirmarSenha;
+
 	
 	@PostConstruct
 	@Override
@@ -50,42 +52,56 @@ public class CadastroUsuarioController extends CadastroBaseController {
 	
 	@Override
 	public String salvar() {
-		UsuarioEntity usuario = (UsuarioEntity) getEntidade();
-		
-		if(usuario.getId() == null && 
-				usuario.getEmail() != null &&
-				!"".equals(usuario.getEmail()) &&
-				verificaEmailExistente(usuario.getEmail())) {
+	    UsuarioEntity usuario = (UsuarioEntity) getEntidade();
 
-			mensagemFatal("", "msg.email.existente");
-			return "";
-		}
-		
-		if(usuario.getId() == null 
-				&& verificaLoginExistente(usuario.getLogin(), getUsuarioLogado().getCliente().getId())) {
-			mensagemFatal("", "msg.login.existente");
-			return "";
-		}
-		
-		if(usuario.getId() == null) {
-			try {
-				usuario.setSenha(EncryptionUtils.encrypt(usuario.getSenha()));
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-		
-		usuario.setCliente(getUsuarioLogado().getCliente());
+	    // valida se senha e confirmação batem (somente em novos cadastros)
+	    if (usuario.getId() == null) {
+	        if (usuario.getSenha() == null || !usuario.getSenha().equals(confirmarSenha)) {
+	            mensagemFatal("", "As senhas não conferem.");
+	            return "";
+	        }
+	    }
+	    
+	    // valida regex
+	    if (!usuario.getSenha().matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[@$!%*?&])[A-Za-z0-9@$!%*?&]{8,}$")) {
+	        mensagemFatal("", "Senha inválida. Deve conter letras maiúsculas, minúsculas, números e caracteres especiais.");
+	        return "";
+	    }
 
-		if(usuario.getEndereco().getCep() == null || usuario.getEndereco().getCep().equals("")) {
-			usuario.setEndereco(null);
-		}
-		
-		String retorno = super.salvar();
-		
-		redirect("/paginas/sistema/usuarios/pesquisaUsuarios.xhtml?acao=OK");
-		
-		return retorno;
+	    if (usuario.getId() == null &&
+	            usuario.getEmail() != null &&
+	            !"".equals(usuario.getEmail()) &&
+	            verificaEmailExistente(usuario.getEmail())) {
+
+	        mensagemFatal("", "msg.email.existente");
+	        return "";
+	    }
+
+	    if (usuario.getId() == null
+	            && verificaLoginExistente(usuario.getLogin(), getUsuarioLogado().getCliente().getId())) {
+	        mensagemFatal("", "msg.login.existente");
+	        return "";
+	    }
+
+	    if (usuario.getId() == null) {
+	        try {
+	            usuario.setSenha(EncryptionUtils.encrypt(usuario.getSenha()));
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	        }
+	    }
+
+	    usuario.setCliente(getUsuarioLogado().getCliente());
+
+	    if (usuario.getEndereco().getCep() == null || usuario.getEndereco().getCep().equals("")) {
+	        usuario.setEndereco(null);
+	    }
+
+	    String retorno = super.salvar();
+
+	    redirect("/paginas/sistema/usuarios/pesquisaUsuarios.xhtml?acao=OK");
+
+	    return retorno;
 	}
 	
 	public void buscarLoginUsuario() {
@@ -170,6 +186,14 @@ public class CadastroUsuarioController extends CadastroBaseController {
 
 	public void setUsuarioSenha(String usuarioSenha) {
 		this.usuarioSenha = usuarioSenha;
+	}
+	
+	public String getConfirmarSenha() {
+	    return confirmarSenha;
+	}
+
+	public void setConfirmarSenha(String confirmarSenha) {
+	    this.confirmarSenha = confirmarSenha;
 	}
 	
 }
