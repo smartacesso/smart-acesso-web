@@ -92,18 +92,9 @@ public class RelatorioOcupacaoController extends RelatorioController {
 			args.put("EQUIPAMENTO", getParans().get("equipamento"));
 			
 			
-			String query = "";
-			
-			if("plsql".equals(sgdb)) {
-				query = "findOcupacaoPorHoraSqlServer";
-			}else if("oracle".equals(sgdb)) {
-				query = "findOcupacaoPorHoraOracle";
-			} else {
-				query = "findOcupacaoPorHora";
-			}
-			
 			listaAcessos = (List<AcessoEntity>) 
-						baseEJB.pesquisaArgFixos(AcessoEntity.class, query, args);
+						baseEJB.pesquisaArgFixos(AcessoEntity.class, "plsql".equals(sgdb) 
+								? "findOcupacaoPorHoraSqlServer" : "findOcupacaoPorHora", args);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

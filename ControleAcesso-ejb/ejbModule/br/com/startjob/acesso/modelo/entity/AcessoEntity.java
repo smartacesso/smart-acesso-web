@@ -45,48 +45,19 @@ import br.com.startjob.acesso.modelo.entity.base.ClienteBaseEntity;
 		@NamedQuery(name = "AcessoEntity.findAllComPedestreNulo", query = "select obj " + "from AcessoEntity obj "
 				+ "where obj.pedestre = null " + "and (obj.removido = false or obj.removido is null) "
 				+ "order by obj.data desc"),
-		@NamedQuery(
-			    name = "AcessoEntity.findOcupacaoPorHora",
-			    query = "select new br.com.startjob.acesso.modelo.entity.AcessoEntity(" +
-			            "       hour(obj.data), count(obj.id)) " +
-			            "from AcessoEntity obj " +
-			            "where obj.sentido = 'ENTRADA' " +
-			            "  and obj.tipo <> 'INATIVO' " +
-			            "  and obj.cliente.id = :ID_CLIENTE " +
-			            "  and date(obj.data) = :DATA " +
-			            "  and (:NOME_PEDESTRE IS NULL OR lower(obj.pedestre.nome) like lower(concat('%', :NOME_PEDESTRE, '%'))) " +
-			            "  and (:ID_EMPRESA IS NULL OR obj.pedestre.empresa.id = :ID_EMPRESA) " +
-			            "  and (:EQUIPAMENTO IS NULL OR obj.equipamento = :EQUIPAMENTO) " +
-			            "group by hour(obj.data)"
-			),
-		@NamedQuery(
-			    name = "AcessoEntity.findOcupacaoPorHoraSqlServer",
-			    query = "select new br.com.startjob.acesso.modelo.entity.AcessoEntity(" +
-			            "       hour(obj.data), count(obj.id)) " +
-			            "from AcessoEntity obj " +
-			            "where obj.sentido = 'ENTRADA' " +
-			            "  and obj.tipo <> 'INATIVO' " +
-			            "  and obj.cliente.id = :ID_CLIENTE " +
-			            "  and cast(obj.data as date) = cast(:DATA as date) " +
-			            "  and (:NOME_PEDESTRE IS NULL OR lower(obj.pedestre.nome) like lower(:NOME_PEDESTRE)) " +
-			            "  and (:ID_EMPRESA IS NULL OR obj.pedestre.empresa.id = :ID_EMPRESA) " +
-			            "  and (:EQUIPAMENTO IS NULL OR obj.equipamento = :EQUIPAMENTO) " +
-			            "group by hour(obj.data)"
-			),
-		@NamedQuery(
-			    name = "AcessoEntity.findOcupacaoPorHoraOracle",
-			    query = "select new br.com.startjob.acesso.modelo.entity.AcessoEntity(" +
-			            "       TO_CHAR(obj.data, 'HH24'), count(obj.id)) " +
-			            "from AcessoEntity obj " +
-			            "where obj.sentido = 'ENTRADA' " +
-			            "  and obj.tipo <> 'INATIVO' " +
-			            "  and obj.cliente.id = :ID_CLIENTE " +
-			            "  and TRUNC(obj.data) = TRUNC(:DATA) " +
-			            "  and (:NOME_PEDESTRE IS NULL OR lower(obj.pedestre.nome) like lower(concat('%', :NOME_PEDESTRE, '%'))) " +
-			            "  and (:ID_EMPRESA IS NULL OR obj.pedestre.empresa.id = :ID_EMPRESA) " +
-			            "  and (:EQUIPAMENTO IS NULL OR obj.equipamento = :EQUIPAMENTO) " +
-			            "group by TO_CHAR(obj.data, 'HH24')"
-			),
+		@NamedQuery(name = "AcessoEntity.findOcupacaoPorHora", query = "select new br.com.startjob.acesso.modelo.entity.AcessoEntity(hour(obj.data), count(obj.id)) "
+				+ "from AcessoEntity obj " + "where obj.sentido = 'ENTRADA' " + "  and obj.tipo <> 'INATIVO' "
+				+ "  and obj.cliente.id = :ID_CLIENTE " + "  and date(obj.data) = :DATA "
+				+ "  and (lower(obj.pedestre.nome) like lower(concat('%', :NOME_PEDESTRE, '%')) or :NOME_PEDESTRE = null) "
+				+ "  and (obj.pedestre.empresa.id = :ID_EMPRESA or :ID_EMPRESA = null) "
+				+ "  and (obj.equipamento = :EQUIPAMENTO or :EQUIPAMENTO = null) " + "group by hour(obj.data) "),
+		@NamedQuery(name = "AcessoEntity.findOcupacaoPorHoraSqlServer", query = "select new br.com.startjob.acesso.modelo.entity.AcessoEntity(hour(obj.data), count(obj.id)) "
+				+ "from AcessoEntity obj " + "where obj.sentido = 'ENTRADA' " + "  and obj.tipo <> 'INATIVO' "
+				+ "  and obj.cliente.id = :ID_CLIENTE "
+				+ "  and format(obj.data, 'YYYY-MM-DD') = format(:DATA, 'YYYY-MM-DD') "
+				+ "  and (lower(obj.pedestre.nome) like lower(:NOME_PEDESTRE) or :NOME_PEDESTRE = null) "
+				+ "  and (obj.pedestre.empresa.id = :ID_EMPRESA or :ID_EMPRESA = null) "
+				+ "  and (obj.equipamento = :EQUIPAMENTO or :EQUIPAMENTO = null) " + "group by hour(obj.data) "),
 		@NamedQuery(name = "AcessoEntity.findAllPedestresSemSaida", query = "select obj " + "from AcessoEntity obj "
 				+ "join fetch obj.pedestre p " + "left join fetch p.empresa e " + "where p.id != null "
 				+ "	and obj.sentido = 'ENTRADA' " + "	and obj.tipo = 'ATIVO' " + "	and (select count(saida.id) "
