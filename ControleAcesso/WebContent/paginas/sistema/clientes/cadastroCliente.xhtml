@@ -5,532 +5,697 @@
 	xmlns:f="http://java.sun.com/jsf/core"
 	xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:p="http://primefaces.org/ui">
-	
+
 <body>
 
 	<ui:composition template="/tema/templates/template.xhtml">
-	
+
 		<ui:define name="titulo">
 			#{msgs['title.sistema']} | #{cadastroClienteController.entidade.id != null 
 											? msgs['title.uc001.editar.cliente'] 
 											: msgs['title.uc001.cadastro.cliente']}
 		</ui:define>
-		
+
 		<ui:define name="breadcrumb">
-			<a target="_top" href="/#{menuController.appName}/paginas/principal.xhtml"> <h:outputText
+			<a target="_top"
+				href="/#{menuController.appName}/paginas/principal.xhtml"> <h:outputText
 					value="#{msgs['title.principal']}" />
 			</a> > 
-			<a target="_top" href="/#{menuController.appName}/paginas/sistema/clientes/pesquisaCliente.xhtml"> <h:outputText
-					value="#{msgs['title.uc001.consulta.clientes']}" />
-			</a> > <h:outputText value="#{cadastroClienteController.entidade.id != null 
+			<a target="_top"
+				href="/#{menuController.appName}/paginas/sistema/clientes/pesquisaCliente.xhtml">
+				<h:outputText value="#{msgs['title.uc001.consulta.clientes']}" />
+			</a> > <h:outputText
+				value="#{cadastroClienteController.entidade.id != null 
 										? msgs['title.uc001.editar.cliente'] 
 										: msgs['title.uc001.cadastro.cliente']}" />
 		</ui:define>
-		
+
 		<ui:define name="tools">
 			<h:panelGrid columns="4" styleClass="conteudo_tools">
-	
+
 				<h:commandButton id="save"
 					action="#{cadastroClienteController.salvar}"
 					title="#{msgs['alt.acao.save']}"
 					image="#{menuController.path}/tema/img/bt_saver.png">
-					<p:ajax process="@form" update="@form"/>
+					<p:ajax process="@form" update="@form" />
 				</h:commandButton>
-				
-				<h:commandButton id="editarSenha" 
-						rendered="#{cadastroClienteController.entidade.id != null}" 
-						title="#{msgs['alt.acao.alterar.senha']}"
-						image="#{menuController.path}/tema/img/bt_security.png"
-						action="#{cadastroClienteController.buscaDadosUsuario()}">
-					<p:ajax process="@this" update="alteraSenhaDialog" oncomplete="PF('alteraSenha').show(); return false;"/>
+
+				<h:commandButton id="editarSenha"
+					rendered="#{cadastroClienteController.entidade.id != null}"
+					title="#{msgs['alt.acao.alterar.senha']}"
+					image="#{menuController.path}/tema/img/bt_security.png"
+					action="#{cadastroClienteController.buscaDadosUsuario()}">
+					<p:ajax process="@this" update="alteraSenhaDialog"
+						oncomplete="PF('alteraSenha').show(); return false;" />
 				</h:commandButton>
 			</h:panelGrid>
 		</ui:define>
-		
+
 		<ui:define name="conteudo">
-		
-			<p:dialog id="alteraSenhaDialog" widgetVar="alteraSenha" header="#{msgs['header.alterar.dados.login']}" modal="true">
+
+			<p:dialog id="alteraSenhaDialog" widgetVar="alteraSenha"
+				header="#{msgs['header.alterar.dados.login']}" modal="true">
 				<p:panelGrid columns="3">
 					<p:column>
-						<h:outputText value="#{msgs['label.novo.login']}"/>
+						<h:outputText value="#{msgs['label.novo.login']}" />
 						<br />
-						<p:inputText value="#{cadastroClienteController.usuarioParaEditar.login}">
-							<f:validateRegex pattern="[a-zA-Z0-9]+"/>
+						<p:inputText
+							value="#{cadastroClienteController.usuarioParaEditar.login}">
+							<f:validateRegex pattern="[a-zA-Z0-9]+" />
 						</p:inputText>
 					</p:column>
-					
+
 					<p:column>
 						<h:outputText value="#{msgs['label.nova.senha']}" />
 						<br />
-						<p:inputText value="#{cadastroClienteController.usuarioSenha}"/>
+						<p:password id="alteraSenha"
+							value="#{cadastroUsuarioController.usuarioSenha}" feedback="true"
+							redisplay="true" promptLabel="Digite sua senha" weakLabel="Fraca"
+							goodLabel="Boa" strongLabel="Forte"
+							validatorMessage="Senha inválida (fraca)">
+							<f:validateRegex
+								pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[@$!%*?&amp;])[A-Za-z0-9@$!%*?&amp;]{8,}$" />
+						</p:password>
 					</p:column>
-					
+
 					<p:column>
 						<br />
-						<p:commandButton value="#{msgs['alt.acao.alterar']}" 
-								action="#{cadastroClienteController.alterarSenhaUsuarioCliente()}" oncomplete="PF('alteraSenha').hide();"/>
+						<p:commandButton value="#{msgs['alt.acao.alterar']}"
+							action="#{cadastroClienteController.alterarSenhaUsuarioCliente()}"
+							oncomplete="PF('alteraSenha').hide();" />
 					</p:column>
 				</p:panelGrid>
 			</p:dialog>
-		
-			
+
+
 			<h:panelGrid width="100%" columns="1" headerClass="h-grid-header">
 				<f:facet name="header">
-					<h:outputText value="#{cadastroClienteController.entidade.id != null 
+					<h:outputText
+						value="#{cadastroClienteController.entidade.id != null 
 								? msgs['title.uc001.editar.cliente'] 
 								: msgs['title.uc001.cadastro.cliente']}" />
 				</f:facet>
-				
+
 				<h:column>
-			
+
 					<p:tabView id="cadastroClienteTab">
 						<p:tab title="Cadastro de unidade">
-							<p:panelGrid columns="2" id="painelCadastroCliente" style="width: 100%;">
+							<p:panelGrid columns="2" id="painelCadastroCliente"
+								style="width: 100%;">
 								<p:column>
-									<p:outputLabel value="#{msgs['label.uc001.nome']}" for="nome" indicateRequired="true"/>
+									<p:outputLabel value="#{msgs['label.uc001.nome']}" for="nome"
+										indicateRequired="true" />
 									<br />
-									<p:inputText id="nome" value="#{cadastroClienteController.entidade.nome}" required="true" size="40"/>
+									<p:inputText id="nome"
+										value="#{cadastroClienteController.entidade.nome}"
+										required="true" size="40" />
 								</p:column>
-								
+
 								<p:column>
-									<p:outputLabel value="#{msgs['label.uc001.email']}" for="email" indicateRequired="false"/>
+									<p:outputLabel value="#{msgs['label.uc001.email']}" for="email"
+										indicateRequired="false" />
 									<br />
-									<p:inputText id="email" value="#{cadastroClienteController.entidade.email}" required="false" size="40" validator="emailValidator"/>
+									<p:inputText id="email"
+										value="#{cadastroClienteController.entidade.email}"
+										required="false" size="40" validator="emailValidator" />
 								</p:column>
-								
+
 								<p:column>
-									<p:outputLabel value="#{msgs['label.uc001.cnpj']}" for="cnpj" indicateRequired="false"/>
+									<p:outputLabel value="#{msgs['label.uc001.cnpj']}" for="cnpj"
+										indicateRequired="false" />
 									<br />
-									<p:inputMask id="cnpj" value="#{cadastroClienteController.entidade.cnpj}" mask="99.999.999/9999-99"
-											required="false" converter="cnpjConverter"/>
+									<p:inputMask id="cnpj"
+										value="#{cadastroClienteController.entidade.cnpj}"
+										mask="99.999.999/9999-99" required="false"
+										converter="cnpjConverter" />
 								</p:column>
-		
+
 								<p:column>
-									<p:outputLabel value="#{msgs['label.uc001.telefone']}" for="telefone"/>
+									<p:outputLabel value="#{msgs['label.uc001.telefone']}"
+										for="telefone" />
 									<br />
-									<p:inputMask id="telefone" value="#{cadastroClienteController.entidade.telefone}" mask="(999) 9999-9999"/>
+									<p:inputMask id="telefone"
+										value="#{cadastroClienteController.entidade.telefone}"
+										mask="(999) 9999-9999" />
 								</p:column>
-		
+
 								<p:column>
-									<p:outputLabel value="#{msgs['label.uc001.celular']}" for="celular" indicateRequired="false"/>
+									<p:outputLabel value="#{msgs['label.uc001.celular']}"
+										for="celular" indicateRequired="false" />
 									<br />
-									<p:inputMask id="celular" value="#{cadastroClienteController.entidade.celular}" mask="(999) 9 9999-9999"
-											required="false"/>
+									<p:inputMask id="celular"
+										value="#{cadastroClienteController.entidade.celular}"
+										mask="(999) 9 9999-9999" required="false" />
 								</p:column>
-		
+
 								<p:column>
-									<p:outputLabel value="#{msgs['label.uc001.contato']}" for="contato"/>
+									<p:outputLabel value="#{msgs['label.uc001.contato']}"
+										for="contato" />
 									<br />
-									<p:inputText id="contato" value="#{cadastroClienteController.entidade.contato}" size="50"/>
+									<p:inputText id="contato"
+										value="#{cadastroClienteController.entidade.contato}"
+										size="50" />
 								</p:column>
-								
+
 								<p:column>
-									<p:outputLabel value="#{msgs['label.uc001.status']}" for="status" indicateRequired="true"/>
+									<p:outputLabel value="#{msgs['label.uc001.status']}"
+										for="status" indicateRequired="true" />
 									<br />
-									<p:selectOneMenu id="status" value="#{cadastroClienteController.entidade.status}" required="true">
-										<f:selectItems value="#{cadastroClienteController.listaStatus}"/>
+									<p:selectOneMenu id="status"
+										value="#{cadastroClienteController.entidade.status}"
+										required="true">
+										<f:selectItems
+											value="#{cadastroClienteController.listaStatus}" />
 									</p:selectOneMenu>
 								</p:column>
-								
+
 								<p:column>
-									<p:outputLabel value="#{msgs['label.uc001.nome.unidade.organizacional']}" for="unidadeOrganizacional"/>
+									<p:outputLabel
+										value="#{msgs['label.uc001.nome.unidade.organizacional']}"
+										for="unidadeOrganizacional" />
 									<br />
-									<p:inputText id="unidadeOrganizacional" value="#{cadastroClienteController.entidade.nomeUnidadeOrganizacional}" 
-												required="true">
-										<f:validateRegex pattern="[a-zA-Z0-9]+"/>
+									<p:inputText id="unidadeOrganizacional"
+										value="#{cadastroClienteController.entidade.nomeUnidadeOrganizacional}"
+										required="true">
+										<f:validateRegex pattern="[a-zA-Z0-9]+" />
 									</p:inputText>
 								</p:column>
-								
-								<p:column rendered="#{cadastroClienteController.entidade.id == null}">
-									<p:outputLabel value="#{msgs['label.uc001.login']}" for="usuarioLogin" indicateRequired="true"/>
+
+								<p:column
+									rendered="#{cadastroClienteController.entidade.id == null}">
+									<p:outputLabel value="#{msgs['label.uc001.login']}"
+										for="usuarioLogin" indicateRequired="true" />
 									<br />
-									<p:inputText id="usuarioLogin" value="#{cadastroClienteController.usuarioLogin}" required="true">
-										<f:validateRegex pattern="[a-zA-Z0-9]+"/>
+									<p:inputText id="usuarioLogin"
+										value="#{cadastroClienteController.usuarioLogin}"
+										required="true">
+										<f:validateRegex pattern="[a-zA-Z0-9]+" />
 									</p:inputText>
 								</p:column>
-								
-								<p:column rendered="#{cadastroClienteController.entidade.id == null}">
-									<p:outputLabel value="#{msgs['label.uc001.senha']}" for="senhaLogin" indicateRequired="true"/>
+
+								<p:column
+									rendered="#{cadastroClienteController.entidade.id == null}">
+									<p:outputLabel value="#{msgs['label.uc001.senha']}"
+										for="senhaLogin" indicateRequired="true" />
 									<br />
-									<p:inputText id="senhaLogin" value="#{cadastroClienteController.usuarioSenha}" required="true"/>
-								</p:column>
-								
-							</p:panelGrid>
-						</p:tab>
-						
-						<p:tab title="#{msgs['label.uc001.endereco']}">
-							<p:panelGrid columns="2" id="painelEnderecoCliente" style="width: 100%;">
-								<p:column>
-									<p:outputLabel value="#{msgs['label.uc001.cep']}" for="cep"/>
+									<p:password id="senhaLogin"
+										value="#{cadastroClienteController.usuarioSenha}"
+										required="true" feedback="true" redisplay="true"
+										match="confirmarSenha" promptLabel="Digite sua senha"
+										weakLabel="Fraca" goodLabel="Boa" strongLabel="Forte"
+										validatorMessage="Senha inválida">
+										<f:validateRegex
+											pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[@$!%*?&amp;])[A-Za-z0-9@$!%*?&amp;]{8,}$" />
+									</p:password>
 									<br />
-									<p:inputMask id="cep" value="#{cadastroClienteController.entidade.endereco.cep}" mask="99999-999"/>
-								</p:column>
-		
-								<p:column>
-									<p:outputLabel value="#{msgs['label.uc001.logradouro']}" for="logradouro"/>
+									<p:outputLabel for="confirmarSenha" value="Confirmar Senha:"
+										indicateRequired="true" />
 									<br />
-									<p:inputText id="logradouro" value="#{cadastroClienteController.entidade.endereco.logradouro}" size="40"/>
-								</p:column>
-		
-								<p:column>
-									<p:outputLabel value="#{msgs['label.uc001.numero']}" for="numero"/>
-									<br />
-									<p:inputNumber id="numero" value="#{cadastroClienteController.entidade.endereco.numero}" size="5" minValue="0" decimalPlaces="0"/>
-								</p:column>
-		
-								<p:column>
-									<p:outputLabel value="#{msgs['label.uc001.complemento']}" for="complemento"/>
-									<br />
-									<p:inputText id="complemento" value="#{cadastroClienteController.entidade.endereco.complemento}" size="40"/>
-								</p:column>
-								
-								<p:column>
-									<p:outputLabel value="#{msgs['label.uc001.bairro']}" for="bairro"/>
-									<br />
-									<p:inputText id="bairro" value="#{cadastroClienteController.entidade.endereco.bairro}" size="30"/>
-								</p:column>
-		
-								<p:column>
-									<p:outputLabel value="#{msgs['label.uc001.cidade']}" for="cidade"/>
-									<br />
-									<p:inputText id="cidade" value="#{cadastroClienteController.entidade.endereco.cidade}" size="40"/>
-								</p:column>
-		
-								<p:column>
-									<p:outputLabel value="#{msgs['label.uc001.estado']}" for="estado"/>
-									<br />
-									<p:inputText id="estado" value="#{cadastroClienteController.entidade.endereco.estado}" size="5"/>
-								</p:column>
-								
-							</p:panelGrid>
-						</p:tab>
-						
-						<p:tab title="#{msgs['label.uc001.planos']}">
-						
-							<p:panelGrid columns="8" id="painelPlanosCliente" style="width: 100%;">
-						
-								<p:column>
-									<p:outputLabel value="#{msgs['label.uc001.nome.plano']}" for="nomePlano" indicateRequired="true"/>
-									<br />
-									<p:inputText id="nomePlano" value="#{cadastroClienteController.plano.nome}" size="40"/>
-								</p:column>
-								<p:column>
-									<p:outputLabel value="#{msgs['label.uc001.status.plano']}" for="statusPlanos" indicateRequired="true"/>
-									<br />
-									<p:selectOneMenu id="statusPlanos" value="#{cadastroClienteController.plano.status}" >
-										<f:selectItems value="#{cadastroClienteController.listaStatus}"/>
-									</p:selectOneMenu>
-								</p:column>
-								<p:column>
-									<p:outputLabel value="#{msgs['label.uc001.data.inicio']}" for="inicioPlano" indicateRequired="true"/>
-									<br />
-									<p:calendar id="inicioPlano" value="#{cadastroClienteController.plano.inicio}" size="10" mask="99/99/9999" 
-									pattern="dd/MM/yyyy" locale="pt_BR" navigator="true"/>
-								</p:column>
-								<p:column>
-									<p:outputLabel value="#{msgs['label.uc001.data.fim']}" for="fimPlano" indicateRequired="true"/>
-									<br />
-									<p:calendar id="fimPlano" value="#{cadastroClienteController.plano.fim}" size="10" mask="99/99/9999" pattern="dd/MM/yyyy" 
-									locale="pt_BR" navigator="true"/>
-								</p:column>
-								<p:column>
-									<p:outputLabel value="#{msgs['label.uc001.periodicidade.cobranca']}" for="periodicidadeCobrancaPlano" indicateRequired="true"/>
-									<br />
-									<p:inputText id="periodicidadeCobrancaPlano" value="#{cadastroClienteController.plano.periodicidadeCobranca}"/>
-								</p:column>
-								<p:column>
-									<p:outputLabel value="#{msgs['label.uc001.dia.vencimento']}" for="diaVencimentoPlano" indicateRequired="true"/>
-									<br />
-									<p:inputNumber id="diaVencimentoPlano" value="#{cadastroClienteController.plano.diaVencimento}" size="5" decimalPlaces="0"
-												maxValue="31" minValue="1"/>
-								</p:column>
-								<p:column>
-									<p:outputLabel value="#{msgs['label.uc001.valor.plano']}" for="valorPlano" indicateRequired="true"/>
-									<br />
-									<p:inputNumber id="valorPlano" value="#{cadastroClienteController.plano.valor}"
-										symbol="#{menuController.currencySymbol}" decimalSeparator="," thousandSeparator="." minValue="0" size="10"/>
-								</p:column>
-								<p:column>
+									<p:password id="confirmarSenha"
+										value="#{cadastroUsuarioController.confirmarSenha}"
+										redisplay="true" required="true" feedback="false"
+										validatorMessage="Confirmação obrigatória" />
 									<br/>
-									<p:commandButton id="adicionar" value="#{msgs['alt.acao.adicionar']}" action="#{cadastroClienteController.adicionarPlano}"
-											update="painelPlanosCliente planos" process="painelPlanosCliente">
+									<h:outputText
+										value="A senha deve conter: mínimo 8 caracteres, com letras maiúsculas, minúsculas, números e caracteres especiais."
+										style="color:gray; font-size:12px" />
+
+								</p:column>
+
+							</p:panelGrid>
+						</p:tab>
+
+						<p:tab title="#{msgs['label.uc001.endereco']}">
+							<p:panelGrid columns="2" id="painelEnderecoCliente"
+								style="width: 100%;">
+								<p:column>
+									<p:outputLabel value="#{msgs['label.uc001.cep']}" for="cep" />
+									<br />
+									<p:inputMask id="cep"
+										value="#{cadastroClienteController.entidade.endereco.cep}"
+										mask="99999-999" />
+								</p:column>
+
+								<p:column>
+									<p:outputLabel value="#{msgs['label.uc001.logradouro']}"
+										for="logradouro" />
+									<br />
+									<p:inputText id="logradouro"
+										value="#{cadastroClienteController.entidade.endereco.logradouro}"
+										size="40" />
+								</p:column>
+
+								<p:column>
+									<p:outputLabel value="#{msgs['label.uc001.numero']}"
+										for="numero" />
+									<br />
+									<p:inputNumber id="numero"
+										value="#{cadastroClienteController.entidade.endereco.numero}"
+										size="5" minValue="0" decimalPlaces="0" />
+								</p:column>
+
+								<p:column>
+									<p:outputLabel value="#{msgs['label.uc001.complemento']}"
+										for="complemento" />
+									<br />
+									<p:inputText id="complemento"
+										value="#{cadastroClienteController.entidade.endereco.complemento}"
+										size="40" />
+								</p:column>
+
+								<p:column>
+									<p:outputLabel value="#{msgs['label.uc001.bairro']}"
+										for="bairro" />
+									<br />
+									<p:inputText id="bairro"
+										value="#{cadastroClienteController.entidade.endereco.bairro}"
+										size="30" />
+								</p:column>
+
+								<p:column>
+									<p:outputLabel value="#{msgs['label.uc001.cidade']}"
+										for="cidade" />
+									<br />
+									<p:inputText id="cidade"
+										value="#{cadastroClienteController.entidade.endereco.cidade}"
+										size="40" />
+								</p:column>
+
+								<p:column>
+									<p:outputLabel value="#{msgs['label.uc001.estado']}"
+										for="estado" />
+									<br />
+									<p:inputText id="estado"
+										value="#{cadastroClienteController.entidade.endereco.estado}"
+										size="5" />
+								</p:column>
+
+							</p:panelGrid>
+						</p:tab>
+
+						<p:tab title="#{msgs['label.uc001.planos']}">
+
+							<p:panelGrid columns="8" id="painelPlanosCliente"
+								style="width: 100%;">
+
+								<p:column>
+									<p:outputLabel value="#{msgs['label.uc001.nome.plano']}"
+										for="nomePlano" indicateRequired="true" />
+									<br />
+									<p:inputText id="nomePlano"
+										value="#{cadastroClienteController.plano.nome}" size="40" />
+								</p:column>
+								<p:column>
+									<p:outputLabel value="#{msgs['label.uc001.status.plano']}"
+										for="statusPlanos" indicateRequired="true" />
+									<br />
+									<p:selectOneMenu id="statusPlanos"
+										value="#{cadastroClienteController.plano.status}">
+										<f:selectItems
+											value="#{cadastroClienteController.listaStatus}" />
+									</p:selectOneMenu>
+								</p:column>
+								<p:column>
+									<p:outputLabel value="#{msgs['label.uc001.data.inicio']}"
+										for="inicioPlano" indicateRequired="true" />
+									<br />
+									<p:calendar id="inicioPlano"
+										value="#{cadastroClienteController.plano.inicio}" size="10"
+										mask="99/99/9999" pattern="dd/MM/yyyy" locale="pt_BR"
+										navigator="true" />
+								</p:column>
+								<p:column>
+									<p:outputLabel value="#{msgs['label.uc001.data.fim']}"
+										for="fimPlano" indicateRequired="true" />
+									<br />
+									<p:calendar id="fimPlano"
+										value="#{cadastroClienteController.plano.fim}" size="10"
+										mask="99/99/9999" pattern="dd/MM/yyyy" locale="pt_BR"
+										navigator="true" />
+								</p:column>
+								<p:column>
+									<p:outputLabel
+										value="#{msgs['label.uc001.periodicidade.cobranca']}"
+										for="periodicidadeCobrancaPlano" indicateRequired="true" />
+									<br />
+									<p:inputText id="periodicidadeCobrancaPlano"
+										value="#{cadastroClienteController.plano.periodicidadeCobranca}" />
+								</p:column>
+								<p:column>
+									<p:outputLabel value="#{msgs['label.uc001.dia.vencimento']}"
+										for="diaVencimentoPlano" indicateRequired="true" />
+									<br />
+									<p:inputNumber id="diaVencimentoPlano"
+										value="#{cadastroClienteController.plano.diaVencimento}"
+										size="5" decimalPlaces="0" maxValue="31" minValue="1" />
+								</p:column>
+								<p:column>
+									<p:outputLabel value="#{msgs['label.uc001.valor.plano']}"
+										for="valorPlano" indicateRequired="true" />
+									<br />
+									<p:inputNumber id="valorPlano"
+										value="#{cadastroClienteController.plano.valor}"
+										symbol="#{menuController.currencySymbol}" decimalSeparator=","
+										thousandSeparator="." minValue="0" size="10" />
+								</p:column>
+								<p:column>
+									<br />
+									<p:commandButton id="adicionar"
+										value="#{msgs['alt.acao.adicionar']}"
+										action="#{cadastroClienteController.adicionarPlano}"
+										update="painelPlanosCliente planos"
+										process="painelPlanosCliente">
 									</p:commandButton>
 								</p:column>
 							</p:panelGrid>
-							
-							<br/>
-							
+
+							<br />
+
 							<p:panelGrid columns="4" id="planos" style="width: 100%;">
-							
-								<h:outputText value="#{msgs['msg.nenhum.item.encontrado.adicionar']}" escape="false"
-											  rendered="#{empty cadastroClienteController.listaPlanos}" />
-							
-								<p:dataTable id="tablePlanos" value="#{cadastroClienteController.listaPlanos}" 
-									var="plano" paginator="true" rows="5" 
-									paginatorPosition="bottom" editable="true" paginatorAlwaysVisible="false"
+
+								<h:outputText
+									value="#{msgs['msg.nenhum.item.encontrado.adicionar']}"
+									escape="false"
+									rendered="#{empty cadastroClienteController.listaPlanos}" />
+
+								<p:dataTable id="tablePlanos"
+									value="#{cadastroClienteController.listaPlanos}" var="plano"
+									paginator="true" rows="5" paginatorPosition="bottom"
+									editable="true" paginatorAlwaysVisible="false"
 									rendered="#{not empty cadastroClienteController.listaPlanos}">
-									
-									<p:column headerText="#{msgs['label.uc001.nome.plano']}" style="text-align: center;">
+
+									<p:column headerText="#{msgs['label.uc001.nome.plano']}"
+										style="text-align: center;">
 										<p:cellEditor>
 											<f:facet name="output">
 												<h:outputText value="#{plano.nome}" />
 											</f:facet>
-											
+
 											<f:facet name="input">
-												<p:inputText value="#{plano.nome}"/>
+												<p:inputText value="#{plano.nome}" />
 											</f:facet>
 										</p:cellEditor>
 									</p:column>
-									
-									<p:column headerText="#{msgs['label.uc001.status.plano']}" style="text-align: center;">
+
+									<p:column headerText="#{msgs['label.uc001.status.plano']}"
+										style="text-align: center;">
 										<p:cellEditor>
 											<f:facet name="output">
 												<h:outputText value="#{plano.status}" />
 											</f:facet>
-											
+
 											<f:facet name="input">
-												<p:selectOneMenu value="#{plano.status}"  style="width:100%">
-													<f:selectItems value="#{cadastroClienteController.listaStatus}"/>
+												<p:selectOneMenu value="#{plano.status}" style="width:100%">
+													<f:selectItems
+														value="#{cadastroClienteController.listaStatus}" />
 												</p:selectOneMenu>
 											</f:facet>
 										</p:cellEditor>
 									</p:column>
-								
-									<p:column headerText="#{msgs['label.uc001.data.inicio']}" style="text-align: center;">
+
+									<p:column headerText="#{msgs['label.uc001.data.inicio']}"
+										style="text-align: center;">
 										<p:cellEditor>
 											<f:facet name="output">
 												<h:outputText value="#{plano.inicio}">
-													<f:convertDateTime pattern="dd/MM/yyyy"/>
+													<f:convertDateTime pattern="dd/MM/yyyy" />
 												</h:outputText>
 											</f:facet>
-											
+
 											<f:facet name="input">
-												<p:calendar value="#{plano.inicio}" pattern="dd/MM/yyyy" locale="pt_BR" mask="99/99/9999" navigator="true"/>
+												<p:calendar value="#{plano.inicio}" pattern="dd/MM/yyyy"
+													locale="pt_BR" mask="99/99/9999" navigator="true" />
 											</f:facet>
 										</p:cellEditor>
-										
+
 									</p:column>
-			
-									<p:column headerText="#{msgs['label.uc001.data.fim']}" style="text-align: center;">
+
+									<p:column headerText="#{msgs['label.uc001.data.fim']}"
+										style="text-align: center;">
 										<p:cellEditor>
 											<f:facet name="output">
 												<h:outputText value="#{plano.fim}">
-													<f:convertDateTime pattern="dd/MM/yyyy"/>
+													<f:convertDateTime pattern="dd/MM/yyyy" />
 												</h:outputText>
 											</f:facet>
-											
+
 											<f:facet name="input">
-												<p:calendar value="#{plano.fim}" pattern="dd/MM/yyyy" locale="pt_BR" mask="99/99/9999" navigator="true"/>
+												<p:calendar value="#{plano.fim}" pattern="dd/MM/yyyy"
+													locale="pt_BR" mask="99/99/9999" navigator="true" />
 											</f:facet>
 										</p:cellEditor>
-			
+
 									</p:column>
-			
-									<p:column headerText="#{msgs['label.uc001.periodicidade.cobranca']}" style="text-align: center;">
-										<p:cellEditor>
-											<f:facet name="output"><h:outputText value="#{plano.periodicidadeCobranca}" /></f:facet>
-											<f:facet name="input"><p:inputText value="#{plano.periodicidadeCobranca}"/></f:facet>
-										</p:cellEditor>
-										
-									</p:column>
-									
-									<p:column headerText="#{msgs['label.uc001.dia.vencimento']}" style="text-align: center;">
-										<p:cellEditor>
-											<f:facet name="output"><h:outputText value="#{plano.diaVencimento}" /></f:facet>
-											<f:facet name="input">
-												<p:inputNumber value="#{plano.diaVencimento}" decimalPlaces="0"
-														maxValue="31" minValue="1"/>
-											</f:facet>
-										</p:cellEditor>
-										
-									</p:column>
-									
-									<p:column headerText="#{msgs['label.uc001.valor.plano']}" style="text-align: center;">
+
+									<p:column
+										headerText="#{msgs['label.uc001.periodicidade.cobranca']}"
+										style="text-align: center;">
 										<p:cellEditor>
 											<f:facet name="output">
-												<h:outputText value="#{plano.valor}" >
-													<f:convertNumber type="currency"/>
+												<h:outputText value="#{plano.periodicidadeCobranca}" />
+											</f:facet>
+											<f:facet name="input">
+												<p:inputText value="#{plano.periodicidadeCobranca}" />
+											</f:facet>
+										</p:cellEditor>
+
+									</p:column>
+
+									<p:column headerText="#{msgs['label.uc001.dia.vencimento']}"
+										style="text-align: center;">
+										<p:cellEditor>
+											<f:facet name="output">
+												<h:outputText value="#{plano.diaVencimento}" />
+											</f:facet>
+											<f:facet name="input">
+												<p:inputNumber value="#{plano.diaVencimento}"
+													decimalPlaces="0" maxValue="31" minValue="1" />
+											</f:facet>
+										</p:cellEditor>
+
+									</p:column>
+
+									<p:column headerText="#{msgs['label.uc001.valor.plano']}"
+										style="text-align: center;">
+										<p:cellEditor>
+											<f:facet name="output">
+												<h:outputText value="#{plano.valor}">
+													<f:convertNumber type="currency" />
 												</h:outputText>
 											</f:facet>
 											<f:facet name="input">
 												<p:inputNumber value="#{plano.valor}"
-														symbol="#{menuController.currencySymbol}" decimalSeparator="," thousandSeparator="." minValue="0"/>
+													symbol="#{menuController.currencySymbol}"
+													decimalSeparator="," thousandSeparator="." minValue="0" />
 											</f:facet>
 										</p:cellEditor>
-										
+
 									</p:column>
-									
-									<p:column headerText="#{msgs['alt.acao.editar']}" style="width:35px; text-align: center;">
-							            <p:rowEditor />
-							        </p:column>
-									
-									<p:column headerText="#{msgs['alt.acao.excluir']}" style="text-align: center;">
-										<h:commandButton image="#{menuController.path}/tema/img/bt_remove_min.png" 
-													title="#{msgs['alt.acao.excluir']}" action="#{cadastroClienteController.removePlano(plano)}">
-											<p:ajax process="@this" update="form:cadastroClienteTab:tablePlanos form:cadastroClienteTab:planos"/>
+
+									<p:column headerText="#{msgs['alt.acao.editar']}"
+										style="width:35px; text-align: center;">
+										<p:rowEditor />
+									</p:column>
+
+									<p:column headerText="#{msgs['alt.acao.excluir']}"
+										style="text-align: center;">
+										<h:commandButton
+											image="#{menuController.path}/tema/img/bt_remove_min.png"
+											title="#{msgs['alt.acao.excluir']}"
+											action="#{cadastroClienteController.removePlano(plano)}">
+											<p:ajax process="@this"
+												update="form:cadastroClienteTab:tablePlanos form:cadastroClienteTab:planos" />
 										</h:commandButton>
 									</p:column>
-									
+
 								</p:dataTable>
 							</p:panelGrid>
-							
-							<br/>
-							
+
+							<br />
+
 						</p:tab>
-						
+
 						<p:tab title="#{msgs['label.uc001.integracao.soc']}">
-						
+
 							<p:panelGrid columns="2" style="width: 100%;">
-							
-								<p:column >
-									<p:outputLabel value="#{msgs['label.uc001.codigo.externo']}" for="codigoExterno" indicateRequired="false"/>
+
+								<p:column>
+									<p:outputLabel value="#{msgs['label.uc001.codigo.externo']}"
+										for="codigoExterno" indicateRequired="false" />
 									<br />
-									<p:inputText id="codigoExterno" value="#{cadastroClienteController.entidade.integracaoSoc.codigoExterno}" 
-												 required="false"/>
+									<p:inputText id="codigoExterno"
+										value="#{cadastroClienteController.entidade.integracaoSoc.codigoExterno}"
+										required="false" />
 								</p:column>
-								
-								<p:column >
-									<p:outputLabel value="#{msgs['label.uc001.usuario.externo']}" for="usuarioSoc" indicateRequired="false"/>
+
+								<p:column>
+									<p:outputLabel value="#{msgs['label.uc001.usuario.externo']}"
+										for="usuarioSoc" indicateRequired="false" />
 									<br />
-									<p:inputText id="usuarioSoc" value="#{cadastroClienteController.entidade.integracaoSoc.usuarioSoc}" 
-												 required="false"/>
+									<p:inputText id="usuarioSoc"
+										value="#{cadastroClienteController.entidade.integracaoSoc.usuarioSoc}"
+										required="false" />
 								</p:column>
-								
-								<p:column >
-									<p:outputLabel value="#{msgs['label.uc001.senha.externo']}" for="senhaSoc" indicateRequired="false"/>
+
+								<p:column>
+									<p:outputLabel value="#{msgs['label.uc001.senha.externo']}"
+										for="senhaSoc" indicateRequired="false" />
 									<br />
-									<p:inputText id="senhaSoc" value="#{cadastroClienteController.entidade.integracaoSoc.senhaSoc}" 
-												 required="false"/>
+									<p:inputText id="senhaSoc"
+										value="#{cadastroClienteController.entidade.integracaoSoc.senhaSoc}"
+										required="false" />
 								</p:column>
-								
+
 							</p:panelGrid>
-						
+
 						</p:tab>
-						
+
 						<p:tab title="#{msgs['label.uc001.integracao.senior']}">
-						
+
 							<p:panelGrid columns="5" style="width: 100%;">
-							
-								<p:column >
-									<p:outputLabel value="#{msgs['label.uc001.url.senior']}" for="urlSenior" indicateRequired="false"/>
+
+								<p:column>
+									<p:outputLabel value="#{msgs['label.uc001.url.senior']}"
+										for="urlSenior" indicateRequired="false" />
 									<br />
-									<p:inputText id="urlSenior" value="#{cadastroClienteController.entidade.integracaoSenior.url}" 
-												 required="false"/>
-								</p:column>
-								
-								<p:column >
-									<p:outputLabel value="#{msgs['label.uc001.usuario.senior']}" for="usuarioSenior" indicateRequired="false"/>
-									<br />
-									<p:inputText id="usuarioSenior" value="#{cadastroClienteController.entidade.integracaoSenior.usuario}" 
-												 required="false"/>
-								</p:column>
-								
-								<p:column >
-									<p:outputLabel value="#{msgs['label.uc001.senha.senior']}" for="senhaSenior" indicateRequired="false"/>
-									<br />
-									<p:password id="senhaSenior" value="#{cadastroClienteController.entidade.integracaoSenior.senha}" 
-												 required="false"/>
+									<p:inputText id="urlSenior"
+										value="#{cadastroClienteController.entidade.integracaoSenior.url}"
+										required="false" />
 								</p:column>
 
 								<p:column>
-								    <p:outputLabel value="Habilita permissoes SENIOR"
-								                   for="permissaoSenior" indicateRequired="false" />
-								    <br />
-								    <p:inputSwitch id="permissaoSenior"
-								        value="#{cadastroClienteController.entidade.integracaoSenior.habilitaPermissao}" />
+									<p:outputLabel value="#{msgs['label.uc001.usuario.senior']}"
+										for="usuarioSenior" indicateRequired="false" />
+									<br />
+									<p:inputText id="usuarioSenior"
+										value="#{cadastroClienteController.entidade.integracaoSenior.usuario}"
+										required="false" />
 								</p:column>
-								
+
 								<p:column>
-								    <p:outputLabel value="Habilita regras de horario SENIOR"
-								                   for="regraSenior" indicateRequired="false" />
-								    <br />
-								    <p:inputSwitch id="regraSenior"
-								        value="#{cadastroClienteController.entidade.integracaoSenior.habilitaRegrasDeHorario}" />
+									<p:outputLabel value="#{msgs['label.uc001.senha.senior']}"
+										for="senhaSenior" indicateRequired="false" />
+									<br />
+									<p:password id="senhaSenior"
+										value="#{cadastroClienteController.entidade.integracaoSenior.senha}"
+										required="false" />
+								</p:column>
+
+								<p:column>
+									<p:outputLabel value="Habilita permissoes SENIOR"
+										for="permissaoSenior" indicateRequired="false" />
+									<br />
+									<p:inputSwitch id="permissaoSenior"
+										value="#{cadastroClienteController.entidade.integracaoSenior.habilitaPermissao}" />
+								</p:column>
+
+								<p:column>
+									<p:outputLabel value="Habilita regras de horario SENIOR"
+										for="regraSenior" indicateRequired="false" />
+									<br />
+									<p:inputSwitch id="regraSenior"
+										value="#{cadastroClienteController.entidade.integracaoSenior.habilitaRegrasDeHorario}" />
 								</p:column>
 
 							</p:panelGrid>
-						
+
 						</p:tab>
-						
-												<p:tab title="#{msgs['label.uc001.integracao.ad']}">
+
+						<p:tab title="#{msgs['label.uc001.integracao.ad']}">
 
 							<p:panelGrid columns="2" style="width: 100%;">
 
-								<p:column >
-									<p:outputLabel value="#{msgs['label.uc001.url.ad']}" for="urlAD" indicateRequired="false"/>
+								<p:column>
+									<p:outputLabel value="#{msgs['label.uc001.url.ad']}"
+										for="urlAD" indicateRequired="false" />
 									<br />
-									<p:inputText id="urlAD" value="#{cadastroClienteController.entidade.integracaoAD.url}"
-												 required="false"/>
+									<p:inputText id="urlAD"
+										value="#{cadastroClienteController.entidade.integracaoAD.url}"
+										required="false" />
 								</p:column>
 
-								<p:column >
-									<p:outputLabel value="#{msgs['label.uc001.usuario.ad']}" for="usuarioAD" indicateRequired="false"/>
+								<p:column>
+									<p:outputLabel value="#{msgs['label.uc001.usuario.ad']}"
+										for="usuarioAD" indicateRequired="false" />
 									<br />
-									<p:inputText id="usuarioAD" value="#{cadastroClienteController.entidade.integracaoAD.usuario}"
-												 required="false"/>
+									<p:inputText id="usuarioAD"
+										value="#{cadastroClienteController.entidade.integracaoAD.usuario}"
+										required="false" />
 								</p:column>
 
-								<p:column >
-									<p:outputLabel value="#{msgs['label.uc001.senha.ad']}" for="senhaAD" indicateRequired="false"/>
+								<p:column>
+									<p:outputLabel value="#{msgs['label.uc001.senha.ad']}"
+										for="senhaAD" indicateRequired="false" />
 									<br />
-									<p:password id="senhaAD" value="#{cadastroClienteController.entidade.integracaoAD.senha}"
-												required="false"/>
+									<p:password id="senhaAD"
+										value="#{cadastroClienteController.entidade.integracaoAD.senha}"
+										required="false" />
 								</p:column>
-								
-								<p:column >
-									<p:outputLabel value="#{msgs['label.uc001.base.ad']}" for="baseAD" indicateRequired="false"/>
+
+								<p:column>
+									<p:outputLabel value="#{msgs['label.uc001.base.ad']}"
+										for="baseAD" indicateRequired="false" />
 									<br />
-									<p:password id="baseAD" value="#{cadastroClienteController.entidade.integracaoAD.base}"
-												required="false"/>
+									<p:password id="baseAD"
+										value="#{cadastroClienteController.entidade.integracaoAD.base}"
+										required="false" />
 								</p:column>
 
 							</p:panelGrid>
 
 						</p:tab>
-						
+
 						<p:tab title="#{msgs['label.uc001.integracao.totvs']}">
-						
+
 							<p:panelGrid columns="6" style="width: 100%;">
-							
-								<p:column >
-									<p:outputLabel value="#{msgs['label.uc001.url.base']}" for="url" indicateRequired="false"/>
+
+								<p:column>
+									<p:outputLabel value="#{msgs['label.uc001.url.base']}"
+										for="url" indicateRequired="false" />
 									<br />
-									<p:inputText id="url" value="#{cadastroClienteController.entidade.integracaoTotvs.url}" 
-												 required="false"/>
-								</p:column>
-								
-								<p:column >
-									<p:outputLabel value="#{msgs['label.uc001.usuario.totvs']}" for="usuarioTotvs" indicateRequired="false"/>
-									<br />
-									<p:inputText id="usuarioTotvs" value="#{cadastroClienteController.entidade.integracaoTotvs.usuario}" 
-												 required="false"/>
-								</p:column>
-								
-								<p:column >
-									<p:outputLabel value="#{msgs['label.uc001.senha.totvs']}" for="senhaTovs" indicateRequired="false"/>
-									<br />
-									<p:password id="senhaTovs" value="#{cadastroClienteController.entidade.integracaoTotvs.senha}" 
-												 required="false"/>
+									<p:inputText id="url"
+										value="#{cadastroClienteController.entidade.integracaoTotvs.url}"
+										required="false" />
 								</p:column>
 
-								<p:column >
-									<p:outputLabel value="#{msgs['label.uc001.empresa.totvs']}" for="Empresa" indicateRequired="false"/>
+								<p:column>
+									<p:outputLabel value="#{msgs['label.uc001.usuario.totvs']}"
+										for="usuarioTotvs" indicateRequired="false" />
 									<br />
-									<p:inputText id="Empresa" value="#{cadastroClienteController.entidade.integracaoTotvs.empresa}" 
-												 required="false"/>
+									<p:inputText id="usuarioTotvs"
+										value="#{cadastroClienteController.entidade.integracaoTotvs.usuario}"
+										required="false" />
 								</p:column>
-								
+
+								<p:column>
+									<p:outputLabel value="#{msgs['label.uc001.senha.totvs']}"
+										for="senhaTovs" indicateRequired="false" />
+									<br />
+									<p:password id="senhaTovs"
+										value="#{cadastroClienteController.entidade.integracaoTotvs.senha}"
+										required="false" />
+								</p:column>
+
+								<p:column>
+									<p:outputLabel value="#{msgs['label.uc001.empresa.totvs']}"
+										for="Empresa" indicateRequired="false" />
+									<br />
+									<p:inputText id="Empresa"
+										value="#{cadastroClienteController.entidade.integracaoTotvs.empresa}"
+										required="false" />
+								</p:column>
+
 							</p:panelGrid>
-						
-						
+
+
 						</p:tab>
-						
-						
-						
+
+
+
 					</p:tabView>
 				</h:column>
 			</h:panelGrid>
-	
+
 		</ui:define>
 
 	</ui:composition>

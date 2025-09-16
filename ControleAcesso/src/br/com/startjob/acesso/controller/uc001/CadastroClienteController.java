@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.annotation.PostConstruct;
 import javax.faces.model.SelectItem;
@@ -126,43 +127,51 @@ public class CadastroClienteController extends CadastroBaseController {
 	}
 
 	public void alterarSenhaUsuarioCliente() throws Exception {
-		ClienteEntity cliente = (ClienteEntity) getEntidade();
+	    ClienteEntity cliente = (ClienteEntity) getEntidade();
 
-		Map<String, Object> args = new HashMap<String, Object>();
-		args.put("email", cliente.getEmail());
+	    if (usuarioParaEditar.getLogin() == null || usuarioParaEditar.getLogin().trim().isEmpty()) {
+	        mensagemFatal("", "#O campo login não pode ser vazio.");
+	        return;
+	    }
 
-		@SuppressWarnings("unchecked")
-		ArrayList<UsuarioEntity> userList = (ArrayList<UsuarioEntity>) baseEJB
-				.pesquisaSimplesLimitado(UsuarioEntity.class, "findAll", args, 0, 1);
+	    if (usuarioSenha == null || usuarioSenha.trim().isEmpty()) {
+	        mensagemFatal("", "#O campo senha não pode ser vazio.");
+	        return;
+	    }
 
-		UsuarioEntity user = new UsuarioEntity();
+	    // Busca usuário existente pelo login
+	    UsuarioEntity user = buscaLoginExistente(usuarioParaEditar.getLogin(), cliente.getId());
 
-		if (userList != null && !userList.isEmpty()) {
-			user = userList.get(0);
-		}
+	    boolean criarNovo = false;
 
-		if ("".equals(usuarioParaEditar.getLogin().trim())) {
-			mensagemFatal("", "#O campo login não pode ser vazio.");
-			return;
+	    if (user == null) {
+	        // Se não encontrou, cria um novo
+	        user = new UsuarioEntity();
+	        user.setCliente(cliente);
+	        user.setNome(usuarioParaEditar.getLogin());
+	        user.setStatus(Status.ATIVO);
+	        user.setPerfil(PerfilAcesso.ADMINISTRADOR);
+	        criarNovo = true;
+	    }
 
-		} else if (!usuarioParaEditar.getLogin().equals(user.getLogin())
-				&& verificaLoginExistente(usuarioParaEditar.getLogin(), cliente.getId())) {
-			mensagemFatal("", "#Este login já está em uso.");
-			return;
+	    // Atualiza login e senha
+	    user.setLogin(usuarioParaEditar.getLogin());
+	    user.setSenha(EncryptionUtils.encrypt(usuarioSenha));
 
-		} else if ("".equals(usuarioSenha.trim())) {
-			mensagemFatal("", "#O campo senha não pode ser vazio.");
+	    // Persiste ou atualiza
+	    if (criarNovo) {
+	        baseEJB.gravaObjeto(user); // supondo que você tenha método de inserção
+	        mensagemInfo("", "#Usuário criado com sucesso!");
+	    } else {
+	        baseEJB.alteraObjeto(user);
+	        mensagemInfo("", "#Dados alterados com sucesso!");
+	    }
 
-		} else {
-			user.setLogin(usuarioParaEditar.getLogin());
-			user.setSenha(EncryptionUtils.encrypt(usuarioSenha));
-
-			baseEJB.alteraObjeto(user);
-			mensagemInfo("", "#Dados alterados com sucesso!");
-		}
-		usuarioLogin = "";
-		usuarioSenha = "";
+	    // Limpa campos
+	    usuarioLogin = "";
+	    usuarioSenha = "";
 	}
+
 
 	@Override
 	public String salvar() {
