@@ -53,8 +53,6 @@
 
 			<p:dialog id="alteraSenhaDialog" widgetVar="alteraSenha"
 				header="#{msgs['header.alterar.dados.login']}" modal="true">
-
-				<h:form id="formAlteraSenha">
 					<p:panelGrid columns="3">
 						<p:column>
 							<h:outputText value="#{msgs['label.novo.login']}" />
@@ -83,7 +81,6 @@
 								oncomplete="PF('alteraSenha').hide();" />
 						</p:column>
 					</p:panelGrid>
-				</h:form>
 			</p:dialog>
 
 
@@ -156,7 +153,8 @@
 
 										<p:message for="senha" />
 										<p:message for="confirmarSenha" />
-
+										<h:outputText value="A senha deve conter: mínimo 8 caracteres, com letras maiúsculas, minúsculas, números e caracteres especiais." style="color:gray; font-size:12px"/>
+										
 									</div>
 
 
