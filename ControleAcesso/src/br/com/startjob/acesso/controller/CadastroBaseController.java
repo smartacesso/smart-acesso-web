@@ -48,6 +48,27 @@ public abstract class CadastroBaseController extends BaseController {
 		return false;
 	}
 	
+	public UsuarioEntity buscaLoginExistente(String login, Long idCliente) {
+	    try {
+	        Map<String, Object> args = new HashMap<>();
+	        args.put("login", login);
+	        args.put("cliente.id", idCliente);
+
+	        @SuppressWarnings("unchecked")
+	        List<UsuarioEntity> userList = (List<UsuarioEntity>) baseEJB.pesquisaSimplesLimitado(
+	                UsuarioEntity.class, "findAll", args, 0, 1);
+
+	        // retorna o primeiro usuário encontrado ou null
+	        return (userList != null && !userList.isEmpty()) ? userList.get(0) : null;
+
+	    } catch (Exception e) {
+	        mensagemFatal("", "#Não foi possível verificar a existência deste login.");
+	        e.printStackTrace();
+	    }
+	    return null;
+	}
+
+	
 	public boolean verificaEmailExistente(String email) {
 		try {
 			Map<String, Object> args = new HashMap<String, Object>();
