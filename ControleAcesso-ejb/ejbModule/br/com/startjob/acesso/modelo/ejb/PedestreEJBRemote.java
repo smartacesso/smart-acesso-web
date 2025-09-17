@@ -12,12 +12,10 @@ import javax.ejb.Remote;
 import br.com.startjob.acesso.modelo.entity.ClienteEntity;
 import br.com.startjob.acesso.modelo.entity.ImportacaoEntity;
 import br.com.startjob.acesso.modelo.entity.PedestreRegraEntity;
-import br.com.startjob.acesso.modelo.entity.RegraEntity;
-import br.com.startjob.acesso.modelo.enumeration.TipoArquivo;
 
 @Remote
 public interface PedestreEJBRemote extends BaseEJBRemote {
-	
+
 	/**
 	 * 
 	 * @param ids
@@ -26,7 +24,7 @@ public interface PedestreEJBRemote extends BaseEJBRemote {
 	 * @throws Exception
 	 */
 	public List<Object[]> recuperaPedestresControleAcesso(List<Long> ids, Date time) throws Exception;
-	
+
 	/**
 	 * 
 	 * @param ids
@@ -34,7 +32,8 @@ public interface PedestreEJBRemote extends BaseEJBRemote {
 	 * @return
 	 * @throws Exception
 	 */
-	public List<Object[]> recuperaPedestresControleAcessoComListas(List<Long> ids, Date time, Boolean todasDigitais) throws Exception;
+	public List<Object[]> recuperaPedestresControleAcessoComListas(List<Long> ids, Date time, Boolean todasDigitais)
+			throws Exception;
 
 	/**
 	 * 
@@ -52,7 +51,7 @@ public interface PedestreEJBRemote extends BaseEJBRemote {
 	 * @throws Exception
 	 */
 	public List<Object[]> buscaFotoListaPedestre(List<Long> listaIds) throws Exception;
-	
+
 	/**
 	 * 
 	 * @param dados
@@ -60,7 +59,7 @@ public interface PedestreEJBRemote extends BaseEJBRemote {
 	 * @throws IOException
 	 * @throws ParseException
 	 */
-	public void importarArquivo(ImportacaoEntity dados, String separador) throws IOException, ParseException; 
+	public void importarArquivo(ImportacaoEntity dados, String separador) throws IOException, ParseException;
 
 	/**
 	 * 
@@ -69,7 +68,7 @@ public interface PedestreEJBRemote extends BaseEJBRemote {
 	 * @param idCliente
 	 */
 	public void marcarOuDesmarcarTodos(boolean marcado, Map<String, Object> args, Long idCliente);
-	
+
 	/**
 	 * 
 	 * @param regra
@@ -80,10 +79,9 @@ public interface PedestreEJBRemote extends BaseEJBRemote {
 	 * @param idCliente
 	 * @param args
 	 */
-	public void alterarEmMassa(PedestreRegraEntity pedestreRegra, Long idEmpresa, Long idDepartamento, 
-			Long idCentro, Long idCargo, Long idCliente, Map<String, Object> args);
-	
-	
+	public void alterarEmMassa(PedestreRegraEntity pedestreRegra, Long idEmpresa, Long idDepartamento, Long idCentro,
+			Long idCargo, Long idCliente, Map<String, Object> args);
+
 	/**
 	 * Realiza importação do sistema SOC
 	 * 
@@ -91,7 +89,7 @@ public interface PedestreEJBRemote extends BaseEJBRemote {
 	 * @throws Exception
 	 */
 	public void importarSOC() throws Exception;
-	
+
 	/**
 	 * Exporta dados para o SOC.
 	 * 
@@ -100,13 +98,14 @@ public interface PedestreEJBRemote extends BaseEJBRemote {
 	 * @throws Exception
 	 */
 	public void exportaSOC(ClienteEntity cliente) throws Exception;
-	
+
 	public void importarSenior() throws Exception;
 
 	public void importarTotvs() throws Exception;
-	
+
 	public void resetAutoAtendimento() throws Exception;
 
 	public void importarAD() throws Exception;
-}
 
+	public void importarSponte() throws Exception;
+}
