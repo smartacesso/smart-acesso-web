@@ -14,28 +14,11 @@ import java.util.List;
 
 public class SponteService {
 
-	// ✅ CORREÇÃO: URL correta (era http://api.sponteeducacional.net.br/GetAlunos)
 	private static final String ENDPOINT = "https://api.sponteeducacional.net.br/WSAPIEdu.asmx";
-	private static final String CODIGO_CLIENTE = "42165";
-	private static final String TOKEN = "7dOktGWzyu63";
 	private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm");
 
-	public static void main(String[] args) throws Exception {
-		LocalDateTime inicio = LocalDateTime.of(2021, 1, 1, 7, 10);
-		LocalDateTime fim = LocalDateTime.of(2021, 1, 25, 23, 59);
-
-		List<String> respostas = getAlunosPorIntervalo(inicio, fim);
-
-		for (String resp : respostas) {
-			System.out.println(resp);
-		}
-	}
-
-	/**
-	 * Chama GetAlunos para cada dia dentro do intervalo e retorna todas as
-	 * respostas.
-	 */
-	public static List<String> getAlunosPorIntervalo(LocalDateTime inicio, LocalDateTime fim) throws IOException {
+	public static List<String> getAlunosPorIntervalo(String token, String codigoCliente, LocalDateTime inicio,
+			LocalDateTime fim) throws IOException {
 		List<String> respostas = new ArrayList<>();
 		LocalDateTime atual = inicio;
 
@@ -43,7 +26,7 @@ public class SponteService {
 			String parametrosBusca = "DataCadastro=" + atual.format(FORMATTER);
 			System.out.println("Buscando para: " + parametrosBusca);
 
-			String response = getAlunosSOAP(parametrosBusca);
+			String response = getAlunosSOAP(parametrosBusca, token, codigoCliente);
 			respostas.add(response);
 
 			// incrementa 1 dia (ou 1 minuto se precisar mais granular)
@@ -53,23 +36,24 @@ public class SponteService {
 		return respostas;
 	}
 
-	/**
-	 * Chamada SOAP 1.1 com sParametrosBusca
-	 */
-	public static String getAlunosSOAP(String parametrosBusca) throws IOException {
+	public static String getAlunosSOAP(String parametrosBusca, String token, String codigoCliente) throws IOException {
 		URL url = new URL(ENDPOINT);
 		HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 		conn.setRequestMethod("POST");
 		conn.setRequestProperty("Content-Type", "text/xml; charset=utf-8");
 		conn.setRequestProperty("SOAPAction", "http://api.sponteeducacional.net.br/GetAlunos");
+		conn.setRequestProperty("User-Agent", "Java/17.0.13");
 		conn.setDoOutput(true);
+
+		System.out.println("Java Version: " + System.getProperty("java.version"));
+		System.out.println("User-Agent: " + conn.getRequestProperty("User-Agent"));
 
 		String xmlRequest = "<?xml version=\"1.0\" encoding=\"utf-8\"?>"
 				+ "<soap:Envelope xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" "
 				+ "xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" "
 				+ "xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\">" + "  <soap:Body>"
 				+ "    <GetAlunos xmlns=\"http://api.sponteeducacional.net.br/\">" + "      <nCodigoCliente>"
-				+ CODIGO_CLIENTE + "</nCodigoCliente>" + "      <sToken>" + TOKEN + "</sToken>"
+				+ codigoCliente + "</nCodigoCliente>" + "      <sToken>" + token + "</sToken>"
 				+ "      <sParametrosBusca>" + parametrosBusca + "</sParametrosBusca>" + "    </GetAlunos>"
 				+ "  </soap:Body>" + "</soap:Envelope>";
 
@@ -88,6 +72,7 @@ public class SponteService {
 			br = new BufferedReader(new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8));
 		}
 
+		System.out.println("HTTP: " + conn.getResponseCode());
 		StringBuilder response = new StringBuilder();
 		String line;
 		while ((line = br.readLine()) != null) {

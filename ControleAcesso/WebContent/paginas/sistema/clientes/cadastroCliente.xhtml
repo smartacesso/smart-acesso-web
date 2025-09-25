@@ -644,6 +644,32 @@
 							</p:panelGrid>
 
 						</p:tab>
+						
+						<p:tab title="#{msgs['label.uc001.integracao.sponte']}">
+
+							<p:panelGrid columns="2" style="width: 100%;">
+
+								<p:column>
+									<p:outputLabel value="#{msgs['label.uc001.token.sponte']}"
+										for="tokenSponte" indicateRequired="false" />
+									<br />
+									<p:inputText id="tokenSponte"
+										value="#{cadastroClienteController.entidade.integracaoSponte.token}"
+										required="false" />
+								</p:column>
+
+								<p:column>
+									<p:outputLabel value="#{msgs['label.uc001.id.cliente.sponte']}"
+										for="clienteSponte" indicateRequired="false" />
+									<br />
+									<p:inputText id="clienteSponte"
+										value="#{cadastroClienteController.entidade.integracaoSponte.idCliente}"
+										required="false" />
+								</p:column>
+
+							</p:panelGrid>
+
+						</p:tab>
 
 						<p:tab title="#{msgs['label.uc001.integracao.totvs']}">
 

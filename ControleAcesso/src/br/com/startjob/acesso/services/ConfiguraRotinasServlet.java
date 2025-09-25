@@ -18,13 +18,14 @@ import br.com.startjob.acesso.modelo.entity.ClienteEntity;
 import br.com.startjob.acesso.modelo.utils.AppAmbienteUtils;
 import br.com.startjob.acesso.tasks.ActivatedTasks;
 import br.com.startjob.acesso.tasks.AutoAtendimentoResetTask;
+import br.com.startjob.acesso.tasks.ExportacaoSocTask;
+import br.com.startjob.acesso.tasks.ImportaADTask;
+import br.com.startjob.acesso.tasks.ImportaSeniorTask;
+import br.com.startjob.acesso.tasks.ImportaSponteTask;
 import br.com.startjob.acesso.tasks.ImportacaoSocTask;
 import br.com.startjob.acesso.tasks.ImportarSalesianoTask;
 import br.com.startjob.acesso.tasks.ImportarTotvsTask;
 import br.com.startjob.acesso.tasks.ImportarUsuarioTask;
-import br.com.startjob.acesso.tasks.ExportacaoSocTask;
-import br.com.startjob.acesso.tasks.ImportaADTask;
-import br.com.startjob.acesso.tasks.ImportaSeniorTask;
 
 @SuppressWarnings("serial")
 @WebServlet(loadOnStartup = 1, asyncSupported = true, urlPatterns = { "/configuraRotinas" })
@@ -50,6 +51,7 @@ public class ConfiguraRotinasServlet extends BaseServlet {
 		registraTimersAutoAtendimento();
 		registraTimerSalesiano();
 		timerRegisterAD();
+		timerRegiserSponte();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -126,17 +128,16 @@ public class ConfiguraRotinasServlet extends BaseServlet {
 //		Calendar inicio = getInicio("0");
 //		Long periodExpirar = 24 * 60 * 60 * 1000L;
 //		Timer timer = new Timer();
-		
+
 //		TimerTask totvsTask = new ImportarTotvsTask();
 //		timer.scheduleAtFixedRate(totvsTask, inicio.getTime(), periodExpirar.longValue());
-		
+
 		// Define o período para 30 minutos (30 * 60 * 1000 ms)
-		Long period =  30 * 60 * 1000L;
+		Long period = 30 * 60 * 1000L;
 		Timer timer = new Timer();
 
 		TimerTask totvsTask = new ImportarTotvsTask();
 		timer.scheduleAtFixedRate(totvsTask, 0, period);
-
 
 		log.info("Registrando rotina da TOVS PROTHEUS");
 
@@ -179,8 +180,7 @@ public class ConfiguraRotinasServlet extends BaseServlet {
 
 		ActivatedTasks.getInstancia().timers.put("AUTO_ATENDIMENTO", timer);
 	}
-	
-	
+
 	private void registraPrimeiroUsuario() {
 		log.info("Registra Integração primeiro usuario");
 
@@ -239,7 +239,7 @@ public class ConfiguraRotinasServlet extends BaseServlet {
 			throws ServletException, IOException {
 
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	private void timerRegisterAD() {
 		log.info("Registra Integração AD");
@@ -255,6 +255,24 @@ public class ConfiguraRotinasServlet extends BaseServlet {
 		TimerTask aDTask = new ImportaADTask();
 
 		// Agenda a tarefa para rodar a cada 30 minutos
+		timer.scheduleAtFixedRate(aDTask, 0, period);
+
+		log.info("Registrando rotina da AD");
+
+		ActivatedTasks.getInstancia().timers.put("importacaoAD_cliente", timer);
+	}
+
+	@SuppressWarnings("unchecked")
+	private void timerRegiserSponte() {
+		log.info("Registra Integração Sponte");
+
+		ActivatedTasks.getInstancia().limpaTimersAD();
+
+		Long period = 30 * 60 * 1000L;
+		Timer timer = new Timer();
+
+		TimerTask aDTask = new ImportaSponteTask();
+
 		timer.scheduleAtFixedRate(aDTask, 0, period);
 
 		log.info("Registrando rotina da AD");

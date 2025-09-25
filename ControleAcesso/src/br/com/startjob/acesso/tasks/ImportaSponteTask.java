@@ -22,13 +22,13 @@ public class ImportaSponteTask extends TimerTask {
 		try {
 			pedestreEJB = ((PedestreEJBRemote) BaseServlet.getEjb(PedestreEJBRemote.class));
 			try {
-				pedestreEJB.importarAD();
+				pedestreEJB.importarSponte();
 
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
 
-			logger.info("Processo de importação do AD finalizado...");
+			logger.info("Processo de importação do Sponte finalizado...");
 
 		} catch (Exception e) {
 			e.printStackTrace();
