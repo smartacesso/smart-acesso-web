@@ -36,7 +36,7 @@ public class FuncionarioTotvsDto {
 	    + ", horaInicial=[" + horaInicial + "]"
 	    + ", horaFinal=[" + horaFinal + "]");
 		
-		if("OK".equalsIgnoreCase(situacaoFolha) && !("0".equals(horaInicial) && "0".equals(horaFinal))) {
+		if("OK".equalsIgnoreCase(situacaoFolha)) {
 			pedestre.setObservacoes("Importado dia " + LocalDate.now().toString());
 			pedestre.setStatus(Status.ATIVO);
 

@@ -289,8 +289,9 @@
 							value="#{pedestre.tipo == 'ATIVO' ? pedestre.sentido : '---'}" />
 					</p:column>
 					
-					<p:column headerText="#{msgs['label.uc010.periodo']}" style="text-align: center">
-    					<h:outputText value="#{pedestre.periodo}" />
+					<p:column headerText="Periodo" style="text-align: center"
+					rendered="#{relatorioPedestresController.isRelatorioRonaHabilitado()}">
+    					<h:outputText value="#{relatorioPedestresController.getTipoRefeicao(pedestre.data)}" />
 				    </p:column>
 
 					<p:column headerText="#{msgs['alt.acao.visualizar']}"

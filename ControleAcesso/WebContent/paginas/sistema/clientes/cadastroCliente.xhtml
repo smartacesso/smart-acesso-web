@@ -57,7 +57,7 @@
 				header="#{msgs['header.alterar.dados.login']}" modal="true">
 				<p:panelGrid columns="3">
 					<p:column>
-						<h:outputText value="#{msgs['label.novo.login']}" />
+						<h:outputText value="Login" />
 						<br />
 						<p:inputText
 							value="#{cadastroClienteController.usuarioParaEditar.login}">
@@ -85,6 +85,7 @@
 							oncomplete="PF('alteraSenha').hide();" />
 					</p:column>
 				</p:panelGrid>
+				<h:outputText value="Caso o login editado não exista será criado um novo com os dados passados." style="color:gray; font-size:12px"/>
 			</p:dialog>
 
 

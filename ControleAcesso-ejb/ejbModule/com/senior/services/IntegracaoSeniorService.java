@@ -92,6 +92,42 @@ public class IntegracaoSeniorService {
 				+ "</numEmp>" + "         </parameters>" + "      </ser:" + operation.getOperation() + ">"
 				+ "   </soapenv:Body>" + "</soapenv:Envelope>";
 	}
+	
+	
+	// PEDESTRE NOVO
+	private String gerarSoapBodyComParametros(SoapOperation operation, String numEmp, String codFil, String data,
+			String numCad, String tipCol) {
+		StringBuilder sb = new StringBuilder();
+
+		sb.append("<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" ")
+				.append("xmlns:ser=\"http://services.senior.com.br\">").append("<soapenv:Header/>")
+				.append("<soapenv:Body>").append("<ser:").append(operation.getOperation()).append(">").append("<user>")
+				.append(usuario).append("</user>").append("<password>").append(senha).append("</password>")
+				.append("<encryption></encryption>").append("<parameters>");
+
+// obrigatorio
+		sb.append("<numEmp>").append(numEmp).append("</numEmp>");
+
+// opcionais
+		if (codFil != null && !codFil.isEmpty()) {
+			sb.append("<codFil>").append(codFil).append("</codFil>");
+		}
+		if (data != null && !data.isEmpty()) {
+			sb.append("<data>").append(data).append("</data>");
+		}
+		if (numCad != null && !numCad.isEmpty()) {
+			sb.append("<numCad>").append(numCad).append("</numCad>");
+		}
+		if (tipCol != null && !tipCol.isEmpty()) {
+			sb.append("<tipCol>").append(tipCol).append("</tipCol>");
+		}
+
+		sb.append("</parameters>").append("</ser:").append(operation.getOperation()).append(">")
+				.append("</soapenv:Body>").append("</soapenv:Envelope>");
+
+		return sb.toString();
+	}
+
 
 	// Método para gerar o body SOAP, recebendo parâmetros de empresa
 	// PEDESTRE ADMITIDO, DEMITIDO E ATUALIZADO
@@ -146,10 +182,26 @@ public class IntegracaoSeniorService {
 		return null;
 	}
 
-	// bussca funcionarios
+	// busca funcionarios
 	public List<FuncionarioSeniorDto> buscarFuncionarios(String numEmp) {
 		String soapBodyFuncionarios = gerarSoapBodyComEmpresa(SoapOperation.PEDESTRE, numEmp);
 		String responseXml = enviarSoapRequest(soapBodyFuncionarios);
+		if (responseXml != null) {
+			return parseFuncionariosFromXml(responseXml);
+		}
+		return null;
+	}
+	
+	// busca funcionarios NOVO
+	public List<FuncionarioSeniorDto> buscarFuncionarios(String numEmp, String codFil, String data, String numCad,
+			String tipCol) {
+
+		String soapBodyFuncionarios = gerarSoapBodyComParametros(SoapOperation.PEDESTRE, numEmp, // obrigatório
+				codFil, // opcionais (podem ser null ou "")
+				data, numCad, tipCol);
+
+		String responseXml = enviarSoapRequest(soapBodyFuncionarios);
+
 		if (responseXml != null) {
 			return parseFuncionariosFromXml(responseXml);
 		}

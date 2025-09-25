@@ -2,7 +2,10 @@ package br.com.startjob.acesso.controller.uc009;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.faces.event.ValueChangeEvent;
@@ -25,6 +28,20 @@ import br.com.startjob.acesso.modelo.enumeration.TipoPedestre;
 		lazyLoad = true, quantPorPagina = 10)
 public class RelatorioPedestresController extends RelatorioController {
 	
+	
+	 // Constantes dos nomes das refeições
+    public static final String CAFE_MANHA = "Cafe da Manha";
+    public static final String CAFE_MANHA2 = "Cafe da Manha 2";
+    public static final String ALMOCO = "Almoco";
+    public static final String CAFE_TARDE = "Cafe da Tarde";
+    public static final String CAFE_TARDE2 = "Cafe da Tarde 2";
+    public static final String CAFE_TARDE_SEXTA = "Cafe da Tarde (Sexta)";
+    public static final String CAFE_TARDE2_SEXTA = "Cafe da Tarde 2 (Sexta)";
+    public static final String LANCHE_EXTRA = "Lanche Hora Extra";
+    public static final String JANTAR = "Jantar";
+    public static final String LANCHE_NOITE = "Lanche da Noite";
+
+	
 	private Long idEmpresaSelecionada;
 	private EmpresaEntity empresaSelecionada;
 	
@@ -33,6 +50,9 @@ public class RelatorioPedestresController extends RelatorioController {
 	private List<SelectItem> listaCentrosDeCusto;
 	private List<SelectItem> listaCargos;
 	private List<SelectItem> listaEquipamentos;
+	
+	private Map<String, Long> refeicoesCount;
+	private long totalRefeicoes;
 	
 	private boolean permiteCampoAdicionalCrachaMatricula = true;
 	
@@ -83,34 +103,130 @@ public class RelatorioPedestresController extends RelatorioController {
 	public String getTipoRefeicao(java.sql.Timestamp timestamp) {
 	    return getTipoRefeicao((Date) timestamp);
 	}
-
 	
 	public String getTipoRefeicao(Date dataAcesso) {
 	    if (dataAcesso == null) {
 	        return "--";
 	    }
-	    
+
 	    Calendar cal = Calendar.getInstance();
 	    cal.setTime(dataAcesso);
 	    int hora = cal.get(Calendar.HOUR_OF_DAY);
 	    int minuto = cal.get(Calendar.MINUTE);
 	    int minutosTotais = hora * 60 + minuto;
 
-	    if (minutosTotais >= 330 && minutosTotais <= 480) { // 05:30 - 08:00
-	        return "Lanche Matutino";
-	    } else if (minutosTotais >= 600 && minutosTotais <= 750) { // 10:00 - 13:30
-	        return "Almoço";
-	    } else if (minutosTotais >= 840 && minutosTotais <= 930) { // 14:00 - 15:30
-	        return "Lanche Vespertino";
-	    } else if (minutosTotais >= 1080 && minutosTotais <= 1260) { // 18:00 - 21:00
-	        return "Jantar";
-	    } else if (minutosTotais >= 1320 && minutosTotais <= 1410) { // 22:00 - 23:30
-	        return "Lanche Noturno";
-	    } else if ((minutosTotais >= 60 && minutosTotais <= 240)) { // 01:00 - 04:00
-	        return "Ceia";
+	    boolean isSexta = (cal.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY);
+
+	    // Café da manhã: 05:40 – 06:59 (340 – 419)
+	    if (minutosTotais >= 340 && minutosTotais <= 419) {
+	        return CAFE_MANHA;
 	    }
 
-	    return "Fora do horário de refeição";
+	    // Café da manhã 2: 07:30 – 10:00 (450 – 600)
+	    if (minutosTotais >= 450 && minutosTotais <= 600) {
+	        return CAFE_MANHA2;
+	    }
+
+	    // Almoço: 10:50 – 13:30 (650 – 810)
+	    if (minutosTotais >= 650 && minutosTotais <= 810) {
+	        return ALMOCO;
+	    }
+
+	    if (isSexta) {
+	        // Na sexta: Café da tarde (13:25 – 15:25)
+	        if (minutosTotais >= 865 && minutosTotais <= 925) {
+	            return CAFE_TARDE_SEXTA;
+	        }
+
+	        // Na sexta: Café da tarde 2 (15:30 – 15:59)
+	        if (minutosTotais >= 990 && minutosTotais <= 959) {
+	            return CAFE_TARDE2_SEXTA;
+	        }
+	    } else {
+	        // Café da tarde normal: 14:25 – 16:25 (865 – 985)
+	        if (minutosTotais >= 865 && minutosTotais <= 985) {
+	            return CAFE_TARDE;
+	        }
+
+	        // Café da tarde 2 normal: 16:30 – 16:59 (990 – 1019)
+	        if (minutosTotais >= 990 && minutosTotais <= 1019) {
+	            return CAFE_TARDE2;
+	        }
+	    }
+
+	    // Lanche hora extra: 18:00 – 18:20 (1080 – 1100)
+	    if (minutosTotais >= 1080 && minutosTotais <= 1100) {
+	        return LANCHE_EXTRA;
+	    }
+
+	    // Jantar: 18:30 – 19:30 (1110 – 1170)
+	    if (minutosTotais >= 1110 && minutosTotais <= 1170) {
+	        return JANTAR;
+	    }
+
+	    // Lanche da noite: 22:30 – 22:50 (1350 – 1370)
+	    if (minutosTotais >= 1350 && minutosTotais <= 1370) {
+	        return LANCHE_NOITE;
+	    }
+
+	    return "Fora do horario de refeicao";
+	}
+
+	public void calcularRefeicoes() {
+	    refeicoesCount = new LinkedHashMap<>();
+
+	    // Sempre
+	    refeicoesCount.put(CAFE_MANHA, 0L);
+	    refeicoesCount.put(CAFE_MANHA2, 0L);
+	    refeicoesCount.put(ALMOCO, 0L);
+
+	    // Descobrir se hoje é sexta (com base no primeiro acesso, por exemplo)
+	    boolean isSexta = false;
+	    List<AcessoEntity> acessos = super.getResult().stream()
+	            .map(e -> (AcessoEntity) e)
+	            .filter(e -> "ENTRADA".equalsIgnoreCase(e.getSentido())
+	                    && "ATIVO".equalsIgnoreCase(e.getTipo()))
+	            .collect(Collectors.toList());
+
+	    if (!acessos.isEmpty()) {
+	        Calendar cal = Calendar.getInstance();
+	        cal.setTime(acessos.get(0).getData());
+	        isSexta = (cal.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY);
+	    }
+
+	    // Adiciona cafés de acordo com o dia
+	    if (isSexta) {
+	        refeicoesCount.put(CAFE_TARDE_SEXTA, 0L);
+	        refeicoesCount.put(CAFE_TARDE2_SEXTA, 0L);
+	    } else {
+	        refeicoesCount.put(CAFE_TARDE, 0L);
+	        refeicoesCount.put(CAFE_TARDE2, 0L);
+	    }
+
+	    // Restante
+	    refeicoesCount.put(LANCHE_EXTRA, 0L);
+	    refeicoesCount.put(JANTAR, 0L);
+	    refeicoesCount.put(LANCHE_NOITE, 0L);
+
+	    long total = 0L;
+	    for (AcessoEntity acesso : acessos) {
+	        String refeicao = getTipoRefeicao(acesso.getData());
+	        if (refeicoesCount.containsKey(refeicao)) {
+	            refeicoesCount.put(refeicao, refeicoesCount.get(refeicao) + 1);
+	            total++;
+	        }
+	    }
+
+	    this.totalRefeicoes = total;
+	}
+
+	public Map<String, Long> getRefeicoesCount() {
+		calcularRefeicoes();
+		return refeicoesCount;
+	}
+
+	public long getTotalRefeicoes() {
+	    return totalRefeicoes;
 	}
 
 

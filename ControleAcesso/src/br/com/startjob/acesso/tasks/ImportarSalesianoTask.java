@@ -299,6 +299,7 @@ public class ImportarSalesianoTask extends TimerTask {
 	    DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
 	    boolean isPermitido = PermissoesEduTotvs.isPermitido(cadastro.getCodStatus());
+	    System.out.println("Codigo do status : " + cadastro.getStatus());
 	    pedestre.setStatus(isPermitido ? Status.ATIVO : Status.INATIVO);
 
 	    pedestre.setObservacoes("Atualizado em: " + LocalDateTime.now().format(dtf));

@@ -1133,9 +1133,6 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 			}
 
 		} else {
-			if (funcionario.getCodigoHorario().equals("01")) {
-				System.out.println(".");
-			}
 			regra = buscarRegraPeloNomeCompleto(funcionario.getCodigoHorario(), cliente.getId());
 		}
 		return regra;
@@ -1836,8 +1833,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		horariosDto.stream().filter(h -> h.getNome().equalsIgnoreCase("Inicio")).findFirst().ifPresent(filtrados::add);
 
 		// Pega o primeiro "Refeicao"
-		horariosDto.stream().filter(h -> h.getNome().equalsIgnoreCase("Refeicao")).findFirst()
-				.ifPresent(filtrados::add);
+		horariosDto.stream().filter(h -> h.getNome().equalsIgnoreCase("Refeicao")).findFirst().ifPresent(filtrados::add);
 
 		// Pega todos os "Termino"
 		horariosDto.stream().filter(h -> h.getNome().equalsIgnoreCase("Termino")).findFirst().ifPresent(filtrados::add);
