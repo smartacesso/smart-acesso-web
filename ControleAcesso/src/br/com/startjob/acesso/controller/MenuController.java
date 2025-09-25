@@ -164,14 +164,11 @@ public class MenuController extends BaseController {
 
 	private void criaMenuAdministracao() {
 
-		/*
-		 * if(!"smartponto".equals(usuarioLogado.getCliente().
-		 * getNomeUnidadeOrganizacional()) &&
-		 * !"startjob".equals(usuarioLogado.getCliente().getNomeUnidadeOrganizacional())
-		 * && !"adminGeral".equals(usuarioLogado.getNome()) &&
-		 * !"fiemg".equals(usuarioLogado.getCliente().getNomeUnidadeOrganizacional()))
-		 * return;
-		 */
+		if (!"smartponto".equals(usuarioLogado.getCliente().getNomeUnidadeOrganizacional())
+				&& !"startjob".equals(usuarioLogado.getCliente().getNomeUnidadeOrganizacional())
+				&& !"admingeral".equalsIgnoreCase(usuarioLogado.getLogin())
+				&& !"fiemg".equals(usuarioLogado.getCliente().getNomeUnidadeOrganizacional()))
+			return;
 
 		DefaultSubMenu adm = DefaultSubMenu.builder()
 				.label(resource.recuperaChave("menu.administracao", getFacesContext())).build();
@@ -263,7 +260,16 @@ public class MenuController extends BaseController {
 				.styleClass("ui-simple-menu")
 				.url(BaseConstant.URL_APLICACAO + "/paginas/sistema/relatorios/relatorioPermanencia.xhtml").build();
 		relatorios.getElements().add(relatorioPermanencia);
+		
+		if(isRelatorioRonaHabilitado()) {
+			DefaultMenuItem relatorioRefeicao = DefaultMenuItem.builder()
+					.value(resource.recuperaChave("menu.relatorio.refeicao", getFacesContext()))
+					.styleClass("ui-simple-menu")
+					.url(BaseConstant.URL_APLICACAO + "/paginas/sistema/relatorios/relatorioRefeicao.xhtml").build();
+			relatorios.getElements().add(relatorioRefeicao);
 
+		}
+	
 		menu.getElements().add(relatorios);
 
 	}

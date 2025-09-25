@@ -141,7 +141,8 @@ public interface BaseConstant {
 		public static final String PREENCHER_CARTAO_COM_MATRICULA = "preencher cartao com matricula";
 		
 		public static final String PREENCHER_CARTAO_AUTO = "preencher cartao automaticamente (8 digitos)";
-
+		
+		public static final String HABILITA_RELATORIO_RONA = "Habilita relatorio rona";
 		
 		public static final String TIPO_QR_CODE = "Permitir acesso via QR Code: Habilita QRCode dinâmico";
 

@@ -437,7 +437,7 @@ public class PedestreEntity extends ClienteBaseEntity {
 	    + ", horaInicial=[" + funcionarioTotvsDto.getHoraInicial() + "]"
 	    + ", horaFinal=[" + funcionarioTotvsDto.getHoraFinal() + "]");
 		
-		if(funcionarioTotvsDto.getSituacaoFolha().trim().equals("OK") && !("0".equals(funcionarioTotvsDto.getHoraInicial()) && "0".equals(funcionarioTotvsDto.getHoraFinal()))) {
+		if(funcionarioTotvsDto.getSituacaoFolha().trim().equals("OK")) {
 			this.setStatus(Status.ATIVO);
 			this.observacoes =  "atualizado dia " + LocalDate.now().toString();
 		}else {

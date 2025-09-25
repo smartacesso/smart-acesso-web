@@ -1,0 +1,109 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui">
+
+<body>
+
+	<ui:composition template="/tema/templates/template.xhtml">
+		<ui:define name="titulo">
+            Relatorio de refeicao
+        </ui:define>
+
+		<ui:define name="breadcrumb">
+			<a target="_top"
+				href="/#{menuController.appName}/paginas/principal.xhtml"> <h:outputText
+					value="#{msgs['title.principal']}" />
+			</a> > <h:outputText value="#{msgs['title.uc009.relatorio.pedestres']}" />
+		</ui:define>
+
+		<ui:define name="tools">
+			<h:panelGrid columns="4" styleClass="conteudo_tools">
+
+				<h:commandButton id="acaoBuscar"
+					action="#{relatorioPedestresController.buscar()}"
+					title="#{msgs['alt.acao.buscar']}" alt="#{msgs['alt.acao.buscar']}"
+					image="#{menuController.path}/tema/img/bt_searcher.png">
+
+					<p:ajax process="@form" update="@form" />
+				</h:commandButton>
+
+				<h:commandButton id="acaoLimpar"
+					action="#{relatorioPedestresController.limpar()}"
+					title="#{msgs['alt.acao.limpar']}" alt="#{msgs['alt.acao.limpar']}"
+					image="#{menuController.path}/tema/img/bt_cleaner.png">
+
+					<p:ajax process="@this" update="@form" />
+				</h:commandButton>
+
+				<h:commandButton id="acaoExportar"
+					image="#{menuController.path}/tema/img/bt_exporter_xlsx.png"
+					title="#{msgs['alt.acao.exportar']}"
+					alt="#{msgs['alt.acao.exportar']}">
+
+					<p:dataExporter type="pdf" target="form:pedestresTable"
+						fileName="pedestres" />
+				</h:commandButton>
+
+			</h:panelGrid>
+
+			<div style="float: right;">
+
+				<p:calendar id="filtro-data-inicio"
+					value="#{relatorioPedestresController.parans['data_maior_data']}"
+					pattern="dd/MM/yyyy HH:mm" mask="99/99/9999 99:99" size="20"
+					navigator="true"
+					valueChangeListener="#{relatorioPedestresController.alteraDataInicio}">
+
+
+					<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+				</p:calendar>
+				até
+				<p:calendar id="filtro-data-fim"
+					value="#{relatorioPedestresController.parans['data_menor_data']}"
+					pattern="dd/MM/yyyy HH:mm" mask="99/99/9999 99:99" size="20"
+					navigator="true"
+					valueChangeListener="#{relatorioPedestresController.alteraDataFim}">
+
+					<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+				</p:calendar>
+
+			</div>
+		</ui:define>
+
+		<ui:define name="conteudo">
+			<h:panelGroup layout="block"
+				style="text-align:center; margin-top:20px;">
+				<p:panel header="Relatorio de Refeicoes"
+					style="display:inline-block; text-align:center;">
+
+					<p:dataTable id="pedestresTable"
+						value="#{relatorioPedestresController.refeicoesCount.entrySet()}"
+						var="entry" rowHover="true" stripedRows="true"
+						style="margin: 0 auto;">
+
+						<p:column headerText="Refeicao" style="text-align:center;">
+							<h:outputText value="#{entry.key}" />
+						</p:column>
+
+						<p:column headerText="Quantidade" style="text-align:center;">
+							<h:outputText value="#{entry.value}" />
+						</p:column>
+
+						<!-- Rodapé com total -->
+						<f:facet name="footer">
+							<h:outputText
+								value="Total de refeicoes: #{relatorioPedestresController.totalRefeicoes}"
+								style="font-weight:bold; font-size:14px;" />
+						</f:facet>
+					</p:dataTable>
+
+				</p:panel>
+			</h:panelGroup>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

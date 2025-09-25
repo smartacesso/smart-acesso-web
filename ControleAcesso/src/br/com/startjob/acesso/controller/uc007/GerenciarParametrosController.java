@@ -106,6 +106,7 @@ public class GerenciarParametrosController extends BaseController {
 			boolean tempoQRCodeDinamico = false;
 			boolean horarioDisparoSOC = false;
 			boolean habilitaAppPedestre = false;
+			boolean habilitaRelatorioRona = false;
 
 			for (BaseEntity baseEntity : all) {
 				ParametroEntity item = (ParametroEntity) baseEntity;
@@ -191,6 +192,9 @@ public class GerenciarParametrosController extends BaseController {
 				}
 				if (item.getNome().equals(BaseConstant.PARAMETERS_NAME.TEMPO_TOLERANCIA_ENTRADA_E_SAIDA)) {
 					tempoToleranciaEntrada = true;
+				}
+				if (item.getNome().equals(BaseConstant.PARAMETERS_NAME.HABILITA_RELATORIO_RONA)) {
+					habilitaRelatorioRona = true;
 				}
 
 			}
@@ -336,6 +340,15 @@ public class GerenciarParametrosController extends BaseController {
 						getUsuarioLogado().getCliente());
 				parametrosGerais.add(p);
 			}
+			
+			
+			if (!habilitaRelatorioRona) {
+				ParametroEntity p = new ParametroEntity(BaseConstant.PARAMETERS_NAME.HABILITA_RELATORIO_RONA, "false",
+						getUsuarioLogado().getCliente());
+				parametrosGerais.add(p);
+			}
+			
+			
 
 			// ordena configurações
 			Collections.sort(parametrosGerais, new Comparator<ParametroEntity>() {

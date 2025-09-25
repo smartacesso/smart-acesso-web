@@ -42,6 +42,7 @@ import br.com.startjob.acesso.modelo.collections.LazyLoadingList;
 import br.com.startjob.acesso.modelo.collections.LazyLoadingList.LazyLoadingItemListener;
 import br.com.startjob.acesso.modelo.ejb.BaseEJBRemote;
 import br.com.startjob.acesso.modelo.entity.HistoricoCotaEntity;
+import br.com.startjob.acesso.modelo.entity.ParametroEntity;
 import br.com.startjob.acesso.modelo.entity.UsuarioEntity;
 import br.com.startjob.acesso.modelo.entity.base.BaseEntity;
 import br.com.startjob.acesso.modelo.utils.AppAmbienteUtils;
@@ -1478,5 +1479,15 @@ public abstract class BaseController implements Serializable {
 		setSessioAtrribute(sessionAttributeName, Boolean.TRUE.equals((Boolean) obj) ? false : true);
 	}
 
+	public boolean isRelatorioRonaHabilitado() {
+		ParametroEntity param = baseEJB.getParametroSistema(BaseConstant.PARAMETERS_NAME.HABILITA_RELATORIO_RONA,
+				getUsuarioLogado().getCliente().getId());
+
+		if (param != null) {
+			Boolean habilitado = Boolean.valueOf(param.getValor());
+			return habilitado;
+		}
+		return false;
+	}
 	
 }
