@@ -126,7 +126,7 @@ indexes = {
 				+ "and obj.cliente.id = :ID_CLIENTE "),
 		
 		@NamedQuery(name = "PedestreEntity.findAllAutoAtendimentoAtivo", query = "select obj " + "from PedestreEntity obj "
-				+ "where (obj.removido = false or obj.removido is null) and obj.autoAtendimento = true " + "order by obj.id asc"),
+				+ "where (obj.removido = false or obj.removido is null) and obj.cliente.id = :ID_CLIENTE and obj.autoAtendimento = true " + "order by obj.id asc"),
 		@NamedQuery(name = "PedestreEntity.findByIdWithEmpRegrasAndHorarios",
 				query = "select distinct obj from PedestreEntity obj "
 						+ "left join fetch obj.cliente c "
@@ -151,6 +151,9 @@ indexes = {
 				+ "and obj.cliente.id = :ID_CLIENTE "),
 		@NamedQuery(name = "PedestreEntity.findByCpfAndIdCliente", query = "select distinct obj from PedestreEntity obj "
 				+ "where obj.cpf = :CPF "
+				+ "and obj.cliente.id = :ID_CLIENTE "),
+		@NamedQuery(name = "PedestreEntity.findByNomeAndIdCliente", query = "select distinct obj from PedestreEntity obj "
+				+ "where obj.nome = :NOME "
 				+ "and obj.cliente.id = :ID_CLIENTE ")
 
 })
@@ -369,7 +372,7 @@ public class PedestreEntity extends ClienteBaseEntity {
 		LocalDate hoje = LocalDate.now();
 
 		this.nome = funcionarioSeniorDto.getNome();
-		this.matricula = funcionarioSeniorDto.getNumeroMatricula();
+		this.matricula = funcionarioSeniorDto.getNumeroMatricula() + funcionarioSeniorDto.getEmpresa()+funcionarioSeniorDto.getNumCracha();
 		this.telefone = funcionarioSeniorDto.getDddtelefone() + funcionarioSeniorDto.getNumtelefone();
 		this.codigoCartaoAcesso = funcionarioSeniorDto.getNumCracha();
 		this.rg = funcionarioSeniorDto.getRg();
@@ -397,11 +400,10 @@ public class PedestreEntity extends ClienteBaseEntity {
 			final EmpresaEntity empresaEntity) {
 
 		this.nome = funcionarioSeniorDto.getNome();
-		this.matricula = funcionarioSeniorDto.getNumeroMatricula();
+		this.matricula = funcionarioSeniorDto.getNumeroMatricula() + funcionarioSeniorDto.getEmpresa()+funcionarioSeniorDto.getNumCracha();
 		this.telefone = funcionarioSeniorDto.getDddtelefone() + funcionarioSeniorDto.getNumtelefone();
 		
-//		System.out.println("numero do cracha update : " + funcionarioSeniorDto.getNumCracha());
-//		this.codigoCartaoAcesso = funcionarioSeniorDto.getNumCracha();
+		this.codigoCartaoAcesso = funcionarioSeniorDto.getNumCracha();
 		
 		this.rg = funcionarioSeniorDto.getRg();
 		this.codigoPermissao = funcionarioSeniorDto.getCodPrm(); // codigo permissao

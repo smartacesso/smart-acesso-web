@@ -104,6 +104,7 @@ public class GerenciarParametrosController extends BaseController {
 			boolean removerCartaoPedestreRemovidos = false;
 			boolean tipoQRCodePadrao = false;
 			boolean tempoQRCodeDinamico = false;
+			boolean tempoCadastroFacialRemoto = false;
 			boolean horarioDisparoSOC = false;
 			boolean habilitaAppPedestre = false;
 			boolean habilitaRelatorioRona = false;
@@ -183,6 +184,9 @@ public class GerenciarParametrosController extends BaseController {
 				}
 				if (item.getNome().equals(BaseConstant.PARAMETERS_NAME.TEMPO_QRCODE_DINAMICO)) {
 					tempoQRCodeDinamico = true;
+				}
+				if (item.getNome().equals(BaseConstant.PARAMETERS_NAME.TEMPO_EXPIRACAO_CADASTRO_FACIAL )) {
+					tempoCadastroFacialRemoto = true;
 				}
 				if (item.getNome().equals(BaseConstant.PARAMETERS_NAME.HABILITA_APP_PEDESTRE)) {
 					habilitaAppPedestre = true;
@@ -319,6 +323,12 @@ public class GerenciarParametrosController extends BaseController {
 
 			if (!tempoQRCodeDinamico) {
 				ParametroEntity p = new ParametroEntity(BaseConstant.PARAMETERS_NAME.TEMPO_QRCODE_DINAMICO, "5",
+						getUsuarioLogado().getCliente());
+				parametrosGerais.add(p);
+			}
+			
+			if (!tempoCadastroFacialRemoto) {
+				ParametroEntity p = new ParametroEntity(BaseConstant.PARAMETERS_NAME.TEMPO_EXPIRACAO_CADASTRO_FACIAL, "1",
 						getUsuarioLogado().getCliente());
 				parametrosGerais.add(p);
 			}
