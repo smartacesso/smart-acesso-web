@@ -1,13 +1,20 @@
 package br.com.startjob.acesso.controller.uc008;
 
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
+import javax.faces.application.FacesMessage;
+import javax.faces.context.FacesContext;
 import javax.faces.event.AbortProcessingException;
 import javax.faces.event.ComponentSystemEvent;
 import javax.faces.event.ValueChangeEvent;
@@ -17,6 +24,8 @@ import javax.inject.Named;
 
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.model.file.UploadedFile;
+
+import com.senior.services.Enum.ModoImportacaoFuncionario;
 
 import br.com.startjob.acesso.annotations.UseCase;
 import br.com.startjob.acesso.controller.BaseController;
@@ -48,6 +57,13 @@ public class ConsultaPedestreController extends BaseController {
 	private List<SelectItem> listaDepartamentos;
 	private List<SelectItem> listaCentrosDeCusto;
 	private List<SelectItem> listaTipoArquivo;
+	
+	private String empresaSelecionada;
+	private String codFil;
+	private Date data;
+	private String numCad;
+	private String tipCol;
+
 	
 	@EJB
 	private PedestreEJBRemote pedestreEJB;
@@ -359,6 +375,61 @@ public class ConsultaPedestreController extends BaseController {
 		return !usuarioLogado.getPerfil().equals(PerfilAcesso.CUIDADOR);
 	}
 
+	
+	public void executarIntegracaoPedestre() {
+	    try {
+	    	// Decide o modo de importação a partir da presença da data
+	    	ModoImportacaoFuncionario modo;
+	    	String dataParaBusca = null;
+
+	    	if (data == null) {
+	    	    modo = ModoImportacaoFuncionario.COMPLETA;
+	    	} else {
+	    	    modo = ModoImportacaoFuncionario.INCREMENTAL;
+
+	    	    // converte java.util.Date para LocalDate
+	    	    LocalDate dataLocal = data.toInstant()  // pega o Instant
+	    	                               .atZone(ZoneId.systemDefault()) // aplica o fuso local
+	    	                               .toLocalDate();               // pega LocalDate
+
+	    	    // formata para dd/MM/yyyy
+	    	    dataParaBusca = dataLocal.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+	    	}
+
+	    	// chama o EJB
+	    	pedestreEJB.importaFuncionariosSenior(
+	    	    empresaSelecionada, 
+	    	    getUsuarioLogado().getCliente(), 
+	    	    modo,
+	    	    codFil, 
+	    	    dataParaBusca,   // null se completa, dd/MM/yyyy se incremental
+	    	    numCad, 
+	    	    tipCol
+	    	);
+
+	        FacesContext.getCurrentInstance().addMessage(null, 
+	            new FacesMessage(FacesMessage.SEVERITY_INFO, "Integração concluída", null));
+	    } catch (Exception e) {
+	        FacesContext.getCurrentInstance().addMessage(null, 
+	            new FacesMessage(FacesMessage.SEVERITY_ERROR, "Erro: " + e.getMessage(), null));
+	    }
+	}
+
+	public boolean exibeImportarPedestresSenior() {
+	    if (getUsuarioLogado() == null) {
+	        return false;
+	    }
+	    if (getUsuarioLogado().getCliente() == null) {
+	        return false;
+	    }
+	    if (getUsuarioLogado().getCliente().getIntegracaoSenior() == null) {
+	        return false;
+	    }
+	    
+	    String url = getUsuarioLogado().getCliente().getIntegracaoSenior().getUrl();
+	    return url != null && !url.trim().isEmpty();
+	}
+	
 	public PedestreEntity getPedestreSelecionado() {
 		return pedestreSelecionado;
 	}
@@ -441,6 +512,118 @@ public class ConsultaPedestreController extends BaseController {
 
 	public void setPermiteCampoAdicionalCrachaMatricula(boolean permiteCampoAdicionalCrachaMatricula) {
 		this.permiteCampoAdicionalCrachaMatricula = permiteCampoAdicionalCrachaMatricula;
+	}
+
+	public String getCodFil() {
+		return codFil;
+	}
+
+	public void setCodFil(String codFil) {
+		this.codFil = codFil;
+	}
+
+	public Date getData() {
+		return data;
+	}
+
+	public void setData(Date data) {
+		this.data = data;
+	}
+
+	public String getNumCad() {
+		return numCad;
+	}
+
+	public void setNumCad(String numCad) {
+		this.numCad = numCad;
+	}
+
+	public String getTipCol() {
+		return tipCol;
+	}
+
+	public void setTipCol(String tipCol) {
+		this.tipCol = tipCol;
+	}
+
+	public PedestreEJBRemote getPedestreEJB() {
+		return pedestreEJB;
+	}
+
+	public void setPedestreEJB(PedestreEJBRemote pedestreEJB) {
+		this.pedestreEJB = pedestreEJB;
+	}
+
+	public EmpresaEJBRemote getEmpresaEJB() {
+		return empresaEJB;
+	}
+
+	public void setEmpresaEJB(EmpresaEJBRemote empresaEJB) {
+		this.empresaEJB = empresaEJB;
+	}
+
+	public String getAcao() {
+		return acao;
+	}
+
+	public void setAcao(String acao) {
+		this.acao = acao;
+	}
+
+	public boolean isHabilitaAppPedestre() {
+		return habilitaAppPedestre;
+	}
+
+	public void setHabilitaAppPedestre(boolean habilitaAppPedestre) {
+		this.habilitaAppPedestre = habilitaAppPedestre;
+	}
+
+	public MenuController getMenuController() {
+		return menuController;
+	}
+
+	public void setMenuController(MenuController menuController) {
+		this.menuController = menuController;
+	}
+
+	public static long getSerialversionuid() {
+		return serialVersionUID;
+	}
+
+	public void setListaTiposPedestre(List<SelectItem> listaTiposPedestre) {
+		this.listaTiposPedestre = listaTiposPedestre;
+	}
+
+	public void setListaEmpresas(List<SelectItem> listaEmpresas) {
+		this.listaEmpresas = listaEmpresas;
+	}
+
+	public void setListaCargos(List<SelectItem> listaCargos) {
+		this.listaCargos = listaCargos;
+	}
+
+	public void setListaDepartamentos(List<SelectItem> listaDepartamentos) {
+		this.listaDepartamentos = listaDepartamentos;
+	}
+
+	public void setListaCentrosDeCusto(List<SelectItem> listaCentrosDeCusto) {
+		this.listaCentrosDeCusto = listaCentrosDeCusto;
+	}
+
+	public void setListaTipoArquivo(List<SelectItem> listaTipoArquivo) {
+		this.listaTipoArquivo = listaTipoArquivo;
+	}
+
+	public void setTipo(String tipo) {
+		this.tipo = tipo;
+	}
+
+	public String getEmpresaSelecionada() {
+		return empresaSelecionada;
+	}
+
+	public void setEmpresaSelecionada(String empresaSelecionada) {
+		this.empresaSelecionada = empresaSelecionada;
 	}
 }
 

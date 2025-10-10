@@ -25,11 +25,12 @@ import com.totvs.dto.CadastroDTO;
 
 public class IntegracaoTotvsEducacionalService {
 
-//  private static final String ENDPOINT_CONSULTA = "https://inspetoriasao142787.rm.cloudtotvs.com.br:1503/wsConsultaSQL/IwsConsultaSQL"; //homologacao
-	private static final String ENDPOINT_CONSULTA = "https://inspetoriasao142819.rm.cloudtotvs.com.br:8051/wsConsultaSQL/IwsConsultaSQL";
+  private static final String ENDPOINT_CONSULTA = "https://inspetoriasao142787.rm.cloudtotvs.com.br:1503/wsConsultaSQL/IwsConsultaSQL"; //homologacao
+//	private static final String ENDPOINT_CONSULTA = "https://inspetoriasao142819.rm.cloudtotvs.com.br:8051/wsConsultaSQL/IwsConsultaSQL";
     private static final String USER = "suporte.smart";
-    private static final String PASS = "suporte@smart";
-    private static final SimpleDateFormat sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+//    private static final String PASS = "suporte@smart";
+    private static final String PASS = "pokEnerish";
+    private static final SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
     private LocalDate ultimaImportacaoCompleta = null;
     
     public String getCadastros(Date lastUpdate) {
@@ -56,6 +57,7 @@ public class IntegracaoTotvsEducacionalService {
         if(rodarImportacaoCompleta) {
             // 01/01/ANO ATUAL 00:00:00
             Calendar calendar = Calendar.getInstance();
+            calendar.set(Calendar.YEAR, LocalDate.now().getYear() -1);
             calendar.set(Calendar.MONTH, Calendar.JANUARY);
             calendar.set(Calendar.DAY_OF_MONTH, 1);
             calendar.set(Calendar.HOUR_OF_DAY, 0);
@@ -161,38 +163,35 @@ public class IntegracaoTotvsEducacionalService {
 
 		NodeList resultados = doc.getElementsByTagName("Resultado");
 
-		// 3️⃣ Itera sobre cada <Resultado>
+		// Itera sobre cada <Resultado>
 		for (int i = 0; i < resultados.getLength(); i++) {
-			Element resultado = (Element) resultados.item(i);
+		    Element resultado = (Element) resultados.item(i);
 
-			CadastroDTO dto = new CadastroDTO();
+		    CadastroDTO dto = new CadastroDTO();
 
-			// Numéricos (usa parseInt com fallback para 0 caso vazio)
-			dto.setCodColigada(parseIntSafe(getTag(resultado, "CODCOLIGADA")));
-			dto.setCodFilial(parseIntSafe(getTag(resultado, "CODFILIAL")));
-			dto.setCodResponsavel(parseIntSafe(getTag(resultado, "CODRESPONSAVEL")));
-			dto.setIdHabilitacaoFilial(parseIntSafe(getTag(resultado, "IDHABILITACAOFILIAL")));
-			dto.setIdPerLet(parseIntSafe(getTag(resultado, "IDPERLET")));
+		    // Numéricos
+		    dto.setCodColigada(parseIntSafe(getTag(resultado, "CODCOLIGADA")));
+		    dto.setCodFilial(parseIntSafe(getTag(resultado, "CODFILIAL")));
+		    dto.setIdHabilitacaoFilial(parseIntSafe(getTag(resultado, "IDHABILITACAOFILIAL")));
+		    dto.setIdPerLet(parseIntSafe(getTag(resultado, "IDPERLET")));
 
-			// Strings
-			dto.setNomeColigada(getTag(resultado, "NOMECOLIGADA"));
-			dto.setCnpjColigada(getTag(resultado, "CNPJCOLIGADA"));
-			dto.setNomeFilial(getTag(resultado, "NOMEFILIAL"));
-			dto.setCnpjFilial(getTag(resultado, "CNPJFILIAL"));
-			dto.setNome(getTag(resultado, "NOME"));
-			dto.setMatricula(getTag(resultado, "MATRICULA"));
-			dto.setCpf(getTag(resultado, "CPF"));
-			dto.setNomeResponsavel(getTag(resultado, "NOMERESPONSAVEL"));
-			dto.setCpfCnpfResponsavel(getTag(resultado, "CPFCNPFRESPONSAVEL"));
-			dto.setCodStatus(getTag(resultado, "CODSTATUS"));
-			dto.setStatus(getTag(resultado, "STATUS"));
-			dto.setNivelEnsino(getTag(resultado, "NIVELENSINO"));
-			dto.setOrigem(getTag(resultado, "ORIGEM"));
+		    // Strings
+		    dto.setOrigem(getTag(resultado, "ORIGEM"));
+		    dto.setNomeColigada(getTag(resultado, "NOMECOLIGADA"));
+		    dto.setCnpjColigada(getTag(resultado, "CNPJCOLIGADA"));
+		    dto.setNomeFilial(getTag(resultado, "NOMEFILIAL"));
+		    dto.setCnpjFilial(getTag(resultado, "CNPJFILIAL"));
+		    dto.setNome(getTag(resultado, "NOME"));
+		    dto.setMatricula(getTag(resultado, "MATRICULA"));
+		    dto.setCpf(getTag(resultado, "CPF"));
+		    dto.setCodStatus(getTag(resultado, "CODSTATUS"));
+		    dto.setStatus(getTag(resultado, "STATUS"));
+		    dto.setNivelEnsino(getTag(resultado, "NIVELENSINO")); // pode vir vazio <NIVELENSINO />
 
-			// Data (converte string para Date)
-			dto.setDataAlteracao(parseDateSafe(getTag(resultado, "DATAALTERACAO")));
+		    // Data
+		    dto.setDataAlteracao(parseDateSafe(getTag(resultado, "DATAALTERACAO")));
 
-			lista.add(dto);
+		    lista.add(dto);
 		}
 
 		return lista;

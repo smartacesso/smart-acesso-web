@@ -3,7 +3,9 @@ package br.com.startjob.acesso.to.TotvsEdu;
 public enum TipoTotvsEdu {
 	
 	ALUNO("EDUCACIONAL", "ALUNO"),
-	FUNCIONARIO("FOLHA", "FUNCIONARIO");
+	FUNCIONARIO("FOLHA", "FUNCIONARIO"),
+	RESPONSAVEL("RESPONSAVEL_EDUCACIONAL", "RESPONSAVEL"),
+	RESPONSAVEL_FIN("RESPONSAVEL_FINANCEIRO", "RESPONSAVEL");
 	
 	private String tabelaRm;
 	private String desc;

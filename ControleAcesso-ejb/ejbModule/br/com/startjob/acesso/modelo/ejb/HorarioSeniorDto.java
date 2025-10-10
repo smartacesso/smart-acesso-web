@@ -2,6 +2,7 @@ package br.com.startjob.acesso.modelo.ejb;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 import br.com.startjob.acesso.modelo.entity.HorarioEntity;
@@ -104,52 +105,60 @@ public class HorarioSeniorDto {
 	}
 	
 	public HorarioEntity toHorarioEntity() {
-//		if(this.nome.contains("Lanche")) {
-//			return null;
-//		}
+		
+	    // Se o nome estiver nulo, definir como "Padrao"
+	    String nomeHorario = (this.nome == null || this.nome.isEmpty()) ? "Padrao" : this.nome;
+		
+		Date inicioDate = converterHorarioParaDate(inicio);
+		Date fimDate = converterHorarioParaDate(fim);
 		
 		HorarioEntity horario = new HorarioEntity();
 		horario.setDiasSemana("1234567");
-		horario.setHorarioInicio(converterHorarioParaDate(inicio));
-		horario.setHorarioFim(converterHorarioParaDate(fim));
-		horario.setNome(nome);
+		horario.setHorarioInicio(ajustarMinutos(inicioDate, -20));
+		horario.setHorarioFim(ajustarMinutos(fimDate, 20));
+		horario.setNome(nomeHorario);
 		horario.setIdHorarioSenior(Integer.parseInt(idHorario));
 		horario.setStatus(Status.ATIVO);
-		
-		if(this.nome.equalsIgnoreCase("Refeicao") ||this.nome.equalsIgnoreCase("inicio")) {
-			horario.setQtdeDeCreditos(1L);
-		}
 		
 		return horario;
 	}
 	
 	public HorarioEntity toHorarioPedestre() {
-		if(this.nome.contains("Lanche")) {
-			return null;
-		}
-		
-		HorarioEntity horario = new HorarioEntity();
-		horario.setDiasSemana("1234567");
-		horario.setHorarioInicio(converterHorarioParaDate(inicio));
-		horario.setHorarioFim(converterHorarioParaDate(fim));
-		horario.setNome(nome + " pedestre");
-		horario.setIdHorarioSenior(Integer.parseInt(idHorario));
-		horario.setStatus(Status.ATIVO);
-		if(this.nome.equalsIgnoreCase("Refeicao") ||this.nome.equalsIgnoreCase("inicio")) {
-			horario.setQtdeDeCreditos(1L);
-		}
+	    // Se o nome estiver nulo, definir como "Padrao"
+	    String nomeHorario = (this.nome == null || this.nome.isEmpty()) ? "Padrao" : this.nome;
+	    
+	    Date inicioDate = converterHorarioParaDate(inicio);
+		Date fimDate = converterHorarioParaDate(fim);
 
-		return horario;
+	    HorarioEntity horario = new HorarioEntity();
+	    horario.setDiasSemana("1234567");
+	    horario.setHorarioInicio(ajustarMinutos( inicioDate, -20));
+	    horario.setHorarioFim(ajustarMinutos(fimDate, 20));
+	    horario.setNome(nomeHorario + " pedestre");
+
+	    // Evitar NullPointer se idHorario estiver nulo
+	    if(idHorario != null && !idHorario.isEmpty()) {
+	        horario.setIdHorarioSenior(Integer.parseInt(idHorario));
+	    }
+
+	    horario.setStatus(Status.ATIVO);
+
+	    if(nomeHorario.equalsIgnoreCase("Refeicao") ||nomeHorario.equalsIgnoreCase("lanche") ||nomeHorario.equalsIgnoreCase("inicio")) {
+	        horario.setQtdeDeCreditos(1L);
+	    }
+
+	    return horario;
 	}
+
 	
 	public static HorarioSeniorDto criaHorarioPadrao() {
 		HorarioSeniorDto horarioPadrao = new HorarioSeniorDto();
 		horarioPadrao.setIdEscala("99991");
 		horarioPadrao.setIdHorario("99991");
 		horarioPadrao.setDiaSemana("1234567");
-		horarioPadrao.setInicio("00:00");
-		horarioPadrao.setFim("23:59");
-		horarioPadrao.setNome("periodo");
+		horarioPadrao.setInicio("00:21");
+		horarioPadrao.setFim("23:39");
+		horarioPadrao.setNome("inicio");
 		
 		return horarioPadrao;
 	}
@@ -161,9 +170,17 @@ public class HorarioSeniorDto {
 		horarioPadrao.setDiaSemana("7");
 		horarioPadrao.setInicio("00:00");
 		horarioPadrao.setFim("00:01");
-		horarioPadrao.setNome("periodo");
+		horarioPadrao.setNome("inicio");
 		
 		return horarioPadrao;
+	}
+	
+	private Date ajustarMinutos(Date date, int minutos) {
+	    if (date == null) return null;
+	    Calendar cal = Calendar.getInstance();
+	    cal.setTime(date);
+	    cal.add(Calendar.MINUTE, minutos); 
+	    return cal.getTime();
 	}
 
 }

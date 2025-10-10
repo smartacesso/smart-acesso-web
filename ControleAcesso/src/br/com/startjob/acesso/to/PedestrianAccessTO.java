@@ -108,13 +108,13 @@ public class PedestrianAccessTO {
 		this.celular		= objects[28] == null ? null : objects[28].toString();
 		this.observacoes	= objects[29] == null ? null : objects[29].toString();
 		this.matricula		= objects[37] == null ? null : objects[37].toString();
-		this.removido		= objects[38] == null ? false : Boolean.valueOf(objects[38].toString());
-		this.sempreLiberado   = objects[39] == null ? false : Boolean.valueOf(objects[39].toString());
+		this.removido		= toBoolean(objects[38]);
+		this.sempreLiberado   = toBoolean(objects[39]);
 		this.acessoLivre   = toBoolean(objects[78]);
-		this.habilitarTeclado = objects[40] == null ? false : Boolean.valueOf(objects[40].toString());
+		this.habilitarTeclado = toBoolean(objects[40]);
 		this.idTemp			= objects[41] == null ? null : Long.valueOf(objects[41].toString());
 		this.qrCodeParaAcesso = objects[42] == null ? null : objects[42].toString();
-		this.cadastroFacialObrigatorio = objects[43] == null ? false : Boolean.valueOf(objects[43].toString());
+		this.cadastroFacialObrigatorio = toBoolean(objects[43]);
 		
 		//endereco
 		this.cep			  = objects[30] == null ? null : objects[30].toString();
@@ -133,7 +133,7 @@ public class PedestrianAccessTO {
 		this.idDepartamento = objects[47] == null ? null : Long.valueOf(objects[47].toString());
 		this.luxandIdentifier = objects[49] == null ? null : objects[49].toString();
 		
-		this.enviaSmsAoPassarNaCatraca = objects[48] == null ? false : Boolean.valueOf(objects[48].toString());
+		this.enviaSmsAoPassarNaCatraca = toBoolean(objects[48]);
 		
 		//digitais cadastradas
 		adicionaBiometria(objects);
@@ -165,7 +165,7 @@ public class PedestrianAccessTO {
 			this.tipoQRCode = objects[67] == null ? null : objects[67].toString();
 		}catch (Exception e) {}
 		try {
-			this.bloqueado = objects[64] == null ? null : Boolean.valueOf(objects[64].toString());
+			this.bloqueado = toBoolean(objects[64]);
 		}catch (Exception e) {}
 		this.dataCadastroFotoNaHikivision  = objects[68] == null ? null : criaData(objects[68], sdf);
 		
