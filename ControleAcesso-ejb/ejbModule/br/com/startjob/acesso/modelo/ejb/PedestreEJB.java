@@ -45,6 +45,7 @@ import javax.xml.ws.soap.MTOMFeature;
 import org.hibernate.proxy.HibernateProxy;
 import org.jboss.ejb3.annotation.TransactionTimeout;
 
+import com.ad.service.ActiveDirectoryService;
 import com.age.soc.services.exportaDados.ExportaDadosWs;
 import com.age.soc.services.exportaDados.ExportaDadosWsService;
 import com.age.soc.services.exportaDados.ExportaDadosWsVo;
@@ -98,7 +99,9 @@ import br.com.startjob.acesso.modelo.enumeration.Status;
 import br.com.startjob.acesso.modelo.enumeration.TipoPedestre;
 import br.com.startjob.acesso.modelo.enumeration.TipoRegra;
 import br.com.startjob.acesso.modelo.to.IntervaloTO;
+import br.com.startjob.acesso.modelo.to.UsuarioADTO;
 import br.com.startjob.acesso.modelo.utils.AppAmbienteUtils;
+import br.com.startjob.acesso.modelo.utils.UsuarioAdToPedestreConverter;
 
 @Stateless
 @TransactionAttribute(TransactionAttributeType.REQUIRED)
@@ -2159,7 +2162,58 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 	}
 
 	private void importarFuncionariosAD(ClienteEntity cliente) {
-		// TODO Auto-generated method stub
+		try {
+
+			// estes usuarios que devem ser trocados da variãvel de url
+
+			/*
+			 * String baseDn = "cn=Users,dc=smart,dc=local"; String username =
+			 * "cn=Administrator,cn=Users,dc=smart,dc=local"; String password =
+			 * "desenvolvimento@2024";
+			 */
+
+			if (Objects.isNull(cliente.getIntegracaoAD().getUrl())) {
+				return;
+			}
+
+			ActiveDirectoryService activeDirectoryService = new ActiveDirectoryService(
+					cliente.getIntegracaoAD().getUsuario(), cliente.getIntegracaoAD().getSenha(),
+					cliente.getIntegracaoAD().getBase(), cliente.getIntegracaoAD().getUrl());
+
+			List<String> usuarios = ActiveDirectoryService.buscarUsuarios();
+			usuarios.forEach(System.out::println);
+
+			UsuarioADTO user = new UsuarioADTO();
+
+			List<UsuarioADTO> users = user.convertUser(usuarios);
+
+			List<PedestreEntity> pedestrians = UsuarioAdToPedestreConverter.converterLista(users);
+
+			pedestrians.forEach(pedestrian -> {
+				try {
+					pedestrian.setCliente(cliente);
+					saveOrUpdateForName(pedestrian);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			});
+
+			System.out.println("pedestres da integracao AD salvos com suceso");
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void saveOrUpdateForName(PedestreEntity pedestrian) throws Exception {
+		PedestreEntity pedestrianPersisted = buscaPedestrePorNome(pedestrian.getNome());
+
+		if (Objects.nonNull(pedestrianPersisted)) {
+			pedestrian = (PedestreEntity) alteraObjeto(pedestrianPersisted)[0];
+		} else {
+			pedestrian = (PedestreEntity) gravaObjeto(pedestrian)[0];
+		}
 
 	}
 
