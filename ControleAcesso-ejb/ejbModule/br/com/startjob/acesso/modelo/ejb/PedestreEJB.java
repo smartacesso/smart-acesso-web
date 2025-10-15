@@ -1064,6 +1064,8 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 				empresa = em.merge(empresa); // reanexa
 				pedestre.setEmpresa(empresa);
 			}
+			
+			processarRegrasPorFuncionarioTotvs(pedestre, cliente, funcionarioTotvsDto);
 
 			if (pedestres == null || pedestres.isEmpty()) {
 				pedestre.setAlterado(true);
@@ -1078,9 +1080,9 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 						+ pedestre.getMatricula() + ", id : " + pedestre.getId());
 			}
 			System.out.println("Status : " + pedestre.getStatus());
-
-			processarRegrasPorFuncionarioTotvs(pedestre, cliente, funcionarioTotvsDto);
-
+			
+			
+			
 		} catch (Exception e) {
 			throw new RuntimeException("Erro ao processar funcionário TOTVS: " + funcionarioTotvsDto.getMatricula(), e);
 		}
@@ -1116,7 +1118,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 			}
 
 			System.out.println("Funcionario ira trabalhar, atualizando horarios...");
-
+			
 			HorarioTotvsProtheusDTO horario;
 			ParametroEntity param = getParametroSistema(BaseConstant.PARAMETERS_NAME.TEMPO_TOLERANCIA_ENTRADA_E_SAIDA,
 					cliente.getId());

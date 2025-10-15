@@ -434,6 +434,7 @@ public class PedestreEntity extends ClienteBaseEntity {
 		this.setCliente(cliente);
 		this.setDataAlteracao(new Date());
 		this.setExistente(true);
+		this.setSempreLiberado(false);
 		
 		System.out.println("situacaoFolha=" + funcionarioTotvsDto.getSituacaoFolha()
 	    + ", horaInicial=[" + funcionarioTotvsDto.getHoraInicial() + "]"
