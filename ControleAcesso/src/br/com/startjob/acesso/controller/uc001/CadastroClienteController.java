@@ -45,6 +45,9 @@ public class CadastroClienteController extends CadastroBaseController {
 	private String emailAnterior;
 
 	UsuarioEntity usuarioParaEditar;
+	
+	
+	private String senhaIntegracaoInput;
 
 	@PostConstruct
 	@Override
@@ -133,34 +136,35 @@ public class CadastroClienteController extends CadastroBaseController {
 	public void alterarSenhaUsuarioCliente() throws Exception {
 		ClienteEntity cliente = (ClienteEntity) getEntidade();
 
-		if (usuarioParaEditar.getLogin() == null || usuarioParaEditar.getLogin().trim().isEmpty()) {
-			mensagemFatal("", "#O campo login não pode ser vazio.");
-			return;
-		}
+
+	    if (usuarioLogin == null || usuarioLogin.trim().isEmpty()) {
+	        mensagemFatal("", "#O campo login não pode ser vazio.");
+	        return;
+	    }
 
 		if (usuarioSenha == null || usuarioSenha.trim().isEmpty()) {
 			mensagemFatal("", "#O campo senha não pode ser vazio.");
 			return;
 		}
 
-		// Busca usuário existente pelo login
-		UsuarioEntity user = buscaLoginExistente(usuarioParaEditar.getLogin(), cliente.getId());
+	    // Busca usuário existente pelo login
+	    UsuarioEntity user = buscaLoginExistente(usuarioLogin, cliente.getId());
 
 		boolean criarNovo = false;
 
-		if (user == null) {
-			// Se não encontrou, cria um novo
-			user = new UsuarioEntity();
-			user.setCliente(cliente);
-			user.setNome(usuarioParaEditar.getLogin());
-			user.setStatus(Status.ATIVO);
-			user.setPerfil(PerfilAcesso.ADMINISTRADOR);
-			criarNovo = true;
-		}
+	    if (user == null) {
+	        // Se não encontrou, cria um novo
+	        user = new UsuarioEntity();
+	        user.setCliente(cliente);
+	        user.setNome(usuarioLogin);
+	        user.setStatus(Status.ATIVO);
+	        user.setPerfil(PerfilAcesso.ADMINISTRADOR);
+	        criarNovo = true;
+	    }
 
-		// Atualiza login e senha
-		user.setLogin(usuarioParaEditar.getLogin());
-		user.setSenha(EncryptionUtils.encrypt(usuarioSenha));
+	    // Atualiza login e senha
+	    user.setLogin(usuarioLogin);
+	    user.setSenha(EncryptionUtils.encrypt(usuarioSenha));
 
 		// Persiste ou atualiza
 		if (criarNovo) {
@@ -208,6 +212,13 @@ public class CadastroClienteController extends CadastroBaseController {
 		if (cliente.getId() != null)
 			criaUsuario = false;
 
+		IntegracaoSeniorEntity integracao = cliente.getIntegracaoSenior();
+
+		if (senhaIntegracaoInput != null && !senhaIntegracaoInput.isEmpty()) {
+		    integracao.setSenha(senhaIntegracaoInput);
+		}
+		
+		
 		String retorno = super.salvar();
 
 		cliente = (ClienteEntity) getEntidade();
@@ -228,6 +239,10 @@ public class CadastroClienteController extends CadastroBaseController {
 
 					baseEJB.gravaObjeto(user);
 				} else {
+				    if (usuarioParaEditar == null || usuarioParaEditar.getId() == null) {
+				        return "";
+				    }
+					
 					UsuarioEntity user = (UsuarioEntity) baseEJB.recuperaObjeto(UsuarioEntity.class,
 							usuarioParaEditar.getId());
 
@@ -383,6 +398,15 @@ public class CadastroClienteController extends CadastroBaseController {
 
 	public void setUsuarioParaEditar(UsuarioEntity usuarioParaEditar) {
 		this.usuarioParaEditar = usuarioParaEditar;
+	}
+
+	// getter e setter
+	public String getSenhaIntegracaoInput() {
+	    return senhaIntegracaoInput;
+	}
+
+	public void setSenhaIntegracaoInput(String senhaIntegracaoInput) {
+	    this.senhaIntegracaoInput = senhaIntegracaoInput;
 	}
 
 }

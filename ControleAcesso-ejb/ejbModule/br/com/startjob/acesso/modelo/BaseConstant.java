@@ -141,19 +141,25 @@ public interface BaseConstant {
 		public static final String PREENCHER_CARTAO_COM_MATRICULA = "preencher cartao com matricula";
 		
 		public static final String PREENCHER_CARTAO_AUTO = "preencher cartao automaticamente (8 digitos)";
-
+		
+		public static final String HABILITA_RELATORIO_RONA = "Habilita relatorio rona";
 		
 		public static final String TIPO_QR_CODE = "Permitir acesso via QR Code: Habilita QRCode dinâmico";
 
 		public static final String TIPO_QR_CODE_PADRAO = "Permitir acesso via QR Code: Tipo padrão";
 		
 		public static final String TEMPO_QRCODE_DINAMICO = "Permitir acesso via QR Code: Tempo para renovação do tipo QRCode Dinâmico por tempo (em minutos)";
+		
+		
+
 
 		public static final String HABILITA_APP_PEDESTRE = "Habilita App do Pedestre";
 		
 		public static final String REMOVE_CARTAO_EXCLUIDO = "Remove o cartão dos Pedestres removidos";
 		
 		public static final String TEMPO_TOLERANCIA_ENTRADA_E_SAIDA = "Tempo de tolerancia (Entrada/Saida)";
+
+		public static final String TEMPO_EXPIRACAO_CADASTRO_FACIAL = "Tempo para EXPIRAÇÃO da liberação de cadastro facial remoto (em horas)";
 
 	}
 	

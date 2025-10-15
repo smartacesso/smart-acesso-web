@@ -4,25 +4,22 @@ import java.util.Date;
 
 public class CadastroDTO {
 
-    private int codColigada;                // numerico
-    private String nomeColigada;            // string
-    private String cnpjColigada;            // string
-    private int codFilial;                  // numerico
-    private String nomeFilial;              // string
-    private String cnpjFilial;              // string
-    private String nome;                    // string
-    private String matricula;               // string
-    private String cpf;                     // string
-    private int codResponsavel;             // numerico
-    private String nomeResponsavel;         // string
-    private String cpfCnpfResponsavel;      // string
-    private String codStatus;               // string
-    private String status;                  // string
-    private String nivelEnsino;             // string
-    private int idHabilitacaoFilial;        // numerico
-    private Date dataAlteracao;             // Date
-    private int idPerLet;                   // numerico
-    private String origem;                  // numerico (mas vem como texto, então usa String)
+	private int codColigada;         // numerico
+    private String nomeColigada;     // string
+    private String cnpjColigada;     // string
+    private int codFilial;           // numerico
+    private String nomeFilial;       // string
+    private String cnpjFilial;       // string
+    private String nome;             // string
+    private String matricula;        // string
+    private String cpf;              // string
+    private String codStatus;        // string (alguns casos pode ser letra, ex: "A")
+    private String status;           // string
+    private String nivelEnsino;      // string (pode vir vazio ou `<NIVELENSINO />`)
+    private int idHabilitacaoFilial; // numerico (pode não vir em todos os resultados)
+    private Date dataAlteracao;      // Date
+    private int idPerLet;            // numerico (pode não vir em todos os resultados)
+    private String origem;           // string (EDUCACIONAL, FOLHA, etc.)
 
     // Getters e setters
 
@@ -52,15 +49,6 @@ public class CadastroDTO {
 
     public String getCpf() { return cpf; }
     public void setCpf(String cpf) { this.cpf = cpf; }
-
-    public int getCodResponsavel() { return codResponsavel; }
-    public void setCodResponsavel(int codResponsavel) { this.codResponsavel = codResponsavel; }
-
-    public String getNomeResponsavel() { return nomeResponsavel; }
-    public void setNomeResponsavel(String nomeResponsavel) { this.nomeResponsavel = nomeResponsavel; }
-
-    public String getCpfCnpfResponsavel() { return cpfCnpfResponsavel; }
-    public void setCpfCnpfResponsavel(String cpfCnpfResponsavel) { this.cpfCnpfResponsavel = cpfCnpfResponsavel; }
 
     public String getCodStatus() { return codStatus; }
     public void setCodStatus(String codStatus) { this.codStatus = codStatus; }

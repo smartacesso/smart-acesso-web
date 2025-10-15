@@ -1,5 +1,6 @@
 package br.com.startjob.acesso.modelo.entity;
 
+import java.util.Calendar;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -21,12 +22,11 @@ import javax.persistence.Transient;
 import br.com.startjob.acesso.modelo.entity.base.ClienteBaseEntity;
 
 @Entity
-@Table(name = "TB_ACESSO", indexes = {
-		@Index(name = "idx_pedestre_data", columnList = "ID_PEDESTRE, DATA"),
+@Table(name = "TB_ACESSO", indexes = { @Index(name = "idx_pedestre_data", columnList = "ID_PEDESTRE, DATA"),
 		@Index(name = "idx_pedestre_tipo", columnList = "ID_PEDESTRE, TIPO"),
 		@Index(name = "idx_cliente_data", columnList = "ID_CLIENTE, DATA, SENTIDO, TIPO"),
 		@Index(name = "idx_pedestre_sentido_tipo", columnList = "ID_PEDESTRE, SENTIDO, TIPO, DATA"),
-		@Index(name = "idx_only_pedestre", columnList = "ID_PEDESTRE")})
+		@Index(name = "idx_only_pedestre", columnList = "ID_PEDESTRE") })
 @NamedQueries({
 		@NamedQuery(name = "AcessoEntity.findAll", query = "select obj " + "from AcessoEntity obj "
 				+ "where (obj.removido = false or obj.removido is null) " + "order by obj.id asc"),
@@ -70,19 +70,13 @@ import br.com.startjob.acesso.modelo.entity.base.ClienteBaseEntity;
 		@NamedQuery(name = "AcessoEntity.findLastAccessByIdAndCurrentLastAccess", query = "select new br.com.startjob.acesso.modelo.entity.AcessoEntity(obj.id) "
 				+ "from AcessoEntity obj " + "	join obj.pedestre p " + "where p.id = :ID_PEDESTRE "
 				+ "and obj.data = :DATA "),
-		@NamedQuery(name = "AcessoEntity.findAllByIdPedestre",
-				    query = "select obj from AcessoEntity obj " +
-				            "where obj.pedestre.id = :ID_PEDESTRE " +
-				            "AND (:DATA_INICIO IS NULL OR obj.data >= :DATA_INICIO) " +
-				            "AND (:DATA_FIM IS NULL OR obj.data <= :DATA_FIM) " +
-				            "and (obj.removido = false or obj.removido is null) " +
-				            "order by obj.data desc"),
-		@NamedQuery(name = "AcessoEntity.findAllByIdPedestreSemData",
-				    query = "select obj from AcessoEntity obj " +
-				            "where obj.pedestre.id = :ID_PEDESTRE " +
-				            "and (obj.removido = false or obj.removido is null) " +
-				            "order by obj.data desc")
-})
+		@NamedQuery(name = "AcessoEntity.findAllByIdPedestre", query = "select obj from AcessoEntity obj "
+				+ "where obj.pedestre.id = :ID_PEDESTRE " + "AND (:DATA_INICIO IS NULL OR obj.data >= :DATA_INICIO) "
+				+ "AND (:DATA_FIM IS NULL OR obj.data <= :DATA_FIM) "
+				+ "and (obj.removido = false or obj.removido is null) " + "order by obj.data desc"),
+		@NamedQuery(name = "AcessoEntity.findAllByIdPedestreSemData", query = "select obj from AcessoEntity obj "
+				+ "where obj.pedestre.id = :ID_PEDESTRE " + "and (obj.removido = false or obj.removido is null) "
+				+ "order by obj.data desc") })
 @SuppressWarnings("serial")
 public class AcessoEntity extends ClienteBaseEntity {
 
@@ -131,6 +125,9 @@ public class AcessoEntity extends ClienteBaseEntity {
 
 	@Transient
 	private Long idPedestre;
+
+	@Transient
+	private String periodo;
 
 	public AcessoEntity() {
 
@@ -317,6 +314,38 @@ public class AcessoEntity extends ClienteBaseEntity {
 
 	public void setIsSincronizado(Boolean isSincronizado) {
 		this.isSincronizado = isSincronizado;
+	}
+
+	@Transient
+	public String getPeriodo() {
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(this.data);
+
+		int hora = cal.get(Calendar.HOUR_OF_DAY);
+		int minuto = cal.get(Calendar.MINUTE);
+		int totalMinutos = hora * 60 + minuto;
+
+		if (estaEntre(totalMinutos, 301, 420))
+			return "Café da manhã 1";
+		if (estaEntre(totalMinutos, 421, 630))
+			return "Café da manhã 2";
+		if (estaEntre(totalMinutos, 629, 840))
+			return "Almoço";
+		if (estaEntre(totalMinutos, 841, 990))
+			return "Café da tarde 1";
+		if (estaEntre(totalMinutos, 991, 1050))
+			return "Café da tarde 2";
+		if (estaEntre(totalMinutos, 1051, 1200))
+			return "Jantar";
+
+		if (totalMinutos >= 1201 || totalMinutos <= 300)
+			return "Lanche da noite";
+
+		return "Fora de horário";
+	}
+
+	private boolean estaEntre(int valor, int inicio, int fim) {
+		return valor >= inicio && valor <= fim;
 	}
 
 }

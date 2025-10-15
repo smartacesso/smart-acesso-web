@@ -86,6 +86,25 @@ public abstract class CadastroBaseController extends BaseController {
 		return false;
 	}
 	
+	public UsuarioEntity buscaUsuario(Long id) {
+		try {
+			Map<String, Object> args = new HashMap<String, Object>();
+			args.put("ID", id);
+			
+			@SuppressWarnings("unchecked")
+			List<UsuarioEntity> usuarioList = (List<UsuarioEntity>) baseEJB.pesquisaArgFixos(UsuarioEntity.class, 
+					"findById", args);
+			
+			if( usuarioList != null && !usuarioList.isEmpty()) {
+				return usuarioList.get(0);
+			}
+		} catch (Exception e) {
+			mensagemFatal("", "#Não foi possível verificar a existência deste e-mail.");
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
 	public boolean matriculaJaExistente(String matricula, Long idCliente, Long idPedestre) {
 		Integer qtdePedestres = 0;
 		try {

@@ -8,6 +8,8 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.senior.services.Enum.SoapOperation;
 import com.senior.services.dto.CargoSeniorDto;
@@ -24,6 +26,8 @@ public class IntegracaoSeniorService {
 	private String url;
 	private String usuario;
 	private String senha;
+	private static final Logger logger = Logger.getLogger(IntegracaoSeniorService.class.getName());
+	    
 
 	public IntegracaoSeniorService(ClienteEntity cliente) {
 		this.url = cliente.getIntegracaoSenior().getUrl();
@@ -32,44 +36,53 @@ public class IntegracaoSeniorService {
 	}
 
 	// Método comum para realizar a requisição SOAP
-	private String enviarSoapRequest(String soapBody) {
-		try {
-			// Iniciando a conexão
-			URL urlSoap = new URL(url);
-			HttpURLConnection connection = (HttpURLConnection) urlSoap.openConnection();
-			connection.setDoOutput(true);
-			connection.setRequestMethod("POST");
-			connection.setRequestProperty("Content-Type", "text/xml; charset=UTF-8");
-			connection.setRequestProperty("Accept", "application/xml");
+	private String enviarSoapRequest(String soapBody, SoapOperation operation) {
+	    long startTime = System.currentTimeMillis();
 
-			// Enviando o XML no corpo da requisição
-			try (OutputStream os = connection.getOutputStream()) {
-				byte[] input = soapBody.getBytes(StandardCharsets.UTF_8);
-				os.write(input, 0, input.length);
-			}
+	    try {
+	        URL urlSoap = new URL(url);
+	        HttpURLConnection connection = (HttpURLConnection) urlSoap.openConnection();
+	        connection.setDoOutput(true);
+	        connection.setRequestMethod("POST");
+	        connection.setRequestProperty("Content-Type", "text/xml; charset=UTF-8");
+	        connection.setRequestProperty("Accept", "application/xml");
+	        connection.setConnectTimeout(30000); // 30s
+	        connection.setReadTimeout(30000); // 30s
 
-			// Verificando a resposta
-			int responseCode = connection.getResponseCode();
+	        logger.info("Enviando requisição SOAP para operação " + operation.getOperation() + " na URL " + url);
 
-			if (responseCode == 200) { // Se a resposta for 200
-				BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-				String inputLine;
-				StringBuilder response = new StringBuilder();
+	        try (OutputStream os = connection.getOutputStream()) {
+	            byte[] input = soapBody.getBytes(StandardCharsets.UTF_8);
+	            os.write(input, 0, input.length);
+	        }
 
-				while ((inputLine = in.readLine()) != null) {
-					response.append(inputLine);
-				}
-				in.close();
-				return response.toString();
-			} else {
-				System.out.println("Erro na requisição: Código " + responseCode);
-				return null;
-			}
+	        int responseCode = connection.getResponseCode();
+	        long duration = System.currentTimeMillis() - startTime;
 
-		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
-		}
+	        if (responseCode == 200) {
+	            BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+	            String inputLine;
+	            StringBuilder response = new StringBuilder();
+
+	            while ((inputLine = in.readLine()) != null) {
+	                response.append(inputLine);
+	            }
+	            in.close();
+
+	            logger.info("Requisição SOAP concluída com sucesso em " + duration + " ms para operação " + operation.getOperation());
+	            return response.toString();
+	        } else {
+	            logger.warning("Erro na requisição SOAP: Código HTTP " + responseCode + " para operação " + operation.getOperation());
+	            return null;
+	        }
+
+	    } catch (java.net.SocketTimeoutException e) {
+	        logger.log(Level.SEVERE, "Timeout ao tentar conectar na operação " + operation.getOperation(), e);
+	        return null;
+	    } catch (Exception e) {
+	        logger.log(Level.SEVERE, "Erro inesperado na requisição SOAP para operação " + operation.getOperation(), e);
+	        return null;
+	    }
 	}
 
 	// Método para gerar o body SOAP sem parametro
@@ -92,6 +105,42 @@ public class IntegracaoSeniorService {
 				+ "</numEmp>" + "         </parameters>" + "      </ser:" + operation.getOperation() + ">"
 				+ "   </soapenv:Body>" + "</soapenv:Envelope>";
 	}
+	
+	
+	// PEDESTRE NOVO
+	private String gerarSoapBodyComParametros(SoapOperation operation, String numEmp, String codFil, String data,
+			String numCad, String tipCol) {
+		StringBuilder sb = new StringBuilder();
+
+		sb.append("<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" ")
+				.append("xmlns:ser=\"http://services.senior.com.br\">").append("<soapenv:Header/>")
+				.append("<soapenv:Body>").append("<ser:").append(operation.getOperation()).append(">").append("<user>")
+				.append(usuario).append("</user>").append("<password>").append(senha).append("</password>")
+				.append("<encryption></encryption>").append("<parameters>");
+
+// obrigatorio
+		sb.append("<numEmp>").append(numEmp).append("</numEmp>");
+
+// opcionais
+		if (codFil != null && !codFil.isEmpty()) {
+			sb.append("<codFil>").append(codFil).append("</codFil>");
+		}
+		if (data != null && !data.isEmpty()) {
+			sb.append("<data>").append(data).append("</data>");
+		}
+		if (numCad != null && !numCad.isEmpty()) {
+			sb.append("<numCad>").append(numCad).append("</numCad>");
+		}
+		if (tipCol != null && !tipCol.isEmpty()) {
+			sb.append("<tipCol>").append(tipCol).append("</tipCol>");
+		}
+
+		sb.append("</parameters>").append("</ser:").append(operation.getOperation()).append(">")
+				.append("</soapenv:Body>").append("</soapenv:Envelope>");
+
+		return sb.toString();
+	}
+
 
 	// Método para gerar o body SOAP, recebendo parâmetros de empresa
 	// PEDESTRE ADMITIDO, DEMITIDO E ATUALIZADO
@@ -139,17 +188,22 @@ public class IntegracaoSeniorService {
 	// busca empresas
 	public List<EmpresaSeniorDto> buscarEmpresas() {
 		String soapBodyEmpresas = gerarSoapBodySemEmpresa(SoapOperation.EMPRESA);
-		String responseXml = enviarSoapRequest(soapBodyEmpresas);
+		String responseXml = enviarSoapRequest(soapBodyEmpresas, SoapOperation.EMPRESA);
 		if (responseXml != null) {
 			return parseEmpresasFromXml(responseXml);
 		}
 		return null;
 	}
+	
+	// busca funcionarios NOVO
+	public List<FuncionarioSeniorDto> buscarFuncionarios(String numEmp, String codFil, String data, String numCad,
+			String tipCol) {
 
-	// bussca funcionarios
-	public List<FuncionarioSeniorDto> buscarFuncionarios(String numEmp) {
-		String soapBodyFuncionarios = gerarSoapBodyComEmpresa(SoapOperation.PEDESTRE, numEmp);
-		String responseXml = enviarSoapRequest(soapBodyFuncionarios);
+		String soapBodyFuncionarios = gerarSoapBodyComParametros(SoapOperation.PEDESTRE, numEmp, // obrigatório
+				codFil, // opcionais (podem ser null ou "")
+				data, numCad, tipCol);
+		
+		String responseXml = enviarSoapRequest(soapBodyFuncionarios, SoapOperation.PEDESTRE);
 		if (responseXml != null) {
 			return parseFuncionariosFromXml(responseXml);
 		}
@@ -158,7 +212,7 @@ public class IntegracaoSeniorService {
 	
 	public List<FuncionarioSeniorDto> buscarFuncionariosAtualizadosNoDia(String numEmp, String d) {
 		String soapBodyFuncionarios = gerarSoapBodyComData(SoapOperation.PEDESTRE, numEmp, d);
-		String responseXml = enviarSoapRequest(soapBodyFuncionarios);
+		String responseXml = enviarSoapRequest(soapBodyFuncionarios, SoapOperation.PEDESTRE);
 		if (responseXml != null) {
 			return parseFuncionariosFromXml(responseXml);
 		}
@@ -168,7 +222,7 @@ public class IntegracaoSeniorService {
 	// bussca funcionarios
 	public List<FuncionarioSeniorDto> buscarFuncionariosAdmitidos(String numEmp, String data) {
 		String soapBodyFuncionarios = gerarSoapBodyComData(SoapOperation.PEDESTRE_ADMITIDOS, numEmp, data);
-		String responseXml = enviarSoapRequest(soapBodyFuncionarios);
+		String responseXml = enviarSoapRequest(soapBodyFuncionarios, SoapOperation.PEDESTRE_ADMITIDOS);
 		if (responseXml != null) {
 			return parseFuncionariosFromXml(responseXml);
 		}
@@ -178,7 +232,7 @@ public class IntegracaoSeniorService {
 	// bussca funcionarios
 	public List<FuncionarioSeniorDto> buscarFuncionariosDemitidos(String numEmp, String data) {
 		String soapBodyFuncionarios = gerarSoapBodyComData(SoapOperation.PEDESTRE_DEMITIDOS, numEmp, data);
-		String responseXml = enviarSoapRequest(soapBodyFuncionarios);
+		String responseXml = enviarSoapRequest(soapBodyFuncionarios, SoapOperation.PEDESTRE_DEMITIDOS);
 		if (responseXml != null) {
 			return parseFuncionariosFromXml(responseXml);
 		}
@@ -188,7 +242,7 @@ public class IntegracaoSeniorService {
 	// bussca cargo
 	public List<CargoSeniorDto> buscaCargos(String numEmp) {
 		String soapBodyCargo = gerarSoapBodyComEmpresa(SoapOperation.CARGO, numEmp);
-		String responseXml = enviarSoapRequest(soapBodyCargo);
+		String responseXml = enviarSoapRequest(soapBodyCargo, SoapOperation.CARGO);
 		if (responseXml != null) {
 			return parseCargoFromXml(responseXml);
 		}
@@ -198,7 +252,7 @@ public class IntegracaoSeniorService {
 	// bussca cerntro de custo
 	public List<CentroDeCustoSeniorDto> buscaCentroDeCusto(String numEmp) {
 		String soapBodyCentroDeCusto = gerarSoapBodyComEmpresa(SoapOperation.CENTRO_CUSTO, numEmp);
-		String responseXml = enviarSoapRequest(soapBodyCentroDeCusto);
+		String responseXml = enviarSoapRequest(soapBodyCentroDeCusto, SoapOperation.CENTRO_CUSTO);
 		if (responseXml != null) {
 			return parseCentroCustoFromXml(responseXml);
 		}
@@ -208,7 +262,7 @@ public class IntegracaoSeniorService {
 	// busca horarios
 	public List<HorarioSeniorDto> buscarHorarios(String escala) {
 		String soapBodyEmpresas = gerarSoapBodyComEscala(SoapOperation.HORARIOS, escala);
-		String responseXml = enviarSoapRequest(soapBodyEmpresas);
+		String responseXml = enviarSoapRequest(soapBodyEmpresas, SoapOperation.HORARIOS);
 		if (responseXml != null) {
 			return parseHorarioFromXml(responseXml);
 		}
@@ -218,7 +272,7 @@ public class IntegracaoSeniorService {
 	// busca horarios pedestre
 	public List<HorarioPedestreDto> buscarHorariosPedestre(String data, String numCad, Integer numEmp, Integer tipCol) {
 		String soapBodyEmpresas = gerarSoapBodyComHorarioPedestre(SoapOperation.HORARIO_PEDESTRE, data, numCad, numEmp, tipCol);
-		String responseXml = enviarSoapRequest(soapBodyEmpresas);
+		String responseXml = enviarSoapRequest(soapBodyEmpresas, SoapOperation.HORARIO_PEDESTRE);
 		if (responseXml != null) {
 			return parseHorarioPedestreFromXml(responseXml);
 		}

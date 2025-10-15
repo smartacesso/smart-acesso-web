@@ -40,11 +40,27 @@ public class IntegracaoSeniorEntity extends BaseEntity {
 	@Column(name="SENHA", nullable=true, length=255)
 	private String senha;
 	
+	@Column(name = "EMPRESA_SENIOR", nullable = true)
+	private String numEmp;
+	
+	@Column(name = "COD_FIL", nullable = true)
+	private String codFil;
+
+	@Column(name = "TIP_COL", nullable = true)
+	private String tipCol;
+	
 	@Column(name = "HABILITAR_PERMISSAO", nullable = true)
 	private Boolean habilitaPermissao;
 	
 	@Column(name = "HABILITAR_REGRAS_HORARIO", nullable = true)
 	private Boolean habilitaRegrasDeHorario;
+	
+	@Column(name = "HORA_INICIO", nullable = true)
+	private Integer horaInicio;
+	
+	@Column(name = "QUANTIDADE_EXECUCOES", nullable = true)
+	private Integer quantidadeExecucoes;
+	
 
 	public Long getId() {
 		return id;
@@ -100,5 +116,45 @@ public class IntegracaoSeniorEntity extends BaseEntity {
 
 	public boolean isRegraHabilitada() {
 		return getHabilitaRegrasDeHorario() != null ? habilitaRegrasDeHorario : false;
+	}
+
+	public String getCodFil() {
+		return codFil;
+	}
+
+	public void setCodFil(String codFil) {
+		this.codFil = codFil;
+	}
+
+	public String getTipCol() {
+		return tipCol;
+	}
+
+	public void setTipCol(String tipCol) {
+		this.tipCol = tipCol;
+	}
+
+	public Integer getHoraInicio() {
+		return horaInicio;
+	}
+
+	public void setHoraInicio(Integer horaInicio) {
+		this.horaInicio = horaInicio;
+	}
+
+	public Integer getQuantidadeExecucoes() {
+		return quantidadeExecucoes;
+	}
+
+	public void setQuantidadeExecucoes(Integer quantidadeExecucoes) {
+		this.quantidadeExecucoes = quantidadeExecucoes;
+	}
+
+	public String getNumEmp() {
+		return numEmp;
+	}
+
+	public void setNumEmp(String numEmp) {
+		this.numEmp = numEmp;
 	}
 }

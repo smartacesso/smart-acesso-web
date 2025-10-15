@@ -57,10 +57,9 @@
 				header="#{msgs['header.alterar.dados.login']}" modal="true">
 				<p:panelGrid columns="3">
 					<p:column>
-						<h:outputText value="#{msgs['label.novo.login']}" />
+						<h:outputText value="Login" />
 						<br />
-						<p:inputText
-							value="#{cadastroClienteController.usuarioParaEditar.login}">
+						<p:inputText value="#{cadastroClienteController.usuarioLogin}">
 							<f:validateRegex pattern="[a-zA-Z0-9]+" />
 						</p:inputText>
 					</p:column>
@@ -69,7 +68,7 @@
 						<h:outputText value="#{msgs['label.nova.senha']}" />
 						<br />
 						<p:password id="alteraSenha"
-							value="#{cadastroUsuarioController.usuarioSenha}" feedback="true"
+							value="#{cadastroClienteController.usuarioSenha}" feedback="true"
 							redisplay="true" promptLabel="Digite sua senha" weakLabel="Fraca"
 							goodLabel="Boa" strongLabel="Forte"
 							validatorMessage="Senha inválida (fraca)">
@@ -82,9 +81,13 @@
 						<br />
 						<p:commandButton value="#{msgs['alt.acao.alterar']}"
 							action="#{cadastroClienteController.alterarSenhaUsuarioCliente()}"
+							process="@form" update="@form"
 							oncomplete="PF('alteraSenha').hide();" />
 					</p:column>
 				</p:panelGrid>
+				<h:outputText
+					value="Caso o login editado não exista será criado um novo com os dados passados."
+					style="color:gray; font-size:12px" />
 			</p:dialog>
 
 
@@ -215,7 +218,7 @@
 										value="#{cadastroUsuarioController.confirmarSenha}"
 										redisplay="true" required="true" feedback="false"
 										validatorMessage="Confirmação obrigatória" />
-									<br/>
+									<br />
 									<h:outputText
 										value="A senha deve conter: mínimo 8 caracteres, com letras maiúsculas, minúsculas, números e caracteres especiais."
 										style="color:gray; font-size:12px" />
@@ -550,55 +553,106 @@
 
 						</p:tab>
 
+						<!-- requer PrimeFlex -->
 						<p:tab title="#{msgs['label.uc001.integracao.senior']}">
+							<div class="p-grid p-fluid">
 
-							<p:panelGrid columns="5" style="width: 100%;">
+								<!-- URL ocupa linha inteira -->
+								<div class="p-col-12">
+									<div class="p-field">
+										<label for="urlSenior">#{msgs['label.uc001.url.senior']}</label>
+										<p:inputText id="urlSenior"
+											value="#{cadastroClienteController.entidade.integracaoSenior.url}"
+											style="width:100%" />
+									</div>
+								</div>
 
-								<p:column>
-									<p:outputLabel value="#{msgs['label.uc001.url.senior']}"
-										for="urlSenior" indicateRequired="false" />
-									<br />
-									<p:inputText id="urlSenior"
-										value="#{cadastroClienteController.entidade.integracaoSenior.url}"
-										required="false" />
-								</p:column>
+								<!-- Usuário e Senha lado a lado -->
+								<div class="p-col-12 p-md-6">
+									<div class="p-field">
+										<label for="usuarioSenior">#{msgs['label.uc001.usuario.senior']}</label>
+										<p:inputText id="usuarioSenior"
+											value="#{cadastroClienteController.entidade.integracaoSenior.usuario}"
+											style="width:100%" />
+									</div>
+								</div>
+								<div class="p-col-12 p-md-6">
+									<div class="p-field">
+										<label for="senhaSenior">#{msgs['label.uc001.senha.senior']}</label>
+										<p:password id="senhaSenior"
+											value="#{cadastroClienteController.senhaIntegracaoInput}"
+											style="width:100%" />
+									</div>
+								</div>
+								<!-- CodFil e TipCol lado a lado -->
+								<div class="p-col-12 p-md-6">
+									<div class="p-field">
+										<label for="numEmp">Empresa</label>
+										<p:inputText id="numEmp"
+											value="#{cadastroClienteController.entidade.integracaoSenior.numEmp}"
+											style="width:100%" />
+									</div>
+								</div>
+								<!-- CodFil e TipCol lado a lado -->
+								<div class="p-col-12 p-md-6">
+									<div class="p-field">
+										<label for="codFilSenior">Código da Filial (codFil)</label>
+										<p:inputText id="codFilSenior"
+											value="#{cadastroClienteController.entidade.integracaoSenior.codFil}"
+											style="width:100%" />
+									</div>
+								</div>
+								<div class="p-col-12 p-md-6">
+									<div class="p-field">
+										<label for="tipColSenior">Tipo de Colaborador (tipCol)</label>
+										<p:inputText id="tipColSenior"
+											value="#{cadastroClienteController.entidade.integracaoSenior.tipCol}"
+											style="width:100%" />
+									</div>
+								</div>
+								<!-- Hora de início e quantidade de execuções lado a lado -->
+								<div class="p-col-12 p-md-6">
+									<div class="p-field">
+										<label for="horaInicioSenior">Hora de início</label>
+										<p:inputText id="horaInicioSenior"
+											value="#{cadastroClienteController.entidade.integracaoSenior.horaInicio}"
+											style="width:100%">
+											<f:validateLongRange minimum="0" maximum="23" />
+										</p:inputText>
+										<small>Informe a hora em formato 0-23</small>
+									</div>
+								</div>
 
-								<p:column>
-									<p:outputLabel value="#{msgs['label.uc001.usuario.senior']}"
-										for="usuarioSenior" indicateRequired="false" />
-									<br />
-									<p:inputText id="usuarioSenior"
-										value="#{cadastroClienteController.entidade.integracaoSenior.usuario}"
-										required="false" />
-								</p:column>
-
-								<p:column>
-									<p:outputLabel value="#{msgs['label.uc001.senha.senior']}"
-										for="senhaSenior" indicateRequired="false" />
-									<br />
-									<p:password id="senhaSenior"
-										value="#{cadastroClienteController.entidade.integracaoSenior.senha}"
-										required="false" />
-								</p:column>
-
-								<p:column>
-									<p:outputLabel value="Habilita permissoes SENIOR"
-										for="permissaoSenior" indicateRequired="false" />
-									<br />
-									<p:inputSwitch id="permissaoSenior"
-										value="#{cadastroClienteController.entidade.integracaoSenior.habilitaPermissao}" />
-								</p:column>
-
-								<p:column>
-									<p:outputLabel value="Habilita regras de horario SENIOR"
-										for="regraSenior" indicateRequired="false" />
-									<br />
-									<p:inputSwitch id="regraSenior"
-										value="#{cadastroClienteController.entidade.integracaoSenior.habilitaRegrasDeHorario}" />
-								</p:column>
-
-							</p:panelGrid>
-
+								<div class="p-col-12 p-md-6">
+									<div class="p-field">
+										<label for="qtdExecucoesSenior">Quantidade de
+											execuções por dia</label>
+										<p:inputText id="qtdExecucoesSenior"
+											value="#{cadastroClienteController.entidade.integracaoSenior.quantidadeExecucoes}"
+											style="width:100%" />
+									</div>
+								</div>
+								<br/>
+								<!-- Permissões e Regras na mesma linha -->
+								<div class="p-col-12 p-md-3">
+									<div class="p-field"
+										style="display: flex; align-items: center; gap: 1rem;">
+										<label for="permissaoSenior" style="margin: 0;">Habilita
+											permissões</label>
+										<p:inputSwitch id="permissaoSenior"
+											value="#{cadastroClienteController.entidade.integracaoSenior.habilitaPermissao}" />
+									</div>
+								</div>
+								<div class="p-col-12 p-md-3">
+									<div class="p-field"
+										style="display: flex; align-items: center; gap: 1rem;">
+										<label for="regraSenior" style="margin: 0; width: 118px">Habilita
+											regras</label>
+										<p:inputSwitch id="regraSenior"
+											value="#{cadastroClienteController.entidade.integracaoSenior.habilitaRegrasDeHorario}" />
+									</div>
+								</div>
+							</div>
 						</p:tab>
 
 						<p:tab title="#{msgs['label.uc001.integracao.ad']}">
@@ -712,12 +766,7 @@
 								</p:column>
 
 							</p:panelGrid>
-
-
 						</p:tab>
-
-
-
 					</p:tabView>
 				</h:column>
 			</h:panelGrid>

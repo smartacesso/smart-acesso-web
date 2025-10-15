@@ -60,10 +60,16 @@
 				<!-- Filtros à direita -->
 				<p:toolbarGroup align="right"
 					styleClass="flex flex-wrap gap-2 justify-start md:justify-end w-full md:w-auto">
-
+					
+					<p:commandButton id="abrirDialogFiltro"
+						 rendered="#{consultaPedestreController.exibeImportarPedestresSenior()}" 
+		                 value="Importar"
+		                 icon="pi pi-filter"
+		                 styleClass="btn-white-text" 
+		                 onclick="PF('dialogFiltroPedestre').show(); return false;" />
 
 					<p:commandButton id="acaoLimpar"
-						action="#{consultaPedestreController.limpar}" icon="pi pi-filter"
+						action="#{consultaPedestreController.limpar}" icon="pi pi-spinner"
 						process="@this" update="@form"
 						styleClass="rounded-button ui-button-flat" />
 
@@ -390,6 +396,47 @@
 				</p:panelGrid>
 
 			</p:dialog>
+
+			<p:dialog id="dialogFiltroPedestre" header="Filtros Pedestre"
+				widgetVar="dialogFiltroPedestre" modal="true" resizable="false"
+				width="500">
+
+				<h:form id="formDialogFiltro">
+					<p:panelGrid columns="2" styleClass="ui-fluid"
+						columnClasses="ui-g-4,ui-g-8">
+						
+						<p:outputLabel for="codEmp" value="Empresa:" />
+						<p:inputText id="codEmp"
+							value="#{consultaPedestreController.empresaSelecionada}" />
+
+						<p:outputLabel for="codFil" value="Filial:" />
+						<p:inputText id="codFil"
+							value="#{consultaPedestreController.codFil}" />
+
+						<p:outputLabel for="data" value="Data:" />
+						<p:calendar id="data" value="#{consultaPedestreController.data}"
+							pattern="dd/MM/yyyy" navigator="true" showButtonPanel="true" />
+
+						<p:outputLabel for="numCad" value="Matrícula:" />
+						<p:inputText id="numCad"
+							value="#{consultaPedestreController.numCad}" />
+
+						<p:outputLabel for="tipCol" value="Tipo Colaborador:" />
+						<p:inputText id="tipCol"
+							value="#{consultaPedestreController.tipCol}" />
+
+					</p:panelGrid>
+
+					<p:separator />
+
+					<p:commandButton value="Executar Integração" icon="pi pi-play"
+						action="#{consultaPedestreController.executarIntegracaoPedestre}"
+						process="@form" update="@form"
+						oncomplete="PF('dialogFiltroPedestre').hide();" 
+						 styleClass="btn-white-text" />
+				</h:form>
+			</p:dialog>
+
 			<style>
 .tabela-responsive .ui-datatable-scrollable-body {
 	overflow-x: auto;
@@ -425,6 +472,14 @@
 		padding-top: 17%;
 	}
 }
+
+/* deixa o texto e ícone branco em botões customizados */
+.btn-white-text,
+.btn-white-text .ui-button-text,
+.btn-white-text .pi {
+    color: #fff !important;
+}
+
 </style>
 		</ui:define>
 

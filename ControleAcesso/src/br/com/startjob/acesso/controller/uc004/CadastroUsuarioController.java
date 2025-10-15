@@ -50,50 +50,137 @@ public class CadastroUsuarioController extends CadastroBaseController {
 		montaListaPerfilAcesso();
 	}
 	
+//	@Override
+//	public String salvar() {
+//	    UsuarioEntity usuario = (UsuarioEntity) getEntidade();
+//
+//	    // valida se senha e confirmação batem (somente em novos cadastros)
+//	    // valida se senha e confirmação batem (somente em novos cadastros)
+//	    if (usuario.getId() == null) {
+//	        if (usuario.getSenha() == null || !usuario.getSenha().equals(confirmarSenha)) {
+//	            mensagemFatal("", "As senhas não conferem.");
+//	            return "";
+//	        }
+//
+//	        // valida regex APENAS para novo usuário
+//	        if (!usuario.getSenha().matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[@$!%*?&])[A-Za-z0-9@$!%*?&]{8,}$")) {
+//	            mensagemFatal("", "Senha inválida. Deve conter letras maiúsculas, minúsculas, números e caracteres especiais.");
+//	            return "";
+//	        }
+//
+//	        try {
+//	            usuario.setSenha(EncryptionUtils.encrypt(usuario.getSenha()));
+//	        } catch (Exception e) {
+//	            e.printStackTrace();
+//	        }
+//	    }
+//
+//	    if (usuario.getId() == null &&
+//	            usuario.getEmail() != null &&
+//	            !"".equals(usuario.getEmail()) &&
+//	            verificaEmailExistente(usuario.getEmail())) {
+//
+//	        mensagemFatal("", "msg.email.existente");
+//	        return "";
+//	    }
+//
+//	    if (usuario.getId() == null
+//	            && verificaLoginExistente(usuario.getLogin(), getUsuarioLogado().getCliente().getId())) {
+//	        mensagemFatal("", "msg.login.existente");
+//	        return "";
+//	    }
+//
+//	    if (usuario.getId() == null) {
+//	        try {
+//	            usuario.setSenha(EncryptionUtils.encrypt(usuario.getSenha()));
+//	        } catch (Exception e) {
+//	            e.printStackTrace();
+//	        }
+//	    }
+//
+//	    usuario.setCliente(getUsuarioLogado().getCliente());
+//
+//	    if (usuario.getEndereco().getCep() == null || usuario.getEndereco().getCep().equals("")) {
+//	        usuario.setEndereco(null);
+//	    }
+//
+//	    String retorno = super.salvar();
+//
+//	    redirect("/paginas/sistema/usuarios/pesquisaUsuarios.xhtml?acao=OK");
+//
+//	    return retorno;
+//	}
+	
+	
 	@Override
 	public String salvar() {
 	    UsuarioEntity usuario = (UsuarioEntity) getEntidade();
 
-	    // valida se senha e confirmação batem (somente em novos cadastros)
-	    if (usuario.getId() == null) {
+	    boolean novoUsuario = (usuario.getId() == null);
+
+	    if (novoUsuario) {
+	        // valida se senha e confirmação batem
 	        if (usuario.getSenha() == null || !usuario.getSenha().equals(confirmarSenha)) {
 	            mensagemFatal("", "As senhas não conferem.");
 	            return "";
 	        }
-	    }
-	    
-	    // valida regex
-	    if (!usuario.getSenha().matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[@$!%*?&])[A-Za-z0-9@$!%*?&]{8,}$")) {
-	        mensagemFatal("", "Senha inválida. Deve conter letras maiúsculas, minúsculas, números e caracteres especiais.");
-	        return "";
-	    }
 
-	    if (usuario.getId() == null &&
-	            usuario.getEmail() != null &&
-	            !"".equals(usuario.getEmail()) &&
-	            verificaEmailExistente(usuario.getEmail())) {
+	        // valida regex APENAS para novo usuário
+	        if (!usuario.getSenha().matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[@$!%*?&])[A-Za-z0-9@$!%*?&]{8,}$")) {
+	            mensagemFatal("", "Senha inválida. Deve conter letras maiúsculas, minúsculas, números e caracteres especiais.");
+	            return "";
+	        }
 
-	        mensagemFatal("", "msg.email.existente");
-	        return "";
-	    }
-
-	    if (usuario.getId() == null
-	            && verificaLoginExistente(usuario.getLogin(), getUsuarioLogado().getCliente().getId())) {
-	        mensagemFatal("", "msg.login.existente");
-	        return "";
-	    }
-
-	    if (usuario.getId() == null) {
+	        // criptografa senha do novo usuário
 	        try {
 	            usuario.setSenha(EncryptionUtils.encrypt(usuario.getSenha()));
 	        } catch (Exception e) {
 	            e.printStackTrace();
+	            mensagemFatal("", "Erro ao criptografar a senha.");
+	            return "";
+	        }
+
+	        // valida email duplicado
+	        if (usuario.getEmail() != null && !"".equals(usuario.getEmail()) && verificaEmailExistente(usuario.getEmail())) {
+	            mensagemFatal("", "msg.email.existente");
+	            return "";
+	        }
+
+	        // valida login duplicado
+	        if (verificaLoginExistente(usuario.getLogin(), getUsuarioLogado().getCliente().getId())) {
+	            mensagemFatal("", "msg.login.existente");
+	            return "";
+	        }
+
+	    } else {
+	        // se for edição e usuário digitou nova senha, valida e criptografa
+	        if (usuarioSenha != null) {
+	            if (!usuario.getSenha().equals(confirmarSenha)) {
+	                mensagemFatal("", "As senhas não conferem.");
+	                return "";
+	            }
+	            if (!usuario.getSenha().matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[@$!%*?&])[A-Za-z0-9@$!%*?&]{8,}$")) {
+	                mensagemFatal("", "Senha inválida. Deve conter letras maiúsculas, minúsculas, números e caracteres especiais.");
+	                return "";
+	            }
+	            try {
+	                usuario.setSenha(EncryptionUtils.encrypt(usuario.getSenha()));
+	            } catch (Exception e) {
+	                e.printStackTrace();
+	                mensagemFatal("", "Erro ao criptografar a senha.");
+	                return "";
+	            }
+	        } else {
+	            // mantém a senha já existente no banco (não sobrescreve)
+	            UsuarioEntity existente = buscaUsuario(usuario.getId());
+	            usuario.setSenha(existente.getSenha());
 	        }
 	    }
 
 	    usuario.setCliente(getUsuarioLogado().getCliente());
 
-	    if (usuario.getEndereco().getCep() == null || usuario.getEndereco().getCep().equals("")) {
+	    if (usuario.getEndereco() != null &&
+	        (usuario.getEndereco().getCep() == null || usuario.getEndereco().getCep().isEmpty())) {
 	        usuario.setEndereco(null);
 	    }
 
@@ -103,6 +190,7 @@ public class CadastroUsuarioController extends CadastroBaseController {
 
 	    return retorno;
 	}
+
 	
 	public void buscarLoginUsuario() {
 		UsuarioEntity usuario = (UsuarioEntity) getEntidade();

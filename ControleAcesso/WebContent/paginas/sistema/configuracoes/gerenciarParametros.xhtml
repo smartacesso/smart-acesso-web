@@ -64,7 +64,8 @@
 									and not item.nome.contains('Comtele') and not item.nome.startsWith('Limite')
 									and not item.nome.contains('QR Code: Tipo padrão')
 									and not item.nome.contains('SOC')
-									and not item.nome.contains('tolerancia')}">
+									and not item.nome.contains('tolerancia')
+									and not item.nome.contains('remoto')}">
 						
 							<p:ajax process="@this"/>
 						</p:inputNumber>
@@ -72,6 +73,13 @@
 						<p:inputNumber value="#{item.valor}" minValue="1" maxValue="60" decimalPlaces="0"
 								rendered="#{item.valor != 'true' and item.valor != 'false' 
 									and item.nome.contains('tolerancia')}">
+						
+							<p:ajax process="@this"/>
+						</p:inputNumber>
+						
+						<p:inputNumber value="#{item.valor}" minValue="1" maxValue="24" decimalPlaces="0"
+								rendered="#{item.valor != 'true' and item.valor != 'false' 
+									and item.nome.contains('cadastro facial remoto')}">
 						
 							<p:ajax process="@this"/>
 						</p:inputNumber>

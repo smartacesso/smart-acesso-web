@@ -9,7 +9,10 @@ import java.util.Map;
 
 import javax.ejb.Remote;
 
+import com.senior.services.Enum.ModoImportacaoFuncionario;
+
 import br.com.startjob.acesso.modelo.entity.ClienteEntity;
+import br.com.startjob.acesso.modelo.entity.EmpresaEntity;
 import br.com.startjob.acesso.modelo.entity.ImportacaoEntity;
 import br.com.startjob.acesso.modelo.entity.PedestreRegraEntity;
 
@@ -106,6 +109,10 @@ public interface PedestreEJBRemote extends BaseEJBRemote {
 	public void resetAutoAtendimento() throws Exception;
 
 	public void importarAD() throws Exception;
+
+	
+	public void importaFuncionariosSenior(final String empresaExistente, final ClienteEntity cliente,
+			ModoImportacaoFuncionario modo, String codFil, String data, String numCad, String tipCol);
 
 	public void importarSponte() throws Exception;
 }

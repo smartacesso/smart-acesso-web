@@ -1,5 +1,6 @@
 package br.com.startjob.acesso.modelo.entity;
 
+import java.util.Calendar;
 import java.util.Date;
 
 import javax.persistence.Column;
@@ -266,8 +267,8 @@ public class HorarioEntity extends BaseEntity {
 	}
 
 	public void update(HorarioSeniorDto dto) {
-		this.horarioInicio = dto.getInicio();
-		this.horarioFim = dto.getFim();
+		this.horarioInicio = ajustarMinutos(dto.getInicio(), -20);
+		this.horarioFim = ajustarMinutos(dto.getFim(), 20);
 		
 	}
 	
@@ -283,6 +284,14 @@ public class HorarioEntity extends BaseEntity {
 
 	public void setIdHorarioSenior(Integer idHorarioSenior) {
 		this.idHorarioSenior = idHorarioSenior;
+	}
+	
+	private Date ajustarMinutos(Date date, int minutos) {
+	    if (date == null) return null;
+	    Calendar cal = Calendar.getInstance();
+	    cal.setTime(date);
+	    cal.add(Calendar.MINUTE, minutos); 
+	    return cal.getTime();
 	}
 
 }

@@ -43,15 +43,15 @@ public class ConfiguraRotinasServlet extends BaseServlet {
 		}
 
 		log.info("Registra rotinas recorrentes...");
-
-		registraPrimeiroUsuario();
-		registraTimersParaSenior();
-		registraTimersParaSOC();
+//		registraPrimeiroUsuario();
+//		registraTimersParaSenior();
+//		registraTimersParaSOC();
 		registraTimersParaTotvs();
 		registraTimersAutoAtendimento();
 		registraTimerSalesiano();
 		timerRegisterAD();
 		timerRegiserSponte();
+
 	}
 
 	@SuppressWarnings("unchecked")
@@ -105,7 +105,7 @@ public class ConfiguraRotinasServlet extends BaseServlet {
 		ActivatedTasks.getInstancia().limpaTimersSenior();
 
 		// Define o período para 30 minutos (30 * 60 * 1000 ms)
-		Long period = 5 * 60 * 1000L;
+		Long period = 5  * 60 * 1000L;
 		Timer timer = new Timer();
 
 		// Define a nova tarefa
@@ -124,13 +124,6 @@ public class ConfiguraRotinasServlet extends BaseServlet {
 
 //	     Limpa os timers anteriores relacionados à nova função
 		ActivatedTasks.getInstancia().limpaTimersTovs();
-
-//		Calendar inicio = getInicio("0");
-//		Long periodExpirar = 24 * 60 * 60 * 1000L;
-//		Timer timer = new Timer();
-
-//		TimerTask totvsTask = new ImportarTotvsTask();
-//		timer.scheduleAtFixedRate(totvsTask, inicio.getTime(), periodExpirar.longValue());
 
 		// Define o período para 30 minutos (30 * 60 * 1000 ms)
 		Long period = 30 * 60 * 1000L;
@@ -172,7 +165,8 @@ public class ConfiguraRotinasServlet extends BaseServlet {
 
 		ActivatedTasks.getInstancia().limpaTimersAutoAtendimento();
 
-		Long period = 30 * 60 * 1000L; // a cada 15 minutos
+		//(pegar o numero e adicionar na hora)
+		Long period = 1 * 60 * 1000L; // a cada 30 minutos
 		Timer timer = new Timer();
 		TimerTask task = new AutoAtendimentoResetTask();
 
