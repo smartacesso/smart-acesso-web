@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import javax.annotation.PostConstruct;
 import javax.faces.model.SelectItem;
@@ -20,6 +19,7 @@ import br.com.startjob.acesso.modelo.entity.EnderecoEntity;
 import br.com.startjob.acesso.modelo.entity.IntegracaoADEntity;
 import br.com.startjob.acesso.modelo.entity.IntegracaoSOCEntity;
 import br.com.startjob.acesso.modelo.entity.IntegracaoSeniorEntity;
+import br.com.startjob.acesso.modelo.entity.IntegracaoSponteEntity;
 import br.com.startjob.acesso.modelo.entity.IntegracaoTotvsEntity;
 import br.com.startjob.acesso.modelo.entity.PlanoEntity;
 import br.com.startjob.acesso.modelo.entity.UsuarioEntity;
@@ -76,6 +76,10 @@ public class CadastroClienteController extends CadastroBaseController {
 			cliente.setIntegracaoAD(new IntegracaoADEntity());
 		}
 
+		if (cliente.getIntegracaoSponte() == null) {
+			cliente.setIntegracaoSponte(new IntegracaoSponteEntity());
+		}
+
 		if (cliente.getPlanos() != null && !cliente.getPlanos().isEmpty()) {
 			listaPlanos = cliente.getPlanos();
 		} else {
@@ -130,22 +134,23 @@ public class CadastroClienteController extends CadastroBaseController {
 	}
 
 	public void alterarSenhaUsuarioCliente() throws Exception {
-	    ClienteEntity cliente = (ClienteEntity) getEntidade();
+		ClienteEntity cliente = (ClienteEntity) getEntidade();
+
 
 	    if (usuarioLogin == null || usuarioLogin.trim().isEmpty()) {
 	        mensagemFatal("", "#O campo login não pode ser vazio.");
 	        return;
 	    }
 
-	    if (usuarioSenha == null || usuarioSenha.trim().isEmpty()) {
-	        mensagemFatal("", "#O campo senha não pode ser vazio.");
-	        return;
-	    }
+		if (usuarioSenha == null || usuarioSenha.trim().isEmpty()) {
+			mensagemFatal("", "#O campo senha não pode ser vazio.");
+			return;
+		}
 
 	    // Busca usuário existente pelo login
 	    UsuarioEntity user = buscaLoginExistente(usuarioLogin, cliente.getId());
 
-	    boolean criarNovo = false;
+		boolean criarNovo = false;
 
 	    if (user == null) {
 	        // Se não encontrou, cria um novo
@@ -161,20 +166,19 @@ public class CadastroClienteController extends CadastroBaseController {
 	    user.setLogin(usuarioLogin);
 	    user.setSenha(EncryptionUtils.encrypt(usuarioSenha));
 
-	    // Persiste ou atualiza
-	    if (criarNovo) {
-	        baseEJB.gravaObjeto(user); // supondo que você tenha método de inserção
-	        mensagemInfo("", "#Usuário criado com sucesso!");
-	    } else {
-	        baseEJB.alteraObjeto(user);
-	        mensagemInfo("", "#Dados alterados com sucesso!");
-	    }
+		// Persiste ou atualiza
+		if (criarNovo) {
+			baseEJB.gravaObjeto(user); // supondo que você tenha método de inserção
+			mensagemInfo("", "#Usuário criado com sucesso!");
+		} else {
+			baseEJB.alteraObjeto(user);
+			mensagemInfo("", "#Dados alterados com sucesso!");
+		}
 
-	    // Limpa campos
-	    usuarioLogin = "";
-	    usuarioSenha = "";
+		// Limpa campos
+		usuarioLogin = "";
+		usuarioSenha = "";
 	}
-
 
 	@Override
 	public String salvar() {
