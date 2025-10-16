@@ -2849,16 +2849,21 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 				return Optional.of(listaPedestres.get(0));
 			}
 			
-//			if (listaPedestres == null || listaPedestres.isEmpty()) {
-//				return Optional.empty();
-//			}
-//
-//
 			// Mais de um encontrado para a mesma matrícula (potencial inconsistência)
 			System.err.println("Matricula não encontrada ou duplicada: " + matricula + " na empresa " + empresa.getId()
 					+ ". Total encontrados: " + listaPedestres.size());
 
-			// Fallback: tentar por Cracha (ou outro campo único)
+			// Fallback: tentar por RG ou NOME
+			if (funcionarioSeniorDto.getRg() != null && ! funcionarioSeniorDto.getRg().trim().isEmpty() && !"0".equals( funcionarioSeniorDto.getRg())) {
+				System.out.println("buscando por RG");
+				PedestreEntity pedestre = buscaPedestrePorRg( funcionarioSeniorDto.getRg());
+
+				if (pedestre != null) {
+					System.out.println("Fallback por RG retornou pedestre: " + pedestre.getNome());
+					return Optional.of(pedestre);
+				}
+			}
+			
 			
 			if (funcionarioSeniorDto.getNome() != null && ! funcionarioSeniorDto.getNome().trim().isEmpty()) {
 				System.out.println("buscando por nome");
@@ -2870,16 +2875,6 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 				}
 			}
 
-			if (funcionarioSeniorDto.getRg() != null && ! funcionarioSeniorDto.getRg().trim().isEmpty() && !"0".equals( funcionarioSeniorDto.getRg())) {
-				System.out.println("buscando por RG");
-				PedestreEntity pedestre = buscaPedestrePorRg( funcionarioSeniorDto.getRg());
-
-				if (pedestre != null) {
-					System.out.println("Fallback por RG retornou pedestre: " + pedestre.getNome());
-					return Optional.of(pedestre);
-				}
-			}
-			
 			// Se não encontrou por CPF, retorna o primeiro mesmo (com alerta)
 			System.err.println(
 					"[Aviso] Fallback por NOME e RG falhou, retornando primeiro da lista para matrícula: " + matricula);
