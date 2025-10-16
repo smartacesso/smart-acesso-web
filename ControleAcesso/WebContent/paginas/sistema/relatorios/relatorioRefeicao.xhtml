@@ -52,6 +52,16 @@
 
 			<div style="float: right;">
 
+				<p:outputLabel for="filtro-empresa"
+					value="#{msgs['label.uc009.empresa']}" />
+				<p:selectOneMenu id="filtro-empresa"
+					value="#{relatorioPedestresController.parans['pedestre.empresa.id']}"
+					valueChangeListener="#{relatorioPedestresController.eventoEmpresaSelecionada}">
+					<f:selectItems
+						value="#{relatorioPedestresController.listaEmpresas}" />
+					<f:converter converterId="javax.faces.Long" />
+				</p:selectOneMenu>
+
 				<p:calendar id="filtro-data-inicio"
 					value="#{relatorioPedestresController.parans['data_maior_data']}"
 					pattern="dd/MM/yyyy HH:mm" mask="99/99/9999 99:99" size="20"
