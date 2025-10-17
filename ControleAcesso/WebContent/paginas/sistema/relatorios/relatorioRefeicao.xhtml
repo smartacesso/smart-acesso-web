@@ -103,12 +103,13 @@
 							<h:outputText value="#{entry.value}" />
 						</p:column>
 
-						<!-- Rodapé com total -->
 						<f:facet name="footer">
-							<h:outputText
-								value="Total de refeicoes: #{relatorioPedestresController.totalRefeicoes}"
-								style="font-weight:bold; font-size:14px;" />
+							<h:outputText escape="false"
+								value="Total de refeições: #{relatorioPedestresController.totalRefeicoes}&#60;br/>Período: #{relatorioPedestresController.parans['data_maior_data']} até #{relatorioPedestresController.parans['data_menor_data']}"
+								style="font-weight:bold; font-size:14px; text-align:center; display:block;" />
+
 						</f:facet>
+
 					</p:dataTable>
 
 				</p:panel>
