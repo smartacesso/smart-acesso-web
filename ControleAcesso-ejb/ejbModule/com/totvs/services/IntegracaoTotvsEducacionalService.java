@@ -25,11 +25,11 @@ import com.totvs.dto.CadastroDTO;
 
 public class IntegracaoTotvsEducacionalService {
 
-  private static final String ENDPOINT_CONSULTA = "https://inspetoriasao142787.rm.cloudtotvs.com.br:1503/wsConsultaSQL/IwsConsultaSQL"; //homologacao
-//	private static final String ENDPOINT_CONSULTA = "https://inspetoriasao142819.rm.cloudtotvs.com.br:8051/wsConsultaSQL/IwsConsultaSQL";
+//  private static final String ENDPOINT_CONSULTA = "https://inspetoriasao142787.rm.cloudtotvs.com.br:1503/wsConsultaSQL/IwsConsultaSQL"; //homologacao
+	private static final String ENDPOINT_CONSULTA = "https://inspetoriasao142819.rm.cloudtotvs.com.br:8051/wsConsultaSQL/IwsConsultaSQL";
     private static final String USER = "suporte.smart";
-//    private static final String PASS = "suporte@smart";
-    private static final String PASS = "pokEnerish";
+    private static final String PASS = "suporte@smart";
+//    private static final String PASS = "pokEnerish";
     private static final SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
     private LocalDate ultimaImportacaoCompleta = null;
     

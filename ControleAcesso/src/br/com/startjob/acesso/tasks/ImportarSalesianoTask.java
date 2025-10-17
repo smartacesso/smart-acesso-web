@@ -253,7 +253,7 @@ public class ImportarSalesianoTask extends TimerTask {
 	    String matricula = null;
 	    
 	    // Atualiza cartão
-	    if(TipoTotvsEdu.RESPONSAVEL.getDesc().equals(tipo)) {
+	    if("RESPONSAVEL".equals(tipo)) {
 	    	 System.out.println("reponsavel");
 	    	 String somenteNumeros = cadastro.getCpf().replaceAll("\\D", "");
 			 codigoCartao = somenteNumeros.isEmpty() ? "0" : String.valueOf(Long.parseLong(somenteNumeros));
@@ -296,7 +296,7 @@ public class ImportarSalesianoTask extends TimerTask {
 	    pedestre.setEmpresa(recuperaEmpresa(cadastro.getNomeColigada(), cliente));
 
 	    // Atualiza cartão
-	    if(TipoTotvsEdu.RESPONSAVEL.getDesc().equals(tipo)) {
+	    if("RESPONSAVEL".equals(tipo)) {
 	    	System.out.println("reponsavel");
 	    	pedestre.setMatricula(null);
 	    }
