@@ -43,14 +43,14 @@ public class ConfiguraRotinasServlet extends BaseServlet {
 		}
 
 		log.info("Registra rotinas recorrentes...");
-		registraTimersParaSenior();
+//		registraTimersParaSenior();
 //		registraTimersParaSOC();
 //		registraTimersParaTotvs();
 //		registraTimerSalesiano();
 //		registraPrimeiroUsuario();
-//		registraTimersAutoAtendimento();
+		registraTimersAutoAtendimento();
 //		timerRegisterAD();
-//		timerRegiserSponte();
+		timerRegiserSponte();
 
 	}
 

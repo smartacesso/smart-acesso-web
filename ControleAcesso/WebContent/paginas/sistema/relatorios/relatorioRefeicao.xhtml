@@ -52,6 +52,16 @@
 
 			<div style="float: right;">
 
+				<p:outputLabel for="filtro-empresa"
+					value="#{msgs['label.uc009.empresa']}" />
+				<p:selectOneMenu id="filtro-empresa"
+					value="#{relatorioPedestresController.parans['pedestre.empresa.id']}"
+					valueChangeListener="#{relatorioPedestresController.eventoEmpresaSelecionada}">
+					<f:selectItems
+						value="#{relatorioPedestresController.listaEmpresas}" />
+					<f:converter converterId="javax.faces.Long" />
+				</p:selectOneMenu>
+
 				<p:calendar id="filtro-data-inicio"
 					value="#{relatorioPedestresController.parans['data_maior_data']}"
 					pattern="dd/MM/yyyy HH:mm" mask="99/99/9999 99:99" size="20"
@@ -89,16 +99,23 @@
 							<h:outputText value="#{entry.key}" />
 						</p:column>
 
+						<p:column headerText="Refeicao" style="text-align:center;">
+							<h:outputText value="#{entry.key}" />
+						</p:column>
+
 						<p:column headerText="Quantidade" style="text-align:center;">
 							<h:outputText value="#{entry.value}" />
 						</p:column>
 
-						<!-- Rodapé com total -->
 						<f:facet name="footer">
-							<h:outputText
-								value="Total de refeicoes: #{relatorioPedestresController.totalRefeicoes}"
-								style="font-weight:bold; font-size:14px;" />
+							<h:outputText escape="false"
+								value="Total de refeicoes: #{relatorioPedestresController.totalRefeicoes} &#10;
+               Periodo: #{relatorioPedestresController.dataInicio} ate #{relatorioPedestresController.dataFim} &#10;
+               Empresa: #{relatorioPedestresController.empresaSelecionada.getNome()}"
+								style="font-weight:bold; font-size:14px; text-align:center; display:block; white-space: pre-line;" />
 						</f:facet>
+
+
 					</p:dataTable>
 
 				</p:panel>
