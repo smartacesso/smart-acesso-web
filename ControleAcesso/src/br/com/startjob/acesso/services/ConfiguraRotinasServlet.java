@@ -46,11 +46,11 @@ public class ConfiguraRotinasServlet extends BaseServlet {
 //		registraTimersParaSenior();
 //		registraTimersParaSOC();
 //		registraTimersParaTotvs();
-		registraTimerSalesiano();
+//		registraTimerSalesiano();
 //		registraPrimeiroUsuario();
-//		registraTimersAutoAtendimento();
+		registraTimersAutoAtendimento();
 //		timerRegisterAD();
-//		timerRegiserSponte();
+		timerRegiserSponte();
 
 	}
 

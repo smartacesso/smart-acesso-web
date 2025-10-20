@@ -99,16 +99,22 @@
 							<h:outputText value="#{entry.key}" />
 						</p:column>
 
+						<p:column headerText="Refeicao" style="text-align:center;">
+							<h:outputText value="#{entry.key}" />
+						</p:column>
+
 						<p:column headerText="Quantidade" style="text-align:center;">
 							<h:outputText value="#{entry.value}" />
 						</p:column>
 
 						<f:facet name="footer">
 							<h:outputText escape="false"
-								value="Total de refeições: #{relatorioPedestresController.totalRefeicoes}&#60;br/>Período: #{relatorioPedestresController.parans['data_maior_data']} até #{relatorioPedestresController.parans['data_menor_data']}"
-								style="font-weight:bold; font-size:14px; text-align:center; display:block;" />
-
+								value="Total de refeicoes: #{relatorioPedestresController.totalRefeicoes} &#10;
+               Periodo: #{relatorioPedestresController.dataInicio} ate #{relatorioPedestresController.dataFim} &#10;
+               Empresa: #{relatorioPedestresController.empresaSelecionada.getNome()}"
+								style="font-weight:bold; font-size:14px; text-align:center; display:block; white-space: pre-line;" />
 						</f:facet>
+
 
 					</p:dataTable>
 

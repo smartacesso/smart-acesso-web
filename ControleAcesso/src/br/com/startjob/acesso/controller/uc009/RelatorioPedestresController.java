@@ -1,5 +1,6 @@
 package br.com.startjob.acesso.controller.uc009;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -56,6 +57,11 @@ public class RelatorioPedestresController extends RelatorioController {
 	
 	private boolean permiteCampoAdicionalCrachaMatricula = true;
 	
+	private String dataInicio;
+	private String dataFim;
+	
+	SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+	
 	@PostConstruct
 	@Override
 	public void init() {
@@ -80,6 +86,23 @@ public class RelatorioPedestresController extends RelatorioController {
 		getParans().put("pedestre.tipo", TipoPedestre.PEDESTRE);
 		
 		setNamedQueryPesquisa("findAllComPedestreEmpresaECargo");
+		
+		   Object menor = getParans().get("data_menor_data");
+		    Object maior = getParans().get("data_maior_data");
+
+		    if (menor instanceof Date) {
+		        dataFim = sdf.format((Date) menor);
+		    } else {
+		        dataFim = menor.toString();
+		    }
+
+		    if (maior instanceof Date) {
+		        dataInicio = sdf.format((Date) maior);
+		    } else {
+		        dataInicio = maior.toString();
+		    }
+		
+		
 		return super.buscar();
 	}
 	
@@ -260,5 +283,21 @@ public class RelatorioPedestresController extends RelatorioController {
 
 	public boolean isPermiteCampoAdicionalCrachaMatricula() {
 		return permiteCampoAdicionalCrachaMatricula;
+	}
+
+	public String getDataInicio() {
+		return dataInicio;
+	}
+
+	public void setDataInicio(String dataInicio) {
+		this.dataInicio = dataInicio;
+	}
+
+	public String getDataFim() {
+		return dataFim;
+	}
+
+	public void setDataFim(String dataFim) {
+		this.dataFim = dataFim;
 	}
 }
