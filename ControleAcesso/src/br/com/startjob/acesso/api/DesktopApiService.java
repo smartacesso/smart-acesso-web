@@ -1364,6 +1364,9 @@ public class DesktopApiService extends BaseService {
 			);
 		visitante.setHabilitarTeclado(Boolean.valueOf(jsonObject.getString("habilitarTeclado")));
 		visitante.setEnviaSmsAoPassarNaCatraca(Boolean.valueOf(jsonObject.getString("enviaSmsAoPassarNaCatraca")));
+		visitante.setMatricula(jsonObject.getString("justificativa"));
+		visitante.setJustificativa(jsonObject.getString("justificativa"));
+		visitante.setAgendamentoLiberado(Boolean.valueOf(jsonObject.getString("agendamentoLiberado")));
 
 		try {
 			visitante.setLuxandIdentifier(jsonObject.getString("luxandIdentifier"));
@@ -1425,6 +1428,8 @@ public class DesktopApiService extends BaseService {
 
 		try {
 			visitante.setDataCadastroFotoNaHikivision(sdf.parse(jsonObject.getString("dataCadastroFotoNaHikivision")));
+			visitante.setDataInicioPeriodoAgendamento(sdf.parse(jsonObject.getString("dataInicioPeriodoAgendamento")));
+			visitante.setDataFimPeriodoAgendamento(sdf.parse(jsonObject.getString("dataFimPeriodoAgendamento")));
 		} catch (Exception e) {
 		}
 
