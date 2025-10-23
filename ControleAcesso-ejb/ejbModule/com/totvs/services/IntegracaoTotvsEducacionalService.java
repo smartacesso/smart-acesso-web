@@ -30,7 +30,9 @@ public class IntegracaoTotvsEducacionalService {
     private static final String USER = "suporte.smart";
     private static final String PASS = "suporte@smart";
 //    private static final String PASS = "pokEnerish";
-    private static final SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+//    private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+    private static final SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
+
     private LocalDate ultimaImportacaoCompleta = null;
     
     public String getCadastros(Date lastUpdate) {
@@ -57,7 +59,7 @@ public class IntegracaoTotvsEducacionalService {
         if(rodarImportacaoCompleta) {
             // 01/01/ANO ATUAL 00:00:00
             Calendar calendar = Calendar.getInstance();
-            calendar.set(Calendar.YEAR, LocalDate.now().getYear() -1);
+            calendar.set(Calendar.YEAR, LocalDate.now().getYear());
             calendar.set(Calendar.MONTH, Calendar.JANUARY);
             calendar.set(Calendar.DAY_OF_MONTH, 1);
             calendar.set(Calendar.HOUR_OF_DAY, 0);
@@ -67,8 +69,8 @@ public class IntegracaoTotvsEducacionalService {
             String dataDefault = sdf.format(calendar.getTime());
         	
       //  	parameters = "$CODCOLIGADA=1;$FILTRAR_STATUS="+ "1" + ";$DATAALTERACAO=" + dataDefault + ";$FILTRAR_SITUACAO_FUNC="+ "1";
-            parameters = "$CODCOLIGADA=1;$FILTRAR_STATUS="+ "1" + ";$DATAALTERACAO=" + dataDefault + ";$FILTRAR_SITUACAO_FUNC="+ "1";
-        	System.out.println("Primeira importacao. Apenas ativos");
+            parameters = "$CODCOLIGADA=1;$FILTRAR_STATUS=1;$DATAALTERACAO=" + dataDefault + ";$FILTRAR_SITUACAO_FUNC=1";
+        	System.out.println("Primeira importacao. Apenas ativos...data : " + dataDefault);
         	
         } else {
         	String dataFormatada = sdf.format(lastUpdate);
