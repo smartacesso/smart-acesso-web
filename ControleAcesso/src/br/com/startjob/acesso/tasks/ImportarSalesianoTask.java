@@ -212,22 +212,7 @@ public class ImportarSalesianoTask extends TimerTask {
 	    System.out.printf("Salvando, nome: %s, matricula: %s, cpf: %s, tipo: %s%n", 
 	            nome, matricula, cpf, tipo);
 
-	    PedestreEntity pedestre;
-
-	    if (cpf == null || cpf.trim().isEmpty()) {
-	        System.out.println("CPF não informado → buscando por nome.");
-	        pedestre = buscaPedestrePorNome(nome, cliente.getId());
-
-//	        if (pedestre == null && !TipoTotvsEdu.RESPONSAVEL.getDesc().equals(tipo)) {
-//	            System.out.println("Não encontrado por nome → buscando por matrícula.");
-//	            pedestre = buscaPedestrePorMatricula(matricula, cliente.getId());
-//	        }
-
-	    } else {
-	        String cpfNormalizado = cpf.replaceAll("\\D", "");
-	        System.out.println("CPF informado → buscando por CPF normalizado: " + cpfNormalizado);
-	        pedestre = buscaPedestrePorCpf(cpfNormalizado, cliente.getId());
-	    }
+	    PedestreEntity pedestre = buscarPedestre(cpf, nome, matricula, cliente, tipo);
 
 	    if (pedestre == null) {
 	        System.out.println("Nenhum cadastro existente encontrado → criando novo.");
@@ -240,7 +225,55 @@ public class ImportarSalesianoTask extends TimerTask {
 	    }
 	}
 
+	public PedestreEntity buscarPedestre(String cpf, String nome, String matricula, ClienteEntity cliente, String tipo) {
+	    PedestreEntity pedestre = null;
 
+	    
+	    // 2. Busca por Matrícula (somente se não for do tipo RESPONSÁVEL, caso essa regra ainda seja necessária)
+	    boolean tipoNaoResponsavel = !"RESPONSAVEL".equals(tipo);
+	    if (tipoNaoResponsavel && matricula != null && !matricula.trim().isEmpty()) {
+	        System.out.println("Buscando por matrícula: " + matricula);
+	        pedestre = buscaPedestrePorMatricula(matricula, cliente.getId());
+
+	        if (pedestre != null) {
+	            System.out.println("Encontrado por matrícula. nome : " + pedestre.getNome());
+	            return pedestre;
+	        }
+
+	        System.out.println("Não encontrado por matrícula.");
+	    }
+	    
+	    // 1. Busca por CPF
+	    if (cpf != null && !cpf.trim().isEmpty()) {
+	        String cpfNormalizado = cpf.replaceAll("\\D", "").trim();
+	        System.out.println("CPF informado → buscando por CPF: " + cpfNormalizado);
+
+	        pedestre = buscaPedestrePorCpf(cpfNormalizado, cliente.getId());
+	        if (pedestre != null) {
+	            System.out.println("Encontrado por CPF. nome : " + pedestre.getNome());
+	            return pedestre;
+	        }
+	        System.out.println("Não encontrado por CPF.");
+	    }
+
+	    // 3. Busca por Nome (última opção, pois pode ter duplicidade)
+	    if (nome != null && !nome.trim().isEmpty()) {
+	        System.out.println("Buscando por nome: " + nome);
+	        pedestre = buscaPedestrePorNome(nome, cliente.getId());
+
+	        if (pedestre != null) {
+	            System.out.println("Encontrado por nome (atenção: pode haver duplicidade).");
+	            return pedestre;
+	        }
+
+	        System.out.println("Não encontrado por nome.");
+	    }
+
+	    System.out.println("Nenhum pedestre encontrado com os dados fornecidos.");
+	    return null;
+	}
+
+	
 	private PedestreEntity criarNovoCadastro(CadastroDTO cadastro, ClienteEntity cliente) throws Exception {
 		String cpfNormalizado = cadastro.getCpf().replaceAll("\\D", "");
 		
@@ -305,7 +338,6 @@ public class ImportarSalesianoTask extends TimerTask {
 	    atualizarCamposComuns(pedestre, cadastro);
 	}
 
-
 	private void atualizarCamposComuns(PedestreEntity pedestre, CadastroDTO cadastro) {
 	    DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
@@ -332,49 +364,71 @@ public class ImportarSalesianoTask extends TimerTask {
 		return null;
 	}
 	
-	private PedestreEntity buscaPedestrePorMatricula(String matricula, Long idCliente) throws Exception {
+	@SuppressWarnings("unchecked")
+	private PedestreEntity buscaPedestrePorMatricula(String matricula, Long idCliente) {
 		Map<String, Object> args = new HashMap<String, Object>();
 		args.put("MATRICULA", matricula);
 		args.put("ID_CLIENTE", idCliente);
 
 		@SuppressWarnings("unchecked")
-		List<PedestreEntity> pedestres = (List<PedestreEntity>) baseEJB.pesquisaArgFixos(PedestreEntity.class,
-				"findByMatriculaAndIdCliente", args);
+		List<PedestreEntity> pedestres;
+		try {
+			pedestres = (List<PedestreEntity>) baseEJB.pesquisaArgFixos(PedestreEntity.class,
+					"findByMatriculaAndIdCliente", args);
 
-		if (pedestres != null && !pedestres.isEmpty()) {
-			return pedestres.get(0);
+			if (pedestres != null && !pedestres.isEmpty()) {
+				return pedestres.get(0);
+			}
+
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 
 		return null;
 	}
-	
-	private PedestreEntity buscaPedestrePorCpf(String cpf, Long idCliente) throws Exception {
+
+	@SuppressWarnings("unchecked")
+	private PedestreEntity buscaPedestrePorCpf(String cpf, Long idCliente) {
 		Map<String, Object> args = new HashMap<String, Object>();
 		args.put("CPF", cpf);
 		args.put("ID_CLIENTE", idCliente);
 
 		@SuppressWarnings("unchecked")
-		List<PedestreEntity> pedestres = (List<PedestreEntity>) baseEJB.pesquisaArgFixos(PedestreEntity.class,
-				"findByCpfAndIdCliente", args);
+		List<PedestreEntity> pedestres;
+		try {
+			pedestres = (List<PedestreEntity>) baseEJB.pesquisaArgFixos(PedestreEntity.class, "findByCpfAndIdCliente",
+					args);
 
-		if (pedestres != null && !pedestres.isEmpty()) {
-			return pedestres.get(0);
+			if (pedestres != null && !pedestres.isEmpty()) {
+				return pedestres.get(0);
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 
 		return null;
 	}
 	
-	private PedestreEntity buscaPedestrePorNome(String nome, Long idCliente) throws Exception {
+	@SuppressWarnings("unchecked")
+	private PedestreEntity buscaPedestrePorNome(String nome, Long idCliente) {
 		Map<String, Object> args = new HashMap<String, Object>();
 		args.put("NOME", nome);
 		args.put("ID_CLIENTE", idCliente);
 
 		@SuppressWarnings("unchecked")
-		List<PedestreEntity> pedestres = (List<PedestreEntity>) baseEJB.pesquisaArgFixos(PedestreEntity.class,
-				"findByNomeAndIdCliente", args);
+		List<PedestreEntity> pedestres;
+		try {
+			pedestres = (List<PedestreEntity>) baseEJB.pesquisaArgFixos(PedestreEntity.class, "findByNomeAndIdCliente",
+					args);
 
-		if (pedestres != null && !pedestres.isEmpty()) {
-			return pedestres.get(0);
+			if (pedestres != null && !pedestres.isEmpty()) {
+				return pedestres.get(0);
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 
 		return null;
