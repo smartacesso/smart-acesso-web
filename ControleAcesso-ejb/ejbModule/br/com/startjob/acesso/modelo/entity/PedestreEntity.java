@@ -35,6 +35,7 @@ import javax.persistence.Transient;
 
 import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
+import org.hibernate.annotations.Type;
 
 import com.fasterxml.jackson.databind.ser.std.AsArraySerializerBase;
 import com.senior.services.dto.FuncionarioSeniorDto;
@@ -92,7 +93,9 @@ indexes = {
 		@NamedQuery(name = "PedestreEntity.findById_matricula", query = "select obj from PedestreEntity obj "
 				+ "where obj.matricula = :MATRICULA " + "order by obj.id desc"),
 		@NamedQuery(name = "PedestreEntity.findByNomePedestre", query = "select obj from PedestreEntity obj "
-				+ "where obj.nome = :NOME " + "order by obj.id desc"),
+				+ "where obj.nome = :NOME " 
+				+ "and (obj.removido = false or obj.removido is null) "
+				+ "order by obj.id desc"),
 		@NamedQuery(name = "PedestreEntity.findByCardNumber", query = "select obj from PedestreEntity obj "
 				+ "where obj.codigoCartaoAcesso = :CARD_NUMBER " + "order by obj.id desc"),
 		@NamedQuery(name = "PedestreEntity.findAllPedestresComEmpresa", query = "select obj from PedestreEntity obj "
@@ -123,6 +126,7 @@ indexes = {
 		@NamedQuery(name = "PedestreEntity.findByMatriculaAndIdEmpresaAndIdCliente", query = "select distinct obj from PedestreEntity obj "
 				+ "left join fetch obj.empresa e " + "left join fetch obj.equipamentos eq "
 				+ "where obj.matricula = :MATRICULA " + "and e.id = :ID_EMPRESA "
+				+ "and (obj.removido = false or obj.removido is null) "
 				+ "and obj.cliente.id = :ID_CLIENTE "),
 		
 		@NamedQuery(name = "PedestreEntity.findAllAutoAtendimentoAtivo", query = "select obj " + "from PedestreEntity obj "
@@ -350,6 +354,22 @@ public class PedestreEntity extends ClienteBaseEntity {
 	    inverseJoinColumns = @JoinColumn(name = "id_responsavel")
 	)
 	private List<ResponsibleEntity> responsaveis;
+	
+	
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "DATA_INICIO_PERIODO_AGENDAMENTO", nullable = true, length = 30)
+	private Date dataInicioPeriodoAgendamento;
+	
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name = "DATA_FIM_PERIODO_AGENDAMENTO", nullable = true, length = 30)
+	private Date dataFimPeriodoAgendamento;
+	
+	@Column(name = "JUSTIFICATIVA_LIBERADO", nullable = true, length = 30)
+	private String justificativa;
+	
+	@Type(type = "org.hibernate.type.NumericBooleanType")
+	@Column(name="AGENDAMENTO_LIBERADO", nullable=true, length=11)
+	private Boolean agendamentoLiberado;
 
 	
 	@Transient
@@ -955,6 +975,38 @@ public class PedestreEntity extends ClienteBaseEntity {
 
 	public void setAcessoLivre(Boolean acessoLivre) {
 		this.acessoLivre = acessoLivre;
+	}
+
+	public Date getDataInicioPeriodoAgendamento() {
+		return dataInicioPeriodoAgendamento;
+	}
+
+	public void setDataInicioPeriodoAgendamento(Date dataInicioPeriodoAgendamento) {
+		this.dataInicioPeriodoAgendamento = dataInicioPeriodoAgendamento;
+	}
+
+	public Date getDataFimPeriodoAgendamento() {
+		return dataFimPeriodoAgendamento;
+	}
+
+	public void setDataFimPeriodoAgendamento(Date dataFimPeriodoAgendamento) {
+		this.dataFimPeriodoAgendamento = dataFimPeriodoAgendamento;
+	}
+
+	public String getJustificativa() {
+		return justificativa;
+	}
+
+	public void setJustificativa(String justificativa) {
+		this.justificativa = justificativa;
+	}
+
+	public Boolean getAgendamentoLiberado() {
+		return agendamentoLiberado;
+	}
+
+	public void setAgendamentoLiberado(Boolean agendamentoLiberado) {
+		this.agendamentoLiberado = agendamentoLiberado;
 	}
 
 }
