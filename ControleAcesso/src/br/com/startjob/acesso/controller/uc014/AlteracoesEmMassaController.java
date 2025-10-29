@@ -1,6 +1,7 @@
 package br.com.startjob.acesso.controller.uc014;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,6 +66,10 @@ public class AlteracoesEmMassaController extends BaseController{
 	
 	private boolean permiteCampoAdicionalCrachaMatricula = true;
 	
+	private Date dataInicioJustificativa;
+	private Date dataFimJustificativa;
+	private String justificativa;
+	
 	@PostConstruct
 	@Override
 	public void init() {
@@ -108,6 +113,21 @@ public class AlteracoesEmMassaController extends BaseController{
 		
 		pedestreEJB.alterarEmMassa(pedestreRegraAlteracao, idEmpresaAlteracao, idDepartamentoAlteracao, 
 				idCentroCustoAlteracao, idCargoAlteracao, idCliente, getParans());
+		
+		buscar();
+		
+		mensagemInfo("", "#Alteração em massa executada com sucesso.");
+	}
+	
+	
+	public void salvarJustificativa() {
+		System.out.println("teste");
+		
+		
+		Long idCliente = getUsuarioLogado().getCliente().getId();
+		pedestreRegraAlteracao.setRegra(regraAlteracao);
+		
+		pedestreEJB.salvarJustificativa(idCliente, dataInicioJustificativa, dataFimJustificativa, justificativa, getParans());
 		
 		buscar();
 		
@@ -249,7 +269,7 @@ public class AlteracoesEmMassaController extends BaseController{
 		listaTipoRegra.add(new SelectItem(TipoRegra.ACESSO_UNICO, TipoRegra.ACESSO_UNICO.getDescricao()));
 		listaTipoRegra.add(new SelectItem(TipoRegra.ACESSO_ESCALA_3_3, TipoRegra.ACESSO_ESCALA_3_3.getDescricao()));
 	}
-
+	
 	public List<SelectItem> getListaEmpresas() {
 		return listaEmpresas;
 	}
@@ -328,6 +348,30 @@ public class AlteracoesEmMassaController extends BaseController{
 
 	public boolean isPermiteCampoAdicionalCrachaMatricula() {
 		return permiteCampoAdicionalCrachaMatricula;
+	}
+
+	public Date getDataInicioJustificativa() {
+		return dataInicioJustificativa;
+	}
+
+	public void setDataInicioJustificativa(Date dataInicioJustificativa) {
+		this.dataInicioJustificativa = dataInicioJustificativa;
+	}
+
+	public Date getDataFimJustificativa() {
+		return dataFimJustificativa;
+	}
+
+	public void setDataFimJustificativa(Date dataFimJustificativa) {
+		this.dataFimJustificativa = dataFimJustificativa;
+	}
+
+	public String getJustificativa() {
+		return justificativa;
+	}
+
+	public void setJustificativa(String justificativa) {
+		this.justificativa = justificativa;
 	}
 	
 }

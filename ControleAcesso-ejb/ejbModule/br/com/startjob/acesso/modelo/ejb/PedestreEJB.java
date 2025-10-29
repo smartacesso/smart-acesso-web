@@ -394,7 +394,11 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 				"		h2.HORARIO_FIM as horarioFim,  " + // 75
 				"		h2.STATUS as statusPR, " + // 76
 				"		pd.ID_LOCAL as idLocal, " + // 77
-				"		pd.ACESSO_LIVRE as acessoLivre " + // 78
+				"		pd.ACESSO_LIVRE as acessoLivre, " + // 78
+				"		pd.DATA_INICIO_PERIODO_AGENDAMENTO as dataInicioPeriodoAgendamento, " + // 79
+				"		pd.DATA_FIM_PERIODO_AGENDAMENTO as dataFimPeriodoAgendamento, " + // 80
+				"		pd.JUSTIFICATIVA_LIBERADO as justificativa, " + // 81
+				"		pd.AGENDAMENTO_LIBERADO as agendamentoLiberado " + // 82
 				"from " + schema + "TB_PEDESTRE pd " + "		left join " + schema
 				+ "TB_ENDERECO e on e.ID_ENDERECO = pd.ID_ENDERECO " + "		left join " + schema
 				+ "TB_EMPRESA emp on emp.ID_EMPRESA = pd.ID_EMPRESA " + "		left join " + schema
@@ -3512,5 +3516,71 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 			return null;
 		return xml.substring(s + open.length(), e).trim();
 	}
+
+	@Override
+	public void salvarJustificativa(Long idCliente, Date dataInicioJustificativa, Date dataFimJustificativa,
+			String justificativa, Map<String, Object> parans) {
+
+		Map<String, Object> arg = new HashMap<String, Object>();
+		arg.putAll(parans);
+		arg.remove("cliente.id");
+
+		String query = "";
+		Query q = null;
+
+		if (dataInicioJustificativa != null && dataFimJustificativa != null) {
+//			desativa regras dos pedestres
+			query = adicionarAgendamento(idCliente, arg, dataInicioJustificativa, dataFimJustificativa, justificativa);
+			q = em.createNativeQuery(query);
+			q.executeUpdate();
+
+			query = queryMudarDataAlteracaoPedestres(idCliente);
+			q = em.createNativeQuery(query);
+			q.executeUpdate();
+
+// 		apagar marcado/desmarcado no pedestre
+			query = queryApagarMarcadoTodosPedestres(idCliente);
+			q = em.createNativeQuery(query);
+			q.executeUpdate();
+
+		}
+	}
+	
+	
+	public String adicionarAgendamento(Long idCliente, Map<String, Object> arg, Date dataInicio, Date dataFim, String justificativa) {
+		StringBuilder query = new StringBuilder();
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		
+		String sgdb = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SGDB);
+		String schema = "";
+		if (sgdb == null || "".equals(sgdb)) {
+			sgdb = "mysql";
+		}
+
+		if ("plsql".equals(sgdb)) {
+			schema = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SCHEMA);
+		}
+		
+		String dataInicioAg = sdf.format(dataInicio);
+		String dataFimAg = sdf.format(dataFim);
+
+
+		query.append("update " + schema + "TB_PEDESTRE set DATA_INICIO_PERIODO_AGENDAMENTO = '" + dataInicioAg + "', ");
+		query.append("DATA_FIM_PERIODO_AGENDAMENTO = '" + dataFimAg + "', ");
+		query.append("JUSTIFICATIVA_LIBERADO = '" + justificativa + "', "); 
+		query.append("SEMPRE_LIBERADO = TRUE ");
+		query.append("where ID_PEDESTRE in ( ");
+		query.append("select id from (select ID_PEDESTRE as id from " + schema + "TB_PEDESTRE ");
+		query.append("where ID_CLIENTE = ").append(idCliente).append(" and TIPO_PEDESTRE = 'PEDESTRE' ")
+		     .append(" and (ALTERAR_EM_MASSA IS NULL OR ALTERAR_EM_MASSA = 1) ");
+		query.append(concatenaFiltros(arg));
+		query.append(") as tmp )");
+
+		
+		System.out.println(query.toString());
+
+		return query.toString();
+	}
+	
 
 }

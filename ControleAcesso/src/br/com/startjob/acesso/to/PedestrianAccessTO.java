@@ -86,6 +86,12 @@ public class PedestrianAccessTO {
 	private Date dataCadastroFotoNaHikivision;
 	private String fotoBase64;
 	
+	private Date dataInicioPeriodoAgendamento;
+	private Date dataFimPeriodoAgendamento;
+	private String justificativa;
+	private Boolean agendamentoLiberado;
+
+	
 	private transient SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	
 	public PedestrianAccessTO() {}
@@ -146,6 +152,13 @@ public class PedestrianAccessTO {
 		this.inicioTurno = objects[12] == null ? null : criaData(objects[12], sdf);
 		this.dataInicioPeriodo = objects[21] == null ? null : criaData(objects[21], sdf);
 		this.dataFimPeriodo = objects[22] == null ? null : criaData(objects[22], sdf);
+		
+		//agendamento liberado
+		this.dataInicioPeriodoAgendamento = objects[79] == null ? null : criaData(objects[79], sdf);
+		this.dataFimPeriodoAgendamento = objects[80] == null ? null : criaData(objects[80], sdf);
+		this.justificativa = objects[81] == null ? null : objects[81].toString();
+		this.agendamentoLiberado =  toBoolean(objects[78]);
+		
 		try {
 			this.qtdAcessoAntesSinc = objects[62] == null ? null : Integer.valueOf(objects[62].toString());
 		}catch (Exception e) {}
@@ -211,7 +224,11 @@ public class PedestrianAccessTO {
 	        this.login = entity.getLogin();
 	        this.dataCadastroFotoNaHikivision = entity.getDataCadastroFotoNaHikivision();
 	        this.tipoAcesso = entity.getTipoAcesso();
-
+	        this.dataInicioPeriodoAgendamento = entity.getDataInicioPeriodoAgendamento();
+	        this.dataFimPeriodoAgendamento = entity.getDataFimPeriodoAgendamento();
+	        this.justificativa = entity.getJustificativa();
+	        this.agendamentoLiberado = entity.getAgendamentoLiberado();
+	        
 	        byte[] fotoBytes = entity.getFoto();
 	        this.fotoBase64 = (fotoBytes != null) ? Base64.encodeBase64String(fotoBytes) : "";
 	    }
@@ -926,6 +943,38 @@ public class PedestrianAccessTO {
 
 	    String s = val.toString().trim();
 	    return "1".equals(s) || "true".equalsIgnoreCase(s);
+	}
+
+	public Date getDataInicioPeriodoAgendamento() {
+		return dataInicioPeriodoAgendamento;
+	}
+
+	public void setDataInicioPeriodoAgendamento(Date dataInicioPeriodoAgendamento) {
+		this.dataInicioPeriodoAgendamento = dataInicioPeriodoAgendamento;
+	}
+
+	public Date getDataFimPeriodoAgendamento() {
+		return dataFimPeriodoAgendamento;
+	}
+
+	public void setDataFimPeriodoAgendamento(Date dataFimPeriodoAgendamento) {
+		this.dataFimPeriodoAgendamento = dataFimPeriodoAgendamento;
+	}
+
+	public String getJustificativa() {
+		return justificativa;
+	}
+
+	public void setJustificativa(String justificativa) {
+		this.justificativa = justificativa;
+	}
+
+	public Boolean getAgendamentoLiberado() {
+		return agendamentoLiberado;
+	}
+
+	public void setAgendamentoLiberado(Boolean agendamentoLiberado) {
+		this.agendamentoLiberado = agendamentoLiberado;
 	}
 	
 }
