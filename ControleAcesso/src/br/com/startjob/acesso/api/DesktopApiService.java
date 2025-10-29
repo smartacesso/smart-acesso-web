@@ -1296,7 +1296,9 @@ public class DesktopApiService extends BaseService {
 
 	private void setNovosDadosVisitante(JSONObject jsonObject, PedestreEntity visitante) {
 		try {
-			visitante.setIdTemp(Long.valueOf(jsonObject.getString("idTemp")));
+			if(jsonObject.getString("idTemp") != null && !jsonObject.getString("idTemp").isEmpty()) {
+				visitante.setIdTemp(Long.valueOf(jsonObject.getString("idTemp")));
+			}
 		} catch (Exception e) {
 		}
 
@@ -1364,7 +1366,6 @@ public class DesktopApiService extends BaseService {
 			);
 		visitante.setHabilitarTeclado(Boolean.valueOf(jsonObject.getString("habilitarTeclado")));
 		visitante.setEnviaSmsAoPassarNaCatraca(Boolean.valueOf(jsonObject.getString("enviaSmsAoPassarNaCatraca")));
-		visitante.setMatricula(jsonObject.getString("justificativa"));
 		visitante.setJustificativa(jsonObject.getString("justificativa"));
 		visitante.setAgendamentoLiberado(Boolean.valueOf(jsonObject.getString("agendamentoLiberado")));
 
@@ -1428,10 +1429,24 @@ public class DesktopApiService extends BaseService {
 
 		try {
 			visitante.setDataCadastroFotoNaHikivision(sdf.parse(jsonObject.getString("dataCadastroFotoNaHikivision")));
-			visitante.setDataInicioPeriodoAgendamento(sdf.parse(jsonObject.getString("dataInicioPeriodoAgendamento")));
+		} catch (Exception e) {
+			
+		}
+		
+		try {
 			visitante.setDataFimPeriodoAgendamento(sdf.parse(jsonObject.getString("dataFimPeriodoAgendamento")));
 		} catch (Exception e) {
+			visitante.setDataInicioPeriodoAgendamento(null);
+			
 		}
+		
+		try {
+			visitante.setDataFimPeriodoAgendamento(sdf.parse(jsonObject.getString("dataFimPeriodoAgendamento")));
+		} catch (Exception e) {
+			visitante.setDataFimPeriodoAgendamento(null);
+		}
+		
+		
 
 		setRegrasVisitante(visitante, jsonObject.getJSONArray("pedestresRegras"));
 

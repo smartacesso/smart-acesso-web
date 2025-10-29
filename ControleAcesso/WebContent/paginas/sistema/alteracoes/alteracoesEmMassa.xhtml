@@ -25,12 +25,19 @@
 
 				<p:toolbarGroup
 					styleClass="flex flex-wrap gap-2 justify-start md:justify-end w-full md:w-auto">
-					
+
 					<p:commandButton id="acaoAlterarDados" icon="pi pi-pencil"
 						onclick="PF('alteracaoEmMassa').show(); return false;"
 						styleClass="rounded-button ui-button-warning"
 						title="#{msgs['alt.acao.alterar.dados.em.massa']}" />
-						
+
+
+					<p:commandButton id="acaoJustificativa" icon="pi pi-calendar"
+						onclick="PF('dialogJustificativa').show(); return false;"
+						styleClass="rounded-button ui-button-info"
+						title="Definir Período e Justificativa" />
+
+
 					<p:commandButton id="acaoLimpar"
 						action="#{alteracoesEmMassaController.limpar}" icon="pi pi-filter"
 						process="@this" update="@form"
@@ -39,7 +46,7 @@
 
 					<p:inputText id="filtro-nome" placeholder="Filtrar por nome"
 						value="#{alteracoesEmMassaController.parans['nome']}"
-						style="width:200px; font-size:13px;" 
+						style="width:200px; font-size:13px;"
 						onkeypress="if(event.key === 'Enter') { event.preventDefault(); document.getElementById('form:acaoBuscar').click(); }" />
 
 					<p:commandButton id="acaoBuscar"
@@ -76,6 +83,7 @@
 			<p:dialog id="dialogAlteracaoEmMassa" widgetVar="alteracaoEmMassa"
 				header="#{msgs['title.uc014.dados.para.alteracao.em.massa']}"
 				modal="true" width="70%" resizable="false" positionType="absolute">
+
 				<p:panelGrid id="alteracaoEmpresa" columns="4">
 
 					<p:column>
@@ -207,10 +215,11 @@
 				<p:panelGrid id="confirmarAlteracao" columns="2"
 					style="margin-left: 79%;">
 					<p:column>
-						<p:commandButton id="aplicarAlteracao"
-							value="#{msgs['alt.acao.aplicar']}"
-							action="#{alteracoesEmMassaController.iniciarAlteracaoEmMassa}"
-							update="@form" oncomplete="PF('alteracaoEmMassa').hide();" />
+						<p:commandButton id="aplicarJustificativa" value="Salvar"
+							action="#{alteracoesEmMassaController.salvarJustificativa}"
+							process="@form" update="@form"
+							oncomplete="PF('dialogJustificativa').hide();" />
+
 					</p:column>
 
 					<p:column>
@@ -222,6 +231,46 @@
 				</p:panelGrid>
 
 			</p:dialog>
+
+			<p:dialog id="dialogJustificativa" widgetVar="dialogJustificativa"
+				header="Definir Período e Justificativa" modal="true"
+				resizable="false" width="40%">
+
+
+					<p:panelGrid columns="2" columnClasses="label,value"
+						style="width:100%">
+
+						<p:outputLabel value="Data Início:" for="dataInicioJustificativa" />
+						<p:calendar id="dataInicioJustificativa"
+							value="#{alteracoesEmMassaController.dataInicioJustificativa}"
+							pattern="dd/MM/yyyy HH:mm" mask="99/99/9999 00:00" navigator="true" />
+
+						<p:outputLabel value="Data Fim:" for="dataFimJustificativa" />
+						<p:calendar id="dataFimJustificativa"
+							value="#{alteracoesEmMassaController.dataFimJustificativa}"
+							pattern="dd/MM/yyyy HH:mm" mask="99/99/9999 00:00" navigator="true" />
+
+						<p:outputLabel value="Justificativa:" for="justificativa" />
+						<p:inputTextarea id="justificativa" rows="4" cols="30"
+							value="#{alteracoesEmMassaController.justificativa}"
+							autoResize="true" />
+
+					</p:panelGrid>
+
+					<p:separator />
+
+					<p:panelGrid columns="2" style="float:right; margin-top:10px;">
+						<p:commandButton value="Salvar"
+							action="#{alteracoesEmMassaController.salvarJustificativa}"
+							update="@form"
+							oncomplete="PF('dialogJustificativa').hide();" />
+
+						<p:commandButton value="Cancelar"
+							onclick="PF('dialogJustificativa').hide(); return false;" />
+					</p:panelGrid>
+
+			</p:dialog>
+
 
 			<p:dialog id="dialogEscolherRegra"
 				header="#{msgs['label.uc014.consultar.regras']}"
@@ -411,7 +460,8 @@
 
 				<h:column>
 
-					<ui:include src="/tema/templates/vazio.xhtml" style="margin-top: 1000px;">
+					<ui:include src="/tema/templates/vazio.xhtml"
+						style="margin-top: 1000px;">
 						<ui:param name="exibe"
 							value="#{empty alteracoesEmMassaController.result}" />
 						<ui:param name="exibeAdicionar" value="true" />
@@ -491,34 +541,34 @@
 			</h:panelGrid>
 
 			<style>
-				.tabela-responsive .ui-datatable-scrollable-body {
-					overflow-x: auto;
-				}
-				
-				.tabela-responsive .ui-datatable-scrollable-header-box {
-					overflow-x: auto;
-				}
-				
-				@media screen and (max-width: 768px) {
-					.ui-datatable th, .ui-datatable td {
-						font-size: 12px;
-						padding: 6px;
-					}
-				}
-				
-				.align-left {
-					text-align: left !important;
-				}
-				
-				@media ( max-width : 768px) {
-					.col-desktop-only {
-						display: none !important;
-					}
-					.ui-datatable{
-						margin-top: 30px;
-					}
-				}
-			</style>
+.tabela-responsive .ui-datatable-scrollable-body {
+	overflow-x: auto;
+}
+
+.tabela-responsive .ui-datatable-scrollable-header-box {
+	overflow-x: auto;
+}
+
+@media screen and (max-width: 768px) {
+	.ui-datatable th, .ui-datatable td {
+		font-size: 12px;
+		padding: 6px;
+	}
+}
+
+.align-left {
+	text-align: left !important;
+}
+
+@media ( max-width : 768px) {
+	.col-desktop-only {
+		display: none !important;
+	}
+	.ui-datatable {
+		margin-top: 30px;
+	}
+}
+</style>
 
 		</ui:define>
 	</ui:composition>
