@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -41,6 +42,7 @@ public class RelatorioPedestresController extends RelatorioController {
     public static final String LANCHE_EXTRA = "Lanche Hora Extra";
     public static final String JANTAR = "Jantar";
     public static final String LANCHE_NOITE = "Lanche da Noite";
+	private static final String LANCHE_EXTRA_NOITE = "Lanche extre noite";
 
 	
 	private Long idEmpresaSelecionada;
@@ -139,98 +141,165 @@ public class RelatorioPedestresController extends RelatorioController {
 	    int minutosTotais = hora * 60 + minuto;
 
 	    boolean isSexta = (cal.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY);
-
-	    // Café da manhã: 05:40 – 06:59 (340 – 419)
-	    if (minutosTotais >= 340 && minutosTotais <= 419) {
-	        return CAFE_MANHA;
+	    
+	    if(Objects.isNull(empresaSelecionada)) {
+	    	return "";
 	    }
+	    
+	    
+	    if (empresaSelecionada.getNome().contains("ALVO")) {
 
-	    // Café da manhã 2: 07:30 – 10:00 (450 – 600)
-	    if (minutosTotais >= 450 && minutosTotais <= 600) {
-	        return CAFE_MANHA2;
-	    }
-
-	    // Almoço: 10:50 – 13:30 (650 – 810)
-	    if (minutosTotais >= 650 && minutosTotais <= 810) {
-	        return ALMOCO;
-	    }
-
-	    if (isSexta) {
-	        // Na sexta: Café da tarde (13:25 – 15:25)
-	        if (minutosTotais >= 865 && minutosTotais <= 925) {
-	            return CAFE_TARDE_SEXTA;
+	        // Café da manhã: 06:30 – 06:55 (390 – 415)
+	        if (minutosTotais >= 390 && minutosTotais <= 415) {
+	            return CAFE_MANHA;
 	        }
 
-	        // Na sexta: Café da tarde 2 (15:30 – 15:59)
-	        if (minutosTotais >= 990 && minutosTotais <= 959) {
-	            return CAFE_TARDE2_SEXTA;
+	        // Almoço: 11:00 – 13:00 (660 – 780)
+	        if (minutosTotais >= 660 && minutosTotais <= 780) {
+	            return ALMOCO;
 	        }
-	    } else {
-	        // Café da tarde normal: 14:25 – 16:25 (865 – 985)
-	        if (minutosTotais >= 865 && minutosTotais <= 985) {
+
+	        // Café da tarde: 14:30 – 15:00 (870 – 900)
+	        if (minutosTotais >= 870 && minutosTotais <= 900) {
 	            return CAFE_TARDE;
 	        }
 
-	        // Café da tarde 2 normal: 16:30 – 16:59 (990 – 1019)
-	        if (minutosTotais >= 990 && minutosTotais <= 1019) {
-	            return CAFE_TARDE2;
+	        // Jantar: 18:30 – 19:30 (1110 – 1170)
+	        if (minutosTotais >= 1110 && minutosTotais <= 1170) {
+	            return JANTAR;
 	        }
+
+	        // Lanche noturno: 22:30 – 22:40 (1350 – 1360)
+	        if (minutosTotais >= 1350 && minutosTotais <= 1360) {
+	            return LANCHE_NOITE;
+	        }
+
+	        // Lanche hora extra noturno: 00:00 – 02:00 (0 – 120)
+	        if (minutosTotais >= 0 && minutosTotais <= 120) {
+	            return LANCHE_EXTRA_NOITE;
+	        }
+
+	        return "Fora do horario de refeicao";
 	    }
 
-	    // Lanche hora extra: 18:00 – 18:20 (1080 – 1100)
-	    if (minutosTotais >= 1080 && minutosTotais <= 1100) {
-	        return LANCHE_EXTRA;
-	    }
+	    
+	    
+		if (empresaSelecionada.getNome().contains("RONA")) {
 
-	    // Jantar: 18:30 – 19:30 (1110 – 1170)
-	    if (minutosTotais >= 1110 && minutosTotais <= 1170) {
-	        return JANTAR;
-	    }
+			// Café da manhã: 05:40 – 06:59 (340 – 419)
+			if (minutosTotais >= 340 && minutosTotais <= 419) {
+				return CAFE_MANHA;
+			}
 
-	    // Lanche da noite: 22:30 – 22:50 (1350 – 1370)
-	    if (minutosTotais >= 1350 && minutosTotais <= 1370) {
-	        return LANCHE_NOITE;
-	    }
+			// Café da manhã 2: 07:30 – 10:00 (450 – 600)
+			if (minutosTotais >= 450 && minutosTotais <= 600) {
+				return CAFE_MANHA2;
+			}
 
-	    return "Fora do horario de refeicao";
+			// Almoço: 10:50 – 13:30 (650 – 810)
+			if (minutosTotais >= 650 && minutosTotais <= 810) {
+				return ALMOCO;
+			}
+
+			if (isSexta) {
+				// Na sexta: Café da tarde (13:25 – 15:25)
+				if (minutosTotais >= 865 && minutosTotais <= 925) {
+					return CAFE_TARDE_SEXTA;
+				}
+
+				// Na sexta: Café da tarde 2 (15:30 – 15:59)
+				if (minutosTotais >= 990 && minutosTotais <= 959) {
+					return CAFE_TARDE2_SEXTA;
+				}
+			} else {
+				// Café da tarde normal: 14:25 – 16:25 (865 – 985)
+				if (minutosTotais >= 865 && minutosTotais <= 985) {
+					return CAFE_TARDE;
+				}
+
+				// Café da tarde 2 normal: 16:30 – 16:59 (990 – 1019)
+				if (minutosTotais >= 990 && minutosTotais <= 1019) {
+					return CAFE_TARDE2;
+				}
+			}
+
+			// Lanche hora extra: 18:00 – 18:20 (1080 – 1100)
+			if (minutosTotais >= 1080 && minutosTotais <= 1100) {
+				return LANCHE_EXTRA;
+			}
+
+			// Jantar: 18:30 – 19:30 (1110 – 1170)
+			if (minutosTotais >= 1110 && minutosTotais <= 1170) {
+				return JANTAR;
+			}
+
+			// Lanche da noite: 22:30 – 22:50 (1350 – 1370)
+			if (minutosTotais >= 1350 && minutosTotais <= 1370) {
+				return LANCHE_NOITE;
+			}
+
+			return "Fora do horario de refeicao";
+		}
+		
+		return "";
 	}
 
 	public void calcularRefeicoes() {
 	    refeicoesCount = new LinkedHashMap<>();
 
-	    // Sempre
-	    refeicoesCount.put(CAFE_MANHA, 0L);
-	    refeicoesCount.put(CAFE_MANHA2, 0L);
-	    refeicoesCount.put(ALMOCO, 0L);
-
-	    // Descobrir se hoje é sexta (com base no primeiro acesso, por exemplo)
-	    boolean isSexta = false;
 	    List<AcessoEntity> acessos = super.getResult().stream()
-	            .map(e -> (AcessoEntity) e)
-	            .filter(e -> "ENTRADA".equalsIgnoreCase(e.getSentido())
-	                    && "ATIVO".equalsIgnoreCase(e.getTipo()))
-	            .collect(Collectors.toList());
+	        .map(e -> (AcessoEntity) e)
+	        .filter(e -> "ENTRADA".equalsIgnoreCase(e.getSentido())
+	                && "ATIVO".equalsIgnoreCase(e.getTipo()))
+	        .collect(Collectors.toList());
 
+	    boolean isSexta = false;
 	    if (!acessos.isEmpty()) {
 	        Calendar cal = Calendar.getInstance();
 	        cal.setTime(acessos.get(0).getData());
 	        isSexta = (cal.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY);
 	    }
 
-	    // Adiciona cafés de acordo com o dia
-	    if (isSexta) {
-	        refeicoesCount.put(CAFE_TARDE_SEXTA, 0L);
-	        refeicoesCount.put(CAFE_TARDE2_SEXTA, 0L);
-	    } else {
+	    // Identifica empresa
+	    if(Objects.isNull(empresaSelecionada)) {
+	    	return;
+	    }
+	    
+	    
+	    String nomeEmpresa = empresaSelecionada.getNome().toUpperCase();
+
+	    if (nomeEmpresa.contains("ALVO")) {
+	        // Intervalos da ALVO
+	        refeicoesCount.put(CAFE_MANHA, 0L);
+	        refeicoesCount.put(ALMOCO, 0L);
 	        refeicoesCount.put(CAFE_TARDE, 0L);
-	        refeicoesCount.put(CAFE_TARDE2, 0L);
+	        refeicoesCount.put(JANTAR, 0L);
+	        refeicoesCount.put(LANCHE_NOITE, 0L);
+	        refeicoesCount.put(LANCHE_EXTRA_NOITE, 0L);
+
+	    } else if (nomeEmpresa.contains("RONA")) {
+	        // Intervalos da RONA
+	        refeicoesCount.put(CAFE_MANHA, 0L);
+	        refeicoesCount.put(CAFE_MANHA2, 0L);
+	        refeicoesCount.put(ALMOCO, 0L);
+
+	        if (isSexta) {
+	            refeicoesCount.put(CAFE_TARDE_SEXTA, 0L);
+	            refeicoesCount.put(CAFE_TARDE2_SEXTA, 0L);
+	        } else {
+	            refeicoesCount.put(CAFE_TARDE, 0L);
+	            refeicoesCount.put(CAFE_TARDE2, 0L);
+	        }
+
+	        refeicoesCount.put(LANCHE_EXTRA, 0L);
+	        refeicoesCount.put(JANTAR, 0L);
+	        refeicoesCount.put(LANCHE_NOITE, 0L);
+	    } else {
+	        // Empresa sem configuração específica
+	        refeicoesCount.put("DESCONHECIDA", 0L);
 	    }
 
-	    // Restante
-	    refeicoesCount.put(LANCHE_EXTRA, 0L);
-	    refeicoesCount.put(JANTAR, 0L);
-	    refeicoesCount.put(LANCHE_NOITE, 0L);
-
+	    // Contagem
 	    long total = 0L;
 	    for (AcessoEntity acesso : acessos) {
 	        String refeicao = getTipoRefeicao(acesso.getData());
