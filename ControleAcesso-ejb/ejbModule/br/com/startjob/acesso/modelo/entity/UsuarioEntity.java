@@ -137,6 +137,9 @@ public class UsuarioEntity extends ClienteBaseEntity {
 	@Column(name="HABILITA_EXPEDIDORA", nullable=true)
 	private Boolean expedidora = false;
 	
+	@Column(name="REDEFINIR_SENHA", nullable=false)
+	private Boolean redefinirSenha= false;
+	
 	@Transient
 	private String chaveIntegracaoComtele;
 	
@@ -258,6 +261,12 @@ public class UsuarioEntity extends ClienteBaseEntity {
 	}
 	public void setExpedidora(Boolean expedidora) {
 		this.expedidora = expedidora;
+	}
+	public Boolean getRedefinirSenha() {
+		return redefinirSenha;
+	}
+	public void setRedefinirSenha(Boolean redefinirSenha) {
+		this.redefinirSenha = redefinirSenha;
 	}
 	
 }

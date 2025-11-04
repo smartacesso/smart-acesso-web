@@ -2,11 +2,14 @@ package br.com.startjob.acesso.controller.uc004;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import javax.annotation.PostConstruct;
 import javax.faces.model.SelectItem;
 import javax.faces.view.ViewScoped;
 import javax.inject.Named;
+
+import org.primefaces.PrimeFaces;
 
 import br.com.startjob.acesso.annotations.UseCase;
 import br.com.startjob.acesso.controller.CadastroBaseController;
@@ -120,25 +123,36 @@ public class CadastroUsuarioController extends CadastroBaseController {
 
 	    if (novoUsuario) {
 	        // valida se senha e confirmação batem
-	        if (usuario.getSenha() == null || !usuario.getSenha().equals(confirmarSenha)) {
-	            mensagemFatal("", "As senhas não conferem.");
-	            return "";
-	        }
+	    	
+			if (Objects.nonNull(usuario.getSenha())) {
 
-	        // valida regex APENAS para novo usuário
-	        if (!usuario.getSenha().matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[@$!%*?&])[A-Za-z0-9@$!%*?&]{8,}$")) {
-	            mensagemFatal("", "Senha inválida. Deve conter letras maiúsculas, minúsculas, números e caracteres especiais.");
-	            return "";
-	        }
+				if (!usuario.getSenha().equals(confirmarSenha)) {
+					mensagemFatal("", "As senhas não conferem.");
+					return "";
+				}
 
-	        // criptografa senha do novo usuário
-	        try {
-	            usuario.setSenha(EncryptionUtils.encrypt(usuario.getSenha()));
-	        } catch (Exception e) {
-	            e.printStackTrace();
-	            mensagemFatal("", "Erro ao criptografar a senha.");
-	            return "";
-	        }
+				// valida regex APENAS para novo usuário
+				if (!usuario.getSenha()
+						.matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[@$!%*?&])[A-Za-z0-9@$!%*?&]{8,}$")) {
+					mensagemFatal("",
+							"Senha inválida. Deve conter letras maiúsculas, minúsculas, números e caracteres especiais.");
+					return "";
+				}
+
+				// criptografa senha do novo usuário
+				try {
+					usuario.setSenha(EncryptionUtils.encrypt(usuario.getSenha()));
+					usuario.setRedefinirSenha(false);
+				} catch (Exception e) {
+					e.printStackTrace();
+					mensagemFatal("", "Erro ao criptografar a senha.");
+					return "";
+				}
+
+			}else {
+				usuario.setSenha(null);
+				usuario.setRedefinirSenha(true);
+			}
 
 	        // valida email duplicado
 	        if (usuario.getEmail() != null && !"".equals(usuario.getEmail()) && verificaEmailExistente(usuario.getEmail())) {
@@ -251,7 +265,17 @@ public class CadastroUsuarioController extends CadastroBaseController {
 		listaPerfilAcesso.add(new SelectItem(PerfilAcesso.RESPONSAVEL, PerfilAcesso.RESPONSAVEL.toString()));
 	}
 	
-	
+	public void verificarSenhaAntesDeSalvar() {
+	    UsuarioEntity usuario = (UsuarioEntity) getEntidade();
+
+	    if (usuario.getSenha() == null || usuario.getSenha().isEmpty()) {
+	        // JSF só abre o dialog — a ação final será decidida pelo usuário no front
+	        PrimeFaces.current().executeScript("PF('confirmDialogSemSenha').show();");
+	    } else {
+	        salvar(); // se tiver senha, salva normalmente
+	    }
+	}
+
 	public List<SelectItem> getListaStatus() {
 		return listaStatus;
 	}

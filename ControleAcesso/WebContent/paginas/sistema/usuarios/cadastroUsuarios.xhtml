@@ -33,11 +33,11 @@
 		<ui:define name="tools">
 			<h:panelGrid columns="4" styleClass="conteudo_tools">
 
-				<p:commandButton id="save"
-					action="#{cadastroUsuarioController.salvar}"
-					title="#{msgs['alt.acao.save']}" icon="pi pi-check">
-					<p:ajax process="@form" update="@form" />
-				</p:commandButton>
+				<!-- dentro do mesmo <h:form id="formUsuario"> -->
+				<p:commandButton id="save" icon="pi pi-check"
+					process="@form" update="@form"
+					actionListener="#{cadastroUsuarioController.verificarSenhaAntesDeSalvar}" />
+
 				<h:commandButton id="editarSenha"
 					rendered="#{cadastroUsuarioController.entidade.id != null}"
 					title="#{msgs['alt.acao.alterar.senha']}"
@@ -50,37 +50,50 @@
 		</ui:define>
 
 		<ui:define name="conteudo">
+			<p:confirmDialog id="confirmDialogSemSenha"
+				widgetVar="confirmDialogSemSenha"
+				header="Confirmar cadastro sem senha" closable="false" modal="true"
+				message="Deseja realmente cadastrar este usuário sem senha?"
+				icon="pi pi-exclamation-triangle">
+
+				<p:commandButton value="Sim" icon="pi pi-check" process="@this"
+					action="#{cadastroUsuarioController.salvar}"
+					oncomplete="PF('confirmDialogSemSenha').hide();" update="@form" />
+
+				<p:commandButton value="Não" icon="pi pi-times" type="button"
+					onclick="PF('confirmDialogSemSenha').hide();" />
+			</p:confirmDialog>
+
 
 			<p:dialog id="alteraSenhaDialog" widgetVar="alteraSenha"
 				header="#{msgs['header.alterar.dados.login']}" modal="true">
-					<p:panelGrid columns="3">
-						<p:column>
-							<h:outputText value="#{msgs['label.novo.login']}" />
-							<p:inputText value="#{cadastroUsuarioController.usuarioLogin}">
-								<f:validateRegex pattern="[a-zA-Z0-9]+" />
-							</p:inputText>
-						</p:column>
+				<p:panelGrid columns="3">
+					<p:column>
+						<h:outputText value="#{msgs['label.novo.login']}" />
+						<p:inputText value="#{cadastroUsuarioController.usuarioLogin}">
+							<f:validateRegex pattern="[a-zA-Z0-9]+" />
+						</p:inputText>
+					</p:column>
 
-						<p:column>
-							<h:outputText value="#{msgs['label.nova.senha']}" />
-							<p:password id="alteraSenha"
-								value="#{cadastroUsuarioController.usuarioSenha}"
-								feedback="true" 
-								redisplay="true"
-								promptLabel="Digite sua senha" weakLabel="Fraca" goodLabel="Boa"
-								strongLabel="Forte" validatorMessage="Senha inválida (fraca)">
-								<f:validateRegex
-									pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[@$!%*?&amp;])[A-Za-z0-9@$!%*?&amp;]{8,}$" />
-							</p:password>
-						</p:column>
+					<p:column>
+						<h:outputText value="#{msgs['label.nova.senha']}" />
+						<p:password id="alteraSenha"
+							value="#{cadastroUsuarioController.usuarioSenha}" feedback="true"
+							redisplay="true" promptLabel="Digite sua senha" weakLabel="Fraca"
+							goodLabel="Boa" strongLabel="Forte"
+							validatorMessage="Senha inválida (fraca)">
+							<f:validateRegex
+								pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[@$!%*?&amp;])[A-Za-z0-9@$!%*?&amp;]{8,}$" />
+						</p:password>
+					</p:column>
 
-						<p:column>
-							<p:commandButton value="#{msgs['alt.acao.alterar']}"
-								action="#{cadastroUsuarioController.alterarLoginSenhaUsuarioUsuario()}"
-								process="@form" update="@form"
-								oncomplete="PF('alteraSenha').hide();" />
-						</p:column>
-					</p:panelGrid>
+					<p:column>
+						<p:commandButton value="#{msgs['alt.acao.alterar']}"
+							action="#{cadastroUsuarioController.alterarLoginSenhaUsuarioUsuario()}"
+							process="@form" update="@form"
+							oncomplete="PF('alteraSenha').hide();" />
+					</p:column>
+				</p:panelGrid>
 			</p:dialog>
 
 
@@ -133,10 +146,10 @@
 									<div class="ui-g-12 ui-md-6">
 
 										<p:outputLabel for="senha" value="Senha:"
-											indicateRequired="true" />
+											indicateRequired="false" />
 										<p:password id="senha"
 											value="#{cadastroUsuarioController.entidade.senha}"
-											required="true" feedback="true" redisplay="true"
+											required="false" feedback="true" redisplay="true"
 											match="confirmarSenha" promptLabel="Digite sua senha"
 											weakLabel="Fraca" goodLabel="Boa" strongLabel="Forte"
 											validatorMessage="Senha inválida">
@@ -145,16 +158,18 @@
 										</p:password>
 
 										<p:outputLabel for="confirmarSenha" value="Confirmar Senha:"
-											indicateRequired="true" />
+											indicateRequired="false" />
 										<p:password id="confirmarSenha"
 											value="#{cadastroUsuarioController.confirmarSenha}"
-											redisplay="true" required="true" feedback="false"
+											redisplay="true" required="false" feedback="false"
 											validatorMessage="Confirmação obrigatória" />
 
 										<p:message for="senha" />
 										<p:message for="confirmarSenha" />
-										<h:outputText value="A senha deve conter: mínimo 8 caracteres, com letras maiúsculas, minúsculas, números e caracteres especiais." style="color:gray; font-size:12px"/>
-										
+										<h:outputText
+											value="A senha deve conter: mínimo 8 caracteres, com letras maiúsculas, minúsculas, números e caracteres especiais."
+											style="color:gray; font-size:12px" />
+
 									</div>
 
 
