@@ -3396,79 +3396,96 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		}
 	}
 
+	
+	// Pode ser um campo da classe (fora do método)
+	// Pode ser um campo da classe (fora do método)
+	private final Map<Long, Boolean> consultaInicialMap = new HashMap<>();
+
 	public void importarAlunosSponte(final ClienteEntity cliente) {
-		LocalDate startDate = LocalDate.of(2020, 1, 1);
-		LocalDate today = LocalDate.now();
-		LocalDate endDate = today.minusDays(1);
+	    boolean primeiraConsulta = !consultaInicialMap.getOrDefault(cliente.getId(), false);
 
-		LocalDate mesInicio = startDate;
-		while (!mesInicio.isAfter(endDate)) {
-			LocalDate mesFim = mesInicio.withDayOfMonth(1).plusMonths(1).minusDays(1);
-			if (mesFim.isAfter(endDate)) {
-				mesFim = endDate;
-			}
+	    LocalDate startDate;
+	    LocalDate endDate;
 
-			LocalDateTime inicio = mesInicio.atStartOfDay();
-			LocalDateTime fim = mesFim.atTime(LocalTime.MAX);
+	    if (primeiraConsulta) {
+	        // Primeira consulta: pega desde 2017
+	        startDate = LocalDate.of(2017, 1, 1);
+	        endDate = LocalDate.now().minusDays(1);
+	        System.out.println("Primeira importação detectada para clienteId=" + cliente.getId() +
+	                           ", importando desde 2017...");
+	    } else {
+	        // Consultas seguintes: apenas o dia atual
+	        startDate = LocalDate.now();
+	        endDate = startDate;
+	        System.out.println("Importação incremental para clienteId=" + cliente.getId() +
+	                           ", importando apenas o dia atual...");
+	    }
 
-			try {
-				System.out.println("Iniciando importação para clienteId =" + cliente.getId() + ", período de " + inicio
-						+ " até " + fim);
+	    LocalDate mesInicio = startDate;
+	    while (!mesInicio.isAfter(endDate)) {
+	        LocalDate mesFim = mesInicio.withDayOfMonth(1).plusMonths(1).minusDays(1);
+	        if (mesFim.isAfter(endDate)) {
+	            mesFim = endDate;
+	        }
 
-				List<String> respostas = SponteService.getAlunosPorIntervalo(cliente.getIntegracaoSponte().getToken(),
-						cliente.getIntegracaoSponte().getIdCliente(), inicio, fim);
+	        LocalDateTime inicio = mesInicio.atStartOfDay();
+	        LocalDateTime fim = mesFim.atTime(LocalTime.MAX);
 
-				if (respostas == null || respostas.isEmpty()) {
-					System.out.println("Nenhuma resposta para este período: clienteId =" + cliente.getId()
-							+ ", período " + inicio + " a " + fim);
-				} else {
-					for (String xml : respostas) {
-						if (xml == null || xml.isEmpty()) {
-							System.out.println("XML vazio ou nulo ignorado para clienteId =" + cliente.getId()
-									+ ", período " + inicio + " a " + fim);
-							continue;
-						}
-						if (xml.contains("Nenhum registro foi encontrado")) {
-							System.out.println("Sem registros encontrados no XML para clienteId=" + cliente.getId()
-									+ ", período " + inicio + " a " + fim);
-							continue;
-						}
+	        try {
+	            System.out.println("Iniciando importação para clienteId=" + cliente.getId() +
+	                               ", período de " + inicio + " até " + fim);
 
-						List<PedestreEntity> pedestres = parseAlunosFromSoap(xml, cliente);
-						if (pedestres == null || pedestres.isEmpty()) {
-							System.out.println("parseAlunosFromSoap retornou vazio/nulo para clienteId ="
-									+ cliente.getId() + ", XML ignorado");
-							continue;
-						}
+	            List<String> respostas = SponteService.getAlunosPorIntervalo(
+	                    cliente.getIntegracaoSponte().getToken(),
+	                    cliente.getIntegracaoSponte().getIdCliente(),
+	                    inicio, fim
+	            );
 
-						for (PedestreEntity p : pedestres) {
-							try {
-								p.setCliente(cliente);
-								saveOrUpdateForName(p);
-								System.out.println("Aluno salvo/atualizado: clienteId=" + cliente.getId() + ", aluno="
-										+ p.getNome());
-							} catch (Exception e) {
-								System.out.println("Erro ao salvar aluno: clienteId=" + cliente.getId() + ", aluno="
-										+ p.getNome() + ", erro=" + e.toString());
-								e.printStackTrace();
-							}
-						}
-					}
-				}
-			} catch (IOException e) {
-				System.out.println("Erro de IO ao importar alunos Sponte para clienteId=" + cliente.getId()
-						+ ", período " + inicio + " a " + fim + ": " + e.toString());
-				e.printStackTrace();
-			} catch (Exception e) {
-				System.out.println("Erro inesperado para clienteId=" + cliente.getId() + ", período " + inicio + " a "
-						+ fim + ": " + e.toString());
-				e.printStackTrace();
-			}
+	            if (respostas == null || respostas.isEmpty()) {
+	                System.out.println("Nenhuma resposta para este período: clienteId=" + cliente.getId() +
+	                                   ", período " + inicio + " a " + fim);
+	            } else {
+	                for (String xml : respostas) {
+	                    if (xml == null || xml.isEmpty() || xml.contains("Nenhum registro foi encontrado")) {
+	                        System.out.println("Sem registros válidos no XML para clienteId=" + cliente.getId() +
+	                                           ", período " + inicio + " a " + fim);
+	                        continue;
+	                    }
 
-			mesInicio = mesInicio.plusMonths(1);
-		}
+	                    List<PedestreEntity> pedestres = parseAlunosFromSoap(xml, cliente);
+	                    if (pedestres == null || pedestres.isEmpty()) {
+	                        System.out.println("parseAlunosFromSoap retornou vazio/nulo para clienteId=" +
+	                                           cliente.getId());
+	                        continue;
+	                    }
 
-		System.out.println("Processo Sponte finalizado para clienteId=" + cliente.getId());
+	                    for (PedestreEntity p : pedestres) {
+	                        try {
+	                            p.setCliente(cliente);
+	                            saveOrUpdateForName(p);
+	                            System.out.println("Aluno salvo/atualizado: clienteId=" + cliente.getId() +
+	                                               ", aluno=" + p.getNome());
+	                        } catch (Exception e) {
+	                            System.out.println("Erro ao salvar aluno: clienteId=" + cliente.getId() +
+	                                               ", aluno=" + p.getNome() + ", erro=" + e);
+	                        }
+	                    }
+	                }
+	            }
+
+	        } catch (Exception e) {
+	            System.out.println("Erro inesperado para clienteId=" + cliente.getId() +
+	                               ", período " + inicio + " a " + fim + ": " + e);
+	            e.printStackTrace();
+	        }
+
+	        mesInicio = mesInicio.plusMonths(1);
+	    }
+
+	    // Marca como já tendo feito a primeira consulta
+	    consultaInicialMap.put(cliente.getId(), true);
+
+	    System.out.println("Processo Sponte finalizado para clienteId=" + cliente.getId());
 	}
 
 	private List<PedestreEntity> parseAlunosFromSoap(String xml, ClienteEntity cliente) {

@@ -24,7 +24,6 @@ public class SponteService {
 
 		while (!atual.isAfter(fim)) {
 			String parametrosBusca = "DataCadastro=" + atual.format(FORMATTER);
-			System.out.println("Buscando para: " + parametrosBusca);
 
 			String response = getAlunosSOAP(parametrosBusca, token, codigoCliente);
 			respostas.add(response);
