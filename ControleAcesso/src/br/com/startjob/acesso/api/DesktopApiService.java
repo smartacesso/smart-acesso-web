@@ -1445,7 +1445,7 @@ public class DesktopApiService extends BaseService {
 		}
 		
 		try {
-			visitante.setDataFimPeriodoAgendamento(sdf.parse(jsonObject.getString("dataFimPeriodoAgendamento")));
+			visitante.setDataInicioPeriodoAgendamento(sdf.parse(jsonObject.getString("dataInicioPeriodoAgendamento")));
 		} catch (Exception e) {
 			visitante.setDataInicioPeriodoAgendamento(null);
 			
