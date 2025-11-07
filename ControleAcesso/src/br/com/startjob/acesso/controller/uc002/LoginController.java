@@ -37,6 +37,9 @@ public class LoginController extends BaseController {
 	private String email;
 	private String acao;
 	
+	private String novaSenha;
+	private String confirmarSenha;
+	
 	/**
 	 * EJB responsável por avaliar o usuário no sistema.
 	 */
@@ -67,7 +70,6 @@ public class LoginController extends BaseController {
 			
 			//se ok 
 			if (u != null) {
-				
 				//verifica se está na estrutura principal
 				//ou em outro servidor
 				String urlAtual = getRequest().getRemoteHost();
@@ -188,6 +190,10 @@ public class LoginController extends BaseController {
 		acao = null;
 		
 	}
+	
+	private void definirSenha() {
+		
+	}
 
 	public String getUsuario() {
 		return usuario;
@@ -219,6 +225,22 @@ public class LoginController extends BaseController {
 
 	public void setUnidadeOrganizacional(String unidadeOrganizacional) {
 		this.unidadeOrganizacional = unidadeOrganizacional;
+	}
+
+	public String getNovaSenha() {
+		return novaSenha;
+	}
+
+	public void setNovaSenha(String novaSenha) {
+		this.novaSenha = novaSenha;
+	}
+
+	public String getConfirmarSenha() {
+		return confirmarSenha;
+	}
+
+	public void setConfirmarSenha(String confirmarSenha) {
+		this.confirmarSenha = confirmarSenha;
 	}
 
 }

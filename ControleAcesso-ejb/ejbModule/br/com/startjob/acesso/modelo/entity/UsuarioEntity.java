@@ -269,4 +269,8 @@ public class UsuarioEntity extends ClienteBaseEntity {
 		this.redefinirSenha = redefinirSenha;
 	}
 	
+	public boolean isRedefinirSenha() {
+		return getRedefinirSenha();
+	}
+	
 }
