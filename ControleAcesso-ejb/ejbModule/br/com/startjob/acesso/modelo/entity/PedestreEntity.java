@@ -158,6 +158,10 @@ indexes = {
 				+ "and obj.cliente.id = :ID_CLIENTE "),
 		@NamedQuery(name = "PedestreEntity.findByNomeAndIdCliente", query = "select distinct obj from PedestreEntity obj "
 				+ "where obj.nome = :NOME "
+				+ "and obj.cliente.id = :ID_CLIENTE "),
+		@NamedQuery(name = "PedestreEntity.findAllAlteradoEmMassa", query = "select distinct obj from PedestreEntity obj "
+				+ "where obj.tipo = 'PEDESTRE' "
+				+ "and (obj.alterarEmMassa IS NULL OR obj.alterarEmMassa = 1) "
 				+ "and obj.cliente.id = :ID_CLIENTE ")
 
 })

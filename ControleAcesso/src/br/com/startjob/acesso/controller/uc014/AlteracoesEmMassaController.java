@@ -121,9 +121,6 @@ public class AlteracoesEmMassaController extends BaseController{
 	
 	
 	public void salvarJustificativa() {
-		System.out.println("teste");
-		
-		
 		Long idCliente = getUsuarioLogado().getCliente().getId();
 		pedestreRegraAlteracao.setRegra(regraAlteracao);
 		

@@ -20,6 +20,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -3536,68 +3537,58 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 
 	@Override
 	public void salvarJustificativa(Long idCliente, Date dataInicioJustificativa, Date dataFimJustificativa,
-			String justificativa, Map<String, Object> parans) {
+	        String justificativa, Map<String, Object> parans) {
 
-		Map<String, Object> arg = new HashMap<String, Object>();
-		arg.putAll(parans);
-		arg.remove("cliente.id");
+	    Map<String, Object> arg = new HashMap<>(parans);
+	    arg.remove("cliente.id");
 
-		String query = "";
-		Query q = null;
+	    if (dataInicioJustificativa != null && dataFimJustificativa != null) {
 
-		if (dataInicioJustificativa != null && dataFimJustificativa != null) {
-//			desativa regras dos pedestres
-			query = adicionarAgendamento(idCliente, arg, dataInicioJustificativa, dataFimJustificativa, justificativa);
-			q = em.createNativeQuery(query);
-			q.executeUpdate();
+	        // 🔹 Atualiza todos os pedestres marcados
+	        adicionarAgendamento(idCliente, arg, dataInicioJustificativa, dataFimJustificativa, justificativa);
 
-			query = queryMudarDataAlteracaoPedestres(idCliente);
-			q = em.createNativeQuery(query);
-			q.executeUpdate();
-
-// 		apagar marcado/desmarcado no pedestre
-			query = queryApagarMarcadoTodosPedestres(idCliente);
-			q = em.createNativeQuery(query);
-			q.executeUpdate();
-
-		}
+	        // 🔹 Apaga marcações de alteração em massa
+	        String query = queryApagarMarcadoTodosPedestres(idCliente);
+	        Query q = em.createNativeQuery(query);
+	        q.executeUpdate();
+	    }
 	}
-	
-	
-	public String adicionarAgendamento(Long idCliente, Map<String, Object> arg, Date dataInicio, Date dataFim, String justificativa) {
-		StringBuilder query = new StringBuilder();
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		
-		String sgdb = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SGDB);
-		String schema = "";
-		if (sgdb == null || "".equals(sgdb)) {
-			sgdb = "mysql";
-		}
 
-		if ("plsql".equals(sgdb)) {
-			schema = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SCHEMA);
-		}
-		
-		String dataInicioAg = sdf.format(dataInicio);
-		String dataFimAg = sdf.format(dataFim);
-
-
-		query.append("update " + schema + "TB_PEDESTRE set DATA_INICIO_PERIODO_AGENDAMENTO = '" + dataInicioAg + "', ");
-		query.append("DATA_FIM_PERIODO_AGENDAMENTO = '" + dataFimAg + "', ");
-		query.append("JUSTIFICATIVA_LIBERADO = '" + justificativa + "', "); 
-		query.append("SEMPRE_LIBERADO = TRUE ");
-		query.append("where ID_PEDESTRE in ( ");
-		query.append("select id from (select ID_PEDESTRE as id from " + schema + "TB_PEDESTRE ");
-		query.append("where ID_CLIENTE = ").append(idCliente).append(" and TIPO_PEDESTRE = 'PEDESTRE' ")
-		     .append(" and (ALTERAR_EM_MASSA IS NULL OR ALTERAR_EM_MASSA = 1) ");
-		query.append(concatenaFiltros(arg));
-		query.append(") as tmp )");
-
-		
-		System.out.println(query.toString());
-
-		return query.toString();
+	public void adicionarAgendamento(Long idCliente, Map<String, Object> arg, Date dataInicio, Date dataFim, String justificativa) {
+	    List<PedestreEntity> pedestresMarcados = buscaTodosMarcadosEmMassa(idCliente);
+	    SimpleDateFormat sdfHour = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss:sss");
+	    
+	    for (PedestreEntity pedestre : pedestresMarcados) {
+	        pedestre.setDataInicioPeriodoAgendamento(dataInicio);
+	        pedestre.setDataFimPeriodoAgendamento(dataFim);
+	        pedestre.setJustificativa(justificativa);
+	        pedestre.setSempreLiberado(true);
+	        pedestre.setObservacoes("Agendamento liberado | " + "inicio : " + sdfHour.format(dataInicio) + ", fim : " + sdfHour.format(dataFim) + " | JUSTIFICATIVA: " + justificativa);
+	        
+	        try {
+	            alteraObjeto(pedestre);
+	        } catch (Exception e) {
+	            e.printStackTrace(); // você pode depois trocar por log
+	        }
+	    }
 	}
-	
 
+	private List<PedestreEntity> buscaTodosMarcadosEmMassa(Long idCliente) {
+	    try {
+	        Map<String, Object> args = new HashMap<>();
+	        args.put("ID_CLIENTE", idCliente);
+
+	        @SuppressWarnings("unchecked")
+	        List<PedestreEntity> listaPedestre = (List<PedestreEntity>) pesquisaArgFixos(
+	                PedestreEntity.class, "findAllAlteradoEmMassa", args);
+
+	        return (listaPedestre != null) ? listaPedestre : Collections.emptyList();
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return Collections.emptyList();
+	    }
+	}
+
+	
 }
