@@ -90,8 +90,11 @@ indexes = {
 		@NamedQuery(name = "PedestreEntity.findUltimoPedestreCadastrado", query = "select obj from PedestreEntity obj "
 				+ "where obj.cliente.id = :ID_CLIENTE " + "and obj.matricula is not null " + "and obj.matricula <> '' "
 				+ "order by obj.id desc"),
-		@NamedQuery(name = "PedestreEntity.findById_matricula", query = "select obj from PedestreEntity obj "
-				+ "where obj.matricula = :MATRICULA " + "order by obj.id desc"),
+		@NamedQuery(name = "PedestreEntity.findById_matricula", 
+				query = "select obj from PedestreEntity obj "
+					+ "where obj.matricula = :MATRICULA " 
+					+ "and (obj.removido = false or obj.removido is null) "		
+					+ "order by obj.id desc"),
 		@NamedQuery(name = "PedestreEntity.findByNomePedestre", query = "select obj from PedestreEntity obj "
 				+ "where obj.nome = :NOME " 
 				+ "and (obj.removido = false or obj.removido is null) "
@@ -466,10 +469,10 @@ public class PedestreEntity extends ClienteBaseEntity {
 		
 		if(funcionarioTotvsDto.getSituacaoFolha().trim().equals("OK")) {
 			this.setStatus(Status.ATIVO);
-			this.observacoes =  "atualizado dia " + LocalDate.now().toString();
+			this.observacoes = "Funcionario ATIVO com situação da folha: " + funcionarioTotvsDto.getSituacaoFolha() + ", situacao de escala: " + funcionarioTotvsDto.getStatusTrabalho() +  ", atualizado dia " + LocalDate.now().toString();
 		}else {
 			this.setStatus(Status.INATIVO);
-			this.observacoes = "Funcionario com situação : " + funcionarioTotvsDto.getSituacaoFolha();
+			this.observacoes = "Funcionario INVATIVO com situação da folha: " + funcionarioTotvsDto.getSituacaoFolha() + ", situacao de escala: " + funcionarioTotvsDto.getStatusTrabalho() + ", atualizado dia " + LocalDate.now().toString();
 		}		
 	}
 

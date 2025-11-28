@@ -28,7 +28,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -1071,8 +1073,6 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 				pedestre.setEmpresa(empresa);
 			}
 			
-			processarRegrasPorFuncionarioTotvs(pedestre, cliente, funcionarioTotvsDto);
-
 			if (pedestres == null || pedestres.isEmpty()) {
 				pedestre.setAlterado(true);
 				pedestre = (PedestreEntity) gravaObjeto(pedestre)[0];
@@ -1085,6 +1085,9 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 				System.out.println("atualizando funcionario : " + pedestre.getNome() + ", matricula : "
 						+ pedestre.getMatricula() + ", id : " + pedestre.getId());
 			}
+			
+			processarRegrasPorFuncionarioTotvs(pedestre, cliente, funcionarioTotvsDto);
+			
 			System.out.println("Status : " + pedestre.getStatus());
 			
 			
@@ -1118,8 +1121,22 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 
 			apagaPedetreRegras(pedestre.getId());
 
-			if (("0".equals(funcionario.getHoraInicial()) && "0".equals(funcionario.getHoraFinal()))) {
+			if ("Nao Trabalhado".equalsIgnoreCase(funcionario.getStatusTrabalho())) {
 				System.out.println("Funcionario em folga...");
+				
+				PedestreRegraEntity newPedestreRegra = new PedestreRegraEntity();
+
+				newPedestreRegra.setRegra(regra);
+				newPedestreRegra.setPedestre(pedestre);
+
+				try {
+					newPedestreRegra.setAlterado(true);
+					gravaObjeto(newPedestreRegra);
+					em.flush();
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+				
 				return;
 			}
 
@@ -1140,6 +1157,8 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 			HorarioEntity horarioEncontrado = atualizaRegraComHorarioTotvs(horario, regra.getId());
 			PedestreRegraEntity newPedestreRegra = new PedestreRegraEntity();
 
+			System.out.println("Regra vinculada : " + regra.getNome());
+			
 			newPedestreRegra.setRegra(regra);
 			newPedestreRegra.setPedestre(pedestre);
 
@@ -1175,19 +1194,41 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 	}
 
 	private RegraEntity defineRegraPedestre(ClienteEntity cliente, FuncionarioTotvsDto funcionario) {
-		RegraEntity regra;
-		if ("065".equalsIgnoreCase(funcionario.getCodigoHorario())) {
-			if ("7".equalsIgnoreCase(funcionario.getHoraInicial())) {
-				regra = buscarRegraPeloNomeCompleto("066", cliente.getId());
-			} else {
-				regra = buscarRegraPeloNomeCompleto("067", cliente.getId());
-			}
 
-		} else {
-			regra = buscarRegraPeloNomeCompleto(funcionario.getCodigoHorario(), cliente.getId());
-		}
-		return regra;
+	    String status = funcionario.getStatusTrabalho();
+	    String codHorario = funcionario.getCodigoHorario();
+	    String horaInicial = funcionario.getHoraInicial();
+
+	    // 1 — Funcionário em folga
+	    if (isFolga(status)) {
+	        return buscarRegraPeloNomeCompleto("folga", cliente.getId());
+	    }
+
+	    // 2 — Casos especiais para código 065
+	    if (isCodigo065(codHorario)) {
+	        return regraParaCodigo065(cliente, horaInicial);
+	    }
+
+	    // 3 — Demais códigos: busca pelo código direto
+	    return buscarRegraPeloNomeCompleto(codHorario, cliente.getId());
 	}
+	
+	private boolean isFolga(String status) {
+	    return "Nao Trabalhado".equalsIgnoreCase(status);
+	}
+
+	private boolean isCodigo065(String codigo) {
+	    return "065".equalsIgnoreCase(codigo);
+	}
+
+	private RegraEntity regraParaCodigo065(ClienteEntity cliente, String horaInicial) {
+	    boolean entraAs7 = "7".equalsIgnoreCase(horaInicial);
+
+	    String regraNome = entraAs7 ? "066" : "067";
+
+	    return buscarRegraPeloNomeCompleto(regraNome, cliente.getId());
+	}
+
 
 	private HorarioEntity atualizaRegraComHorarioTotvs(HorarioTotvsProtheusDTO dto, Long idRegra) {
 
@@ -2014,16 +2055,18 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 
 	public RegraEntity processaRegraComHorarios(HorarioPedestreDto escala, List<HorarioSeniorDto> horariosDto,
 			ClienteEntity cliente) {
-
+	
 		if (horariosDto == null || horariosDto.isEmpty()) {
-			throw new IllegalArgumentException("A lista de horários não pode estar vazia.");
+		    throw new IllegalArgumentException("A lista de horários não pode estar vazia.");
 		}
 
-		List<HorarioSeniorDto> filtrados = new ArrayList<>();
 		List<HorarioEntity> horarios = new ArrayList<>();
+		List<HorarioSeniorDto> filtrados = new ArrayList<>();
+		Set<String> chaves = new HashSet<>(); // <-- controla duplicados
 
 		System.out.println("Buscando regra");
 		Integer idEscala = Integer.parseInt(horariosDto.get(0).getIdEscala());
+		
 
 		RegraEntity regra = buscarRegraPeloIdEscala(idEscala, cliente.getId());
 		
@@ -2043,33 +2086,41 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 			}
 		}
 
-		// Pega o primeiro "Inicio"
-		horariosDto.stream()
-		    .filter(h -> {
-		        String nome = (h.getNome() == null || h.getNome().isEmpty()) ? "Padrao" : h.getNome();
-		        return nome.equalsIgnoreCase("Inicio");
-		    })
-		    .findFirst()
-		    .ifPresent(filtrados::add);
 
-		// Pega o primeiro "Refeicao"
-		horariosDto.stream()
-		    .filter(h -> {
-		        String nome = (h.getNome() == null || h.getNome().isEmpty()) ? "Padrao" : h.getNome();
-		        return nome.equalsIgnoreCase("Refeicao");
-		    })
-		    .findFirst()
-		    .ifPresent(filtrados::add);
+		// Função utilitária para extrair nome correto
+		Function<HorarioSeniorDto, String> nomeNormalizado =
+		        h -> (h.getNome() == null || h.getNome().isEmpty()) ? "Padrao" : h.getNome();
 
-		// Pega o primeiro "Termino"
-		horariosDto.stream()
-		    .filter(h -> {
-		        String nome = (h.getNome() == null || h.getNome().isEmpty()) ? "Padrao" : h.getNome();
-		        return nome.equalsIgnoreCase("Termino");
-		    })
-		    .findFirst()
-		    .ifPresent(filtrados::add);
+		// Função utilitária para criar chave única
+		Function<HorarioSeniorDto, String> chaveHorario =
+		        h -> h.getDiaSemana() + "|" + h.getInicio() + "|" + h.getFim();
 
+		horariosDto.stream()
+		    .filter(h -> nomeNormalizado.apply(h).equalsIgnoreCase("Inicio"))
+		    .forEach(h -> {
+		        String chave = chaveHorario.apply(h);
+		        if (chaves.add(chave)) { // só adiciona se chave ainda não existe
+		            filtrados.add(h);
+		        }
+		    });
+
+		horariosDto.stream()
+		    .filter(h -> nomeNormalizado.apply(h).equalsIgnoreCase("Refeicao"))
+		    .forEach(h -> {
+		        String chave = chaveHorario.apply(h);
+		        if (chaves.add(chave)) {
+		            filtrados.add(h);
+		        }
+		    });
+
+		horariosDto.stream()
+		    .filter(h -> nomeNormalizado.apply(h).equalsIgnoreCase("Termino"))
+		    .forEach(h -> {
+		        String chave = chaveHorario.apply(h);
+		        if (chaves.add(chave)) {
+		            filtrados.add(h);
+		        }
+		    });
 
 		for (HorarioSeniorDto horarioSeniorDto : filtrados) {
 			HorarioEntity horarioExistente = buscarHorarioPorRegraEHorario(regra.getId(),

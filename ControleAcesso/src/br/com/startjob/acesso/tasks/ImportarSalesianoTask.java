@@ -35,6 +35,7 @@ import br.com.startjob.acesso.modelo.enumeration.TipoPedestre;
 import br.com.startjob.acesso.modelo.utils.EncryptionUtils;
 import br.com.startjob.acesso.services.BaseServlet;
 import br.com.startjob.acesso.to.TotvsEdu.NivelDeEnsino;
+import br.com.startjob.acesso.to.TotvsEdu.OrigemStatusTotvs;
 import br.com.startjob.acesso.to.TotvsEdu.PermissoesEduTotvs;
 import br.com.startjob.acesso.to.TotvsEdu.TipoTotvsEdu;
 import br.com.startjob.acesso.utils.Utils;
@@ -211,8 +212,14 @@ public class ImportarSalesianoTask extends TimerTask {
 
 	    System.out.printf("Salvando, nome: %s, matricula: %s, cpf: %s, tipo: %s%n", 
 	            nome, matricula, cpf, tipo);
+	    
+	    boolean tipoResponsavel = "RESPONSAVEL".equals(tipo);
+        if(tipoResponsavel) {
+        	int codigo = OrigemStatusTotvs.getCodigoPorTipo(cadastro.getOrigem());
+			matricula = cadastro.getMatricula().concat(String.valueOf(codigo));
+        }
 
-	    PedestreEntity pedestre = buscarPedestre(cpf, nome, matricula, cliente, tipo);
+	    PedestreEntity pedestre = buscarPedestre(cpf, nome, matricula, cliente, tipo, cadastro);
 
 	    if (pedestre == null) {
 	        System.out.println("Nenhum cadastro existente encontrado → criando novo.");
@@ -225,14 +232,13 @@ public class ImportarSalesianoTask extends TimerTask {
 	    }
 	}
 
-	public PedestreEntity buscarPedestre(String cpf, String nome, String matricula, ClienteEntity cliente, String tipo) {
+	public PedestreEntity buscarPedestre(String cpf, String nome, String matricula, ClienteEntity cliente, String tipo, CadastroDTO cadastro) {
 	    PedestreEntity pedestre = null;
-
 	    
-	    // 2. Busca por Matrícula (somente se não for do tipo RESPONSÁVEL, caso essa regra ainda seja necessária)
-	    boolean tipoNaoResponsavel = !"RESPONSAVEL".equals(tipo);
-	    if (tipoNaoResponsavel && matricula != null && !matricula.trim().isEmpty()) {
+	    // 1. Busca por Matrícula
+	    if (matricula != null && !matricula.trim().isEmpty()) {
 	        System.out.println("Buscando por matrícula: " + matricula);
+	        
 	        pedestre = buscaPedestrePorMatricula(matricula, cliente.getId());
 
 	        if (pedestre != null) {
@@ -243,31 +249,31 @@ public class ImportarSalesianoTask extends TimerTask {
 	        System.out.println("Não encontrado por matrícula.");
 	    }
 	    
-	    // 1. Busca por CPF
-	    if (cpf != null && !cpf.trim().isEmpty()) {
-	        String cpfNormalizado = cpf.replaceAll("\\D", "").trim();
-	        System.out.println("CPF informado → buscando por CPF: " + cpfNormalizado);
-
-	        pedestre = buscaPedestrePorCpf(cpfNormalizado, cliente.getId());
-	        if (pedestre != null) {
-	            System.out.println("Encontrado por CPF. nome : " + pedestre.getNome());
-	            return pedestre;
-	        }
-	        System.out.println("Não encontrado por CPF.");
-	    }
-
-	    // 3. Busca por Nome (última opção, pois pode ter duplicidade)
-	    if (nome != null && !nome.trim().isEmpty()) {
-	        System.out.println("Buscando por nome: " + nome);
-	        pedestre = buscaPedestrePorNome(nome, cliente.getId());
-
-	        if (pedestre != null) {
-	            System.out.println("Encontrado por nome (atenção: pode haver duplicidade).");
-	            return pedestre;
-	        }
-
-	        System.out.println("Não encontrado por nome.");
-	    }
+//	    // 2. Busca por CPF
+//	    if (cpf != null && !cpf.trim().isEmpty()) {
+//	        String cpfNormalizado = cpf.replaceAll("\\D", "").trim();
+//	        System.out.println("CPF informado → buscando por CPF: " + cpfNormalizado);
+//
+//	        pedestre = buscaPedestrePorCpf(cpfNormalizado, cliente.getId());
+//	        if (pedestre != null) {
+//	            System.out.println("Encontrado por CPF. nome : " + pedestre.getNome());
+//	            return pedestre;
+//	        }
+//	        System.out.println("Não encontrado por CPF.");
+//	    }
+//
+//	    // 3. Busca por Nome (última opção, pois pode ter duplicidade)
+//	    if (nome != null && !nome.trim().isEmpty()) {
+//	        System.out.println("Buscando por nome: " + nome);
+//	        pedestre = buscaPedestrePorNome(nome, cliente.getId());
+//
+//	        if (pedestre != null) {
+//	            System.out.println("Encontrado por nome (atenção: pode haver duplicidade).");
+//	            return pedestre;
+//	        }
+//
+//	        System.out.println("Não encontrado por nome.");
+//	    }
 
 	    System.out.println("Nenhum pedestre encontrado com os dados fornecidos.");
 	    return null;
@@ -286,11 +292,13 @@ public class ImportarSalesianoTask extends TimerTask {
 	    String matricula = null;
 	    
 	    // Atualiza cartão
-	    if("RESPONSAVEL".equals(tipo)) {
-	    	 System.out.println("reponsavel");
-	    	 String somenteNumeros = cadastro.getCpf().replaceAll("\\D", "");
-			 codigoCartao = somenteNumeros.isEmpty() ? "0" : String.valueOf(Long.parseLong(somenteNumeros));
-	    }else {
+		if ("RESPONSAVEL".equals(tipo)) {
+			System.out.println("reponsavel");
+			String somenteNumeros = cadastro.getCpf().replaceAll("\\D", "");
+			codigoCartao = somenteNumeros.isEmpty() ? "0" : String.valueOf(Long.parseLong(somenteNumeros));
+			int codigo = OrigemStatusTotvs.getCodigoPorTipo(cadastro.getOrigem());
+			matricula = cadastro.getMatricula().concat(String.valueOf(codigo));
+		}else {
 		    String somenteNumeros = cadastro.getMatricula().replaceAll("\\D", "");
 		    codigoCartao = somenteNumeros.isEmpty() ? "0" : String.valueOf(Long.parseLong(somenteNumeros));
 		    matricula = cadastro.getMatricula();
@@ -327,11 +335,12 @@ public class ImportarSalesianoTask extends TimerTask {
 	    pedestre.setNome(cadastro.getNome().toUpperCase());
 	    pedestre.setCpf(cpfNormalizado);
 	    pedestre.setEmpresa(recuperaEmpresa(cadastro.getNomeColigada(), cliente));
-
-	    // Atualiza cartão
-	    if("RESPONSAVEL".equals(tipo)) {
-	    	System.out.println("reponsavel");
-	    	pedestre.setMatricula(null);
+	    
+	    if ("RESPONSAVEL".equals(tipo)) {
+			int codigo = OrigemStatusTotvs.getCodigoPorTipo(cadastro.getOrigem());
+			pedestre.setMatricula(cadastro.getMatricula().concat(String.valueOf(codigo)));
+		}else {
+		    pedestre.setMatricula(cadastro.getMatricula());
 	    }
 
 	    // Aplica campos comuns

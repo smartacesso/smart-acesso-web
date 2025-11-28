@@ -113,9 +113,20 @@ public class HorarioSeniorDto {
 		Date fimDate = converterHorarioParaDate(fim);
 		
 		HorarioEntity horario = new HorarioEntity();
-		horario.setDiasSemana("1234567");
-		horario.setHorarioInicio(ajustarMinutos(inicioDate, -20));
-		horario.setHorarioFim(ajustarMinutos(fimDate, 20));
+		
+		 horario.setDiasSemana(diaSemana);
+		
+//	    if(nomeHorario.equalsIgnoreCase("Termino")) {
+//	        horario.setDiasSemana(diaSemana);
+//	    }else {
+//	    	horario.setDiasSemana("1234567");
+//	    }
+//	    
+//		horario.setHorarioInicio(ajustarMinutos(inicioDate, -20));
+//		horario.setHorarioFim(ajustarMinutos(fimDate, 20));
+		
+		horario.setHorarioInicio(inicioDate);
+		horario.setHorarioFim(fimDate);
 		horario.setNome(nomeHorario);
 		horario.setIdHorarioSenior(Integer.parseInt(idHorario));
 		horario.setStatus(Status.ATIVO);
@@ -127,13 +138,17 @@ public class HorarioSeniorDto {
 	    // Se o nome estiver nulo, definir como "Padrao"
 	    String nomeHorario = (this.nome == null || this.nome.isEmpty()) ? "Padrao" : this.nome;
 	    
+	    if(nomeHorario.equalsIgnoreCase("inicio") || nomeHorario.equalsIgnoreCase("Termino") ) {
+	    	return null;
+	    }
+	    
 	    Date inicioDate = converterHorarioParaDate(inicio);
 		Date fimDate = converterHorarioParaDate(fim);
 
 	    HorarioEntity horario = new HorarioEntity();
 	    horario.setDiasSemana("1234567");
-	    horario.setHorarioInicio(ajustarMinutos( inicioDate, -20));
-	    horario.setHorarioFim(ajustarMinutos(fimDate, 20));
+	    horario.setHorarioInicio(ajustarMinutos( inicioDate, -10));
+	    horario.setHorarioFim(ajustarMinutos(fimDate, 10));
 	    horario.setNome(nomeHorario + " pedestre");
 
 	    // Evitar NullPointer se idHorario estiver nulo
@@ -143,7 +158,7 @@ public class HorarioSeniorDto {
 
 	    horario.setStatus(Status.ATIVO);
 
-	    if(nomeHorario.equalsIgnoreCase("Refeicao") ||nomeHorario.equalsIgnoreCase("lanche") ||nomeHorario.equalsIgnoreCase("inicio")) {
+	    if(nomeHorario.equalsIgnoreCase("Refeicao") ||nomeHorario.equalsIgnoreCase("lanche")) {
 	        horario.setQtdeDeCreditos(1L);
 	    }
 
@@ -156,8 +171,8 @@ public class HorarioSeniorDto {
 		horarioPadrao.setIdEscala("99991");
 		horarioPadrao.setIdHorario("99991");
 		horarioPadrao.setDiaSemana("1234567");
-		horarioPadrao.setInicio("00:21");
-		horarioPadrao.setFim("23:39");
+		horarioPadrao.setInicio("00:00");
+		horarioPadrao.setFim("00:01");
 		horarioPadrao.setNome("inicio");
 		
 		return horarioPadrao;
