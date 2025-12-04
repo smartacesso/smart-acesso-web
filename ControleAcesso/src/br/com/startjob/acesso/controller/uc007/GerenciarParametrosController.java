@@ -30,7 +30,7 @@ public class GerenciarParametrosController extends BaseController {
 	private List<ParametroEntity> parametrosGerais;
 
 	private List<SelectItem> listaCamposObrigatorios;
-	
+
 	private List<String> camposObrigatorios;
 
 	private String campoObrigatorio;
@@ -116,7 +116,7 @@ public class GerenciarParametrosController extends BaseController {
 				if (item.getNome().equals(BaseConstant.PARAMETERS_NAME.PREENCHER_CARTAO_COM_MATRICULA)) {
 					preencherCartaoComMatricula = true;
 				}
-				
+
 				if (item.getNome().equals(BaseConstant.PARAMETERS_NAME.PREENCHER_CARTAO_AUTO)) {
 					preencherCartaoAuto = true;
 				}
@@ -185,7 +185,7 @@ public class GerenciarParametrosController extends BaseController {
 				if (item.getNome().equals(BaseConstant.PARAMETERS_NAME.TEMPO_QRCODE_DINAMICO)) {
 					tempoQRCodeDinamico = true;
 				}
-				if (item.getNome().equals(BaseConstant.PARAMETERS_NAME.TEMPO_EXPIRACAO_CADASTRO_FACIAL )) {
+				if (item.getNome().equals(BaseConstant.PARAMETERS_NAME.TEMPO_EXPIRACAO_CADASTRO_FACIAL)) {
 					tempoCadastroFacialRemoto = true;
 				}
 				if (item.getNome().equals(BaseConstant.PARAMETERS_NAME.HABILITA_APP_PEDESTRE)) {
@@ -207,10 +207,10 @@ public class GerenciarParametrosController extends BaseController {
 						"false", getUsuarioLogado().getCliente());
 				parametrosGerais.add(p);
 			}
-			
+
 			if (!preencherCartaoAuto) {
-				ParametroEntity p = new ParametroEntity(BaseConstant.PARAMETERS_NAME.PREENCHER_CARTAO_AUTO,
-						"false", getUsuarioLogado().getCliente());
+				ParametroEntity p = new ParametroEntity(BaseConstant.PARAMETERS_NAME.PREENCHER_CARTAO_AUTO, "false",
+						getUsuarioLogado().getCliente());
 				parametrosGerais.add(p);
 			}
 
@@ -263,6 +263,11 @@ public class GerenciarParametrosController extends BaseController {
 			if (!validarRGDuplicado) {
 				ParametroEntity p = new ParametroEntity(BaseConstant.PARAMETERS_NAME.VALIDAR_RG_DUPLICADO, "false",
 						getUsuarioLogado().getCliente());
+				parametrosGerais.add(p);
+			}
+			if (!validarCartaoAcessoDuplicado) {
+				ParametroEntity p = new ParametroEntity(BaseConstant.PARAMETERS_NAME.VALIDAR_CARTAO_ACESSO_DUPLICADO,
+						"false", getUsuarioLogado().getCliente());
 				parametrosGerais.add(p);
 			}
 			if (!validarCartaoAcessoDuplicado) {
@@ -326,10 +331,10 @@ public class GerenciarParametrosController extends BaseController {
 						getUsuarioLogado().getCliente());
 				parametrosGerais.add(p);
 			}
-			
+
 			if (!tempoCadastroFacialRemoto) {
-				ParametroEntity p = new ParametroEntity(BaseConstant.PARAMETERS_NAME.TEMPO_EXPIRACAO_CADASTRO_FACIAL, "1",
-						getUsuarioLogado().getCliente());
+				ParametroEntity p = new ParametroEntity(BaseConstant.PARAMETERS_NAME.TEMPO_EXPIRACAO_CADASTRO_FACIAL,
+						"1", getUsuarioLogado().getCliente());
 				parametrosGerais.add(p);
 			}
 
@@ -344,21 +349,18 @@ public class GerenciarParametrosController extends BaseController {
 						getUsuarioLogado().getCliente());
 				parametrosGerais.add(p);
 			}
-			
+
 			if (!tempoToleranciaEntrada) {
-				ParametroEntity p = new ParametroEntity(BaseConstant.PARAMETERS_NAME.TEMPO_TOLERANCIA_ENTRADA_E_SAIDA, "5",
-						getUsuarioLogado().getCliente());
+				ParametroEntity p = new ParametroEntity(BaseConstant.PARAMETERS_NAME.TEMPO_TOLERANCIA_ENTRADA_E_SAIDA,
+						"5", getUsuarioLogado().getCliente());
 				parametrosGerais.add(p);
 			}
-			
-			
+
 			if (!habilitaRelatorioRona) {
 				ParametroEntity p = new ParametroEntity(BaseConstant.PARAMETERS_NAME.HABILITA_RELATORIO_RONA, "false",
 						getUsuarioLogado().getCliente());
 				parametrosGerais.add(p);
 			}
-			
-			
 
 			// ordena configurações
 			Collections.sort(parametrosGerais, new Comparator<ParametroEntity>() {
@@ -398,10 +400,10 @@ public class GerenciarParametrosController extends BaseController {
 
 			if (valorHabilitaAcessoReconhecimentoFacial != getValorHabilitaAcessoReconhecimentoFacial(all))
 				menuController.montaMenu();
-			
-			if(!valorOriginalSOC.equals(getValorSOC(all)))
-                ConectionUtils.get("http://localhost:8081/sistema/configuraRotinas"
-                                    + "?registraSOC=S&idCliente="+getUsuarioLogado().getCliente().getId());
+
+			if (!valorOriginalSOC.equals(getValorSOC(all)))
+				ConectionUtils.get("http://localhost:8081/sistema/configuraRotinas" + "?registraSOC=S&idCliente="
+						+ getUsuarioLogado().getCliente().getId());
 
 		} catch (Exception e) {
 			mensagemFatal("", "msg.uc007.nao.atualizado");
@@ -423,16 +425,16 @@ public class GerenciarParametrosController extends BaseController {
 
 		return false;
 	}
-	
-    private String getValorSOC(List<BaseEntity> all) {
-        for(BaseEntity baseEntity : all) {
-            ParametroEntity item = (ParametroEntity) baseEntity;
-            if(item.getNome().equals(BaseConstant.PARAMETERS_NAME.HORARIO_DISPARO_SOC))
-                return item.getValor();
-        }
-        
-        return "-1";
-    }
+
+	private String getValorSOC(List<BaseEntity> all) {
+		for (BaseEntity baseEntity : all) {
+			ParametroEntity item = (ParametroEntity) baseEntity;
+			if (item.getNome().equals(BaseConstant.PARAMETERS_NAME.HORARIO_DISPARO_SOC))
+				return item.getValor();
+		}
+
+		return "-1";
+	}
 
 	public void adicionaCampoObrigatorio() {
 		if (camposObrigatorios.contains(campoObrigatorio)) {
@@ -482,7 +484,7 @@ public class GerenciarParametrosController extends BaseController {
 		listaCamposObrigatorios.add(new SelectItem("cartao.acesso", ResourceBundleUtils.getInstance()
 				.recuperaChave("label.uc008.codigo.cartao.acesso", getFacesContext())));
 	}
-	
+
 	public List<SelectItem> getListaCamposObrigatorios() {
 		return listaCamposObrigatorios;
 	}

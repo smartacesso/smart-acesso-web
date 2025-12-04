@@ -18,11 +18,8 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -34,11 +31,8 @@ import java.util.stream.Stream;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
 import javax.persistence.Column;
-import javax.persistence.EntityManager;
 import javax.persistence.JoinColumn;
-import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.xml.ws.soap.MTOMFeature;
 
@@ -69,7 +63,6 @@ import com.senior.services.Enum.ModoImportacaoFuncionario;
 import com.senior.services.dto.EmpresaSeniorDto;
 import com.senior.services.dto.FuncionarioSeniorDto;
 import com.senior.services.dto.HorarioPedestreDto;
-import com.senior.services.dto.RegraSeniorDto;
 import com.sponte.SponteService;
 import com.totvs.dto.FuncionarioTotvsDto;
 import com.totvs.dto.HorarioTotvsProtheusDTO;
@@ -88,7 +81,6 @@ import br.com.startjob.acesso.modelo.entity.HorarioEntity;
 import br.com.startjob.acesso.modelo.entity.ImportacaoEntity;
 import br.com.startjob.acesso.modelo.entity.IntegracaoSOCEntity;
 import br.com.startjob.acesso.modelo.entity.IntegracaoSeniorEntity;
-import br.com.startjob.acesso.modelo.entity.IntegracaoTotvsEntity;
 import br.com.startjob.acesso.modelo.entity.ParametroEntity;
 import br.com.startjob.acesso.modelo.entity.PedestreEntity;
 import br.com.startjob.acesso.modelo.entity.PedestreEquipamentoEntity;
@@ -99,7 +91,6 @@ import br.com.startjob.acesso.modelo.enumeration.Permissoes;
 import br.com.startjob.acesso.modelo.enumeration.Status;
 import br.com.startjob.acesso.modelo.enumeration.TipoPedestre;
 import br.com.startjob.acesso.modelo.enumeration.TipoRegra;
-import br.com.startjob.acesso.modelo.to.IntervaloTO;
 import br.com.startjob.acesso.modelo.to.UsuarioADTO;
 import br.com.startjob.acesso.modelo.utils.AppAmbienteUtils;
 import br.com.startjob.acesso.modelo.utils.UsuarioAdToPedestreConverter;
@@ -931,62 +922,65 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 	public void resetAutoAtendimento() throws Exception {
 
 		@SuppressWarnings("unchecked")
-		final List<ClienteEntity> clientes = (List<ClienteEntity>) pesquisaSimples(ClienteEntity.class, "findAll", new HashMap<>());
+		final List<ClienteEntity> clientes = (List<ClienteEntity>) pesquisaSimples(ClienteEntity.class, "findAll",
+				new HashMap<>());
 
-	    if (clientes == null || clientes.isEmpty()) {
-	        System.out.println("Não existem clientes ativos");
-	        return;
-	    }
+		if (clientes == null || clientes.isEmpty()) {
+			System.out.println("Não existem clientes ativos");
+			return;
+		}
 
-	    for (ClienteEntity cliente : clientes) {
-	        Map<String, Object> args = new HashMap<>();
-	        args.put("ID_CLIENTE", cliente.getId());
-	        
-	        List<PedestreEntity> pedestres;
-	        try {
-	        	pedestres = (List<PedestreEntity>) pesquisaArgFixos(PedestreEntity.class, "findAllAutoAtendimentoAtivo", args);
-	        } catch (Exception e) {
-	            System.err.println("Erro ao buscar pedestres do cliente " + cliente.getId());
-	            e.printStackTrace();
-	            continue; // pula para o próximo cliente
-	        }
+		for (ClienteEntity cliente : clientes) {
+			Map<String, Object> args = new HashMap<>();
+			args.put("ID_CLIENTE", cliente.getId());
 
-	        int tempoExpiracao;
-	        try {
-	            tempoExpiracao = getTempoExipiracao(cliente.getId());
-	        } catch (Exception e) {
-	            System.err.println("Erro ao obter tempo de expiração para cliente " + cliente.getId());
-	            e.printStackTrace();
-	            continue;
-	        }
+			List<PedestreEntity> pedestres;
+			try {
+				pedestres = (List<PedestreEntity>) pesquisaArgFixos(PedestreEntity.class, "findAllAutoAtendimentoAtivo",
+						args);
+			} catch (Exception e) {
+				System.err.println("Erro ao buscar pedestres do cliente " + cliente.getId());
+				e.printStackTrace();
+				continue; // pula para o próximo cliente
+			}
 
-	        Date agora = new Date();
+			int tempoExpiracao;
+			try {
+				tempoExpiracao = getTempoExipiracao(cliente.getId());
+			} catch (Exception e) {
+				System.err.println("Erro ao obter tempo de expiração para cliente " + cliente.getId());
+				e.printStackTrace();
+				continue;
+			}
 
-	        for (PedestreEntity p : pedestres) {
-	            if (p.getAutoAtendimentoAt() != null) {
-	                long diffMillis = agora.getTime() - p.getAutoAtendimentoAt().getTime();
-	                if (diffMillis > (tempoExpiracao * 60 * 60 * 1000L)) {
-	                    p.setAutoAtendimento(false);
-	                    p.setAutoAtendimentoAt(null);
+			Date agora = new Date();
 
-	                    try {
-	                        alteraObjeto(p);
-	                        System.out.println("Autoatendimento desmarcado para: " + p.getId());
-	                    } catch (Exception e) {
-	                        System.err.println("Erro ao atualizar pedestre " + p.getId());
-	                        e.printStackTrace();
-	                    }
-	                }
-	            }
-	        }
-	    }
+			for (PedestreEntity p : pedestres) {
+				if (p.getAutoAtendimentoAt() != null) {
+					long diffMillis = agora.getTime() - p.getAutoAtendimentoAt().getTime();
+					if (diffMillis > (tempoExpiracao * 60 * 60 * 1000L)) {
+						p.setAutoAtendimento(false);
+						p.setAutoAtendimentoAt(null);
 
-	    System.out.println("Processo autoatendimento finalizado");
+						try {
+							alteraObjeto(p);
+							System.out.println("Autoatendimento desmarcado para: " + p.getId());
+						} catch (Exception e) {
+							System.err.println("Erro ao atualizar pedestre " + p.getId());
+							e.printStackTrace();
+						}
+					}
+				}
+			}
+		}
+
+		System.out.println("Processo autoatendimento finalizado");
 	}
-	
+
 	private int getTempoExipiracao(Long idCliente) throws Exception {
-		ParametroEntity param = getParametroSistema(BaseConstant.PARAMETERS_NAME.TEMPO_EXPIRACAO_CADASTRO_FACIAL, idCliente);
-		if(param != null)
+		ParametroEntity param = getParametroSistema(BaseConstant.PARAMETERS_NAME.TEMPO_EXPIRACAO_CADASTRO_FACIAL,
+				idCliente);
+		if (param != null)
 			return Integer.valueOf(param.getValor());
 		return 1;
 	}
@@ -1069,7 +1063,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 				empresa = em.merge(empresa); // reanexa
 				pedestre.setEmpresa(empresa);
 			}
-			
+
 			processarRegrasPorFuncionarioTotvs(pedestre, cliente, funcionarioTotvsDto);
 
 			if (pedestres == null || pedestres.isEmpty()) {
@@ -1085,9 +1079,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 						+ pedestre.getMatricula() + ", id : " + pedestre.getId());
 			}
 			System.out.println("Status : " + pedestre.getStatus());
-			
-			
-			
+
 		} catch (Exception e) {
 			throw new RuntimeException("Erro ao processar funcionário TOTVS: " + funcionarioTotvsDto.getMatricula(), e);
 		}
@@ -1123,7 +1115,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 			}
 
 			System.out.println("Funcionario ira trabalhar, atualizando horarios...");
-			
+
 			HorarioTotvsProtheusDTO horario;
 			ParametroEntity param = getParametroSistema(BaseConstant.PARAMETERS_NAME.TEMPO_TOLERANCIA_ENTRADA_E_SAIDA,
 					cliente.getId());
@@ -1227,49 +1219,47 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 	}
 
 	private boolean estaTrabalhandoHoje(List<HorarioEntity> horarios) {
-	    if (horarios == null || horarios.isEmpty()) return false;
+		if (horarios == null || horarios.isEmpty())
+			return false;
 
-	    ZoneId zone = ZoneId.systemDefault();
+		ZoneId zone = ZoneId.systemDefault();
 
-	    // Extrai e ordena os inícios e fins
-	    List<LocalTime> inicios = horarios.stream()
-	        .filter(h -> h.getHorarioInicio() != null)
-	        .map(h -> h.getHorarioInicio().toInstant().atZone(zone).toLocalTime())
-	        .collect(Collectors.toList());
+		// Extrai e ordena os inícios e fins
+		List<LocalTime> inicios = horarios.stream().filter(h -> h.getHorarioInicio() != null)
+				.map(h -> h.getHorarioInicio().toInstant().atZone(zone).toLocalTime()).collect(Collectors.toList());
 
-	    List<LocalTime> fins = horarios.stream()
-	        .filter(h -> h.getHorarioFim() != null)
-	        .map(h -> h.getHorarioFim().toInstant().atZone(zone).toLocalTime())
-	        .collect(Collectors.toList());
+		List<LocalTime> fins = horarios.stream().filter(h -> h.getHorarioFim() != null)
+				.map(h -> h.getHorarioFim().toInstant().atZone(zone).toLocalTime()).collect(Collectors.toList());
 
-	    if (inicios.isEmpty() || fins.isEmpty()) return false;
+		if (inicios.isEmpty() || fins.isEmpty())
+			return false;
 
-	    LocalTime menorInicio = inicios.get(0);                       // primeiro da lista
-	    LocalTime maiorFim = fins.get(fins.size() - 1);               // último da lista
+		LocalTime menorInicio = inicios.get(0); // primeiro da lista
+		LocalTime maiorFim = fins.get(fins.size() - 1); // último da lista
 
-	    LocalTime agora = LocalTime.now();
-	    boolean atravessaMeiaNoite = maiorFim.isBefore(menorInicio);
+		LocalTime agora = LocalTime.now();
+		boolean atravessaMeiaNoite = maiorFim.isBefore(menorInicio);
 
-	    boolean trabalhando;
-	    if (atravessaMeiaNoite) {
-	        // Ex.: 22:00 → 06:00
-	        trabalhando = !agora.isBefore(menorInicio) || !agora.isAfter(maiorFim);
-	    } else {
-	        // Ex.: 06:20 → 13:45
-	        trabalhando = !agora.isBefore(menorInicio) && !agora.isAfter(maiorFim);
-	    }
+		boolean trabalhando;
+		if (atravessaMeiaNoite) {
+			// Ex.: 22:00 → 06:00
+			trabalhando = !agora.isBefore(menorInicio) || !agora.isAfter(maiorFim);
+		} else {
+			// Ex.: 06:20 → 13:45
+			trabalhando = !agora.isBefore(menorInicio) && !agora.isAfter(maiorFim);
+		}
 
-	    System.out.println("[estaTrabalhandoHoje] Inícios: " + inicios);
-	    System.out.println("[estaTrabalhandoHoje] Fins: " + fins);
-	    System.out.println("[estaTrabalhandoHoje] Menor início: " + menorInicio);
-	    System.out.println("[estaTrabalhandoHoje] Maior fim: " + maiorFim);
-	    System.out.println("[estaTrabalhandoHoje] Agora: " + agora);
-	    System.out.println("[estaTrabalhandoHoje] Atravessa meia-noite? " + atravessaMeiaNoite);
-	    System.out.println("[estaTrabalhandoHoje] Resultado: " + (trabalhando ? "Trabalhando" : "Fora do horário"));
+		System.out.println("[estaTrabalhandoHoje] Inícios: " + inicios);
+		System.out.println("[estaTrabalhandoHoje] Fins: " + fins);
+		System.out.println("[estaTrabalhandoHoje] Menor início: " + menorInicio);
+		System.out.println("[estaTrabalhandoHoje] Maior fim: " + maiorFim);
+		System.out.println("[estaTrabalhandoHoje] Agora: " + agora);
+		System.out.println("[estaTrabalhandoHoje] Atravessa meia-noite? " + atravessaMeiaNoite);
+		System.out.println("[estaTrabalhandoHoje] Resultado: " + (trabalhando ? "Trabalhando" : "Fora do horário"));
 
-	    return trabalhando;
+		return trabalhando;
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	@Override
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
@@ -1568,8 +1558,6 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		gravaObjeto(log);
 	}
 
-
-
 	@SuppressWarnings("unchecked")
 	@Override
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
@@ -1597,79 +1585,72 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 	private static final Map<Long, LocalDate> cacheUltimaExecucaoCompleta = new HashMap<>();
 
 	private void importarEmpresasComControle(ClienteEntity cliente) {
-	    LocalTime agora = LocalTime.now();
-	    LocalDate hoje = LocalDate.now();
-	    IntegracaoSeniorEntity config = cliente.getIntegracaoSenior();
+		LocalTime agora = LocalTime.now();
+		LocalDate hoje = LocalDate.now();
+		IntegracaoSeniorEntity config = cliente.getIntegracaoSenior();
 
-	    if (config == null) {
-	        System.out.println("Cliente sem configuração Senior: " + cliente.getId());
-	        return;
-	    }
+		if (config == null) {
+			System.out.println("Cliente sem configuração Senior: " + cliente.getId());
+			return;
+		}
 
-	    // quantidade de execuções no intervalo de 24h
-	    int qtdExec = config.getQuantidadeExecucoes() != null ? config.getQuantidadeExecucoes() : 1;
-	    int horaInicio = config.getHoraInicio() != null ? config.getHoraInicio() : 0;
+		// quantidade de execuções no intervalo de 24h
+		int qtdExec = config.getQuantidadeExecucoes() != null ? config.getQuantidadeExecucoes() : 1;
+		int horaInicio = config.getHoraInicio() != null ? config.getHoraInicio() : 0;
 
-	    // intervalo em minutos
-	    long intervaloMinutos = (24 * 60) / qtdExec;
+		// intervalo em minutos
+		long intervaloMinutos = (24 * 60) / qtdExec;
 
-	    // gera os horários esperados para execução completa
-	    List<LocalTime> horariosExecucao = new ArrayList<>();
-	    for (int i = 0; i < qtdExec; i++) {
-	        int minutosExec = (horaInicio * 60) + (i * (int) intervaloMinutos);
-	        int hora = (minutosExec / 60) % 24;
-	        int minuto = minutosExec % 60;
-	        horariosExecucao.add(LocalTime.of(hora, minuto));
-	    }
+		// gera os horários esperados para execução completa
+		List<LocalTime> horariosExecucao = new ArrayList<>();
+		for (int i = 0; i < qtdExec; i++) {
+			int minutosExec = (horaInicio * 60) + (i * (int) intervaloMinutos);
+			int hora = (minutosExec / 60) % 24;
+			int minuto = minutosExec % 60;
+			horariosExecucao.add(LocalTime.of(hora, minuto));
+		}
 
-	    // controla execuções do dia
-	    if (!hoje.equals(cacheUltimaExecucaoCompleta.get(cliente.getId()))) {
-	        cacheQtdExecucoes.put(cliente.getId(), 0);
-	        cacheUltimaExecucaoCompleta.put(cliente.getId(), hoje);
-	    }
+		// controla execuções do dia
+		if (!hoje.equals(cacheUltimaExecucaoCompleta.get(cliente.getId()))) {
+			cacheQtdExecucoes.put(cliente.getId(), 0);
+			cacheUltimaExecucaoCompleta.put(cliente.getId(), hoje);
+		}
 
-	    int qtdHoje = cacheQtdExecucoes.getOrDefault(cliente.getId(), 0);
-	    boolean execucaoCompleta = false;
+		int qtdHoje = cacheQtdExecucoes.getOrDefault(cliente.getId(), 0);
+		boolean execucaoCompleta = false;
 
-	    // considera completa se estiver em um dos horários previstos (tolerância de até 5 minutos)
-	    for (LocalTime horario : horariosExecucao) {
-	        if (agora.getHour() == horario.getHour() &&
-	            Math.abs(agora.getMinute() - horario.getMinute()) < 5 &&
-	            qtdHoje < qtdExec) {
-	            execucaoCompleta = true;
-	            break;
-	        }
-	    }
+		// considera completa se estiver em um dos horários previstos (tolerância de até
+		// 5 minutos)
+		for (LocalTime horario : horariosExecucao) {
+			if (agora.getHour() == horario.getHour() && Math.abs(agora.getMinute() - horario.getMinute()) < 5
+					&& qtdHoje < qtdExec) {
+				execucaoCompleta = true;
+				break;
+			}
+		}
 
-	    if (execucaoCompleta) {
-	        System.out.println("Executando COMPLETA para cliente " + cliente.getId() +
-	                           " às " + agora);
-	        importarEmpresasSenior(cliente, ModoImportacaoFuncionario.COMPLETA);
-	        cacheQtdExecucoes.put(cliente.getId(), qtdHoje + 1);
-	    } else {
-	        System.out.println("Executando INCREMENTAL para cliente " + cliente.getId() +
-	                           " às " + agora);
-	        importarEmpresasSenior(cliente, ModoImportacaoFuncionario.INCREMENTAL);
-	    }
+		if (execucaoCompleta) {
+			System.out.println("Executando COMPLETA para cliente " + cliente.getId() + " às " + agora);
+			importarEmpresasSenior(cliente, ModoImportacaoFuncionario.COMPLETA);
+			cacheQtdExecucoes.put(cliente.getId(), qtdHoje + 1);
+		} else {
+			System.out.println("Executando INCREMENTAL para cliente " + cliente.getId() + " às " + agora);
+			importarEmpresasSenior(cliente, ModoImportacaoFuncionario.INCREMENTAL);
+		}
 	}
 
-	
-	private List<FuncionarioSeniorDto> buscaTodosOsFuncioriosDaEmpresa(final String numEmp,
-	        final ClienteEntity cliente,
-	        final String codFil,
-	        final String data,  // já vem dd/MM/yyyy ou null
-	        final String numCad,
-	        final String tipCol) {
+	private List<FuncionarioSeniorDto> buscaTodosOsFuncioriosDaEmpresa(final String numEmp, final ClienteEntity cliente,
+			final String codFil, final String data, // já vem dd/MM/yyyy ou null
+			final String numCad, final String tipCol) {
 
-	    System.out.println("Buscando funcionários da empresa: " + numEmp);
-	    IntegracaoSeniorService integracaoSeniorService = new IntegracaoSeniorService(cliente);
+		System.out.println("Buscando funcionários da empresa: " + numEmp);
+		IntegracaoSeniorService integracaoSeniorService = new IntegracaoSeniorService(cliente);
 
-	    // usa data como veio; se null, busca completa
-	    String dataFinal = (data != null) ? data : "";
+		// usa data como veio; se null, busca completa
+		String dataFinal = (data != null) ? data : "";
 
-	    return integracaoSeniorService.buscarFuncionarios(numEmp, codFil, dataFinal, numCad, tipCol);
+		return integracaoSeniorService.buscarFuncionarios(numEmp, codFil, dataFinal, numCad, tipCol);
 	}
-
 
 	private List<FuncionarioSeniorDto> buscarFuncionariosDemitidos(String numEmp, final ClienteEntity cliente) {
 		System.out.println("buscando todos funcionarios demitidos no dia no empresa" + numEmp);
@@ -1753,34 +1734,30 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 
 		return integracaoSeniorService.buscarEmpresas();
 	}
-	
-	
-	public void importaFuncionariosSenior(
-	        final String numEmp,
-	        final ClienteEntity cliente,
-	        ModoImportacaoFuncionario modo,
-	        String codFil, String data, String numCad, String tipCol) {
-	    
-	    Optional<EmpresaEntity> empresaExistenteOpt = buscaEmpresaExistente(numEmp, cliente.getId());
-	    EmpresaEntity empresaExistente = empresaExistenteOpt.orElseGet(() -> {
-	        EmpresaSeniorDto empresaSenior = new EmpresaSeniorDto();
-	        empresaSenior.setNumEmp(numEmp);
-	        EmpresaEntity novaEmpresa = new EmpresaEntity(empresaSenior, false, cliente);
-	        try {
-	            return (EmpresaEntity) gravaObjeto(novaEmpresa)[0];
-	        } catch (Exception e) {
-	            System.out.println("Erro ao salvar empresa");
-	            return null;
-	        }
-	    });
 
-	    if (empresaExistente == null) {
-	        return;
-	    }
+	public void importaFuncionariosSenior(final String numEmp, final ClienteEntity cliente,
+			ModoImportacaoFuncionario modo, String codFil, String data, String numCad, String tipCol) {
 
-	    importaFuncionariosSenior(empresaExistente, cliente, modo, codFil, data, numCad, tipCol);
+		Optional<EmpresaEntity> empresaExistenteOpt = buscaEmpresaExistente(numEmp, cliente.getId());
+		EmpresaEntity empresaExistente = empresaExistenteOpt.orElseGet(() -> {
+			EmpresaSeniorDto empresaSenior = new EmpresaSeniorDto();
+			empresaSenior.setNumEmp(numEmp);
+			EmpresaEntity novaEmpresa = new EmpresaEntity(empresaSenior, false, cliente);
+			try {
+				return (EmpresaEntity) gravaObjeto(novaEmpresa)[0];
+			} catch (Exception e) {
+				System.out.println("Erro ao salvar empresa");
+				return null;
+			}
+		});
+
+		if (empresaExistente == null) {
+			return;
+		}
+
+		importaFuncionariosSenior(empresaExistente, cliente, modo, codFil, data, numCad, tipCol);
 	}
-	
+
 	// Controle de execução de regras por funcionário
 	private static final Map<Long, LocalDate> cacheExecucaoRegras = new HashMap<>();
 
@@ -1790,13 +1767,15 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 
 		if (modo == ModoImportacaoFuncionario.COMPLETA) {
 			System.out.println("Importação COMPLETA");
-			funcionarios = buscaTodosOsFuncioriosDaEmpresa(
-			        empresaExistente.getCodEmpresaSenior(),
-			        cliente,
-			        codFil,   // vindo do filtro (pode ser null)
-			        data,     // vindo do filtro (pode ser null)
-			        numCad,   // vindo do filtro (pode ser null)
-			        tipCol    // vindo do filtro (pode ser null)
+			funcionarios = buscaTodosOsFuncioriosDaEmpresa(empresaExistente.getCodEmpresaSenior(), cliente, codFil, // vindo
+																													// do
+																													// filtro
+																													// (pode
+																													// ser
+																													// null)
+					data, // vindo do filtro (pode ser null)
+					numCad, // vindo do filtro (pode ser null)
+					tipCol // vindo do filtro (pode ser null)
 			);
 		} else {
 			System.out.println("Importação INCREMENTAL");
@@ -1804,14 +1783,16 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 			List<FuncionarioSeniorDto> admitidos = new ArrayList<>();
 
 			System.out.println("data recebida: " + data);
-			
-			alterados =  buscaTodosOsFuncioriosDaEmpresa(
-			        empresaExistente.getCodEmpresaSenior(),
-			        cliente,
-			        codFil,   // vindo do filtro (pode ser null)
-			        data,     // vindo do filtro (pode ser null)
-			        numCad,   // vindo do filtro (pode ser null)
-			        tipCol    // vindo do filtro (pode ser null)
+
+			alterados = buscaTodosOsFuncioriosDaEmpresa(empresaExistente.getCodEmpresaSenior(), cliente, codFil, // vindo
+																													// do
+																													// filtro
+																													// (pode
+																													// ser
+																													// null)
+					data, // vindo do filtro (pode ser null)
+					numCad, // vindo do filtro (pode ser null)
+					tipCol // vindo do filtro (pode ser null)
 			);
 
 			funcionarios = Stream.concat(alterados.stream(), admitidos.stream()).distinct()
@@ -1845,7 +1826,6 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 			PedestreEntity pedestre = pedestreExistente
 					.orElseGet(() -> new PedestreEntity(funcionario, empresaExistente));
 
-
 			pedestre.updateFuncionarioSenior(funcionario, empresaExistente);
 			pedestre.setAlterado(true);
 
@@ -1854,19 +1834,19 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 						: gravaObjeto(pedestre)[0]);
 
 				em.flush();
-				
-				if (cliente.getIntegracaoSenior().isPermissaoHabilitada() /*&& isPermissaoAlterada(pedestre, funcionario)*/) {
+
+				if (cliente.getIntegracaoSenior()
+						.isPermissaoHabilitada() /* && isPermissaoAlterada(pedestre, funcionario) */) {
 					System.out.println("Verificando permissao");
 					atualizarPermissao(cliente, pedestre, funcionario);
 				}
 
-				if (cliente.getIntegracaoSenior().isRegraHabilitada() /*&& isPermissaoAlterada(pedestre, funcionario)*/) {
+				if (cliente.getIntegracaoSenior()
+						.isRegraHabilitada() /* && isPermissaoAlterada(pedestre, funcionario) */) {
 					System.out.println("Verificando regra");
 					processarRegrasPorFuncionario(pedestre, cliente, funcionario);
 				}
 
-				
-				
 			} catch (Exception e) {
 				System.err.println("Erro ao processar regras para: " + funcionario.getNome());
 				e.printStackTrace();
@@ -1882,23 +1862,24 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		return !pedestre.getCodigoPermissao().equals(funcionario.getCodPrm());
 	}
 
-	private void atualizarPermissao(final ClienteEntity cliente, PedestreEntity pedestre, FuncionarioSeniorDto funcionario) {
+	private void atualizarPermissao(final ClienteEntity cliente, PedestreEntity pedestre,
+			FuncionarioSeniorDto funcionario) {
 		System.out.println("Atualizando permissão do funcionario id : " + pedestre.getId() + " nome : "
 				+ pedestre.getNome() + " permissão recebido : " + funcionario.getCodPrm());
 		apagaTodosPedetreEquipamentos(pedestre);
-		
+
 		Permissoes permissao = Permissoes.valueOf("_" + funcionario.getCodPrm());
 
 		for (String nomeEquipamento : permissao.getEquipamentos()) {
 			EquipamentoEntity equipamento = buscaEquipamentoPeloNome(nomeEquipamento, cliente);
-			
+
 			if (funcionario != null && "N".equals(funcionario.getUsaRef())) {
-			    System.out.println("Não usa refeitório");
-			    if (equipamento.getNome().toUpperCase().contains("REFEITORIO")) {
-			        continue; // pula este equipamento
-			    }
+				System.out.println("Não usa refeitório");
+				if (equipamento.getNome().toUpperCase().contains("REFEITORIO")) {
+					continue; // pula este equipamento
+				}
 			}
-			
+
 			if (equipamento != null) {
 				System.out.println("salvando equipamento : " + equipamento.getNome());
 
@@ -1920,16 +1901,16 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 
 	private void processarRegrasPorFuncionario(PedestreEntity pedestre, ClienteEntity cliente,
 			FuncionarioSeniorDto funcionario) {
-		
+
 		PedestreRegraEntity pedestreRegraValida = buscaRegraAtiva(pedestre.getId());
 
 		if (pedestreRegraValida != null && estaTrabalhandoHoje(pedestreRegraValida.getRegra().getHorarios())) {
-		    System.out.println("Funcionário em jornada de trabalho...");
-		    return;
+			System.out.println("Funcionário em jornada de trabalho...");
+			return;
 		}
-		
+
 		System.out.println("Atualizando regra...");
-		
+
 		HorarioPedestreDto escala = buscaEscalaPedestre(funcionario.getNumeroMatricula(), cliente);
 		List<HorarioSeniorDto> horarios = new ArrayList<>();
 
@@ -2025,7 +2006,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		Integer idEscala = Integer.parseInt(horariosDto.get(0).getIdEscala());
 
 		RegraEntity regra = buscarRegraPeloIdEscala(idEscala, cliente.getId());
-		
+
 		if (regra == null) {
 			regra = horariosDto.get(0).toRegraEntity();
 			regra.setNome("Escala : " + escala.getEscalaSenior() + ", intervalo : " + escala.getHorarioSenior()
@@ -2043,32 +2024,22 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		}
 
 		// Pega o primeiro "Inicio"
-		horariosDto.stream()
-		    .filter(h -> {
-		        String nome = (h.getNome() == null || h.getNome().isEmpty()) ? "Padrao" : h.getNome();
-		        return nome.equalsIgnoreCase("Inicio");
-		    })
-		    .findFirst()
-		    .ifPresent(filtrados::add);
+		horariosDto.stream().filter(h -> {
+			String nome = (h.getNome() == null || h.getNome().isEmpty()) ? "Padrao" : h.getNome();
+			return nome.equalsIgnoreCase("Inicio");
+		}).findFirst().ifPresent(filtrados::add);
 
 		// Pega o primeiro "Refeicao"
-		horariosDto.stream()
-		    .filter(h -> {
-		        String nome = (h.getNome() == null || h.getNome().isEmpty()) ? "Padrao" : h.getNome();
-		        return nome.equalsIgnoreCase("Refeicao");
-		    })
-		    .findFirst()
-		    .ifPresent(filtrados::add);
+		horariosDto.stream().filter(h -> {
+			String nome = (h.getNome() == null || h.getNome().isEmpty()) ? "Padrao" : h.getNome();
+			return nome.equalsIgnoreCase("Refeicao");
+		}).findFirst().ifPresent(filtrados::add);
 
 		// Pega o primeiro "Termino"
-		horariosDto.stream()
-		    .filter(h -> {
-		        String nome = (h.getNome() == null || h.getNome().isEmpty()) ? "Padrao" : h.getNome();
-		        return nome.equalsIgnoreCase("Termino");
-		    })
-		    .findFirst()
-		    .ifPresent(filtrados::add);
-
+		horariosDto.stream().filter(h -> {
+			String nome = (h.getNome() == null || h.getNome().isEmpty()) ? "Padrao" : h.getNome();
+			return nome.equalsIgnoreCase("Termino");
+		}).findFirst().ifPresent(filtrados::add);
 
 		for (HorarioSeniorDto horarioSeniorDto : filtrados) {
 			HorarioEntity horarioExistente = buscarHorarioPorRegraEHorario(regra.getId(),
@@ -2079,7 +2050,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 				if (horario == null) {
 					continue;
 				}
-				
+
 				horario.setRegra(regra); // Vincula o horário à regra
 				horarios.add(horario);
 
@@ -2133,7 +2104,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 	private void criarHorarioPedestreRegra(List<HorarioSeniorDto> horarios, PedestreRegraEntity pedestreRegra,
 			FuncionarioSeniorDto funcionario) {
 		for (HorarioSeniorDto horario : horarios) {
-			
+
 			HorarioEntity horarioPedestre = horario.toHorarioPedestre();
 			if (horarioPedestre == null) {
 				continue;
@@ -2166,6 +2137,61 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		clientes.forEach(cliente -> {
 			importarFuncionariosAD(cliente);
 		});
+
+	}
+
+	@Override
+	@TransactionAttribute(TransactionAttributeType.REQUIRED)
+	public void removerPedestresDuplicadosPorCartao(Long idCliente) {
+		System.out.println("Removendo pedestres/visitantes duplicados por cartão. Cliente: " + idCliente);
+
+		String jpqlCartoes = "select p.codigoCartaoAcesso " + "from PedestreEntity p "
+				+ "where p.cliente.id = :ID_CLIENTE " + "  and p.codigoCartaoAcesso is not null "
+				+ "  and p.codigoCartaoAcesso <> '' " + "  and (p.removido = false or p.removido is null) "
+				+ "group by p.codigoCartaoAcesso " + "having count(p) > 1";
+
+		@SuppressWarnings("unchecked")
+		List<String> cartoesDuplicados = getEntityManager().createQuery(jpqlCartoes)
+				.setParameter("ID_CLIENTE", idCliente).getResultList();
+
+		if (cartoesDuplicados == null || cartoesDuplicados.isEmpty()) {
+			System.out.println("Nenhum cartão duplicado encontrado para o cliente " + idCliente);
+			return;
+		}
+
+		System.out.println("Cartões duplicados encontrados: " + cartoesDuplicados.size());
+
+		for (String cartao : cartoesDuplicados) {
+			try {
+				String jpqlPorCartao = "select p from PedestreEntity p " + "where p.cliente.id = :ID_CLIENTE "
+						+ "  and p.codigoCartaoAcesso = :CARTAO " + "  and (p.removido = false or p.removido is null) "
+						+ "order by p.dataCriacao desc";
+
+				@SuppressWarnings("unchecked")
+				List<PedestreEntity> pedestres = getEntityManager().createQuery(jpqlPorCartao)
+						.setParameter("ID_CLIENTE", idCliente).setParameter("CARTAO", cartao).getResultList();
+
+				if (pedestres == null || pedestres.size() <= 1) {
+					continue;
+				}
+
+				boolean primeiro = true;
+				for (PedestreEntity p : pedestres) {
+					if (primeiro) {
+						primeiro = false; // mantém o mais recente
+						continue;
+					}
+					p.setRemovido(true);
+					p.setDataRemovido(new Date());
+					p.setAlterado(true);
+					alteraObjeto(p);
+					System.out.println("Marcando como removido pedestre id=" + p.getId() + " cartao=" + cartao);
+				}
+			} catch (Exception e) {
+				System.err.println("Erro ao processar duplicados para cartão " + cartao);
+				e.printStackTrace();
+			}
+		}
 	}
 
 	private void importarFuncionariosAD(ClienteEntity cliente) {
@@ -2212,7 +2238,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 			e.printStackTrace();
 		}
 	}
-	
+
 	public void saveOrUpdateForName(PedestreEntity pedestrian) throws Exception {
 		PedestreEntity pedestrianPersisted = buscaPedestrePorNome(pedestrian.getNome());
 
@@ -2834,10 +2860,13 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 //	}
 
 	@SuppressWarnings("unchecked")
-	private Optional<PedestreEntity> buscaPedestreExistente(FuncionarioSeniorDto funcionarioSeniorDto, EmpresaEntity empresa) {
-		System.out.println("numero matricula : " + funcionarioSeniorDto.getNumeroMatricula() + ", numero de RG recebido : " + funcionarioSeniorDto.getRg());
-		
-		String matricula = funcionarioSeniorDto.getNumeroMatricula() + funcionarioSeniorDto.getEmpresa()+funcionarioSeniorDto.getNumCracha();
+	private Optional<PedestreEntity> buscaPedestreExistente(FuncionarioSeniorDto funcionarioSeniorDto,
+			EmpresaEntity empresa) {
+		System.out.println("numero matricula : " + funcionarioSeniorDto.getNumeroMatricula()
+				+ ", numero de RG recebido : " + funcionarioSeniorDto.getRg());
+
+		String matricula = funcionarioSeniorDto.getNumeroMatricula() + funcionarioSeniorDto.getEmpresa()
+				+ funcionarioSeniorDto.getNumCracha();
 //		String matricula = funcionarioSeniorDto.getNumeroMatricula();
 		Map<String, Object> args = new HashMap<>();
 		args.put("MATRICULA", matricula);
@@ -2848,28 +2877,27 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 			List<PedestreEntity> listaPedestres = (List<PedestreEntity>) pesquisaArgFixos(PedestreEntity.class,
 					"findByMatriculaAndIdEmpresaAndIdCliente", args);
 
-			
 			if (listaPedestres.size() == 1) {
 				return Optional.of(listaPedestres.get(0));
 			}
-			
+
 			// Mais de um encontrado para a mesma matrícula (potencial inconsistência)
 			System.err.println("Matricula não encontrada ou duplicada: " + matricula + " na empresa " + empresa.getId()
 					+ ". Total encontrados: " + listaPedestres.size());
 
 			// Fallback: tentar por RG ou NOME
-			if (funcionarioSeniorDto.getRg() != null && ! funcionarioSeniorDto.getRg().trim().isEmpty() && !"0".equals( funcionarioSeniorDto.getRg())) {
+			if (funcionarioSeniorDto.getRg() != null && !funcionarioSeniorDto.getRg().trim().isEmpty()
+					&& !"0".equals(funcionarioSeniorDto.getRg())) {
 				System.out.println("buscando por RG");
-				PedestreEntity pedestre = buscaPedestrePorRg( funcionarioSeniorDto.getRg());
+				PedestreEntity pedestre = buscaPedestrePorRg(funcionarioSeniorDto.getRg());
 
 				if (pedestre != null) {
 					System.out.println("Fallback por RG retornou pedestre: " + pedestre.getNome());
 					return Optional.of(pedestre);
 				}
 			}
-			
-			
-			if (funcionarioSeniorDto.getNome() != null && ! funcionarioSeniorDto.getNome().trim().isEmpty()) {
+
+			if (funcionarioSeniorDto.getNome() != null && !funcionarioSeniorDto.getNome().trim().isEmpty()) {
 				System.out.println("buscando por nome");
 				PedestreEntity pedestre = buscaPedestrePorNome(funcionarioSeniorDto.getNome());
 
@@ -2882,11 +2910,11 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 			// Se não encontrou por CPF, retorna o primeiro mesmo (com alerta)
 			System.err.println(
 					"[Aviso] Fallback por NOME e RG falhou, retornando primeiro da lista para matrícula: " + matricula);
-			
-			if(listaPedestres.isEmpty()) {
+
+			if (listaPedestres.isEmpty()) {
 				return Optional.empty();
 			}
-			
+
 			return Optional.of(listaPedestres.get(0));
 
 		} catch (Exception e) {
@@ -3372,7 +3400,6 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 
 		return hora;
 	}
-	
 
 	@SuppressWarnings("unchecked")
 	@Override
@@ -3396,96 +3423,92 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		}
 	}
 
-	
 	// Pode ser um campo da classe (fora do método)
 	// Pode ser um campo da classe (fora do método)
 	private final Map<Long, Boolean> consultaInicialMap = new HashMap<>();
 
 	public void importarAlunosSponte(final ClienteEntity cliente) {
-	    boolean primeiraConsulta = !consultaInicialMap.getOrDefault(cliente.getId(), false);
+		boolean primeiraConsulta = !consultaInicialMap.getOrDefault(cliente.getId(), false);
 
-	    LocalDate startDate;
-	    LocalDate endDate;
+		LocalDate startDate;
+		LocalDate endDate;
 
-	    if (primeiraConsulta) {
-	        // Primeira consulta: pega desde 2017
-	        startDate = LocalDate.of(2017, 1, 1);
-	        endDate = LocalDate.now().minusDays(1);
-	        System.out.println("Primeira importação detectada para clienteId=" + cliente.getId() +
-	                           ", importando desde 2017...");
-	    } else {
-	        // Consultas seguintes: apenas o dia atual
-	        startDate = LocalDate.now();
-	        endDate = startDate;
-	        System.out.println("Importação incremental para clienteId=" + cliente.getId() +
-	                           ", importando apenas o dia atual...");
-	    }
+		if (primeiraConsulta) {
+			// Primeira consulta: pega desde 2017
+			startDate = LocalDate.of(2017, 1, 1);
+			endDate = LocalDate.now().minusDays(1);
+			System.out.println(
+					"Primeira importação detectada para clienteId=" + cliente.getId() + ", importando desde 2017...");
+		} else {
+			// Consultas seguintes: apenas o dia atual
+			startDate = LocalDate.now();
+			endDate = startDate;
+			System.out.println(
+					"Importação incremental para clienteId=" + cliente.getId() + ", importando apenas o dia atual...");
+		}
 
-	    LocalDate mesInicio = startDate;
-	    while (!mesInicio.isAfter(endDate)) {
-	        LocalDate mesFim = mesInicio.withDayOfMonth(1).plusMonths(1).minusDays(1);
-	        if (mesFim.isAfter(endDate)) {
-	            mesFim = endDate;
-	        }
+		LocalDate mesInicio = startDate;
+		while (!mesInicio.isAfter(endDate)) {
+			LocalDate mesFim = mesInicio.withDayOfMonth(1).plusMonths(1).minusDays(1);
+			if (mesFim.isAfter(endDate)) {
+				mesFim = endDate;
+			}
 
-	        LocalDateTime inicio = mesInicio.atStartOfDay();
-	        LocalDateTime fim = mesFim.atTime(LocalTime.MAX);
+			LocalDateTime inicio = mesInicio.atStartOfDay();
+			LocalDateTime fim = mesFim.atTime(LocalTime.MAX);
 
-	        try {
-	            System.out.println("Iniciando importação para clienteId=" + cliente.getId() +
-	                               ", período de " + inicio + " até " + fim);
+			try {
+				System.out.println("Iniciando importação para clienteId=" + cliente.getId() + ", período de " + inicio
+						+ " até " + fim);
 
-	            List<String> respostas = SponteService.getAlunosPorIntervalo(
-	                    cliente.getIntegracaoSponte().getToken(),
-	                    cliente.getIntegracaoSponte().getIdCliente(),
-	                    inicio, fim
-	            );
+				List<String> respostas = SponteService.getAlunosPorIntervalo(cliente.getIntegracaoSponte().getToken(),
+						cliente.getIntegracaoSponte().getIdCliente(), inicio, fim);
 
-	            if (respostas == null || respostas.isEmpty()) {
-	                System.out.println("Nenhuma resposta para este período: clienteId=" + cliente.getId() +
-	                                   ", período " + inicio + " a " + fim);
-	            } else {
-	                for (String xml : respostas) {
-	                    if (xml == null || xml.isEmpty() || xml.contains("Nenhum registro foi encontrado")) {
-	                        System.out.println("Sem registros válidos no XML para clienteId=" + cliente.getId() +
-	                                           ", período " + inicio + " a " + fim);
-	                        continue;
-	                    }
+				if (respostas == null || respostas.isEmpty()) {
+					System.out.println("Nenhuma resposta para este período: clienteId=" + cliente.getId() + ", período "
+							+ inicio + " a " + fim);
+				} else {
+					for (String xml : respostas) {
+						if (xml == null || xml.isEmpty() || xml.contains("Nenhum registro foi encontrado")) {
+							System.out.println("Sem registros válidos no XML para clienteId=" + cliente.getId()
+									+ ", período " + inicio + " a " + fim);
+							continue;
+						}
 
-	                    List<PedestreEntity> pedestres = parseAlunosFromSoap(xml, cliente);
-	                    if (pedestres == null || pedestres.isEmpty()) {
-	                        System.out.println("parseAlunosFromSoap retornou vazio/nulo para clienteId=" +
-	                                           cliente.getId());
-	                        continue;
-	                    }
+						List<PedestreEntity> pedestres = parseAlunosFromSoap(xml, cliente);
+						if (pedestres == null || pedestres.isEmpty()) {
+							System.out.println(
+									"parseAlunosFromSoap retornou vazio/nulo para clienteId=" + cliente.getId());
+							continue;
+						}
 
-	                    for (PedestreEntity p : pedestres) {
-	                        try {
-	                            p.setCliente(cliente);
-	                            saveOrUpdateForName(p);
-	                            System.out.println("Aluno salvo/atualizado: clienteId=" + cliente.getId() +
-	                                               ", aluno=" + p.getNome());
-	                        } catch (Exception e) {
-	                            System.out.println("Erro ao salvar aluno: clienteId=" + cliente.getId() +
-	                                               ", aluno=" + p.getNome() + ", erro=" + e);
-	                        }
-	                    }
-	                }
-	            }
+						for (PedestreEntity p : pedestres) {
+							try {
+								p.setCliente(cliente);
+								saveOrUpdateForName(p);
+								System.out.println("Aluno salvo/atualizado: clienteId=" + cliente.getId() + ", aluno="
+										+ p.getNome());
+							} catch (Exception e) {
+								System.out.println("Erro ao salvar aluno: clienteId=" + cliente.getId() + ", aluno="
+										+ p.getNome() + ", erro=" + e);
+							}
+						}
+					}
+				}
 
-	        } catch (Exception e) {
-	            System.out.println("Erro inesperado para clienteId=" + cliente.getId() +
-	                               ", período " + inicio + " a " + fim + ": " + e);
-	            e.printStackTrace();
-	        }
+			} catch (Exception e) {
+				System.out.println("Erro inesperado para clienteId=" + cliente.getId() + ", período " + inicio + " a "
+						+ fim + ": " + e);
+				e.printStackTrace();
+			}
 
-	        mesInicio = mesInicio.plusMonths(1);
-	    }
+			mesInicio = mesInicio.plusMonths(1);
+		}
 
-	    // Marca como já tendo feito a primeira consulta
-	    consultaInicialMap.put(cliente.getId(), true);
+		// Marca como já tendo feito a primeira consulta
+		consultaInicialMap.put(cliente.getId(), true);
 
-	    System.out.println("Processo Sponte finalizado para clienteId=" + cliente.getId());
+		System.out.println("Processo Sponte finalizado para clienteId=" + cliente.getId());
 	}
 
 	private List<PedestreEntity> parseAlunosFromSoap(String xml, ClienteEntity cliente) {
@@ -3562,12 +3585,12 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 
 		}
 	}
-	
-	
-	public String adicionarAgendamento(Long idCliente, Map<String, Object> arg, Date dataInicio, Date dataFim, String justificativa) {
+
+	public String adicionarAgendamento(Long idCliente, Map<String, Object> arg, Date dataInicio, Date dataFim,
+			String justificativa) {
 		StringBuilder query = new StringBuilder();
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		
+
 		String sgdb = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SGDB);
 		String schema = "";
 		if (sgdb == null || "".equals(sgdb)) {
@@ -3577,27 +3600,24 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		if ("plsql".equals(sgdb)) {
 			schema = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SCHEMA);
 		}
-		
+
 		String dataInicioAg = sdf.format(dataInicio);
 		String dataFimAg = sdf.format(dataFim);
 
-
 		query.append("update " + schema + "TB_PEDESTRE set DATA_INICIO_PERIODO_AGENDAMENTO = '" + dataInicioAg + "', ");
 		query.append("DATA_FIM_PERIODO_AGENDAMENTO = '" + dataFimAg + "', ");
-		query.append("JUSTIFICATIVA_LIBERADO = '" + justificativa + "', "); 
+		query.append("JUSTIFICATIVA_LIBERADO = '" + justificativa + "', ");
 		query.append("SEMPRE_LIBERADO = TRUE ");
 		query.append("where ID_PEDESTRE in ( ");
 		query.append("select id from (select ID_PEDESTRE as id from " + schema + "TB_PEDESTRE ");
 		query.append("where ID_CLIENTE = ").append(idCliente).append(" and TIPO_PEDESTRE = 'PEDESTRE' ")
-		     .append(" and (ALTERAR_EM_MASSA IS NULL OR ALTERAR_EM_MASSA = 1) ");
+				.append(" and (ALTERAR_EM_MASSA IS NULL OR ALTERAR_EM_MASSA = 1) ");
 		query.append(concatenaFiltros(arg));
 		query.append(") as tmp )");
 
-		
 		System.out.println(query.toString());
 
 		return query.toString();
 	}
-	
 
 }

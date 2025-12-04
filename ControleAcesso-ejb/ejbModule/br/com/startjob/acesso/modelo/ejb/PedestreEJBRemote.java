@@ -12,7 +12,6 @@ import javax.ejb.Remote;
 import com.senior.services.Enum.ModoImportacaoFuncionario;
 
 import br.com.startjob.acesso.modelo.entity.ClienteEntity;
-import br.com.startjob.acesso.modelo.entity.EmpresaEntity;
 import br.com.startjob.acesso.modelo.entity.ImportacaoEntity;
 import br.com.startjob.acesso.modelo.entity.PedestreRegraEntity;
 
@@ -102,6 +101,14 @@ public interface PedestreEJBRemote extends BaseEJBRemote {
 	 */
 	public void exportaSOC(ClienteEntity cliente) throws Exception;
 
+	/**
+	 * Remove pedestres/visitantes duplicados por cartão de acesso, mantendo apenas
+	 * o mais recente (por data de criação) para cada cartão.
+	 *
+	 * @param idCliente identificador do cliente
+	 */
+	public void removerPedestresDuplicadosPorCartao(Long idCliente) throws Exception;
+
 	public void importarSenior() throws Exception;
 
 	public void importarTotvs() throws Exception;
@@ -110,7 +117,6 @@ public interface PedestreEJBRemote extends BaseEJBRemote {
 
 	public void importarAD() throws Exception;
 
-	
 	public void importaFuncionariosSenior(final String empresaExistente, final ClienteEntity cliente,
 			ModoImportacaoFuncionario modo, String codFil, String data, String numCad, String tipCol);
 
