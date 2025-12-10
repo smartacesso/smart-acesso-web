@@ -271,6 +271,10 @@
 							<f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
 						</h:outputText>
 					</p:column>
+					
+					<p:column headerText="Refeição" style="text-align: center">
+						<h:outputText value="#{relatorioPedestresController.getTipoRefeicao(pedestre.data)}" />
+					</p:column>
 
 					<p:column headerText="#{msgs['label.uc009.equipamento']}"
 						styleClass="col-desktop-only" style="text-align: center">
