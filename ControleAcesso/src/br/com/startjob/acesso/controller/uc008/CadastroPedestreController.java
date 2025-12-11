@@ -53,6 +53,7 @@ import br.com.startjob.acesso.api.WebSocketCadastroEndpoint;
 import br.com.startjob.acesso.controller.CadastroBaseController;
 import br.com.startjob.acesso.controller.MenuController;
 import br.com.startjob.acesso.modelo.BaseConstant;
+import br.com.startjob.acesso.modelo.ejb.BaseEJBRemote;
 import br.com.startjob.acesso.modelo.ejb.PedestreEJB;
 import br.com.startjob.acesso.modelo.ejb.PedestreEJBRemote;
 import br.com.startjob.acesso.modelo.entity.AcessoEntity;
@@ -67,6 +68,7 @@ import br.com.startjob.acesso.modelo.entity.EnderecoEntity;
 import br.com.startjob.acesso.modelo.entity.EquipamentoEntity;
 import br.com.startjob.acesso.modelo.entity.HistoricoCotaEntity;
 import br.com.startjob.acesso.modelo.entity.HorarioEntity;
+import br.com.startjob.acesso.modelo.entity.LocalEntity;
 import br.com.startjob.acesso.modelo.entity.MensagemEquipamentoEntity;
 import br.com.startjob.acesso.modelo.entity.ParametroEntity;
 import br.com.startjob.acesso.modelo.entity.PedestreEntity;
@@ -116,6 +118,7 @@ public class CadastroPedestreController extends CadastroBaseController {
 	private List<SelectItem> listaCargos;
 	private List<SelectItem> listaTipoRegra;
 	private List<SelectItem> listaTipoQRCode;
+	private List<SelectItem> listaLocais;
 
 	private Long idEmpresaSelecionada;
 
@@ -131,6 +134,9 @@ public class CadastroPedestreController extends CadastroBaseController {
 
 	private List<EquipamentoEntity> equipamentos;
 	private Long idEquipamentoSelecionado;
+	
+	private List<LocalEntity> locais;
+	private String idLocalSelecionado;
 	
 	private List<HistoricoCotaEntity> listaCotas;
 	private Integer mes;
@@ -194,6 +200,10 @@ public class CadastroPedestreController extends CadastroBaseController {
 	
 	private String linkGerado;
 	private final Gson gson = new Gson();
+
+	private String localPadraoVisitante;
+
+	private String localPadraoPedestre;
 	
 	@PostConstruct
 	@Override
@@ -230,6 +240,7 @@ public class CadastroPedestreController extends CadastroBaseController {
 
 		montaListaEmpresas();
 		montaListaEquipamentosDisponiveis();
+		montaListaLocais();
 		
 		pedestre.setCodigoCartaoAcesso(gerarCartao(pedestre));
 	}
@@ -346,6 +357,16 @@ public class CadastroPedestreController extends CadastroBaseController {
 				getUsuarioLogado().getCliente().getId());
 		if (param != null)
 			gerarCartaoAutomatico = Boolean.valueOf(param.getValor());
+		
+		param = baseEJB.getParametroSistema(BaseConstant.PARAMETERS_NAME.LOCAL_PADRAO_PEDESTRE,
+				getUsuarioLogado().getCliente().getId());
+		if (param != null)
+			localPadraoPedestre = param.getValor();
+		
+		param = baseEJB.getParametroSistema(BaseConstant.PARAMETERS_NAME.LOCAL_PADRAO_VISITANTE,
+				getUsuarioLogado().getCliente().getId());
+		if (param != null)
+			localPadraoVisitante = param.getValor();
 	}
 
 	public boolean verificaObrigatorio(String campo) {
@@ -371,22 +392,84 @@ public class CadastroPedestreController extends CadastroBaseController {
 	}
 
 	public void iniciaVariaveisNovoPedestre(PedestreEntity pedestre) {
-		pedestre.setEndereco(new EnderecoEntity());
-		pedestre.setEmpresa(new EmpresaEntity());
-		pedestre.setDepartamento(new DepartamentoEntity());
-		pedestre.setCargo(new CargoEntity());
-		pedestre.setCentroCusto(new CentroCustoEntity());
 
-		if (tipo != null && !tipo.isEmpty()) {
-			if ("pe".equals(tipo)) {
-				pedestre.setTipo(TipoPedestre.PEDESTRE);
-			} else if ("vi".equals(tipo)) {
-				pedestre.setTipo(TipoPedestre.VISITANTE);
-			}
+	    pedestre.setEndereco(new EnderecoEntity());
+	    pedestre.setEmpresa(new EmpresaEntity());
+	    pedestre.setDepartamento(new DepartamentoEntity());
+	    pedestre.setCargo(new CargoEntity());
+	    pedestre.setCentroCusto(new CentroCustoEntity());
 
-		} else {
-			pedestre.setTipo(TipoPedestre.PEDESTRE);
+	    pedestre.setTipo(TipoPedestre.PEDESTRE); // valor padrão
+
+	    if (tipo != null && !tipo.isEmpty()) {
+
+	        if ("pe".equals(tipo)) {
+	            pedestre.setTipo(TipoPedestre.PEDESTRE);
+
+	        } else if ("vi".equals(tipo)) {
+
+	            pedestre.setTipo(TipoPedestre.VISITANTE);
+
+	            String nomeLocal = null;
+
+	            try {
+	                nomeLocal = buscaNomePadraoLocal(getUsuarioLogado().getCliente().getId());
+	            } catch (Exception e) {
+	                e.printStackTrace();
+	            }
+
+	            // Primeira validação correta
+	            if (nomeLocal == null || nomeLocal.trim().isEmpty()) {
+	                System.out.println("Nenhum nome de local padrão encontrado.");
+	                return; // ou decidir não retornar
+	            }
+	            
+	            System.out.println("Local padrão : " + nomeLocal);
+
+	            LocalEntity localPadrao = buscaLocalPadrao(nomeLocal);
+	            
+	            if (localPadrao == null) {
+	                System.out.println("Local padrão não encontrado: " + nomeLocal);
+	                return; // ou não retornar
+	            }
+
+	            
+	            System.out.println("Local padrao encontrado :  " + localPadrao.getNome() + "uuid : " + localPadrao.getUuid());
+
+	            pedestre.setUuidLocal(localPadrao.getUuid());
+	        }
+	    }
+	}
+
+	
+	@SuppressWarnings("unchecked")
+	private LocalEntity buscaLocalPadrao(String nomeLocal) {
+		List<LocalEntity> local = null;
+
+		Map<String, Object> args = new HashMap<String, Object>();
+		args.put("NOME", nomeLocal);
+		args.put("ID_CLIENTE", getUsuarioLogado().getCliente().getId());
+
+		try {
+			local = (List<LocalEntity>) baseEJB.pesquisaArgFixos(LocalEntity.class, "findByNameAndLocal", args);
+			if (local != null && !local.isEmpty())
+				return local.get(0);
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
+		return null;
+	
+	}
+
+	private String buscaNomePadraoLocal(Long idCliente) throws Exception {
+		String nomeLocalPadrao = null;
+		
+		ParametroEntity param = baseEJB.getParametroSistema(BaseConstant.PARAMETERS_NAME.LOCAL_PADRAO_VISITANTE, idCliente);
+
+		if(param != null)
+			nomeLocalPadrao = param.getValor();
+		
+		return nomeLocalPadrao;
 	}
 
 	public void iniciaVariaveisEditarPedestre(PedestreEntity pedestre) {
@@ -450,6 +533,10 @@ public class CadastroPedestreController extends CadastroBaseController {
 		
 		if (pedestre.getCotas() != null && !pedestre.getCotas().isEmpty()) {
 			listaCotas = pedestre.getCotas();
+		}
+		
+		if (pedestre.getUuidLocal() != null ) {
+			idLocalSelecionado = pedestre.getUuidLocal();
 		}
 		
 	}
@@ -865,7 +952,7 @@ public class CadastroPedestreController extends CadastroBaseController {
 		if (pedestreEquipamento != null)
 			listaPedestresEquipamentos.remove(pedestreEquipamento);
 	}
-
+	
 	public boolean isFormatoAceitoDocumento(String nome) {
 		boolean retorno = false;
 
@@ -1197,6 +1284,28 @@ public class CadastroPedestreController extends CadastroBaseController {
 	public void montaImagemBiometria() {
 		imagemBiometria = DefaultStreamedContent.builder().contentType("image/png")
 				.stream(() -> new ByteArrayInputStream(biometria.getSample())).build();
+	}
+	
+	@SuppressWarnings("unchecked")
+	public void montaListaLocais() {
+		Map<String, Object> args = new HashMap<String, Object>();
+		args.put("ID_CLIENTE", getUsuarioLogado().getCliente().getId());
+
+		listaLocais = new ArrayList<SelectItem>();
+		listaLocais.add(new SelectItem(null, "Selecione"));
+
+		try {
+			locais = (List<LocalEntity>) baseEJB.pesquisaArgFixos(LocalEntity.class,
+					"findAllByIdClienteAdd", args);
+
+			if (locais != null && !locais.isEmpty()) {
+				locais.forEach(local -> {
+					listaLocais.add(new SelectItem(local.getUuid(), local.getNome()));
+				});
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	public boolean isExibeCampoMatricula() {
@@ -2416,6 +2525,46 @@ public class CadastroPedestreController extends CadastroBaseController {
 
 	public void setCodigoCartao(String codigo) {
 	    getPedestreAtual().setCodigoCartaoAcesso(codigo);
+	}
+
+	public List<SelectItem> getListaLocais() {
+		return listaLocais;
+	}
+
+	public void setListaLocais(List<SelectItem> listaLocais) {
+		this.listaLocais = listaLocais;
+	}
+
+	public List<LocalEntity> getLocais() {
+		return locais;
+	}
+
+	public void setLocais(List<LocalEntity> locais) {
+		this.locais = locais;
+	}
+
+	public String getIdLocalSelecionado() {
+		return idLocalSelecionado;
+	}
+
+	public void setIdLocalSelecionado(String idLocalSelecionado) {
+		this.idLocalSelecionado = idLocalSelecionado;
+	}
+
+	public String getLocalPadraoPedestre() {
+		return localPadraoPedestre;
+	}
+
+	public void setLocalPadraoPedestre(String localPadraoPedestre) {
+		this.localPadraoPedestre = localPadraoPedestre;
+	}
+
+	public String getLocalPadraoVisitante() {
+		return localPadraoVisitante;
+	}
+
+	public void setLocalPadraoVisitante(String localPadraoVisitante) {
+		this.localPadraoVisitante = localPadraoVisitante;
 	}
 
 }

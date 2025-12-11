@@ -265,6 +265,9 @@ public class PedestreEntity extends ClienteBaseEntity {
 	
 	@Column(name = "ID_LOCAL", nullable = true, length = 50)
 	private Long idLocal;
+	
+	@Column(name = "UUID_LOCAL", nullable = true)
+	private String uuidLocal;
 
 	@ManyToOne(cascade = { CascadeType.PERSIST }, fetch = FetchType.LAZY)
 	@JoinColumn(name = "ID_ENDERECO", nullable = true)
@@ -395,7 +398,7 @@ public class PedestreEntity extends ClienteBaseEntity {
 
 	}
 
-	public PedestreEntity(final FuncionarioSeniorDto funcionarioSeniorDto, final EmpresaEntity empresaEntity) {
+	public PedestreEntity(final FuncionarioSeniorDto funcionarioSeniorDto, final EmpresaEntity empresaEntity, LocalEntity localPadrao) {
 		LocalDate hoje = LocalDate.now();
 
 		this.nome = funcionarioSeniorDto.getNome();
@@ -408,7 +411,11 @@ public class PedestreEntity extends ClienteBaseEntity {
 		this.empresa = empresaEntity;
 		this.tipo = TipoPedestre.PEDESTRE;
 		this.sempreLiberado = false;
-
+		
+		if(Objects.nonNull(localPadrao)) {
+			this.uuidLocal = localPadrao.getUuid();
+		}
+		
 		if (Objects.nonNull(funcionarioSeniorDto.getDatDem())) {
 			this.observacoes = "DATA DEMISSAO : " + funcionarioSeniorDto.getDatDem() + " | MOTIVO : DEMISSAO";
 			this.status = Status.INATIVO;
@@ -1014,6 +1021,14 @@ public class PedestreEntity extends ClienteBaseEntity {
 
 	public void setAgendamentoLiberado(Boolean agendamentoLiberado) {
 		this.agendamentoLiberado = agendamentoLiberado;
+	}
+
+	public String getUuidLocal() {
+		return uuidLocal;
+	}
+
+	public void setUuidLocal(String uuidLocal) {
+		this.uuidLocal = uuidLocal;
 	}
 
 }

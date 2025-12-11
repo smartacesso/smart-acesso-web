@@ -8,6 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -755,17 +756,35 @@ public class DesktopApiService extends BaseService {
 	            JSONObject jsonObject = jsonArray.getJSONObject(i);
 
 	            String nomeLocal = jsonObject.optString("nome", null);
+	            String uuid = jsonObject.optString("uuid", null);
 	            Long idCliente = jsonObject.has("idCliente") ? Long.parseLong(jsonObject.getString("idCliente")) : null;
 
 	            if (nomeLocal == null || idCliente == null) {
 	            	 return Response.status(Status.BAD_REQUEST).entity(String.format("Local invalido: nome: %s, idCliente: %s", nomeLocal, idCliente)).build();
 	            }
 	            
-	            LocalEntity local = buscaLocalPeloNomeAndIdCliente(nomeLocal, idCliente);
+	            LocalEntity local = null;
 
+	            // 1️⃣ Tenta buscar pelo UUID
+	            if (uuid != null && !uuid.isEmpty()) {
+	                local = buscaLocalPeloUuidAndIdClient(uuid, idCliente);
+	            }
+
+	            // 2️⃣ Fallback (fase de transição) -> busca por nome + cliente
+	            if (local == null) {
+	                local = buscaLocalPeloNomeAndIdCliente(nomeLocal, idCliente);
+	            }
+
+	            // 3️⃣ Se não existe -> cria um novo
 	            if (local == null) {
 	                local = new LocalEntity();
+	                System.out.println("Criando novo Local: " + nomeLocal);
 	            }
+
+	            // 4️⃣ Atualiza/define o UUID
+	            if (local.getUuid() == null && uuid != null) {
+	                local.setUuid(uuid);
+	            } 
 
 	            local.setNome(nomeLocal);
 
@@ -870,7 +889,25 @@ public class DesktopApiService extends BaseService {
 		return null;
 	}
 	
-	
+	private LocalEntity buscaLocalPeloUuidAndIdClient(String UUID, Long idCliente ) {
+		Map<String, Object> args = new HashMap<>();
+		args.put("UUID", UUID);
+		args.put("ID_CLIENTE", idCliente);
+
+		List<LocalEntity> locais = null;
+
+		try {
+			locais = (List<LocalEntity>) ((BaseEJBRemote) getEjb("BaseEJB"))
+					.pesquisaArgFixos(LocalEntity.class, "findByUuidAndIdCliente", args);
+			if (locais != null)
+				return locais.stream().findFirst().orElse(null);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return null;
+	}
 
 	private void adicionaRegraParaVisitante(PedestreEntity visitante, JSONObject jsonObject) throws Exception {
 		Map<String, Object> arg = new HashMap<>();
@@ -1326,6 +1363,13 @@ public class DesktopApiService extends BaseService {
 				visitante.setIdLocal(Long.valueOf(jsonObject.getString("idLocal")));
 			}
 		}
+		
+		if(jsonObject.has("uuidLocal")) {
+			if (jsonObject.getString("uuidLocal") != null && !jsonObject.getString("uuidLocal").isEmpty()) {
+				visitante.setUuidLocal(jsonObject.getString("uuidLocal"));
+			}
+		}
+		
 		
 		// Dados da empresa
 		if (jsonObject.getString("idEmpresa") != null && !jsonObject.getString("idEmpresa").isEmpty())

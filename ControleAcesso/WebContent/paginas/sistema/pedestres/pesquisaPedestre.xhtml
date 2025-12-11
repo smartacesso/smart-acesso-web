@@ -226,6 +226,14 @@
 							<f:converter converterId="javax.faces.Long" />
 						</p:selectOneMenu>
 
+						<p:outputLabel for="filtro-avancado-local"
+							value="Local" />
+						<p:selectOneMenu id="filtro-avancado-local"
+							value="#{consultaPedestreController.parans['uuidLocal']}">
+							<f:selectItems value="#{consultaPedestreController.listaLocais}" />
+						</p:selectOneMenu>
+
+
 					</p:panelGrid>
 				</h:panelGroup>
 

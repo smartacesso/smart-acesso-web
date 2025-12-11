@@ -25,6 +25,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -37,6 +38,7 @@ import java.util.stream.Stream;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
+import javax.faces.model.SelectItem;
 import javax.inject.Inject;
 import javax.persistence.Column;
 import javax.persistence.EntityManager;
@@ -92,6 +94,7 @@ import br.com.startjob.acesso.modelo.entity.ImportacaoEntity;
 import br.com.startjob.acesso.modelo.entity.IntegracaoSOCEntity;
 import br.com.startjob.acesso.modelo.entity.IntegracaoSeniorEntity;
 import br.com.startjob.acesso.modelo.entity.IntegracaoTotvsEntity;
+import br.com.startjob.acesso.modelo.entity.LocalEntity;
 import br.com.startjob.acesso.modelo.entity.ParametroEntity;
 import br.com.startjob.acesso.modelo.entity.PedestreEntity;
 import br.com.startjob.acesso.modelo.entity.PedestreEquipamentoEntity;
@@ -401,7 +404,8 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 				"		pd.DATA_INICIO_PERIODO_AGENDAMENTO as dataInicioPeriodoAgendamento, " + // 79
 				"		pd.DATA_FIM_PERIODO_AGENDAMENTO as dataFimPeriodoAgendamento, " + // 80
 				"		pd.JUSTIFICATIVA_LIBERADO as justificativa, " + // 81
-				"		pd.AGENDAMENTO_LIBERADO as agendamentoLiberado " + // 82
+				"		pd.AGENDAMENTO_LIBERADO as agendamentoLiberado, " + // 82
+				"		pd.UUID_LOCAL as uuidLocal " + // 83
 				"from " + schema + "TB_PEDESTRE pd " + "		left join " + schema
 				+ "TB_ENDERECO e on e.ID_ENDERECO = pd.ID_ENDERECO " + "		left join " + schema
 				+ "TB_EMPRESA emp on emp.ID_EMPRESA = pd.ID_EMPRESA " + "		left join " + schema
@@ -1114,7 +1118,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 			boolean trabalhandoAgora = estaNoTurno(horarioExistente.getHorarioInicio(),
 					horarioExistente.getHorarioFim(), agora);
 
-			if (trabalhandoAgora && Objects.nonNull(pedestreRegra)) {
+			if (trabalhandoAgora && !"folga".equalsIgnoreCase(pedestreRegra.getRegra().getNome())) {
 				System.out.println("Funcionario em horario de trabalho...");
 				return;
 			}
@@ -1147,7 +1151,16 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 					cliente.getId());
 
 			if (param != null) {
-				Integer tolerancia = Integer.valueOf(param.getValor());
+				Integer tolerancia = 0;
+				
+				if(isTurno3x3(regra.getNome())) {
+					tolerancia = 20;
+					System.out.println("turno 3x3, tolerancia : " + tolerancia);
+				}else {
+					tolerancia = Integer.valueOf(param.getValor());
+					System.out.println("Tolerancia padrão : " + tolerancia);
+				}
+				
 				horario = new HorarioTotvsProtheusDTO(funcionario.getHoraInicial(), funcionario.getHoraFinal(),
 						tolerancia);
 			} else {
@@ -1164,6 +1177,8 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 
 			try {
 				newPedestreRegra.setAlterado(true);
+				regra.setAlterado(true);
+				alteraObjeto(regra);
 				gravaObjeto(newPedestreRegra);
 				em.flush();
 				criarHorarioPedestreRegraValido(horarioEncontrado, newPedestreRegra);
@@ -1198,6 +1213,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 	    String status = funcionario.getStatusTrabalho();
 	    String codHorario = funcionario.getCodigoHorario();
 	    String horaInicial = funcionario.getHoraInicial();
+	    String horaFinal = funcionario.getHoraFinal();
 
 	    // 1 — Funcionário em folga
 	    if (isFolga(status)) {
@@ -1208,11 +1224,28 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 	    if (isCodigo065(codHorario)) {
 	        return regraParaCodigo065(cliente, horaInicial);
 	    }
+	    
+	    if (isCodigo999(codHorario)) {
+	        return regraParaCodigo999(cliente, horaFinal);
+	    }
 
 	    // 3 — Demais códigos: busca pelo código direto
 	    return buscarRegraPeloNomeCompleto(codHorario, cliente.getId());
 	}
 	
+	private RegraEntity regraParaCodigo999(ClienteEntity cliente, String horaFinal) {
+	    boolean saiAs17 = "17".equalsIgnoreCase(horaFinal);
+
+	    String regraNome = saiAs17 ? "9991" : "9992";
+
+	    return buscarRegraPeloNomeCompleto(regraNome, cliente.getId());
+	}
+
+	private boolean isCodigo999(String codHorario) {
+		// TODO Auto-generated method stub
+		 return "999".equalsIgnoreCase(codHorario);
+	}
+
 	private boolean isFolga(String status) {
 	    return "Nao Trabalhado".equalsIgnoreCase(status);
 	}
@@ -1229,6 +1262,10 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 	    return buscarRegraPeloNomeCompleto(regraNome, cliente.getId());
 	}
 
+	
+	private boolean isTurno3x3(String codigo) {
+	    return "065".equalsIgnoreCase(codigo) || "066".equalsIgnoreCase(codigo) || "067".equalsIgnoreCase(codigo);
+	}
 
 	private HorarioEntity atualizaRegraComHorarioTotvs(HorarioTotvsProtheusDTO dto, Long idRegra) {
 
@@ -1884,8 +1921,10 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 				System.out.println("Pedestre **não encontrado** para matrícula: " + funcionario.getNumeroMatricula());
 			}
 
+			LocalEntity localPadrao = buscaLocalPadrao(cliente.getId());
+			
 			PedestreEntity pedestre = pedestreExistente
-					.orElseGet(() -> new PedestreEntity(funcionario, empresaExistente));
+					.orElseGet(() -> new PedestreEntity(funcionario, empresaExistente, localPadrao));
 
 
 			pedestre.updateFuncionarioSenior(funcionario, empresaExistente);
@@ -1914,6 +1953,59 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 				e.printStackTrace();
 			}
 		});
+	}
+
+	private LocalEntity buscaLocalPadrao(final Long idCliente) {
+		String nomeLocal = null;
+
+        try {
+            nomeLocal = buscaParametroNomeLocalPadrao(idCliente);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        // Primeira validação correta
+        if (nomeLocal == null || nomeLocal.trim().isEmpty()) {
+            System.out.println("Nenhum nome de local padrão encontrado.");
+            return null; // ou decidir não retornar
+        }
+
+        LocalEntity localPadrao = buscaLocalPadraoPeloNome(nomeLocal, idCliente);
+
+        if (localPadrao == null) {
+            System.out.println("Local padrão não encontrado: " + nomeLocal);
+            return null; 
+        }
+		return localPadrao;
+	}
+	
+	@SuppressWarnings("unchecked")
+	private LocalEntity buscaLocalPadraoPeloNome(String nomeLocal, Long idCliente) {
+		List<LocalEntity> local = null;
+
+		Map<String, Object> args = new HashMap<String, Object>();
+		args.put("NOME", nomeLocal);
+		args.put("ID_CLIENTE", idCliente);
+
+		try {
+			local = (List<LocalEntity>)  (List<LocalEntity>) pesquisaArgFixos(LocalEntity.class, "findByNameAndLocal", args);
+			if (local != null && !local.isEmpty())
+				return local.get(0);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	private String buscaParametroNomeLocalPadrao(Long idCliente) {
+		String nomeLocalPadrao = null;
+		
+		ParametroEntity param = getParametroSistema(BaseConstant.PARAMETERS_NAME.LOCAL_PADRAO_PEDESTRE, idCliente);
+
+		if(param != null)
+			nomeLocalPadrao = param.getValor();
+		
+		return nomeLocalPadrao;
 	}
 
 	private boolean isPermissaoAlterada(final PedestreEntity pedestre, final FuncionarioSeniorDto funcionario) {
@@ -3641,5 +3733,23 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 	    }
 	}
 
+	@SuppressWarnings("unchecked")
+	public List<LocalEntity> listaDeLocais(ClienteEntity cliente) {
+		Map<String, Object> args = new HashMap<String, Object>();
+		args.put("ID_CLIENTE", cliente.getId());
+
+		try {
+			List<LocalEntity> locais = (List<LocalEntity>)  (List<LocalEntity>) pesquisaArgFixos(LocalEntity.class,
+					"findAllByIdClienteAdd", args);
+
+			if (locais != null && !locais.isEmpty()) {
+				return locais;
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
 	
 }

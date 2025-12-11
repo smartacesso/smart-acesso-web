@@ -160,6 +160,10 @@ public interface BaseConstant {
 		public static final String TEMPO_TOLERANCIA_ENTRADA_E_SAIDA = "Tempo de tolerancia (Entrada/Saida)";
 
 		public static final String TEMPO_EXPIRACAO_CADASTRO_FACIAL = "Tempo para EXPIRAÇÃO da liberação de cadastro facial remoto (em horas)";
+		
+		public static final String LOCAL_PADRAO_VISITANTE = "Local padrao visitante";
+		
+		public static final String LOCAL_PADRAO_PEDESTRE = "Local padrao pedestre";
 
 	}
 	
