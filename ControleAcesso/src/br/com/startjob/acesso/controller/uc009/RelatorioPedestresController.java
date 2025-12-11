@@ -37,12 +37,14 @@ public class RelatorioPedestresController extends RelatorioController {
     public static final String ALMOCO = "Almoco";
     public static final String CAFE_TARDE = "Cafe da Tarde";
     public static final String CAFE_TARDE2 = "Cafe da Tarde 2";
+    public static final String LANCHE_EXTRA_01 = "Lanche hora extra 01";
+    public static final String LANCHE_EXTRA_02 = "Lanche hora extra 02";
     public static final String CAFE_TARDE_SEXTA = "Cafe da Tarde (Sexta)";
     public static final String CAFE_TARDE2_SEXTA = "Cafe da Tarde 2 (Sexta)";
     public static final String LANCHE_EXTRA = "Lanche Hora Extra";
     public static final String JANTAR = "Jantar";
     public static final String LANCHE_NOITE = "Lanche da Noite";
-	private static final String LANCHE_EXTRA_NOITE = "Lanche extre noite";
+	private static final String LANCHE_EXTRA_NOITE = "Lanche extra noite";
 
 	
 	private Long idEmpresaSelecionada;
@@ -149,8 +151,8 @@ public class RelatorioPedestresController extends RelatorioController {
 	    
 	    if (empresaSelecionada.getNome().contains("ALVO")) {
 
-	        // Café da manhã: 06:30 – 06:55 (390 – 415)
-	        if (minutosTotais >= 390 && minutosTotais <= 415) {
+	        // Café da manhã: 06:30 – 06:50 (390 – 410)
+	        if (minutosTotais >= 390 && minutosTotais <= 410) {
 	            return CAFE_MANHA;
 	        }
 
@@ -159,9 +161,19 @@ public class RelatorioPedestresController extends RelatorioController {
 	            return ALMOCO;
 	        }
 
-	        // Café da tarde: 14:30 – 15:00 (870 – 900)
+	        // Café da tarde 1ª turma: 14:30 – 15:00 (870 – 900)
 	        if (minutosTotais >= 870 && minutosTotais <= 900) {
 	            return CAFE_TARDE;
+	        }
+
+	        // Lanche hora extra 01: 16:50 – 17:00 (1010 – 1020)
+	        if (minutosTotais >= 1010 && minutosTotais <= 1020) {
+	            return LANCHE_EXTRA_01;
+	        }
+
+	        // Lanche hora extra 02: 18:00 – 18:20 (1080 – 1100)
+	        if (minutosTotais >= 1080 && minutosTotais <= 1100) {
+	            return LANCHE_EXTRA_02;
 	        }
 
 	        // Jantar: 18:30 – 19:30 (1110 – 1170)
@@ -174,7 +186,7 @@ public class RelatorioPedestresController extends RelatorioController {
 	            return LANCHE_NOITE;
 	        }
 
-	        // Lanche hora extra noturno: 00:00 – 02:00 (0 – 120)
+	        // Lanche hora extra 03: 00:00 – 02:00 (0 – 120)
 	        if (minutosTotais >= 0 && minutosTotais <= 120) {
 	            return LANCHE_EXTRA_NOITE;
 	        }
@@ -273,6 +285,8 @@ public class RelatorioPedestresController extends RelatorioController {
 	        refeicoesCount.put(CAFE_MANHA, 0L);
 	        refeicoesCount.put(ALMOCO, 0L);
 	        refeicoesCount.put(CAFE_TARDE, 0L);
+	        refeicoesCount.put(LANCHE_EXTRA_01, 0L);
+	        refeicoesCount.put(LANCHE_EXTRA_02, 0L);
 	        refeicoesCount.put(JANTAR, 0L);
 	        refeicoesCount.put(LANCHE_NOITE, 0L);
 	        refeicoesCount.put(LANCHE_EXTRA_NOITE, 0L);
