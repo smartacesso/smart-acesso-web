@@ -35,13 +35,25 @@ import br.com.startjob.acesso.modelo.entity.base.ClienteBaseEntity;
 					  + "where obj.nome = :NOME and obj.cliente.id = :ID_CLIENTE "
 					  + "and (obj.removido = false OR obj.removido IS NULL) "  	
 					  + "order by obj.id asc"),
+	@NamedQuery(name  = "LocalEntity.findByUuidAndIdCliente", 
+				query = "select obj from LocalEntity obj "
+					  + "where obj.uuid = :UUID and obj.cliente.id = :ID_CLIENTE "
+					  + "and (obj.removido = false OR obj.removido IS NULL) "  	
+					  + "order by obj.id asc"),
 	@NamedQuery(name = "LocalEntity.findAllByIdCliente", 
 			    query = "select distinct obj FROM LocalEntity obj "
 			          + "left join fetch obj.hikivisionDeviceNames "
 			          + "where obj.cliente.id = :ID_CLIENTE "
 			          + "and obj.dataAlteracao >= :LAST_SYNC "
 			          + "and (obj.removido = false OR obj.removido IS NULL) "
-			          + "order BY obj.id ASC")
+			          + "order BY obj.id ASC"),
+	@NamedQuery(name  = "LocalEntity.findAllByIdClienteAdd", 
+				query = "select obj "
+				      + "from LocalEntity obj "
+				      + "where obj.cliente.id = :ID_CLIENTE "
+					  + "and (obj.removido = false or obj.removido is null) "
+					  + "and (obj.uuid != '' or obj.uuid is not null) "
+					  + "order by obj.id asc")
 
 })
 public class LocalEntity extends ClienteBaseEntity {
@@ -60,6 +72,9 @@ public class LocalEntity extends ClienteBaseEntity {
 	    @CollectionTable(name = "tb_hikivision_devices_name", joinColumns = @JoinColumn(name = "ID_LOCAL"))
 	    @Column(name = "DEVICE_NAME", nullable = false)
 	    private List<String> hikivisionDeviceNames = new ArrayList<>();
+	    
+	    @Column(name = "UUID", unique = true, length = 36)
+	    private String uuid;
 
 	    public Long getId() {
 	        return this.id;
@@ -101,5 +116,13 @@ public class LocalEntity extends ClienteBaseEntity {
 
 		public void setHikivisionDeviceNames(List<String> hikivisionDeviceNames) {
 			this.hikivisionDeviceNames = hikivisionDeviceNames;
+		}
+
+		public String getUuid() {
+			return uuid;
+		}
+
+		public void setUuid(String uuid) {
+			this.uuid = uuid;
 		}
 }

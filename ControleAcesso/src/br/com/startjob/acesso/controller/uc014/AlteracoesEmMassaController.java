@@ -5,6 +5,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
@@ -121,9 +123,6 @@ public class AlteracoesEmMassaController extends BaseController{
 	
 	
 	public void salvarJustificativa() {
-		System.out.println("teste");
-		
-		
 		Long idCliente = getUsuarioLogado().getCliente().getId();
 		pedestreRegraAlteracao.setRegra(regraAlteracao);
 		
@@ -268,6 +267,45 @@ public class AlteracoesEmMassaController extends BaseController{
 		listaTipoRegra.add(new SelectItem(TipoRegra.ACESSO_PERIODO, TipoRegra.ACESSO_PERIODO.getDescricao()));
 		listaTipoRegra.add(new SelectItem(TipoRegra.ACESSO_UNICO, TipoRegra.ACESSO_UNICO.getDescricao()));
 		listaTipoRegra.add(new SelectItem(TipoRegra.ACESSO_ESCALA_3_3, TipoRegra.ACESSO_ESCALA_3_3.getDescricao()));
+	}
+	
+	public String buscaRegra(PedestreEntity pedestre) {
+
+		if (pedestre == null || pedestre.getId() == null) {
+			return "";
+		}
+
+		Map<String, Object> args = new HashMap<>();
+		args.put("ID_PEDESTRE", pedestre.getId());
+
+		List<PedestreRegraEntity> regraAtiva;
+
+		try {
+			@SuppressWarnings("unchecked")
+			List<PedestreRegraEntity> resultado =
+				(List<PedestreRegraEntity>) baseEJB.pesquisaArgFixos(
+					PedestreRegraEntity.class,
+					"findPedestreRegraAtivo",
+					args
+				);
+
+			regraAtiva = resultado;
+
+		} catch (Exception e) {
+			return "";
+		}
+
+		if (regraAtiva == null || regraAtiva.isEmpty()) {
+			return "";
+		}
+
+		PedestreRegraEntity regra = regraAtiva.get(0);
+
+		if (regra.getRegra() == null || regra.getRegra().getNome() == null) {
+			return "";
+		}
+
+		return regra.getRegra().getNome();
 	}
 	
 	public List<SelectItem> getListaEmpresas() {

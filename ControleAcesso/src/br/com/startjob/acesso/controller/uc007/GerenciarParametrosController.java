@@ -108,6 +108,8 @@ public class GerenciarParametrosController extends BaseController {
 			boolean horarioDisparoSOC = false;
 			boolean habilitaAppPedestre = false;
 			boolean habilitaRelatorioRona = false;
+			boolean localPadraoPedestre = false;
+			boolean localPadraoVisitante = false;
 
 			for (BaseEntity baseEntity : all) {
 				ParametroEntity item = (ParametroEntity) baseEntity;
@@ -199,6 +201,12 @@ public class GerenciarParametrosController extends BaseController {
 				}
 				if (item.getNome().equals(BaseConstant.PARAMETERS_NAME.HABILITA_RELATORIO_RONA)) {
 					habilitaRelatorioRona = true;
+				}
+				if (item.getNome().equals(BaseConstant.PARAMETERS_NAME.LOCAL_PADRAO_PEDESTRE)) {
+					localPadraoPedestre = true;
+				}
+				if (item.getNome().equals(BaseConstant.PARAMETERS_NAME.LOCAL_PADRAO_VISITANTE)) {
+					localPadraoVisitante = true;
 				}
 
 			}
@@ -358,7 +366,17 @@ public class GerenciarParametrosController extends BaseController {
 				parametrosGerais.add(p);
 			}
 			
+			if (!localPadraoPedestre) {
+				ParametroEntity p = new ParametroEntity(BaseConstant.PARAMETERS_NAME.LOCAL_PADRAO_PEDESTRE, "",
+						getUsuarioLogado().getCliente());
+				parametrosGerais.add(p);
+			}
 			
+			if (!localPadraoVisitante) {
+				ParametroEntity p = new ParametroEntity(BaseConstant.PARAMETERS_NAME.LOCAL_PADRAO_VISITANTE, "",
+						getUsuarioLogado().getCliente());
+				parametrosGerais.add(p);
+			}
 
 			// ordena configurações
 			Collections.sort(parametrosGerais, new Comparator<ParametroEntity>() {

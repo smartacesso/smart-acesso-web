@@ -267,9 +267,11 @@ public class HorarioEntity extends BaseEntity {
 	}
 
 	public void update(HorarioSeniorDto dto) {
-		this.horarioInicio = ajustarMinutos(dto.getInicio(), -20);
-		this.horarioFim = ajustarMinutos(dto.getFim(), 20);
+//		this.horarioInicio = ajustarMinutos(dto.getInicio(), -10);
+//		this.horarioFim = ajustarMinutos(dto.getFim(), 10);
 		
+		this.horarioInicio = dto.getInicio();
+		this.horarioFim = dto.getFim();
 	}
 	
 	public void update(HorarioTotvsProtheusDTO dto) {

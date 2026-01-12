@@ -58,33 +58,39 @@
 							<p:ajax process="@this"/>
 						</p:spinner>
 
-						<p:inputNumber value="#{item.valor}" minValue="1" maxValue="16" decimalPlaces="0"
-								rendered="#{item.valor != 'true' and item.valor != 'false' 
-									and not item.nome.contains('Formato') and not item.nome.startsWith('Campos')
-									and not item.nome.contains('Comtele') and not item.nome.startsWith('Limite')
-									and not item.nome.contains('QR Code: Tipo padrão')
-									and not item.nome.contains('SOC')
-									and not item.nome.contains('tolerancia')
-									and not item.nome.contains('remoto')}">
-						
-							<p:ajax process="@this"/>
+						<p:inputNumber value="#{item.valor}" minValue="1" maxValue="16"
+							decimalPlaces="0"
+							rendered="#{not (item.valor == 'true' or item.valor == 'false'
+    or item.nome.contains('Formato')
+    or item.nome.startsWith('Campos')
+    or item.nome.contains('Comtele')
+    or item.nome.startsWith('Limite')
+    or item.nome.contains('QR Code: Tipo padrão')
+    or item.nome.contains('SOC')
+    or item.nome.contains('tolerancia')
+    or item.nome.contains('remoto')
+    or item.nome.contains('Local'))}">
+
+							<p:ajax process="@this" />
 						</p:inputNumber>
-						
+
 						<p:inputNumber value="#{item.valor}" minValue="1" maxValue="60" decimalPlaces="0"
 								rendered="#{item.valor != 'true' and item.valor != 'false' 
-									and item.nome.contains('tolerancia')}">
+									and item.nome.contains('tolerancia')
+									and !item.nome.contains('Local')}">
 						
 							<p:ajax process="@this"/>
 						</p:inputNumber>
 						
 						<p:inputNumber value="#{item.valor}" minValue="1" maxValue="24" decimalPlaces="0"
 								rendered="#{item.valor != 'true' and item.valor != 'false' 
-									and item.nome.contains('cadastro facial remoto')}">
+									and item.nome.contains('cadastro facial remoto')
+									and !item.nome.contains('Local')}">
 						
 							<p:ajax process="@this"/>
 						</p:inputNumber>
 						
-						<p:inputText value="#{item.valor}"  rendered="#{item.nome.contains('Formato')}">
+						<p:inputText value="#{item.valor}"  rendered="#{item.nome.contains('Formato') or item.nome.contains('Local')}">
 						
 							<p:ajax process="@this"/>
 						</p:inputText>

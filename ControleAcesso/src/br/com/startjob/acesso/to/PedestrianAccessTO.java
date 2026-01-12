@@ -64,6 +64,7 @@ public class PedestrianAccessTO {
 	private Boolean enviaSmsAoPassarNaCatraca;
 
 	private Long idLocal;
+	private String uuidLocal;
 	private Long idEmpresa;
 	private Long idCargo;
 	private Long idCentroCusto;
@@ -132,6 +133,7 @@ public class PedestrianAccessTO {
 		this.estado			  = objects[36] == null ? null : objects[36].toString();
 		
 		this.idLocal 		  = objects[77] == null ? null : Long.valueOf(objects[77].toString());
+		this.uuidLocal 		  = objects[83] == null ? null : objects[83].toString();
 		
 		this.idEmpresa = objects[44] == null ? null : Long.valueOf(objects[44].toString());
 		this.idCargo = objects[45] == null ? null : Long.valueOf(objects[45].toString());
@@ -219,6 +221,7 @@ public class PedestrianAccessTO {
 	        this.genero = entity.getGenero() != null ? entity.getGenero().name() : null;
 	        this.enviaSmsAoPassarNaCatraca = entity.getEnviaSmsAoPassarNaCatraca();
 	        this.idLocal = entity.getIdLocal();
+	        this.uuidLocal = entity.getUuidLocal();
 	        this.luxandIdentifier = entity.getLuxandIdentifier();
 	        this.qtdAcessoAntesSinc = entity.getQtdAcessoAntesSinc();
 	        this.login = entity.getLogin();
@@ -975,6 +978,14 @@ public class PedestrianAccessTO {
 
 	public void setAgendamentoLiberado(Boolean agendamentoLiberado) {
 		this.agendamentoLiberado = agendamentoLiberado;
+	}
+
+	public String getUuidLocal() {
+		return uuidLocal;
+	}
+
+	public void setUuidLocal(String uuidLocal) {
+		this.uuidLocal = uuidLocal;
 	}
 	
 }
