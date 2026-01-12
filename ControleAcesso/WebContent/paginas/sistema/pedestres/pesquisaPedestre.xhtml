@@ -314,6 +314,27 @@
 								<h:outputText value="#{pedestre.empresa.nome}" />
 							</p:column>
 
+							<p:column headerText="departamento"
+								styleClass="align-left col-desktop-only">
+								<h:outputText value="#{pedestre.departamento.nome}" />
+							</p:column>
+
+							<p:column headerText="cargo"
+								styleClass="align-left col-desktop-only">
+								<h:outputText value="#{pedestre.centroCusto.nome}" />
+							</p:column>
+
+							<p:column headerText="centro de custo"
+								styleClass="align-left col-desktop-only">
+								<h:outputText value="#{pedestre.cargo.nome}" />
+							</p:column>
+
+							<p:column headerText="regra ativa"
+								styleClass="align-left col-desktop-only">
+								<h:outputText
+									value="#{consultaPedestreController.buscaRegra(pedestre)}" />
+							</p:column>
+
 							<p:column headerText="#{msgs['alt.acao.editar']}"
 								style="text-align: center;">
 								<p:commandButton icon="pi pi-pencil"

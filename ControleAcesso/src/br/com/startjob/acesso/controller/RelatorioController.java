@@ -157,7 +157,7 @@ public abstract class RelatorioController extends BaseController {
 					else
 						identificador = equipamento.getIdentificador();
 					
-					listaEquipamentos.add(new SelectItem(identificador, equipamento.getNome()));
+					listaEquipamentos.add(new SelectItem(equipamento.getNome(), equipamento.getNome()));
 				});
 			}
 		} catch(Exception e) {

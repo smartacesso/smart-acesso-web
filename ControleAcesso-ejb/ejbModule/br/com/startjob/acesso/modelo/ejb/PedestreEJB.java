@@ -1118,14 +1118,14 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 			boolean trabalhandoAgora = estaNoTurno(horarioExistente.getHorarioInicio(),
 					horarioExistente.getHorarioFim(), agora);
 
-			if (trabalhandoAgora && !"folga".equalsIgnoreCase(pedestreRegra.getRegra().getNome())) {
-				System.out.println("Funcionario em horario de trabalho...");
-				return;
-			}
+//			if (trabalhandoAgora && !"folga".equalsIgnoreCase(pedestreRegra.getRegra().getNome())) {
+//				System.out.println("Funcionario em horario de trabalho...");
+//				return;
+//			}
 
 			apagaPedetreRegras(pedestre.getId());
 
-			if ("Nao Trabalhado".equalsIgnoreCase(funcionario.getStatusTrabalho())) {
+			if ("Nao Trabalhado".equalsIgnoreCase(funcionario.getStatusTrabalho()) || isHorarioZerado(funcionario.getHoraInicial(), funcionario.getHoraFinal())) {
 				System.out.println("Funcionario em folga...");
 				
 				PedestreRegraEntity newPedestreRegra = new PedestreRegraEntity();
@@ -1189,6 +1189,14 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		} else {
 			System.out.println("Regra invalida ou não encontrada : " + funcionario.getCodigoHorario());
 		}
+	}
+
+	private boolean isHorarioZerado(String horaInicial, String horaFinal) {
+		if("0".equalsIgnoreCase(horaFinal) && "0".equalsIgnoreCase(horaInicial)) {
+			return true;
+		}
+		
+		return false;
 	}
 
 	private boolean estaNoTurno(Date horarioInicio, Date horarioFim, LocalTime agora) {

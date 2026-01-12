@@ -216,7 +216,7 @@
 					style="margin-left: 79%;">
 					<p:column>
 						<p:commandButton id="aplicarJustificativa" value="Salvar"
-							action="#{alteracoesEmMassaController.salvarJustificativa}"
+							action="#{alteracoesEmMassaController.iniciarAlteracaoEmMassa}"
 							process="@form" update="@form"
 							oncomplete="PF('dialogJustificativa').hide();" />
 
@@ -518,6 +518,26 @@
 						<p:column headerText="#{msgs['label.uc008.empresa']}"
 							styleClass="align-left col-desktop-only">
 							<h:outputText value="#{pedestre.empresa.nome}" />
+						</p:column>
+
+						<p:column headerText="departamento"
+							styleClass="align-left col-desktop-only">
+							<h:outputText value="#{pedestre.departamento.nome}" />
+						</p:column>
+
+						<p:column headerText="cargo"
+							styleClass="align-left col-desktop-only">
+							<h:outputText value="#{pedestre.centroCusto.nome}" />
+						</p:column>
+
+						<p:column headerText="centro de custo"
+							styleClass="align-left col-desktop-only">
+							<h:outputText value="#{pedestre.cargo.nome}" />
+						</p:column>
+						
+						<p:column headerText="regra ativa"
+							styleClass="align-left col-desktop-only">
+							<h:outputText value="#{alteracoesEmMassaController.buscaRegra(pedestre)}" />
 						</p:column>
 
 						<p:column style="text-align: center; width: 40px">

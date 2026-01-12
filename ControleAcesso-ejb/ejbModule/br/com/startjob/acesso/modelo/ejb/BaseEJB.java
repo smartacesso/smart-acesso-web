@@ -1079,9 +1079,19 @@ public class BaseEJB implements BaseEJBRemote {
 
 					// like ou igual
 					String operacao = " = ";
-					if (!(argumentos.get(chave) instanceof Number) && argumentos.get(chave) instanceof String) {
-						operacao = " like '%'||";
+//					if (!(argumentos.get(chave) instanceof Number) && argumentos.get(chave) instanceof String) {
+//						operacao = " like '%'||";
+//					}
+
+					// 🔴 CASO ESPECIAL: equipamento sempre usa "="
+					if ("equipamento".equals(chave)) {
+					    operacao = " = ";
 					}
+					// 🟢 PADRÃO: String usa LIKE
+					else if (!(argumentos.get(chave) instanceof Number) && argumentos.get(chave) instanceof String) {
+					    operacao = " like '%'||";
+					}
+
 
 					// monta query
 					if (queryStr.indexOf("where") != -1) {
@@ -1566,7 +1576,7 @@ public class BaseEJB implements BaseEJBRemote {
 			}
 
 			Query query = getEntityManager().createNamedQuery(nomeClasse + "." + namedQuery);
-
+			
 			if (arg != null) {
 
 				// complementa query com argumentos
@@ -1595,6 +1605,7 @@ public class BaseEJB implements BaseEJBRemote {
 				if (queryStr.indexOf("where") != -1) {
 					this.setaArgumentos(arg, query);
 				}
+				
 
 			} else {
 
