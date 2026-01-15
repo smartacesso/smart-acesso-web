@@ -1,112 +1,176 @@
 <ui:composition xmlns="http://www.w3.org/1999/xhtml"
-                xmlns:ui="http://java.sun.com/jsf/facelets"
-                xmlns:h="http://java.sun.com/jsf/html"
-                xmlns:p="http://primefaces.org/ui"
-                template="/tema/templates/template.xhtml">
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	template="/tema/templates/template.xhtml">
 
-    <ui:define name="conteudo">
 
-        <p:panel header="Cadastro Facial"
-                 style="max-width:520px;margin:auto;margin-top:40px">
+	<ui:define name="conteudo">
 
-            <!-- STEPS -->
-            <p:steps activeIndex="#{cadastroFacialHikivisionController.step}">
-                <p:menuitem value="CPF"/>
-                <p:menuitem value="Dados"/>
-                <p:menuitem value="Foto"/>
-                <p:menuitem value="Confirmação"/>
-            </p:steps>
+		<p:panel header="Cadastro Facial"
+			style="max-width:520px;margin:auto;margin-top:40px">
 
-            <p:separator/>
-            <p:messages autoUpdate="true"/>
+			<!-- STEPS -->
+			<p:steps activeIndex="#{cadastroPedestreController.step}">
+				<p:menuitem value="CPF" />
+				<p:menuitem value="Dados" />
+				<p:menuitem value="Foto" />
+				<p:menuitem value="Confirmação" />
+			</p:steps>
 
-            <!-- STEP 0 - CPF -->
-			<h:panelGroup
-				rendered="#{cadastroFacialHikivisionController.step eq 0}">
+			<p:separator />
+			<p:messages autoUpdate="true" />
+
+			<!-- STEP 0 - CPF -->
+			<h:panelGroup rendered="#{cadastroPedestreController.step eq 0}">
 				<p:panelGrid columns="1" layout="grid" class="ui-fluid">
 
 					<p:outputLabel value="CPF" />
 					<p:inputMask id="cpf" mask="999.999.999-99"
-						value="#{cadastroFacialHikivisionController.cpf}" />
+						value="#{cadastroPedestreController.cpf}" />
 
 					<p:commandButton value="Buscar" icon="pi pi-search"
-						action="#{cadastroFacialHikivisionController.buscarPorCpf}"
+						action="#{cadastroPedestreController.buscarPorCpf}"
 						process="@parent" update="@form" />
 				</p:panelGrid>
 			</h:panelGroup>
 
 
 			<!-- STEP 1 - DADOS -->
-            <h:panelGroup rendered="#{cadastroFacialHikivisionController.step eq 1}">
-                <p:panelGrid columns="1" layout="grid" class="ui-fluid">
+			<h:panelGroup rendered="#{cadastroPedestreController.step eq 1}">
+				<p:panelGrid columns="1" layout="grid" class="ui-fluid">
 
-                    <p:outputLabel value="Nome completo"/>
-                    <p:inputText value="#{cadastroFacialHikivisionController.pedestre.nome}"
-                                 required="true"/>
+					<p:outputLabel value="Nome completo" />
+					<p:inputText value="#{cadastroPedestreController.entidade.nome}"
+						required="true" />
 
-                    <p:commandButton value="Avançar"
-                                     icon="pi pi-arrow-right"
-                                     action="#{cadastroFacialHikivisionController.proximo}"
-                                     process="@this"
-                                     update="@form"/>
+					<p:outputLabel value="#{msgs['label.uc008.empresa']}" for="empresa" />
+					<p:selectOneMenu id="empresa"
+						value="#{cadastroPedestreController.entidade.empresa.id}"
+						valueChangeListener="#{cadastroPedestreController.eventoEmpresaSelecionada}"
+						required="#{cadastroPedestreController.verificaObrigatorio('empresa')}"
+						style="width: 100%">
+						<f:selectItems value="#{cadastroPedestreController.listaEmpresas}" />
+					</p:selectOneMenu>
 
-                    <p:commandButton value="Voltar"
-                                     icon="pi pi-arrow-left"
-                                     action="#{cadastroFacialHikivisionController.voltar}"
-                                     process="@this"
-                                     update="@form"/>
-                </p:panelGrid>
-            </h:panelGroup>
+					<p:commandButton value="Avançar" icon="pi pi-arrow-right"
+						action="#{cadastroPedestreController.proximo}" process="@this"
+						update="@form" />
 
-            <!-- STEP 2 - FOTO -->
-            <h:panelGroup rendered="#{cadastroFacialHikivisionController.step eq 2}">
-                <p:panelGrid columns="1" layout="grid" class="ui-fluid"
-                             style="text-align:center">
+					<p:commandButton value="Voltar" icon="pi pi-arrow-left"
+						action="#{cadastroPedestreController.voltar}" process="@this"
+						update="@form" />
+				</p:panelGrid>
+			</h:panelGroup>
 
-                    <p:graphicImage value="#{cadastroFacialHikivisionController.streamFoto}"
-                                    rendered="#{not empty cadastroFacialHikivisionController.pedestre.foto}"
-                                    style="width:180px;height:180px;border-radius:50%"/>
+			<!-- STEP 2 - FOTO -->
+			<h:panelGroup id="fotoPreview"
+				rendered="#{cadastroPedestreController.step eq 2}">
 
-                    <p:commandButton value="Tirar Foto"
-                                     icon="pi pi-camera"
-                                     type="button"
-                                     onclick="PF('dlgCamera').show()"/>
+				<p:panelGrid columns="1" layout="grid" class="ui-fluid"
+					style="text-align:center">
 
-                    <p:commandButton value="Avançar"
-                                     icon="pi pi-arrow-right"
-                                     disabled="#{empty cadastroFacialHikivisionController.pedestre.foto}"
-                                     action="#{cadastroFacialHikivisionController.proximo}"
-                                     process="@this"
-                                     update="@form"/>
-                </p:panelGrid>
-            </h:panelGroup>
+					<p:outputLabel value="Foto" />
 
-            <!-- STEP 3 - CONFIRMAÇÃO -->
-            <h:panelGroup rendered="#{cadastroFacialHikivisionController.step eq 3}">
-                <p:panelGrid columns="1" layout="grid" class="ui-fluid">
+					<!-- FOTO REAL -->
+					<p:graphicImage
+						value="#{cadastroPedestreController.getSreamedContent(cadastroPedestreController.entidade.foto)}"
+						rendered="#{not empty cadastroPedestreController.entidade.foto}"
+						stream="false" cache="false"
+						style="height:250px;width:250px;border-radius:50%;margin-bottom:10px; border: 5px solid #00263d;" />
 
-                    <h:outputText value="Confirme seus dados"
-                                  style="font-weight:bold"/>
+					<!-- FOTO PADRÃO -->
+					<p:graphicImage
+						value="#{menuController.path}/tema/img/ic_photo_male.png"
+						rendered="#{empty cadastroPedestreController.entidade.foto}"
+						style="height:250px;width:250px;border-radius:50%;margin-bottom:10px; border: 5px solid #00263d;" />
+					<p:spacer height="10" />
 
-                    <h:outputText value="Nome: #{cadastroFacialHikivisionController.pedestre.nome}"/>
-                    <h:outputText value="CPF: #{cadastroFacialHikivisionController.pedestre.cpf}"/>
+					<!-- ABRIR WEBCAM -->
+					<p:commandButton value="Tirar Foto" type="button"
+						onclick="PF('pc').attach(); PF('tirarFoto').show();"
+						icon="pi pi-camera" style="width:100%;margin-bottom:10px" />
 
-                    <p:commandButton value="Concluir Cadastro"
-                                     icon="pi pi-check"
-                                     action="#{cadastroFacialHikivisionController.salvar}"
-                                     process="@this"
-                                     update="@form"/>
-                </p:panelGrid>
-            </h:panelGroup>
 
-        </p:panel>
+					<!-- AVANÇAR -->
+					<p:commandButton value="Avançar" icon="pi pi-arrow-right"
+						action="#{cadastroPedestreController.proximo}" process="@this"
+						update="@form"
+						disabled="#{empty cadastroPedestreController.entidade.foto}"
+						style="width:100%" />
 
-        <!-- DIALOG WEBCAM -->
-        <p:dialog widgetVar="dlgCamera" modal="true" header="Captura Facial">
-            <p:photoCam listener="#{cadastroFacialHikivisionController.onCapture}"
-                         update="@form"/>
-        </p:dialog>
+					<p:commandButton value="Voltar" icon="pi pi-arrow-left"
+						action="#{cadastroPedestreController.voltar}" process="@this"
+						update="@form" />
 
-    </ui:define>
+				</p:panelGrid>
+			</h:panelGroup>
 
+			<!-- STEP 3 - CONFIRMAÇÃO -->
+			<h:panelGroup rendered="#{cadastroPedestreController.step eq 3}">
+				<p:panelGrid columns="1" layout="grid" class="ui-fluid">
+
+					<h:outputText value="Confirme seus dados" style="font-weight:bold" />
+
+					<h:outputText
+						value="Nome: #{cadastroPedestreController.entidade.nome}" />
+					<h:outputText
+						value="CPF: #{cadastroPedestreController.entidade.cpf}" />
+
+					<p:commandButton value="Concluir Cadastro" icon="pi pi-check"
+						action="#{cadastroPedestreController.salvar}" process="@this"
+						update="@form" />
+
+					<p:commandButton value="Voltar" icon="pi pi-arrow-left"
+						action="#{cadastroPedestreController.voltar}" process="@this"
+						update="@form" />
+				</p:panelGrid>
+			</h:panelGroup>
+		</p:panel>
+
+		<p:dialog id="dialogTirarFoto" widgetVar="tirarFoto"
+			header="#{msgs['label.uc008.tirar.foto']}" modal="true"
+			onHide="PF('pc').dettach()">
+
+			<p:photoCam id="idPc" widgetVar="pc"
+				listener="#{cadastroPedestreController.capturarFoto}"
+				autoStart="false" style="width: 10px" />
+			<p:commandButton value="#{msgs['label.uc008.capturar']}"
+				process="dialogTirarFoto" update="form:dialogCropImage"
+				onclick="PF('pc').capture();"
+				oncomplete="PF('tirarFoto').hide(); PF('cropImage').show(); PF('pc').dettach(); return false;"
+				style="margin-top: 10px" />
+
+		</p:dialog>
+
+		<p:dialog id="dialogCropImage" widgetVar="cropImage"
+			header="#{msgs['label.uc008.cortar.imagem']}" modal="true"
+			closable="false" width="370" position="top" resizable="true"
+			positionType="absolute">
+
+			<h:panelGrid columns="2">
+				<p:imageCropper id="imageCroppedTemp"
+					value="#{cadastroPedestreController.croppedImage}"
+					rendered="#{cadastroPedestreController.exibeCrop}"
+					image="#{menuController.urlMain}/resources/upload/#{cadastroPedestreController.fileNameTemp}"
+					initialCoords="75,0,350,350" aspectRatio="1.0" guides="true"
+					minSize="200,200"
+					onerror="console.error('Erro ao carregar imagem no cropper');"
+					onsuccess="console.log('Cropper inicializado com sucesso');" />
+
+			</h:panelGrid>
+
+			<p:commandButton value="#{msgs['label.uc008.cortar']}"
+				action="#{cadastroPedestreController.crop}"
+				process="dialogCropImage" update="fotoPreview" icon="pi pi-clone"
+				oncomplete="PF('cropImage').hide(); console.log('Imagem cortada com sucesso:', '#{cadastroPedestreController.croppedImage}'); return false;"
+				style="margin-top: 10px; margin-right: 10px;" styleClass="whiteIcon" />
+
+			<p:commandButton value="#{msgs['alt.acao.cancelar']}"
+				action="#{cadastroPedestreController.cancelaCrop}" process="@this"
+				oncomplete="PF('cropImage').hide(); PF('escolherFoto').show(); console.log('Corte cancelado'); return false;" />
+
+		</p:dialog>
+	</ui:define>
 </ui:composition>
