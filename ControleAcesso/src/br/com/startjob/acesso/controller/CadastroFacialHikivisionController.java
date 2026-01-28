@@ -11,6 +11,8 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
+import javax.faces.application.FacesMessage;
+import javax.faces.context.FacesContext;
 import javax.faces.view.ViewScoped;
 import javax.inject.Named;
 
@@ -52,14 +54,22 @@ public class CadastroFacialHikivisionController extends BaseController {
 	private Long idCliente;
 	private Long idPedestre;
 	private Long token;
+	private String cpf;
+	
+	private int step = 0;
 
 	@PostConstruct
 	public void init() {
 		baseEJB = pedestreEJB;
 		
 		try {
-			idPedestre = Long.valueOf(getRequest().getParameter("idPedestre"));
+			String id =  getRequest().getParameter("idPedestre");
+			if(id == null) {
+				return;
+			}
+			
 			idCliente = Long.valueOf(getRequest().getParameter("cliente"));
+			idPedestre = Long.valueOf(getRequest().getParameter("idPedestre"));
 			token = Long.valueOf(getRequest().getParameter("token"));
 
 		} catch (Exception e) {
@@ -87,6 +97,39 @@ public class CadastroFacialHikivisionController extends BaseController {
 			return;
 		}
 	}
+	
+	public void buscarPorCpf() {
+
+	    if (cpf == null || cpf.trim().isEmpty()) {
+	    	System.out.println("CPF vazio");
+	        FacesContext.getCurrentInstance().addMessage(null,
+	            new FacesMessage(FacesMessage.SEVERITY_WARN, "CPF obrigatório", null));
+	        return;
+	    }
+
+	    String cpfSemMascara = cpf.replaceAll("\\D", "");
+	    idCliente = getUsuarioLogado().getCliente().getId();
+
+	    PedestreEntity encontrado = buscaPedestrePeloCpf(cpfSemMascara, idCliente);
+
+	    if (encontrado != null) {
+	        this.pedestre = encontrado;
+
+	        FacesContext.getCurrentInstance().addMessage(null,
+	            new FacesMessage(FacesMessage.SEVERITY_INFO,
+	                "Cadastro encontrado", "Dados carregados automaticamente"));
+	    } else {
+	        this.pedestre = new PedestreEntity();
+	        this.pedestre.setCpf(cpfSemMascara);
+
+	        FacesContext.getCurrentInstance().addMessage(null,
+	            new FacesMessage(FacesMessage.SEVERITY_INFO,
+	                "Novo cadastro", "CPF não encontrado"));
+	    }
+
+	    this.step = 1;
+	}
+
 
 	@Override
 	public String salvar() {
@@ -123,6 +166,27 @@ public class CadastroFacialHikivisionController extends BaseController {
 		try {
 			List<PedestreEntity> pedestres = (List<PedestreEntity>) pedestreEJB
 					.pesquisaArgFixos(PedestreEntity.class, "findByIdWithEmpRegrasAndHorarios", args);
+
+			if (pedestres != null) {
+				return pedestres.stream().findFirst().orElse(null);
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return null;
+	}
+	
+	@SuppressWarnings("unchecked")
+	private PedestreEntity buscaPedestrePeloCpf(String cpf, Long idCliente) {
+		HashMap<String, Object> args = new HashMap<>();
+		args.put("CPF", cpf);
+		args.put("ID_CLIENTE", idCliente);
+
+		try {
+			List<PedestreEntity> pedestres = (List<PedestreEntity>) pedestreEJB
+					.pesquisaArgFixos(PedestreEntity.class, "findByCpfAndIdCliente", args);
 
 			if (pedestres != null) {
 				return pedestres.stream().findFirst().orElse(null);
@@ -173,6 +237,13 @@ public class CadastroFacialHikivisionController extends BaseController {
 		}
 		return null;
 	}
+	
+	public StreamedContent getStreamedFoto() {
+	    if (pedestre != null && pedestre.getFoto() != null) {
+	        return getStreamedContent(pedestre.getFoto());
+	    }
+	    return null;
+	}
 
 	private void limpaSessao() {
 		setSessioAtrribute("imagem1", "");
@@ -222,6 +293,36 @@ public class CadastroFacialHikivisionController extends BaseController {
 
 	public Integer getQtdeFotosNecessarias() {
 		return qtdeFotosNecessarias;
+	}
+	
+	public int getStep() {
+		return step;
+	}
+
+	public void setStep(int step) {
+		this.step = step;
+	}
+
+	// ===== CONTROLE DE NAVEGAÇÃO =====
+
+	public void proximo() {
+		if (step < 2) {
+			step++;
+		}
+	}
+
+	public void voltar() {
+		if (step > 0) {
+			step--;
+		}
+	}
+
+	public String getCpf() {
+		return cpf;
+	}
+
+	public void setCpf(String cpf) {
+		this.cpf = cpf;
 	}
 
 }

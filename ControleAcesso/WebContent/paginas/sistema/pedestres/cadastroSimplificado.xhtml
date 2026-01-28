@@ -9,7 +9,7 @@
 	<ui:define name="conteudo">
 
 		<p:panel header="Cadastro Facial"
-			style="max-width:520px;margin:auto;margin-top:40px">
+			style="max-width:auto;margin:auto;margin-top:40px">
 
 			<!-- STEPS -->
 			<p:steps activeIndex="#{cadastroPedestreController.step}">
@@ -30,9 +30,9 @@
 					<p:inputMask id="cpf" mask="999.999.999-99"
 						value="#{cadastroPedestreController.cpf}" />
 
-					<p:commandButton value="Buscar" icon="pi pi-search"
+					<p:commandButton value="Buscar"
 						action="#{cadastroPedestreController.buscarPorCpf}"
-						process="@parent" update="@form" />
+						process="@form" update="@form" />
 				</p:panelGrid>
 			</h:panelGroup>
 
@@ -55,11 +55,11 @@
 					</p:selectOneMenu>
 
 					<p:commandButton value="Avançar" icon="pi pi-arrow-right"
-						action="#{cadastroPedestreController.proximo}" process="@this"
+						action="#{cadastroPedestreController.proximo}" process="@form"
 						update="@form" />
 
 					<p:commandButton value="Voltar" icon="pi pi-arrow-left"
-						action="#{cadastroPedestreController.voltar}" process="@this"
+						action="#{cadastroPedestreController.voltar}" process="@form"
 						update="@form" />
 				</p:panelGrid>
 			</h:panelGroup>
@@ -95,13 +95,12 @@
 
 					<!-- AVANÇAR -->
 					<p:commandButton value="Avançar" icon="pi pi-arrow-right"
-						action="#{cadastroPedestreController.proximo}" process="@this"
+						action="#{cadastroPedestreController.proximo}" process="@form"
 						update="@form"
-						disabled="#{empty cadastroPedestreController.entidade.foto}"
-						style="width:100%" />
+						disabled="#{empty cadastroPedestreController.entidade.foto}" />
 
 					<p:commandButton value="Voltar" icon="pi pi-arrow-left"
-						action="#{cadastroPedestreController.voltar}" process="@this"
+						action="#{cadastroPedestreController.voltar}" process="@form"
 						update="@form" />
 
 				</p:panelGrid>
@@ -117,13 +116,18 @@
 						value="Nome: #{cadastroPedestreController.entidade.nome}" />
 					<h:outputText
 						value="CPF: #{cadastroPedestreController.entidade.cpf}" />
+					<p:selectBooleanCheckbox id="sempreLiberado"
+						rendered="#{not empty cadastroPedestreController.entidade 
+                and cadastroPedestreController.isPedestre()}"
+						itemLabel="Sempre liberado"
+						value="#{cadastroPedestreController.entidade.sempreLiberado}" />
 
 					<p:commandButton value="Concluir Cadastro" icon="pi pi-check"
-						action="#{cadastroPedestreController.salvar}" process="@this"
+						action="#{cadastroPedestreController.salvar}" process="@form"
 						update="@form" />
 
 					<p:commandButton value="Voltar" icon="pi pi-arrow-left"
-						action="#{cadastroPedestreController.voltar}" process="@this"
+						action="#{cadastroPedestreController.voltar}" process="@form"
 						update="@form" />
 				</p:panelGrid>
 			</h:panelGroup>

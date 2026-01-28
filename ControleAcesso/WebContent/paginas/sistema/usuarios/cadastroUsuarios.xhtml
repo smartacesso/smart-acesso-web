@@ -53,34 +53,33 @@
 
 			<p:dialog id="alteraSenhaDialog" widgetVar="alteraSenha"
 				header="#{msgs['header.alterar.dados.login']}" modal="true">
-					<p:panelGrid columns="3">
-						<p:column>
-							<h:outputText value="#{msgs['label.novo.login']}" />
-							<p:inputText value="#{cadastroUsuarioController.usuarioLogin}">
-								<f:validateRegex pattern="[a-zA-Z0-9]+" />
-							</p:inputText>
-						</p:column>
+				<p:panelGrid columns="3">
+					<p:column>
+						<h:outputText value="#{msgs['label.novo.login']}" />
+						<p:inputText value="#{cadastroUsuarioController.usuarioLogin}">
+							<f:validateRegex pattern="[a-zA-Z0-9]+" />
+						</p:inputText>
+					</p:column>
 
-						<p:column>
-							<h:outputText value="#{msgs['label.nova.senha']}" />
-							<p:password id="alteraSenha"
-								value="#{cadastroUsuarioController.usuarioSenha}"
-								feedback="true" 
-								redisplay="true"
-								promptLabel="Digite sua senha" weakLabel="Fraca" goodLabel="Boa"
-								strongLabel="Forte" validatorMessage="Senha inválida (fraca)">
-								<f:validateRegex
-									pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[@$!%*?&amp;])[A-Za-z0-9@$!%*?&amp;]{8,}$" />
-							</p:password>
-						</p:column>
+					<p:column>
+						<h:outputText value="#{msgs['label.nova.senha']}" />
+						<p:password id="alteraSenha"
+							value="#{cadastroUsuarioController.usuarioSenha}" feedback="true"
+							redisplay="true" promptLabel="Digite sua senha" weakLabel="Fraca"
+							goodLabel="Boa" strongLabel="Forte"
+							validatorMessage="Senha inválida (fraca)">
+							<f:validateRegex
+								pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[@$!%*?&amp;])[A-Za-z0-9@$!%*?&amp;]{8,}$" />
+						</p:password>
+					</p:column>
 
-						<p:column>
-							<p:commandButton value="#{msgs['alt.acao.alterar']}"
-								action="#{cadastroUsuarioController.alterarLoginSenhaUsuarioUsuario()}"
-								process="@form" update="@form"
-								oncomplete="PF('alteraSenha').hide();" />
-						</p:column>
-					</p:panelGrid>
+					<p:column>
+						<p:commandButton value="#{msgs['alt.acao.alterar']}"
+							action="#{cadastroUsuarioController.alterarLoginSenhaUsuarioUsuario()}"
+							process="@form" update="@form"
+							oncomplete="PF('alteraSenha').hide();" />
+					</p:column>
+				</p:panelGrid>
 			</p:dialog>
 
 
@@ -153,8 +152,10 @@
 
 										<p:message for="senha" />
 										<p:message for="confirmarSenha" />
-										<h:outputText value="A senha deve conter: mínimo 8 caracteres, com letras maiúsculas, minúsculas, números e caracteres especiais." style="color:gray; font-size:12px"/>
-										
+										<h:outputText
+											value="A senha deve conter: mínimo 8 caracteres, com letras maiúsculas, minúsculas, números e caracteres especiais."
+											style="color:gray; font-size:12px" />
+
 									</div>
 
 
@@ -219,18 +220,30 @@
 
 								<h:panelGroup
 									rendered="#{cadastroUsuarioController.entidade.id != sessionScope.usuario.id}">
-									<div class="ui-g-12 ui-md-6">
-										<p:selectBooleanCheckbox id="acessa"
-											value="#{cadastroUsuarioController.entidade.acessaWeb}"
-											itemLabel="#{msgs['label.uc001.acessa.web']}" />
-									</div>
 
-									<div class="ui-g-12 ui-md-6">
-										<p:selectBooleanCheckbox id="expedidora"
-											value="#{cadastroUsuarioController.entidade.expedidora}"
-											itemLabel="Habilitar expedidora" />
+									<div class="ui-g">
+
+										<div class="ui-g-12 ui-md-6">
+											<p:selectBooleanCheckbox id="acessa"
+												value="#{cadastroUsuarioController.entidade.acessaWeb}"
+												itemLabel="#{msgs['label.uc001.acessa.web']}" />
+										</div>
+
+										<div class="ui-g-12 ui-md-6">
+											<p:selectBooleanCheckbox id="simplificado"
+												value="#{cadastroUsuarioController.entidade.cadastroSimples}"
+												itemLabel="Cadastro simplificado" />
+										</div>
+
+										<div class="ui-g-12 ui-md-6">
+											<p:selectBooleanCheckbox id="expedidora"
+												value="#{cadastroUsuarioController.entidade.expedidora}"
+												itemLabel="Habilitar expedidora" />
+										</div>
+
 									</div>
 								</h:panelGroup>
+
 
 							</div>
 						</p:panel>

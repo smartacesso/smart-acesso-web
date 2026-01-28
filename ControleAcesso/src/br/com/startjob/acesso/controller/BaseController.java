@@ -45,6 +45,7 @@ import br.com.startjob.acesso.modelo.entity.HistoricoCotaEntity;
 import br.com.startjob.acesso.modelo.entity.ParametroEntity;
 import br.com.startjob.acesso.modelo.entity.UsuarioEntity;
 import br.com.startjob.acesso.modelo.entity.base.BaseEntity;
+import br.com.startjob.acesso.modelo.enumeration.TipoPedestre;
 import br.com.startjob.acesso.modelo.utils.AppAmbienteUtils;
 import br.com.startjob.acesso.utils.CookieUtils;
 import br.com.startjob.acesso.utils.ResourceBundleUtils;
@@ -1130,9 +1131,26 @@ public abstract class BaseController implements Serializable {
 		
 		if(urlNovoRegistro != null 
 				&& !"".equals(urlNovoRegistro)){
+			
+
+		    UsuarioEntity usuario = getUsuarioLogado();
+
+
+			
 			this.entidade = (BaseEntity) classEntidade.newInstance();
 			
 			this.entidade = preparaEntidadeNovo(this.entidade);
+			
+			if (usuario != null
+			        && Boolean.TRUE.equals(usuario.getCadastroSimples())
+			        && urlNovoRegistro.contains("cadastroPedestre")) {
+
+			    if (urlNovoRegistro.contains("tipo=vi")) {
+			        urlNovoRegistro = "/paginas/sistema/pedestres/cadastroSimplificado.xhtml?tipo=vi";
+			    } else {
+			        urlNovoRegistro = "/paginas/sistema/pedestres/cadastroSimplificado.xhtml?tipo=pe";
+			    }
+			}
 			
 			redirect(urlNovoRegistro);
 		}
@@ -1489,5 +1507,4 @@ public abstract class BaseController implements Serializable {
 		}
 		return false;
 	}
-	
 }

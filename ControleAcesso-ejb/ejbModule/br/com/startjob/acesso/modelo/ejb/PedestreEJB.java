@@ -1054,7 +1054,8 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 			ClienteEntity cliente) {
 		try {
 			System.out.println(">>>>>>");
-
+			System.out.println("Funcionario : " + funcionarioTotvsDto.getNome());
+			
 			Map<String, Object> args = new HashMap<>();
 			args.put("MATRICULA", funcionarioTotvsDto.getMatricula());
 
@@ -1070,23 +1071,22 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 				pedestre.setEmpresa(empresa);
 			}
 			
+			boolean novo = pedestres == null || pedestres.isEmpty();
+
+			if (novo) {
+			    pedestre.setAlterado(true);
+			    pedestre = (PedestreEntity) gravaObjeto(pedestre)[0];
+			}
+
 			processarRegrasPorFuncionarioTotvs(pedestre, cliente, funcionarioTotvsDto);
 
-			if (pedestres == null || pedestres.isEmpty()) {
-				pedestre.setAlterado(true);
-				pedestre = (PedestreEntity) gravaObjeto(pedestre)[0];
-				System.out.println("salvando funcionario : " + pedestre.getNome() + ", matricula : "
-						+ pedestre.getMatricula() + ", id : " + pedestre.getId());
-			} else {
-				pedestre.updateFuncionarioTotvs(funcionarioTotvsDto);
-				pedestre.setAlterado(true);
-				pedestre = (PedestreEntity) alteraObjeto(pedestre)[0];
-				System.out.println("atualizando funcionario : " + pedestre.getNome() + ", matricula : "
-						+ pedestre.getMatricula() + ", id : " + pedestre.getId());
+			if (!novo) {
+			    pedestre.updateFuncionarioTotvs(funcionarioTotvsDto);
+			    pedestre.setAlterado(true);
+			    pedestre = (PedestreEntity) alteraObjeto(pedestre)[0];
 			}
+			
 			System.out.println("Status : " + pedestre.getStatus());
-			
-			
 			
 		} catch (Exception e) {
 			throw new RuntimeException("Erro ao processar funcionário TOTVS: " + funcionarioTotvsDto.getMatricula(), e);
@@ -1303,9 +1303,10 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 			}
 
 			for (FuncionarioResult funcionario : funcionarios) {
-				ClienteEntity clienteFromFuncionario = getClienteFromFuncionario(funcionario.CCUSTO, clientes);
-
+				ClienteEntity clienteFromFuncionario = getClienteFromFuncionario(funcionario.CCUSTO, clientes);		
+				
 				if (clienteFromFuncionario != null) {
+
 					System.out.println(String.format("Gravando funcionario: %s, %s, %s", funcionario.NOME,
 							funcionario.NOMEEMPRESA, funcionario.CCUSTO));
 					salvarFuncionario(funcionario, clienteFromFuncionario, configs);

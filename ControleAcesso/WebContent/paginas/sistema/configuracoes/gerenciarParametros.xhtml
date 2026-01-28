@@ -65,7 +65,8 @@
 									and not item.nome.contains('QR Code: Tipo padrão')
 									and not item.nome.contains('SOC')
 									and not item.nome.contains('tolerancia')
-									and not item.nome.contains('remoto')}">
+									and not item.nome.contains('remoto')
+									and not item.nome.contains('Local')}">
 						
 							<p:ajax process="@this"/>
 						</p:inputNumber>
@@ -87,6 +88,12 @@
 						<p:inputText value="#{item.valor}"  rendered="#{item.nome.contains('Formato')}">
 						
 							<p:ajax process="@this"/>
+						</p:inputText>
+
+						<p:inputText value="#{item.valor}"
+							rendered="#{item.nome.contains('Local')}">
+
+							<p:ajax process="@this" />
 						</p:inputText>
 
 						<p:inputText value="#{item.valor}"  rendered="#{item.nome.contains('Comtele')}" style="width: 400px;">

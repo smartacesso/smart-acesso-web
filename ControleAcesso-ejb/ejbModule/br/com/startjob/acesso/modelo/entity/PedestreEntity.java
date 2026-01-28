@@ -154,6 +154,8 @@ indexes = {
 				+ "where obj.matricula = :MATRICULA "
 				+ "and obj.cliente.id = :ID_CLIENTE "),
 		@NamedQuery(name = "PedestreEntity.findByCpfAndIdCliente", query = "select distinct obj from PedestreEntity obj "
+				+ "left join fetch obj.cotas " 
+				+ "left join fetch obj.empresa "
 				+ "where obj.cpf = :CPF "
 				+ "and obj.cliente.id = :ID_CLIENTE "),
 		@NamedQuery(name = "PedestreEntity.findByNomeAndIdCliente", query = "select distinct obj from PedestreEntity obj "
@@ -460,13 +462,22 @@ public class PedestreEntity extends ClienteBaseEntity {
 	    + ", horaInicial=[" + funcionarioTotvsDto.getHoraInicial() + "]"
 	    + ", horaFinal=[" + funcionarioTotvsDto.getHoraFinal() + "]");
 		
-		if(funcionarioTotvsDto.getSituacaoFolha().trim().equals("OK")) {
+		if(isPermitido(funcionarioTotvsDto)) {
 			this.setStatus(Status.ATIVO);
 			this.observacoes =  "atualizado dia " + LocalDate.now().toString();
 		}else {
 			this.setStatus(Status.INATIVO);
 			this.observacoes = "Funcionario com situação : " + funcionarioTotvsDto.getSituacaoFolha();
 		}		
+	}
+
+	private boolean isPermitido(FuncionarioTotvsDto funcionarioTotvsDto) {
+	    return "ok".equalsIgnoreCase(funcionarioTotvsDto.getSituacaoFolha())
+	        && (
+	            "Trabalhado".equalsIgnoreCase(funcionarioTotvsDto.getStatusTrabalho())
+	            || funcionarioTotvsDto.getStatusTrabalho() == null
+	            || funcionarioTotvsDto.getStatusTrabalho().trim().isEmpty()
+	        );
 	}
 
 	public String getAllPhonesFormatted() {
@@ -499,6 +510,11 @@ public class PedestreEntity extends ClienteBaseEntity {
 	
 	public boolean isVisitante() {
 		return TipoPedestre.VISITANTE.equals(this.tipo);
+	}
+	
+	
+	public boolean isPedestre() {
+		return TipoPedestre.PEDESTRE.equals(this.tipo);
 	}
 	
 	public boolean autoAtendimentoLiberado() {
