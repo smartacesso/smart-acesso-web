@@ -35,8 +35,10 @@ import br.com.startjob.acesso.modelo.ejb.EmpresaEJBRemote;
 import br.com.startjob.acesso.modelo.ejb.PedestreEJBRemote;
 import br.com.startjob.acesso.modelo.entity.EmpresaEntity;
 import br.com.startjob.acesso.modelo.entity.ImportacaoEntity;
+import br.com.startjob.acesso.modelo.entity.LocalEntity;
 import br.com.startjob.acesso.modelo.entity.ParametroEntity;
 import br.com.startjob.acesso.modelo.entity.PedestreEntity;
+import br.com.startjob.acesso.modelo.entity.PedestreRegraEntity;
 import br.com.startjob.acesso.modelo.entity.UsuarioEntity;
 import br.com.startjob.acesso.modelo.enumeration.PerfilAcesso;
 import br.com.startjob.acesso.modelo.enumeration.Status;
@@ -57,6 +59,7 @@ public class ConsultaPedestreController extends BaseController {
 	private List<SelectItem> listaDepartamentos;
 	private List<SelectItem> listaCentrosDeCusto;
 	private List<SelectItem> listaTipoArquivo;
+	private List<SelectItem> listaLocais;
 	
 	private String empresaSelecionada;
 	private String codFil;
@@ -107,6 +110,7 @@ public class ConsultaPedestreController extends BaseController {
 		
 		buscar();
 		montaListaEmpresas();
+		montaListaLocais();
 		montaListaTiposPedestre();
 		
 		tipoArquivo = TipoArquivo.ARQUIVO_TXT;
@@ -430,6 +434,67 @@ public class ConsultaPedestreController extends BaseController {
 	    return url != null && !url.trim().isEmpty();
 	}
 	
+	@SuppressWarnings("unchecked")
+	public void montaListaLocais() {
+		Map<String, Object> args = new HashMap<String, Object>();
+		args.put("ID_CLIENTE", getUsuarioLogado().getCliente().getId());
+
+		listaLocais = new ArrayList<SelectItem>();
+		listaLocais.add(new SelectItem(null, "Selecione"));
+
+		try {
+			List<LocalEntity> locais = (List<LocalEntity>) baseEJB.pesquisaArgFixos(LocalEntity.class,
+					"findAllByIdClienteAdd", args);
+
+			if (locais != null && !locais.isEmpty()) {
+				locais.forEach(local -> {
+					listaLocais.add(new SelectItem(local.getUuid(), local.getNome()));
+				});
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public String buscaRegra(PedestreEntity pedestre) {
+
+		if (pedestre == null || pedestre.getId() == null) {
+			return "";
+		}
+
+		Map<String, Object> args = new HashMap<>();
+		args.put("ID_PEDESTRE", pedestre.getId());
+
+		List<PedestreRegraEntity> regraAtiva;
+
+		try {
+			@SuppressWarnings("unchecked")
+			List<PedestreRegraEntity> resultado =
+				(List<PedestreRegraEntity>) baseEJB.pesquisaArgFixos(
+					PedestreRegraEntity.class,
+					"findPedestreRegraAtivo",
+					args
+				);
+
+			regraAtiva = resultado;
+
+		} catch (Exception e) {
+			return "";
+		}
+
+		if (regraAtiva == null || regraAtiva.isEmpty()) {
+			return "";
+		}
+
+		PedestreRegraEntity regra = regraAtiva.get(0);
+
+		if (regra.getRegra() == null || regra.getRegra().getNome() == null) {
+			return "";
+		}
+
+		return regra.getRegra().getNome();
+	}
+	
 	public PedestreEntity getPedestreSelecionado() {
 		return pedestreSelecionado;
 	}
@@ -624,6 +689,14 @@ public class ConsultaPedestreController extends BaseController {
 
 	public void setEmpresaSelecionada(String empresaSelecionada) {
 		this.empresaSelecionada = empresaSelecionada;
+	}
+
+	public List<SelectItem> getListaLocais() {
+		return listaLocais;
+	}
+
+	public void setListaLocais(List<SelectItem> listaLocais) {
+		this.listaLocais = listaLocais;
 	}
 }
 

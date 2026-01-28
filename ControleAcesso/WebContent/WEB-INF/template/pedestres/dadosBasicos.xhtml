@@ -183,6 +183,16 @@
 							<f:selectItems value="#{cadastroPedestreController.listaCargos}" />
 						</p:selectOneMenu>
 					</div>
+					
+					<div class="ui-g-12 ui-md-12">
+						<p:outputLabel value="Local" for="local" />
+						<p:selectOneMenu id="local"
+							value="#{cadastroPedestreController.entidade.uuidLocal}"
+							required="#{cadastroPedestreController.verificaObrigatorio('local')}"
+							style="width: 100%">
+							<f:selectItems value="#{cadastroPedestreController.listaLocais}" />
+						</p:selectOneMenu>
+					</div>
 
 					<!-- Login e Senha App -->
 					<h:panelGroup

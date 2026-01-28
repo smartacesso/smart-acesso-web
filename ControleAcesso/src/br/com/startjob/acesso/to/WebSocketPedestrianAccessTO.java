@@ -20,6 +20,7 @@ public class WebSocketPedestrianAccessTO {
 	private String fotoBase64;
 	
 	private Long idLocal;
+	private String uuidLocal;
 	private Long idEmpresa;
 	
 	private List<PedestreRegraTO> pedestreRegras;
@@ -44,6 +45,7 @@ public class WebSocketPedestrianAccessTO {
 		object.setFotoBase64(fotoBytes != null ? Base64.encodeBase64String(fotoBytes) : "");
 
 		object.setIdLocal(Objects.nonNull(pedestre.getIdLocal()) ? pedestre.getIdLocal() : null);
+		object.setUuidLocal(Objects.nonNull(pedestre.getUuidLocal()) ? pedestre.getUuidLocal() : null);
 		object.setIdEmpresa(Objects.nonNull(pedestre.getEmpresa()) ? pedestre.getEmpresa().getId() : null);
 
 		if (Objects.nonNull(pedestre.getRegras())) {
@@ -153,6 +155,14 @@ public class WebSocketPedestrianAccessTO {
 
 	public void setPedestreRegras(List<PedestreRegraTO> pedestreRegras) {
 		this.pedestreRegras = pedestreRegras;
+	}
+
+	public String getUuidLocal() {
+		return uuidLocal;
+	}
+
+	public void setUuidLocal(String uuidLocal) {
+		this.uuidLocal = uuidLocal;
 	}
 	
 	

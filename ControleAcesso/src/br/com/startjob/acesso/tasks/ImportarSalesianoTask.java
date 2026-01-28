@@ -22,6 +22,8 @@ import com.totvs.dto.CadastroDTO;
 import com.totvs.services.IntegracaoTotvsEducacionalService;
 
 import br.com.startjob.acesso.modelo.ejb.BaseEJBRemote;
+import br.com.startjob.acesso.modelo.entity.CargoEntity;
+import br.com.startjob.acesso.modelo.entity.CentroCustoEntity;
 import br.com.startjob.acesso.modelo.entity.ClienteEntity;
 import br.com.startjob.acesso.modelo.entity.DepartamentoEntity;
 import br.com.startjob.acesso.modelo.entity.EmpresaEntity;
@@ -29,12 +31,14 @@ import br.com.startjob.acesso.modelo.entity.IntegracaoSalesianoEntity;
 import br.com.startjob.acesso.modelo.entity.PedestreEntity;
 import br.com.startjob.acesso.modelo.entity.PlanoEntity;
 import br.com.startjob.acesso.modelo.entity.UsuarioEntity;
+import br.com.startjob.acesso.modelo.enumeration.Genero;
 import br.com.startjob.acesso.modelo.enumeration.PerfilAcesso;
 import br.com.startjob.acesso.modelo.enumeration.Status;
 import br.com.startjob.acesso.modelo.enumeration.TipoPedestre;
 import br.com.startjob.acesso.modelo.utils.EncryptionUtils;
 import br.com.startjob.acesso.services.BaseServlet;
 import br.com.startjob.acesso.to.TotvsEdu.NivelDeEnsino;
+import br.com.startjob.acesso.to.TotvsEdu.OrigemStatusTotvs;
 import br.com.startjob.acesso.to.TotvsEdu.PermissoesEduTotvs;
 import br.com.startjob.acesso.to.TotvsEdu.TipoTotvsEdu;
 import br.com.startjob.acesso.utils.Utils;
@@ -211,8 +215,8 @@ public class ImportarSalesianoTask extends TimerTask {
 
 	    System.out.printf("Salvando, nome: %s, matricula: %s, cpf: %s, tipo: %s%n", 
 	            nome, matricula, cpf, tipo);
-
-	    PedestreEntity pedestre = buscarPedestre(cpf, nome, matricula, cliente, tipo);
+	    
+	    PedestreEntity pedestre = buscarPedestre(cpf, nome, matricula, cliente, tipo, cadastro);
 
 	    if (pedestre == null) {
 	        System.out.println("Nenhum cadastro existente encontrado → criando novo.");
@@ -220,20 +224,132 @@ public class ImportarSalesianoTask extends TimerTask {
 	        pedestre = (PedestreEntity) baseEJB.gravaObjeto(pedestre)[0];
 	    } else {
 	        System.out.println("Cadastro existente encontrado → atualizando.");
-	        atualizarCadastroExistente(pedestre, cadastro, cliente);
+	        atualizarCamposComuns(pedestre, cadastro, cliente);;
 	        pedestre = (PedestreEntity) baseEJB.alteraObjeto(pedestre)[0];
 	    }
 	}
+	
+	private PedestreEntity criarNovoCadastro(CadastroDTO cadastro, ClienteEntity cliente) throws Exception {
 
-	public PedestreEntity buscarPedestre(String cpf, String nome, String matricula, ClienteEntity cliente, String tipo) {
-	    PedestreEntity pedestre = null;
+	    String cpf = somenteNumeros(cadastro.getCpf());
+	    String tipo = TipoTotvsEdu.fromTabelaRm(cadastro.getOrigem()).getDesc();
+	    boolean responsavel = isResponsavel(tipo);
 
+	    String codigoCartao = responsavel
+	            ? somenteNumeros(cadastro.getCpf())
+	            : somenteNumeros(cadastro.getMatricula());
+
+	    String matricula = gerarMatricula(cadastro, responsavel);
+
+	    PedestreEntity pedestre = criarPedestre(
+	            cadastro.getNome().toUpperCase(),
+	            cpf,
+	            cadastro.getGenero(),
+	            codigoCartao,
+	            matricula,
+	            cliente	    );
+
+	    atualizarCamposComuns(pedestre, cadastro, cliente);
+
+	    return pedestre;
+	}
+
+	private PedestreEntity criarPedestre(
+	        String nome,
+	        String cpf,
+	        String genero,
+	        String codigoCartao,
+	        String matricula,
+	        ClienteEntity cliente
+	) throws Exception {
+
+	    PedestreEntity pedestre = new PedestreEntity();
+	    pedestre.setNome(nome.toUpperCase());
+	    pedestre.setCpf(cpf);
+	    pedestre.setCliente(cliente);
+	    pedestre.setGenero(Genero.fromString(genero));
+	    pedestre.setCodigoCartaoAcesso(codigoCartao);
+	    pedestre.setTipo(TipoPedestre.PEDESTRE);
+	    pedestre.setSempreLiberado(Boolean.TRUE);
+	    pedestre.setObservacoes("Criado em: " +
+	            LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+
+	    return pedestre;
+	}
+
+	
+	private void atualizarCamposComuns(
+	        PedestreEntity pedestre,
+	        CadastroDTO cadastro,
+	        ClienteEntity cliente
+	) throws Exception {
+
+	    boolean permitido = PermissoesEduTotvs.isPermitido(cadastro.getCodStatus());
+	    String tipo = TipoTotvsEdu.fromTabelaRm(cadastro.getOrigem()).getDesc();
+	    boolean responsavel = isResponsavel(tipo);
+
+
+	    EmpresaEntity empresa = recuperaEmpresa(cadastro.getNomeColigada(), cliente);
+	    DepartamentoEntity departamento = recuperaDepartamento(tipo, empresa);
 	    
-	    // 2. Busca por Matrícula (somente se não for do tipo RESPONSÁVEL, caso essa regra ainda seja necessária)
-	    boolean tipoNaoResponsavel = !"RESPONSAVEL".equals(tipo);
-	    if (tipoNaoResponsavel && matricula != null && !matricula.trim().isEmpty()) {
+	    pedestre.setNome(cadastro.getNome().toUpperCase());
+	    pedestre.setCpf(somenteNumeros(cadastro.getCpf()));
+	    pedestre.setStatus(permitido ? Status.ATIVO : Status.INATIVO);
+	    
+	    pedestre.setMatriculaReferencia(cadastro.getMatricula());
+	    pedestre.setGenero(Genero.fromString(cadastro.getGenero()));
+	    
+	    pedestre.setEmpresa(empresa);
+	    pedestre.setDepartamento(departamento);
+	    
+	    if("ALUNO".equalsIgnoreCase(tipo)) {
+		    CargoEntity cargo = recuperaCargo(cadastro.getCodTurma(), empresa);
+		    CentroCustoEntity centroDecusto = recuperaCentroCusto(cadastro.getCurso(), empresa);
+		    
+		    pedestre.setCargo(cargo);
+		    pedestre.setCentroCusto(centroDecusto);
+	    }
+	    
+	    pedestre.setMatricula(gerarMatricula(cadastro, responsavel));
+	    pedestre.setObservacoes("Atualizado em: " +
+	            LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+	}
+
+	
+	private boolean isResponsavel(String tipo) {
+	    return tipo != null && tipo.toUpperCase().contains("RESPONSAVEL");
+	}
+
+	private String somenteNumeros(String valor) {
+	    if (valor == null) return "0";
+	    String numeros = valor.replaceAll("\\D", "");
+	    return numeros.isEmpty() ? "0" : String.valueOf(Long.parseLong(numeros));
+	}
+
+	private String gerarMatricula(CadastroDTO cadastro, boolean responsavel) {
+	    if (!responsavel) {
+	        return cadastro.getMatricula();
+	    }
+	    int codigo = OrigemStatusTotvs.getCodigoPorTipo(cadastro.getOrigem());
+	    return cadastro.getMatricula().concat(String.valueOf(codigo));
+	}
+	
+	public PedestreEntity buscarPedestre(String cpf, String nome, String matricula, ClienteEntity cliente, String tipo, CadastroDTO cadastro) {
+	    PedestreEntity pedestre = null;
+	    
+//	    boolean tipoResponsavel = tipo.toUpperCase().contains("RESPONSAVEL");
+//
+//        if(tipoResponsavel) {
+//        	int codigo = OrigemStatusTotvs.getCodigoPorTipo(cadastro.getOrigem());
+//			matricula = cadastro.getMatricula().concat(String.valueOf(codigo));
+//        }
+	    
+	    // 1. Busca por Matrícula
+	    if (matricula != null && !matricula.trim().isEmpty()) {
 	        System.out.println("Buscando por matrícula: " + matricula);
-	        pedestre = buscaPedestrePorMatricula(matricula, cliente.getId());
+	        
+//	        pedestre = buscaPedestrePorMatricula(matricula, cliente.getId());
+	        pedestre = buscaPedestreNomeAndMatriculaReferencia(nome, matricula, cliente.getId());
 
 	        if (pedestre != null) {
 	            System.out.println("Encontrado por matrícula. nome : " + pedestre.getNome());
@@ -243,109 +359,8 @@ public class ImportarSalesianoTask extends TimerTask {
 	        System.out.println("Não encontrado por matrícula.");
 	    }
 	    
-	    // 1. Busca por CPF
-	    if (cpf != null && !cpf.trim().isEmpty()) {
-	        String cpfNormalizado = cpf.replaceAll("\\D", "").trim();
-	        System.out.println("CPF informado → buscando por CPF: " + cpfNormalizado);
-
-	        pedestre = buscaPedestrePorCpf(cpfNormalizado, cliente.getId());
-	        if (pedestre != null) {
-	            System.out.println("Encontrado por CPF. nome : " + pedestre.getNome());
-	            return pedestre;
-	        }
-	        System.out.println("Não encontrado por CPF.");
-	    }
-
-	    // 3. Busca por Nome (última opção, pois pode ter duplicidade)
-	    if (nome != null && !nome.trim().isEmpty()) {
-	        System.out.println("Buscando por nome: " + nome);
-	        pedestre = buscaPedestrePorNome(nome, cliente.getId());
-
-	        if (pedestre != null) {
-	            System.out.println("Encontrado por nome (atenção: pode haver duplicidade).");
-	            return pedestre;
-	        }
-
-	        System.out.println("Não encontrado por nome.");
-	    }
-
 	    System.out.println("Nenhum pedestre encontrado com os dados fornecidos.");
 	    return null;
-	}
-
-	
-	private PedestreEntity criarNovoCadastro(CadastroDTO cadastro, ClienteEntity cliente) throws Exception {
-		String cpfNormalizado = cadastro.getCpf().replaceAll("\\D", "");
-		
-	    String tipo = TipoTotvsEdu.fromTabelaRm(cadastro.getOrigem()).getDesc();
-	    String nome = cadastro.getNome().toUpperCase();
-	    String cpf = cpfNormalizado;
-	    EmpresaEntity empresa = recuperaEmpresa(cadastro.getNomeColigada(), cliente);
-	    
-	    String codigoCartao = null;
-	    String matricula = null;
-	    
-	    // Atualiza cartão
-	    if("RESPONSAVEL".equals(tipo)) {
-	    	 System.out.println("reponsavel");
-	    	 String somenteNumeros = cadastro.getCpf().replaceAll("\\D", "");
-			 codigoCartao = somenteNumeros.isEmpty() ? "0" : String.valueOf(Long.parseLong(somenteNumeros));
-	    }else {
-		    String somenteNumeros = cadastro.getMatricula().replaceAll("\\D", "");
-		    codigoCartao = somenteNumeros.isEmpty() ? "0" : String.valueOf(Long.parseLong(somenteNumeros));
-		    matricula = cadastro.getMatricula();
-	    }
-
-	    PedestreEntity novoCadastro = criarPedestre(nome, cpf, codigoCartao, matricula, tipo, cliente, empresa);
-
-	    // Aplica campos comuns
-	    atualizarCamposComuns(novoCadastro, cadastro);
-
-	    return novoCadastro;
-	}
-	
-	private PedestreEntity criarPedestre(String nome, String cpf, String codigoCartao,String matricula, String tipoDepartamento, ClienteEntity cliente, EmpresaEntity empresa) throws Exception {
-	    PedestreEntity pedestre = new PedestreEntity();
-	    pedestre.setTipo(TipoPedestre.PEDESTRE);
-	    pedestre.setNome(nome);
-	    pedestre.setCliente(cliente);
-	    pedestre.setCpf(cpf);
-	    pedestre.setCodigoCartaoAcesso(codigoCartao);
-	    pedestre.setMatricula(matricula);
-	    pedestre.setObservacoes("Criado em: " + LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
-	    pedestre.setEmpresa(empresa);
-	    pedestre.setDepartamento(recuperaDepartamento(tipoDepartamento, empresa));
-	    pedestre.setSempreLiberado(Boolean.TRUE);
-	    return pedestre;
-	}
-
-	private void atualizarCadastroExistente(PedestreEntity pedestre, CadastroDTO cadastro, ClienteEntity cliente) throws Exception {
-	    String tipo = TipoTotvsEdu.fromTabelaRm(cadastro.getOrigem()).getDesc();
-	    String cpfNormalizado = cadastro.getCpf().replaceAll("\\D", "");
-
-	    // Atualiza campos básicos
-	    pedestre.setNome(cadastro.getNome().toUpperCase());
-	    pedestre.setCpf(cpfNormalizado);
-	    pedestre.setEmpresa(recuperaEmpresa(cadastro.getNomeColigada(), cliente));
-
-	    // Atualiza cartão
-	    if("RESPONSAVEL".equals(tipo)) {
-	    	System.out.println("reponsavel");
-	    	pedestre.setMatricula(null);
-	    }
-
-	    // Aplica campos comuns
-	    atualizarCamposComuns(pedestre, cadastro);
-	}
-
-	private void atualizarCamposComuns(PedestreEntity pedestre, CadastroDTO cadastro) {
-	    DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-
-	    boolean isPermitido = PermissoesEduTotvs.isPermitido(cadastro.getCodStatus());
-	    System.out.println("Codigo do status : "+ cadastro.getCodStatus() + ", descricao: " + cadastro.getStatus());
-	    pedestre.setStatus(isPermitido ? Status.ATIVO : Status.INATIVO);
-
-	    pedestre.setObservacoes("Atualizado em: " + LocalDateTime.now().format(dtf));
 	}
 
 	private ClienteEntity buscaClientesPorFilialEColigada(String codColigada, String codFilial) throws Exception {
@@ -433,6 +448,30 @@ public class ImportarSalesianoTask extends TimerTask {
 
 		return null;
 	}
+	
+	@SuppressWarnings("unchecked")
+	private PedestreEntity buscaPedestreNomeAndMatriculaReferencia(String nome, String matricula, Long idCliente) {
+		Map<String, Object> args = new HashMap<String, Object>();
+		
+		args.put("NOME", nome);
+		args.put("MATRICULA_S", matricula);
+		args.put("ID_CLIENTE", idCliente);
+
+		List<PedestreEntity> pedestres;
+		try {
+			
+			pedestres = (List<PedestreEntity>) baseEJB.pesquisaArgFixos(PedestreEntity.class, "findByNomeAndMatriculaAndIdCliente",
+					args);
+
+			if (pedestres != null && !pedestres.isEmpty()) {
+				return pedestres.get(0);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return null;
+	}
 
 	@SuppressWarnings("unchecked")
 	private EmpresaEntity recuperaEmpresa(String nomeEmpresa, ClienteEntity cliente) throws Exception {
@@ -473,48 +512,91 @@ public class ImportarSalesianoTask extends TimerTask {
 		return null;
 	}
 
-//	@SuppressWarnings("unchecked")
-//	private CargoEntity recuperaCargo(String nomeCargo, EmpresaEntity empresa) throws Exception {
-//		if (nomeCargo == null || "".equals(nomeCargo)) {
-//			return null;
-//		}
-//
-//		if (empresa == null) {
-//			return null;
-//		}
-//
-//		try {
-//			Map<String, Object> args = new HashMap<String, Object>();
-//			args.put("nome_equals", nomeCargo);
-//			args.put("empresa.id", empresa.getId());
-//
-//			List<CargoEntity> lista = (List<CargoEntity>) baseEJB.pesquisaSimplesLimitado(CargoEntity.class, "findAll",
-//					args, 0, 1);
-//
-//			CargoEntity cargo = null;
-//			if (lista != null && !lista.isEmpty()) {
-//				cargo = lista.get(0);
-//			}
-//
-//			if (cargo == null) {
-//				// cria empresa
-//				cargo = new CargoEntity();
-//				cargo.setNome(nomeCargo);
-//				cargo.setEmpresa(empresa);
-//				cargo.setStatus(Status.ATIVO);
-//
-//				cargo = (CargoEntity) baseEJB.gravaObjeto(cargo)[0];
-//				cargo = (CargoEntity) baseEJB.recuperaObjeto(CargoEntity.class, cargo.getId());
-//
-//			}
-//
-//			return cargo;
-//
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
-//		return null;
-//	}
+	@SuppressWarnings("unchecked")
+	private CargoEntity recuperaCargo(String nomeCargo, EmpresaEntity empresa) throws Exception {
+		if (nomeCargo == null || "".equals(nomeCargo)) {
+			return null;
+		}
+
+		if (empresa == null) {
+			return null;
+		}
+
+		try {
+			Map<String, Object> args = new HashMap<String, Object>();
+			args.put("nome_equals", nomeCargo);
+			args.put("empresa.id", empresa.getId());
+
+			List<CargoEntity> lista = (List<CargoEntity>) baseEJB.pesquisaSimplesLimitado(CargoEntity.class, "findAll",
+					args, 0, 1);
+
+			CargoEntity cargo = null;
+			if (lista != null && !lista.isEmpty()) {
+				cargo = lista.get(0);
+			}
+
+			if (cargo == null) {
+				// cria empresa
+				cargo = new CargoEntity();
+				cargo.setNome(nomeCargo);
+				cargo.setEmpresa(empresa);
+				cargo.setStatus(Status.ATIVO);
+
+				cargo = (CargoEntity) baseEJB.gravaObjeto(cargo)[0];
+				cargo = (CargoEntity) baseEJB.recuperaObjeto(CargoEntity.class, cargo.getId());
+
+			}
+
+			return cargo;
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	@SuppressWarnings("unchecked")
+	private CentroCustoEntity recuperaCentroCusto(String centroCustoRecebido, EmpresaEntity empresa) throws Exception {
+		if (centroCustoRecebido == null || "".equals(centroCustoRecebido)) {
+			return null;
+		}
+
+		if (empresa == null) {
+			return null;
+		}
+
+		try {
+			Map<String, Object> args = new HashMap<String, Object>();
+			args.put("nome_equals", centroCustoRecebido);
+			args.put("empresa.id", empresa.getId());
+
+			List<CentroCustoEntity> lista = (List<CentroCustoEntity>) baseEJB.pesquisaSimplesLimitado(CentroCustoEntity.class, "findAll",
+					args, 0, 1);
+
+			CentroCustoEntity centroCusto = null;
+			if (lista != null && !lista.isEmpty()) {
+				centroCusto = lista.get(0);
+			}
+
+			if (centroCusto == null) {
+				// cria empresa
+				centroCusto = new CentroCustoEntity();
+				centroCusto.setNome(centroCustoRecebido);
+				centroCusto.setEmpresa(empresa);
+				centroCusto.setStatus(Status.ATIVO);
+
+				centroCusto = (CentroCustoEntity) baseEJB.gravaObjeto(centroCusto)[0];
+				centroCusto = (CentroCustoEntity) baseEJB.recuperaObjeto(CargoEntity.class, centroCusto.getId());
+
+			}
+
+			return centroCusto;
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
 
 	@SuppressWarnings("unchecked")
 	private DepartamentoEntity recuperaDepartamento(String nomeSetor, EmpresaEntity empresa) throws Exception {

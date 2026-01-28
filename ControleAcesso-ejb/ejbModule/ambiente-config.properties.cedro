@@ -13,8 +13,8 @@ config.ambiente.instagram=
 config.ambiente.blog=https://www.smartempresarial.com.br/
 
 # Configura��o do endere�o base do sistema
-config.ambiente.main.site=https://www.smartacesso.com.br/
-config.ambiente.main.link=https://www.smartacesso.com.br/
+config.ambiente.main.site=https://cedropar.com.br:25558/
+config.ambiente.main.link=https://cedropar.com.br:25558/
 config.ambiente.nome.app=sistema
 
 

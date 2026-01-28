@@ -50,36 +50,29 @@ import br.com.startjob.acesso.modelo.enumeration.TipoQRCode;
 import br.com.startjob.acesso.modelo.utils.EncryptionUtils;
 
 @Entity
-@Table(name = "TB_PEDESTRE",
-indexes = {
-		@Index(name = "idx_pedestrian_nome", columnList = "NOME"),
-		@Index(name = "idx_pedestrian_cpf", columnList = "CPF"),
-		@Index(name = "idx_pedestrian_rg", columnList = "RG"),
+@Table(name = "TB_PEDESTRE", indexes = { @Index(name = "idx_pedestrian_nome", columnList = "NOME"),
+		@Index(name = "idx_pedestrian_cpf", columnList = "CPF"), @Index(name = "idx_pedestrian_rg", columnList = "RG"),
 		@Index(name = "idx_pedestrian_matricula", columnList = "MATRICULA"),
-		@Index(name = "idx_pedestrian_card_number", columnList = "CARTAO_ACESSO"),
-		})
+		@Index(name = "idx_pedestrian_card_number", columnList = "CARTAO_ACESSO"), })
 @NamedQueries({
 		@NamedQuery(name = "PedestreEntity.findAll", query = "select obj " + "from PedestreEntity obj "
 				+ "where (obj.removido = false or obj.removido is null) " + "order by obj.id asc"),
 		@NamedQuery(name = "PedestreEntity.findById", query = "select obj from PedestreEntity obj "
 				+ "where obj.id = :ID order by obj.id asc"),
 		@NamedQuery(name = "PedestreEntity.findByIdComplete", query = "select obj from PedestreEntity obj "
-				+ " left join fetch obj.endereco en " 
-				+ " left join fetch obj.empresa emp "
-				+ " left join fetch obj.departamento dep " 
-				+ " left join fetch obj.centroCusto cec "
-				+ " left join fetch obj.cargo ca " 
-				+ " left join fetch obj.cliente cli " 
-				+ " left join obj.regras re "
-				+ " left join obj.equipamentos eq " 
-				+ " left join obj.documentos doc "
-				+ " left join obj.biometrias bio " 
-				+ " left join obj.mensagensPersonalizadas men "
-				+ " left join obj.responsaveis res " 
-				+ " left join fetch obj.cotas c "
+				+ " left join fetch obj.endereco en " + " left join fetch obj.empresa emp "
+				+ " left join fetch obj.departamento dep " + " left join fetch obj.centroCusto cec "
+				+ " left join fetch obj.cargo ca " + " left join fetch obj.cliente cli " + " left join obj.regras re "
+				+ " left join obj.equipamentos eq " + " left join obj.documentos doc "
+				+ " left join obj.biometrias bio " + " left join obj.mensagensPersonalizadas men "
+				+ " left join obj.responsaveis res " + " left join fetch obj.cotas c "
 				+ "where obj.id = :ID order by obj.id asc"),
 		@NamedQuery(name = "PedestreEntity.findAllComEmpresa", query = "select obj from PedestreEntity obj "
-				+ " left join fetch obj.empresa e " + "where (obj.removido = false or obj.removido is null) "
+				+ " left join fetch obj.empresa e " 
+				+ " left join fetch obj.departamento d " 
+				+ " left join fetch obj.centroCusto cc " 
+				+ " left join fetch obj.cargo c " 
+				+ "where (obj.removido = false or obj.removido is null) "
 				+ "order by obj.id asc"),
 		@NamedQuery(name = "PedestreEntity.findByCpf", query = "select obj from PedestreEntity obj "
 				+ "where obj.cpf = :CPF_PEDESTRE " + " and (obj.removido = false or obj.removido is null) "
@@ -91,21 +84,22 @@ indexes = {
 				+ "where obj.cliente.id = :ID_CLIENTE " + "and obj.matricula is not null " + "and obj.matricula <> '' "
 				+ "order by obj.id desc"),
 		@NamedQuery(name = "PedestreEntity.findById_matricula", query = "select obj from PedestreEntity obj "
-				+ "where obj.matricula = :MATRICULA " + "order by obj.id desc"),
+				+ "where obj.matricula = :MATRICULA " + "and (obj.removido = false or obj.removido is null) "
+				+ "order by obj.id desc"),
 		@NamedQuery(name = "PedestreEntity.findByNomePedestre", query = "select obj from PedestreEntity obj "
-				+ "where obj.nome = :NOME " 
-				+ "and (obj.removido = false or obj.removido is null) "
+				+ "where obj.nome = :NOME " + "and (obj.removido = false or obj.removido is null) "
 				+ "order by obj.id desc"),
 		@NamedQuery(name = "PedestreEntity.findByCardNumber", query = "select obj from PedestreEntity obj "
 				+ "where obj.codigoCartaoAcesso = :CARD_NUMBER " + "order by obj.id desc"),
 		@NamedQuery(name = "PedestreEntity.findAllPedestresComEmpresa", query = "select obj from PedestreEntity obj "
-				+ " left join fetch obj.empresa e " + "where (obj.removido = false or obj.removido is null) "
+				+ " left join fetch obj.empresa e " 
+				+ " left join fetch obj.departamento d " 
+				+ " left join fetch obj.centroCusto cc " 
+				+ " left join fetch obj.cargo c " 
+				+ "where (obj.removido = false or obj.removido is null) "
 				+ "and obj.tipo = 'PEDESTRE' " + "order by obj.id asc"),
-		@NamedQuery(name = "PedestreEntity.findPedestresByIdComRegras", 
-					query = "select obj from PedestreEntity obj "
-						+ "left join fetch obj.endereco " 
-						+ "left join fetch obj.regras " 
-						+ "where obj.id = :ID "),
+		@NamedQuery(name = "PedestreEntity.findPedestresByIdComRegras", query = "select obj from PedestreEntity obj "
+				+ "left join fetch obj.endereco " + "left join fetch obj.regras " + "where obj.id = :ID "),
 		@NamedQuery(name = "PedestreEntity.findByIdPedestreAndIdCliente", query = "select obj from PedestreEntity obj "
 				+ " left join fetch obj.empresa e " + "where obj.id = :ID " + "and obj.cliente.id = :ID_CLIENTE "
 				+ "order by obj.id asc"),
@@ -126,43 +120,37 @@ indexes = {
 		@NamedQuery(name = "PedestreEntity.findByMatriculaAndIdEmpresaAndIdCliente", query = "select distinct obj from PedestreEntity obj "
 				+ "left join fetch obj.empresa e " + "left join fetch obj.equipamentos eq "
 				+ "where obj.matricula = :MATRICULA " + "and e.id = :ID_EMPRESA "
-				+ "and (obj.removido = false or obj.removido is null) "
-				+ "and obj.cliente.id = :ID_CLIENTE "),
-		
-		@NamedQuery(name = "PedestreEntity.findAllAutoAtendimentoAtivo", query = "select obj " + "from PedestreEntity obj "
-				+ "where (obj.removido = false or obj.removido is null) and obj.cliente.id = :ID_CLIENTE and obj.autoAtendimento = true " + "order by obj.id asc"),
-		@NamedQuery(name = "PedestreEntity.findByIdWithEmpRegrasAndHorarios",
-				query = "select distinct obj from PedestreEntity obj "
-						+ "left join fetch obj.cliente c "
-						+ "left join fetch obj.empresa emp "
-						+ "left join fetch obj.regras r "
-						+ "where obj.id = :ID "
-						+ "and obj.cliente.id = :ID_CLIENTE "
-						+ "and (obj.removido = false or obj.removido is null) "
-						+ "and (r.removido = false or r.removido is null) "
-						+ "order by obj.id asc"),
-		@NamedQuery(name = "PedestreEntity.findByCPFOnBlur", query = "select distinct obj from PedestreEntity obj "
-				+ "where obj.cpf = :CPF "
-				+ "and obj.cliente.id = :ID_CLIENTE "
+				+ "and (obj.removido = false or obj.removido is null) " + "and obj.cliente.id = :ID_CLIENTE "),
+
+		@NamedQuery(name = "PedestreEntity.findAllAutoAtendimentoAtivo", query = "select obj "
+				+ "from PedestreEntity obj "
+				+ "where (obj.removido = false or obj.removido is null) and obj.cliente.id = :ID_CLIENTE and obj.autoAtendimento = true "
 				+ "order by obj.id asc"),
+		@NamedQuery(name = "PedestreEntity.findByIdWithEmpRegrasAndHorarios", query = "select distinct obj from PedestreEntity obj "
+				+ "left join fetch obj.cliente c " + "left join fetch obj.empresa emp "
+				+ "left join fetch obj.regras r " + "where obj.id = :ID " + "and obj.cliente.id = :ID_CLIENTE "
+				+ "and (obj.removido = false or obj.removido is null) "
+				+ "and (r.removido = false or r.removido is null) " + "order by obj.id asc"),
+		@NamedQuery(name = "PedestreEntity.findByCPFOnBlur", query = "select distinct obj from PedestreEntity obj "
+				+ "where obj.cpf = :CPF " + "and obj.cliente.id = :ID_CLIENTE " + "order by obj.id asc"),
 
 		@NamedQuery(name = "PedestreEntity.findByRGOnBlur", query = "select distinct obj from PedestreEntity obj "
-				+ "where obj.rg = :RG " 
-				+ "and obj.cliente.id = :ID_CLIENTE "
-				+ "order by obj.id asc"),
+				+ "where obj.rg = :RG " + "and obj.cliente.id = :ID_CLIENTE " + "order by obj.id asc"),
 		@NamedQuery(name = "PedestreEntity.findByMatriculaAndIdCliente", query = "select distinct obj from PedestreEntity obj "
-				+ "where obj.matricula = :MATRICULA "
-				+ "and obj.cliente.id = :ID_CLIENTE "),
+				+ "where obj.matricula = :MATRICULA " + "and obj.cliente.id = :ID_CLIENTE "),
 		@NamedQuery(name = "PedestreEntity.findByCpfAndIdCliente", query = "select distinct obj from PedestreEntity obj "
 				+ "left join fetch obj.cotas " 
 				+ "left join fetch obj.empresa "
 				+ "where obj.cpf = :CPF "
 				+ "and obj.cliente.id = :ID_CLIENTE "),
 		@NamedQuery(name = "PedestreEntity.findByNomeAndIdCliente", query = "select distinct obj from PedestreEntity obj "
-				+ "where obj.nome = :NOME "
-				+ "and obj.cliente.id = :ID_CLIENTE ")
-
-})
+				+ "where obj.nome = :NOME " + "and obj.cliente.id = :ID_CLIENTE "),
+		@NamedQuery(name = "PedestreEntity.findAllAlteradoEmMassa", query = "select distinct obj from PedestreEntity obj "
+				+ "where obj.tipo = 'PEDESTRE' " + "and (obj.alterarEmMassa IS NULL OR obj.alterarEmMassa = 1) "
+				+ "and obj.cliente.id = :ID_CLIENTE "),
+		@NamedQuery(name = "PedestreEntity.findByNomeAndMatriculaAndIdCliente", query = "select distinct obj from PedestreEntity obj "
+				+ "where obj.nome = :NOME " + "and obj.matriculaReferencia = :MATRICULA_S "
+				+ "and obj.cliente.id = :ID_CLIENTE " + "and (obj.removido = false or obj.removido is null) "), })
 
 @SuppressWarnings("serial")
 public class PedestreEntity extends ClienteBaseEntity {
@@ -260,6 +248,9 @@ public class PedestreEntity extends ClienteBaseEntity {
 	
 	@Column(name = "ID_LOCAL", nullable = true, length = 50)
 	private Long idLocal;
+	
+	@Column(name = "UUID_LOCAL", nullable = true)
+	private String uuidLocal;
 
 	@ManyToOne(cascade = { CascadeType.PERSIST }, fetch = FetchType.LAZY)
 	@JoinColumn(name = "ID_ENDERECO", nullable = true)
@@ -372,7 +363,13 @@ public class PedestreEntity extends ClienteBaseEntity {
 	@Type(type = "org.hibernate.type.NumericBooleanType")
 	@Column(name="AGENDAMENTO_LIBERADO", nullable=true, length=11)
 	private Boolean agendamentoLiberado;
-
+	
+	@Column(name = "MATRICULA_S", nullable = true, length = 100)
+	private String matriculaReferencia;
+	
+	@Type(type = "org.hibernate.type.NumericBooleanType")
+	@Column(name="IMPORTADO_EDUCACIONAL", nullable=true, length=11)
+	private Boolean importadoEducacional;
 	
 	@Transient
 	private String token;
@@ -390,7 +387,7 @@ public class PedestreEntity extends ClienteBaseEntity {
 
 	}
 
-	public PedestreEntity(final FuncionarioSeniorDto funcionarioSeniorDto, final EmpresaEntity empresaEntity) {
+	public PedestreEntity(final FuncionarioSeniorDto funcionarioSeniorDto, final EmpresaEntity empresaEntity, LocalEntity localPadrao) {
 		LocalDate hoje = LocalDate.now();
 
 		this.nome = funcionarioSeniorDto.getNome();
@@ -403,7 +400,11 @@ public class PedestreEntity extends ClienteBaseEntity {
 		this.empresa = empresaEntity;
 		this.tipo = TipoPedestre.PEDESTRE;
 		this.sempreLiberado = false;
-
+		
+		if(Objects.nonNull(localPadrao)) {
+			this.uuidLocal = localPadrao.getUuid();
+		}
+		
 		if (Objects.nonNull(funcionarioSeniorDto.getDatDem())) {
 			this.observacoes = "DATA DEMISSAO : " + funcionarioSeniorDto.getDatDem() + " | MOTIVO : DEMISSAO";
 			this.status = Status.INATIVO;
@@ -464,10 +465,10 @@ public class PedestreEntity extends ClienteBaseEntity {
 		
 		if(isPermitido(funcionarioTotvsDto)) {
 			this.setStatus(Status.ATIVO);
-			this.observacoes =  "atualizado dia " + LocalDate.now().toString();
+			this.observacoes = "Funcionario ATIVO com situação da folha: " + funcionarioTotvsDto.getSituacaoFolha() + ", situacao de escala: " + funcionarioTotvsDto.getStatusTrabalho() +  ", atualizado dia " + LocalDate.now().toString();
 		}else {
 			this.setStatus(Status.INATIVO);
-			this.observacoes = "Funcionario com situação : " + funcionarioTotvsDto.getSituacaoFolha();
+			this.observacoes = "Funcionario INVATIVO com situação da folha: " + funcionarioTotvsDto.getSituacaoFolha() + ", situacao de escala: " + funcionarioTotvsDto.getStatusTrabalho() + ", atualizado dia " + LocalDate.now().toString();
 		}		
 	}
 
@@ -1023,6 +1024,30 @@ public class PedestreEntity extends ClienteBaseEntity {
 
 	public void setAgendamentoLiberado(Boolean agendamentoLiberado) {
 		this.agendamentoLiberado = agendamentoLiberado;
+	}
+
+	public String getUuidLocal() {
+		return uuidLocal;
+	}
+
+	public void setUuidLocal(String uuidLocal) {
+		this.uuidLocal = uuidLocal;
+	}
+
+	public String getMatriculaReferencia() {
+		return matriculaReferencia;
+	}
+
+	public void setMatriculaReferencia(String matriculaReferencia) {
+		this.matriculaReferencia = matriculaReferencia;
+	}
+
+	public Boolean getImportadoEducacional() {
+		return importadoEducacional;
+	}
+
+	public void setImportadoEducacional(Boolean importadoEducacional) {
+		this.importadoEducacional = importadoEducacional;
 	}
 
 }

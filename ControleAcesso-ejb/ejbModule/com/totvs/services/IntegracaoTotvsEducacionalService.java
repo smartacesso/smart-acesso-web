@@ -184,7 +184,10 @@ public class IntegracaoTotvsEducacionalService {
 		    dto.setNomeFilial(getTag(resultado, "NOMEFILIAL"));
 		    dto.setCnpjFilial(getTag(resultado, "CNPJFILIAL"));
 		    dto.setNome(getTag(resultado, "NOME"));
+		    dto.setGenero(getTag(resultado, "GENERO"));
 		    dto.setMatricula(getTag(resultado, "MATRICULA"));
+		    dto.setCodTurma(getTag(resultado, "CODTURMA"));
+		    dto.setCurso(getTag(resultado, "CURSO"));
 		    dto.setCpf(getTag(resultado, "CPF"));
 		    dto.setCodStatus(getTag(resultado, "CODSTATUS"));
 		    dto.setStatus(getTag(resultado, "STATUS"));

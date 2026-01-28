@@ -13,6 +13,7 @@ public class LocalTo {
 	private Long id;
 	private String nome;
 	private String idClient;
+	private String uuid;
 	
 	@JsonProperty("hikivisionDeviceNames")
 	private List<String> deviceNames;
@@ -23,6 +24,7 @@ public class LocalTo {
 	
 	public LocalTo(LocalEntity local) {
 		this.id = local.getId();
+		this.setUuid(local.getUuid());
 		this.nome = local.getNome() != null ? local.getNome() : "";
 		this.idClient = local.getCliente().getId().toString();
 		this.removed = local.getRemovido();
@@ -66,6 +68,16 @@ public class LocalTo {
 	}
 	public void setDataRemovido(Date dataRemovido) {
 		this.dataRemovido = dataRemovido;
+	}
+
+
+	public String getUuid() {
+		return uuid;
+	}
+
+
+	public void setUuid(String uuid) {
+		this.uuid = uuid;
 	}
 	
 	
