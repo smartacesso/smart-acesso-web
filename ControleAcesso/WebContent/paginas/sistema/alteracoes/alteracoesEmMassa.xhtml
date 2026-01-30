@@ -237,37 +237,38 @@
 				resizable="false" width="40%">
 
 
-					<p:panelGrid columns="2" columnClasses="label,value"
-						style="width:100%">
+				<p:panelGrid columns="2" columnClasses="label,value"
+					style="width:100%">
 
-						<p:outputLabel value="Data Início:" for="dataInicioJustificativa" />
-						<p:calendar id="dataInicioJustificativa"
-							value="#{alteracoesEmMassaController.dataInicioJustificativa}"
-							pattern="dd/MM/yyyy HH:mm" mask="99/99/9999 00:00" navigator="true" />
+					<p:outputLabel value="Data Início:" for="dataInicioJustificativa" />
+					<p:calendar id="dataInicioJustificativa"
+						value="#{alteracoesEmMassaController.dataInicioJustificativa}"
+						pattern="dd/MM/yyyy HH:mm" mask="99/99/9999 00:00"
+						navigator="true" />
 
-						<p:outputLabel value="Data Fim:" for="dataFimJustificativa" />
-						<p:calendar id="dataFimJustificativa"
-							value="#{alteracoesEmMassaController.dataFimJustificativa}"
-							pattern="dd/MM/yyyy HH:mm" mask="99/99/9999 00:00" navigator="true" />
+					<p:outputLabel value="Data Fim:" for="dataFimJustificativa" />
+					<p:calendar id="dataFimJustificativa"
+						value="#{alteracoesEmMassaController.dataFimJustificativa}"
+						pattern="dd/MM/yyyy HH:mm" mask="99/99/9999 00:00"
+						navigator="true" />
 
-						<p:outputLabel value="Justificativa:" for="justificativa" />
-						<p:inputTextarea id="justificativa" rows="4" cols="30"
-							value="#{alteracoesEmMassaController.justificativa}"
-							autoResize="true" />
+					<p:outputLabel value="Justificativa:" for="justificativa" />
+					<p:inputTextarea id="justificativa" rows="4" cols="30"
+						value="#{alteracoesEmMassaController.justificativa}"
+						autoResize="true" />
 
-					</p:panelGrid>
+				</p:panelGrid>
 
-					<p:separator />
+				<p:separator />
 
-					<p:panelGrid columns="2" style="float:right; margin-top:10px;">
-						<p:commandButton value="Salvar"
-							action="#{alteracoesEmMassaController.salvarJustificativa}"
-							update="@form"
-							oncomplete="PF('dialogJustificativa').hide();" />
+				<p:panelGrid columns="2" style="float:right; margin-top:10px;">
+					<p:commandButton value="Salvar"
+						action="#{alteracoesEmMassaController.salvarJustificativa}"
+						update="@form" oncomplete="PF('dialogJustificativa').hide();" />
 
-						<p:commandButton value="Cancelar"
-							onclick="PF('dialogJustificativa').hide(); return false;" />
-					</p:panelGrid>
+					<p:commandButton value="Cancelar"
+						onclick="PF('dialogJustificativa').hide(); return false;" />
+				</p:panelGrid>
 
 			</p:dialog>
 
@@ -525,19 +526,20 @@
 							<h:outputText value="#{pedestre.departamento.nome}" />
 						</p:column>
 
-						<p:column headerText="cargo"
+						<p:column headerText="centro de custo"
 							styleClass="align-left col-desktop-only">
 							<h:outputText value="#{pedestre.centroCusto.nome}" />
 						</p:column>
 
-						<p:column headerText="centro de custo"
+						<p:column headerText="cargo"
 							styleClass="align-left col-desktop-only">
 							<h:outputText value="#{pedestre.cargo.nome}" />
 						</p:column>
-						
+
 						<p:column headerText="regra ativa"
 							styleClass="align-left col-desktop-only">
-							<h:outputText value="#{alteracoesEmMassaController.buscaRegra(pedestre)}" />
+							<h:outputText
+								value="#{alteracoesEmMassaController.buscaRegra(pedestre)}" />
 						</p:column>
 
 						<p:column style="text-align: center; width: 40px">

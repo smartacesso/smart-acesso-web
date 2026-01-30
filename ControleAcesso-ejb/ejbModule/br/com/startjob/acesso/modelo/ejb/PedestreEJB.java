@@ -1081,6 +1081,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 			boolean novo = pedestres == null || pedestres.isEmpty();
 
 			if (novo) {
+				System.out.println("Criando...");
 			    pedestre.setAlterado(true);
 			    pedestre = (PedestreEntity) gravaObjeto(pedestre)[0];
 			}
@@ -1088,6 +1089,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 			processarRegrasPorFuncionarioTotvs(pedestre, cliente, funcionarioTotvsDto);
 
 			if (!novo) {
+				System.out.println("Atualizando...");
 			    pedestre.updateFuncionarioTotvs(funcionarioTotvsDto);
 			    pedestre.setAlterado(true);
 			    pedestre = (PedestreEntity) alteraObjeto(pedestre)[0];
@@ -1118,10 +1120,10 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 			boolean trabalhandoAgora = estaNoTurno(horarioExistente.getHorarioInicio(),
 					horarioExistente.getHorarioFim(), agora);
 
-//			if (trabalhandoAgora && !"folga".equalsIgnoreCase(pedestreRegra.getRegra().getNome())) {
-//				System.out.println("Funcionario em horario de trabalho...");
-//				return;
-//			}
+			if (trabalhandoAgora && !"folga".equalsIgnoreCase(pedestreRegra.getRegra().getNome())) {
+				System.out.println("Funcionario em horario de trabalho...");
+				return;
+			}
 
 			apagaPedetreRegras(pedestre.getId());
 
