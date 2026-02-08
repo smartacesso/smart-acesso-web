@@ -543,19 +543,23 @@
 						</p:column>
 
 						<p:column style="text-align: center; width: 40px">
+
+							<!-- HEADER: marcar / desmarcar todos -->
 							<f:facet name="header">
-								<p:selectBooleanCheckbox id="acaoMarcarTodos"
-									value="#{alteracoesEmMassaController.marcarTodos}"
-									valueChangeListener="#{alteracoesEmMassaController.acaoMarcarTodos}">
-									<p:ajax event="valueChange" process="@this"
+								<p:selectBooleanCheckbox
+									value="#{alteracoesEmMassaController.marcarTodosFlag}">
+									<p:ajax process="@this"
+										listener="#{alteracoesEmMassaController.toggleMarcarTodos}"
 										update="pedestresTable" />
 								</p:selectBooleanCheckbox>
 							</f:facet>
-							<p:selectBooleanCheckbox id="marcarOuDesmarcar"
-								value="#{pedestre.alterarEmMassa}">
-								<p:ajax process="@this" update="@this"
-									listener="#{alteracoesEmMassaController.alteraValorCampoAlterarEmMassaPedestre(pedestre)}" />
+
+							<!-- CHECKBOX DA LINHA -->
+							<p:selectBooleanCheckbox
+								value="#{alteracoesEmMassaController.selecao[pedestre.id]}">
+								<p:ajax process="@this" update="pedestresTable" />
 							</p:selectBooleanCheckbox>
+
 						</p:column>
 
 					</p:dataTable>
