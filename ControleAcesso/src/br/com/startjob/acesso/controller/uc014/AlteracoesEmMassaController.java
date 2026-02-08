@@ -3,10 +3,13 @@ package br.com.startjob.acesso.controller.uc014;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
@@ -27,6 +30,7 @@ import br.com.startjob.acesso.modelo.entity.ParametroEntity;
 import br.com.startjob.acesso.modelo.entity.PedestreEntity;
 import br.com.startjob.acesso.modelo.entity.PedestreRegraEntity;
 import br.com.startjob.acesso.modelo.entity.RegraEntity;
+import br.com.startjob.acesso.modelo.entity.base.BaseEntity;
 import br.com.startjob.acesso.modelo.enumeration.TipoPedestre;
 import br.com.startjob.acesso.modelo.enumeration.TipoRegra;
 
@@ -72,6 +76,9 @@ public class AlteracoesEmMassaController extends BaseController{
 	private Date dataFimJustificativa;
 	private String justificativa;
 	
+	private boolean marcarTodosFlag;
+	private Map<Long, Boolean> selecao = new HashMap<>();
+
 	@PostConstruct
 	@Override
 	public void init() {
@@ -113,10 +120,23 @@ public class AlteracoesEmMassaController extends BaseController{
 		Long idCliente = getUsuarioLogado().getCliente().getId();
 		pedestreRegraAlteracao.setRegra(regraAlteracao);
 		
+	    // Extrai somente os IDs marcados
+	    List<Long> idsSelecionados = selecao.entrySet()
+	        .stream()
+	        .filter(e -> Boolean.TRUE.equals(e.getValue()))
+	        .map(Map.Entry::getKey)
+	        .collect(Collectors.toList());
+
+	    if (idsSelecionados.isEmpty()) {
+	        mensagemInfo("", "Nenhum pedestre selecionado.");
+	        return;
+	    }
+		
 		pedestreEJB.alterarEmMassa(pedestreRegraAlteracao, idEmpresaAlteracao, idDepartamentoAlteracao, 
-				idCentroCustoAlteracao, idCargoAlteracao, idCliente, getParans());
+				idCentroCustoAlteracao, idCargoAlteracao, idCliente, getParans(), idsSelecionados);
 		
 		buscar();
+		
 		
 		mensagemInfo("", "#Alteração em massa executada com sucesso.");
 	}
@@ -133,14 +153,14 @@ public class AlteracoesEmMassaController extends BaseController{
 		mensagemInfo("", "#Alteração em massa executada com sucesso.");
 	}
 	
-	public void acaoMarcarTodos(ValueChangeEvent value) {
-		marcarTodos = (boolean) value.getNewValue();
-		
-		pedestreEJB.marcarOuDesmarcarTodos(marcarTodos, getParans(), getUsuarioLogado().getCliente().getId());
-		
-		buscar();
-	}
-	
+//	public void acaoMarcarTodos(ValueChangeEvent value) {
+//		marcarTodos = (boolean) value.getNewValue();
+//		
+//		pedestreEJB.marcarOuDesmarcarTodos(marcarTodos, getParans(), getUsuarioLogado().getCliente().getId());
+//		
+//		buscar();
+//	}
+//	
 	public void alteraValorCampoAlterarEmMassaPedestre(PedestreEntity pedestre) {
 		try {
 			baseEJB.alteraObjeto(pedestre);
@@ -308,6 +328,41 @@ public class AlteracoesEmMassaController extends BaseController{
 		return regra.getRegra().getNome();
 	}
 	
+	public boolean selecionado(PedestreEntity p) {
+	    if (p == null || p.getId() == null) return false;
+	    return Boolean.TRUE.equals(selecao.get(p.getId()));
+	}
+	
+	public void alternarSelecao(PedestreEntity p) {
+	    if (p == null || p.getId() == null) return;
+
+	    Long id = p.getId();
+	    boolean novoValor = !Boolean.TRUE.equals(selecao.get(id));
+	    selecao.put(id, novoValor);
+	}
+	
+	public void toggleMarcarTodos() {
+	    if (marcarTodosFlag) {
+	        marcarTodos();
+	    } else {
+	        limparSelecao();
+	    }
+	}
+	
+	public void marcarTodos() {
+	    for (BaseEntity b : getResult()) {
+	    	PedestreEntity p = (PedestreEntity) b;// ou sua lista da tabela
+	        if (p.getId() != null) {
+	            selecao.put(p.getId(), true);
+	        }
+	    }
+	}
+	
+	public void limparSelecao() {
+	    selecao.clear();
+	}
+
+	
 	public List<SelectItem> getListaEmpresas() {
 		return listaEmpresas;
 	}
@@ -410,6 +465,22 @@ public class AlteracoesEmMassaController extends BaseController{
 
 	public void setJustificativa(String justificativa) {
 		this.justificativa = justificativa;
+	}
+
+	public Map<Long, Boolean> getSelecao() {
+		return selecao;
+	}
+
+	public void setSelecao(Map<Long, Boolean> selecao) {
+		this.selecao = selecao;
+	}
+
+	public boolean isMarcarTodosFlag() {
+		return marcarTodosFlag;
+	}
+
+	public void setMarcarTodosFlag(boolean marcarTodosFlag) {
+		this.marcarTodosFlag = marcarTodosFlag;
 	}
 	
 }
