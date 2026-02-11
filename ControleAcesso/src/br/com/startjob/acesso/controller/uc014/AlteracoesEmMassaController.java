@@ -3,12 +3,8 @@ package br.com.startjob.acesso.controller.uc014;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -111,9 +107,12 @@ public class AlteracoesEmMassaController extends BaseController{
 	
 	@Override
 	public String buscar() {
-		getParans().put("cliente.id", getUsuarioLogado().getCliente().getId());
-		setNamedQueryPesquisa("findAllPedestresComEmpresa");
-		return super.buscar();
+	    getParans().put("cliente.id", getUsuarioLogado().getCliente().getId());
+	    setNamedQueryPesquisa("findAllPedestresComEmpresa");
+
+	    String ret = super.buscar();
+	    limparSelecao(); // 👈 sempre que a lista muda, zera seleção
+	    return ret;
 	}
 	
 	public void iniciarAlteracaoEmMassa() {
@@ -360,8 +359,8 @@ public class AlteracoesEmMassaController extends BaseController{
 	
 	public void limparSelecao() {
 	    selecao.clear();
+	    marcarTodosFlag = false;
 	}
-
 	
 	public List<SelectItem> getListaEmpresas() {
 		return listaEmpresas;

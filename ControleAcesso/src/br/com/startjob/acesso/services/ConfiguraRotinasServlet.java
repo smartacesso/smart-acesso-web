@@ -45,7 +45,7 @@ public class ConfiguraRotinasServlet extends BaseServlet {
 		log.info("Registra rotinas recorrentes...");
 //		registraTimersParaSenior();
 //		registraTimersParaSOC();
-		registraTimersParaTotvs();
+//		registraTimersParaTotvs();
 //		registraTimerSalesiano();
 //		registraPrimeiroUsuario();
 //		registraTimersAutoAtendimento();
@@ -126,7 +126,7 @@ public class ConfiguraRotinasServlet extends BaseServlet {
 		ActivatedTasks.getInstancia().limpaTimersTovs();
 
 		// Define o período para 30 minutos (30 * 60 * 1000 ms)
-		Long period = 30 * 60 * 1000L;
+		Long period = 20 * 60 * 1000L;
 		Timer timer = new Timer();
 
 		TimerTask totvsTask = new ImportarTotvsTask();

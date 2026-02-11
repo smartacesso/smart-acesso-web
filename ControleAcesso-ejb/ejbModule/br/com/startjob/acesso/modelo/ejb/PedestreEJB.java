@@ -1114,15 +1114,24 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 
 			HorarioEntity horarioExistente = buscarHorarioPorRegra(regra.getId());
 			PedestreRegraEntity pedestreRegra = buscaRegraAtiva(pedestre.getId());
+			
+
+			if (horarioExistente == null) {
+			    System.out.println("Sem horário existente para a regra " + regra.getNome());
+			    return;
+			}
 
 			LocalTime agora = LocalTime.now();
 
 			boolean trabalhandoAgora = estaNoTurno(horarioExistente.getHorarioInicio(),
 					horarioExistente.getHorarioFim(), agora);
 
-			if (trabalhandoAgora && !"folga".equalsIgnoreCase(pedestreRegra.getRegra().getNome())) {
-				System.out.println("Funcionario em horario de trabalho...");
-				return;
+
+			if (pedestreRegra == null || pedestreRegra.getRegra() == null) {
+			    System.out.println("Pedestre sem regra ativa");
+			} else if (trabalhandoAgora && !"folga".equalsIgnoreCase(pedestreRegra.getRegra().getNome())) {
+			    System.out.println("Funcionario em horario de trabalho...");
+			    return;
 			}
 
 			apagaPedetreRegras(pedestre.getId());
@@ -1194,11 +1203,19 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 	}
 
 	private boolean isHorarioZerado(String horaInicial, String horaFinal) {
-		if("0".equalsIgnoreCase(horaFinal) && "0".equalsIgnoreCase(horaInicial)) {
-			return true;
-		}
-		
-		return false;
+	    return isZeroOuVazio(horaInicial) && isZeroOuVazio(horaFinal);
+	}
+
+	private boolean isZeroOuVazio(String valor) {
+	    if (valor == null) {
+	        return true;
+	    }
+
+	    String v = valor.trim().toLowerCase();
+
+	    return v.isEmpty()      // ""
+	        || "0".equals(v)    // "0"
+	        || "o".equals(v);   // "o" (letra O)
 	}
 
 	private boolean estaNoTurno(Date horarioInicio, Date horarioFim, LocalTime agora) {
@@ -2081,7 +2098,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		if (Objects.nonNull(escala)) {
 			if ("0".equalsIgnoreCase(escala.getIdescala())) {
 				System.out.println("ESCALA SEM INTERVALO");
-				criaRegraPadrao(pedestre, cliente, horarios, funcionario);
+				criaRegraFolga(pedestre, cliente, horarios, funcionario);
 				return;
 			}
 
@@ -2097,7 +2114,8 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 
 			} else {
 				System.out.println("ESCALA SEM HORARIO");
-				criaRegraPadrao(pedestre, cliente, horarios, funcionario);
+				criaRegraFolga(pedestre, cliente, horarios, funcionario);
+//				criaRegraPadrao(pedestre, cliente, horarios, funcionario);
 			}
 		} else {
 			System.out.println("FOLGA");
@@ -2145,9 +2163,9 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 	private void criaRegraFolga(PedestreEntity pedestre, ClienteEntity cliente, List<HorarioSeniorDto> horarios,
 			FuncionarioSeniorDto funcionario) {
 		HorarioPedestreDto escala = new HorarioPedestreDto();
-		escala.setEscalaSenior("folga");
-		escala.setEscalaSeniorDesc("folga");
-		escala.setHorarioSeniorDesc("foga");
+		escala.setEscalaSenior("Folga ou sem horario");
+		escala.setEscalaSeniorDesc("");
+		escala.setHorarioSeniorDesc("");
 		escala.setHorarioSenior("");
 		escala.setIntervaloSenior("");
 		horarios.add(HorarioSeniorDto.criarHorarioFolga());
@@ -2657,35 +2675,182 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		return regra;
 	}
 
+//	@Override
+//	public void marcarOuDesmarcarTodos(boolean marcado, Map<String, Object> args, Long idCliente) {
+//		StringBuilder query = new StringBuilder();
+//		String sgdb = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SGDB);
+//		String schema = "";
+//		if (sgdb == null || "".equals(sgdb)) {
+//			sgdb = "mysql";
+//		}
+//
+//		if ("plsql".equals(sgdb)) {
+//			schema = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SCHEMA);
+//		}
+//		query.append("update " + schema + "TB_PEDESTRE ").append("set ALTERAR_EM_MASSA = ").append(marcado ? "1" : "0")
+//				.append(" ").append("where ID_CLIENTE = ").append(idCliente).append(" and TIPO_PEDESTRE = 'PEDESTRE' ")
+//				.append(" ");
+//
+//		Map<String, Object> arg = new HashMap<String, Object>();
+//		arg.putAll(args);
+//		arg.remove("cliente.id");
+//
+//		query.append(concatenaFiltros(arg));
+//
+//		Query q = em.createNativeQuery(query.toString());
+//		q.executeUpdate();
+//	}
+
 	@Override
 	public void marcarOuDesmarcarTodos(boolean marcado, Map<String, Object> args, Long idCliente) {
-		StringBuilder query = new StringBuilder();
-		String sgdb = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SGDB);
-		String schema = "";
-		if (sgdb == null || "".equals(sgdb)) {
-			sgdb = "mysql";
-		}
+	    StringBuilder query = new StringBuilder();
+	    String sgdb = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SGDB);
+	    String schema = "";
 
-		if ("plsql".equals(sgdb)) {
-			schema = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SCHEMA);
-		}
-		query.append("update " + schema + "TB_PEDESTRE ").append("set ALTERAR_EM_MASSA = ").append(marcado ? "1" : "0")
-				.append(" ").append("where ID_CLIENTE = ").append(idCliente).append(" and TIPO_PEDESTRE = 'PEDESTRE' ")
-				.append(" ");
+	    if (sgdb == null || "".equals(sgdb)) {
+	        sgdb = "mysql";
+	    }
 
-		Map<String, Object> arg = new HashMap<String, Object>();
-		arg.putAll(args);
-		arg.remove("cliente.id");
+	    if ("plsql".equals(sgdb)) {
+	        schema = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SCHEMA);
+	    }
 
-		query.append(concatenaFiltros(arg));
+	    
+	    query.append("update ").append(schema).append("TB_PEDESTRE ")
+	         .append("set ALTERAR_EM_MASSA = ")
+	         .append(marcado ? "1" : "NULL")
+	         .append(" ")
+	         .append("where ID_CLIENTE = ").append(idCliente)
+	         .append(" and TIPO_PEDESTRE = 'PEDESTRE' ");
+	    
+	    System.out.println(query.toString());
 
-		Query q = em.createNativeQuery(query.toString());
-		q.executeUpdate();
+	    Map<String, Object> arg = new HashMap<>();
+	    arg.putAll(args);
+	    arg.remove("cliente.id");
+
+	    query.append(concatenaFiltros(arg));
+
+	    Query q = em.createNativeQuery(query.toString());
+	    int afetados = q.executeUpdate();
+
+	    System.out.println(">>> [ALTERAR EM MASSA] Registros atualizados = " + afetados);
 	}
 
+	
+//	@Override
+//	public void alterarEmMassa(PedestreRegraEntity pedestreRegra, Long idEmpresa, Long idDepartamento, Long idCentro,
+//			Long idCargo, Long idCliente, Map<String, Object> args, List<Long> idsSelecionados) {
+//		
+//		if (idsSelecionados == null || idsSelecionados.isEmpty()) {
+//		    System.out.println("Nenhum pedestre selecionado.");
+//		    return;
+//		}
+//
+//		System.out.println("Quantidade de ids : " + idsSelecionados.size());
+//
+//
+//		String sgdb = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SGDB);
+//		String schema = "";
+//		if (sgdb == null || "".equals(sgdb)) {
+//			sgdb = "mysql";
+//		}
+//
+//		if ("plsql".equals(sgdb)) {
+//			schema = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SCHEMA);
+//		}
+//
+//		Query qCount = em.createNativeQuery("SELECT COUNT(*) FROM " + schema + ".TB_PEDESTRE "
+//				+ "WHERE ID_CLIENTE = :idCliente AND TIPO_PEDESTRE = 'PEDESTRE' AND ALTERAR_EM_MASSA = 1");
+//		qCount.setParameter("idCliente", idCliente);
+//
+//		Number totalMarcados = (Number) qCount.getSingleResult();
+//		System.out.println(">>> [ALTERAR EM MASSA] Total de pedestres marcados = " + totalMarcados);
+//
+//		Map<String, Object> arg = new HashMap<String, Object>();
+//		arg.putAll(args);
+//		arg.remove("cliente.id");
+//
+//		String query = "";
+//		Query q = null;
+//		
+//		if(true) return;
+// 
+////		altera campos na tabela pedestre se tiver empresa escolhida
+//		if (idEmpresa != null) {
+//			query = queryAlterarDadosDeEmpresa(idEmpresa, idDepartamento, idCentro, idCargo, idCliente, arg);
+//			q = em.createNativeQuery(query);
+//			q.executeUpdate();
+//		}
+//
+//		if (pedestreRegra != null && pedestreRegra.getRegra() != null) {
+////			desativa regras dos pedestres
+//			query = queryDesativarRegras(idCliente, arg);
+//			System.out.println(">>> SQL DESATIVAR REGRAS:\n" + query);
+//
+//			q = em.createNativeQuery(query);
+//			int afetados = q.executeUpdate();
+//
+//			System.out.println(">>> Linhas afetadas ao desativar regras = " + afetados);
+//
+////			Faz a insercao de novas regras
+////			query = queryCriarNovasRegras(pedestreRegra, args);
+////			if (query != null && !"".equals(query)) {
+////				q = em.createNativeQuery(query);
+////
+////				if (pedestreRegra.getValidade() != null)
+////					q.setParameter("VALIDADE", pedestreRegra.getValidade());
+////				if (pedestreRegra.getDataInicioPeriodo() != null)
+////					q.setParameter("DATA_INICIO_PERIODO", pedestreRegra.getDataInicioPeriodo());
+////				if (pedestreRegra.getDataFimPeriodo() != null)
+////					q.setParameter("DATA_FIM_PERIODO", pedestreRegra.getDataFimPeriodo());
+////
+////				q.executeUpdate();
+////			}
+//
+//			List<String> queries = queryCriarNovasRegrasEmLotes(pedestreRegra, args, 900);
+//
+//			for (String sql : queries) {
+//				System.out.println(">>> SQL INSERT LOTE:\n" + sql);
+//
+//				Query ql = em.createNativeQuery(sql);
+//
+//				if (pedestreRegra.getValidade() != null)
+//					ql.setParameter("VALIDADE", pedestreRegra.getValidade());
+//				if (pedestreRegra.getDataInicioPeriodo() != null)
+//					ql.setParameter("DATA_INICIO_PERIODO", pedestreRegra.getDataInicioPeriodo());
+//				if (pedestreRegra.getDataFimPeriodo() != null)
+//					ql.setParameter("DATA_FIM_PERIODO", pedestreRegra.getDataFimPeriodo());
+//
+//				int inseridos = ql.executeUpdate();
+//				System.out.println(">>> Linhas inseridas neste lote = " + inseridos);
+//			}
+//
+//		}
+//
+//		query = queryMudarDataAlteracaoPedestres(idCliente);
+//		q = em.createNativeQuery(query);
+//		q.executeUpdate();
+//
+//// 		apagar marcado/desmarcado no pedestre
+//		query = queryApagarMarcadoTodosPedestres(idCliente);
+//		q = em.createNativeQuery(query);
+//		q.executeUpdate();
+//
+//	}
+	
 	@Override
 	public void alterarEmMassa(PedestreRegraEntity pedestreRegra, Long idEmpresa, Long idDepartamento, Long idCentro,
-			Long idCargo, Long idCliente, Map<String, Object> args) {
+			Long idCargo, Long idCliente, Map<String, Object> args, List<Long> idsSelecionados) {
+		
+		if (idsSelecionados == null || idsSelecionados.isEmpty()) {
+		    System.out.println("Nenhum pedestre selecionado.");
+		    return;
+		}
+
+		int totalMarcados = idsSelecionados.size();
+		System.out.println(">>> [ALTERAR EM MASSA] Total de pedestres selecionados = " + totalMarcados);
+
 
 		Map<String, Object> arg = new HashMap<String, Object>();
 		arg.putAll(args);
@@ -2693,158 +2858,265 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 
 		String query = "";
 		Query q = null;
-
+		
 //		altera campos na tabela pedestre se tiver empresa escolhida
 		if (idEmpresa != null) {
-			query = queryAlterarDadosDeEmpresa(idEmpresa, idDepartamento, idCentro, idCargo, idCliente, arg);
+			query = queryAlterarDadosDeEmpresa(idEmpresa, idDepartamento, idCentro, idCargo, idCliente, arg, idsSelecionados);
 			q = em.createNativeQuery(query);
 			q.executeUpdate();
 		}
 
 		if (pedestreRegra != null && pedestreRegra.getRegra() != null) {
 //			desativa regras dos pedestres
-			query = queryDesativarRegras(idCliente, arg);
+			query = queryDesativarRegras(idCliente, arg, idsSelecionados);
 			q = em.createNativeQuery(query);
 			q.executeUpdate();
 
-//			Faz a insercao de novas regras
-			query = queryCriarNovasRegras(pedestreRegra, args);
-			if (query != null && !"".equals(query)) {
-				q = em.createNativeQuery(query);
+			List<String> queries = queryCriarNovasRegrasEmLotes(pedestreRegra, idsSelecionados, 900);
 
-				if (pedestreRegra.getValidade() != null)
-					q.setParameter("VALIDADE", pedestreRegra.getValidade());
-				if (pedestreRegra.getDataInicioPeriodo() != null)
-					q.setParameter("DATA_INICIO_PERIODO", pedestreRegra.getDataInicioPeriodo());
-				if (pedestreRegra.getDataFimPeriodo() != null)
-					q.setParameter("DATA_FIM_PERIODO", pedestreRegra.getDataFimPeriodo());
+			for (String sql : queries) {
+			    System.out.println(">>> SQL INSERT LOTE:\n" + sql);
 
-				q.executeUpdate();
+			    Query ql = em.createNativeQuery(sql);
+
+			    if (pedestreRegra.getValidade() != null)
+			        ql.setParameter("VALIDADE", pedestreRegra.getValidade());
+			    if (pedestreRegra.getDataInicioPeriodo() != null)
+			        ql.setParameter("DATA_INICIO_PERIODO", pedestreRegra.getDataInicioPeriodo());
+			    if (pedestreRegra.getDataFimPeriodo() != null)
+			        ql.setParameter("DATA_FIM_PERIODO", pedestreRegra.getDataFimPeriodo());
+
+			    int inseridos = ql.executeUpdate();
+			    System.out.println(">>> Linhas inseridas neste lote = " + inseridos);
 			}
 		}
 
-		query = queryMudarDataAlteracaoPedestres(idCliente);
-		q = em.createNativeQuery(query);
-		q.executeUpdate();
+		String sqlData = queryMudarDataAlteracaoPedestres(idsSelecionados);
+		if (sqlData != null) {
+		    em.createNativeQuery(sqlData).executeUpdate();
+		}
 
-// 		apagar marcado/desmarcado no pedestre
-		query = queryApagarMarcadoTodosPedestres(idCliente);
-		q = em.createNativeQuery(query);
-		q.executeUpdate();
-
+		String sqlLimpar = queryApagarMarcadoTodosPedestres(idsSelecionados);
+		if (sqlLimpar != null) {
+		    em.createNativeQuery(sqlLimpar).executeUpdate();
+		}
 	}
 
+//	public String queryAlterarDadosDeEmpresa(Long idEmpresa, Long idDepartamento, Long idCentro, Long idCargo,
+//			Long idCliente, Map<String, Object> arg) {
+//
+//		String sgdb = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SGDB);
+//		String schema = "";
+//		if (sgdb == null || "".equals(sgdb)) {
+//			sgdb = "mysql";
+//		}
+//
+//		if ("plsql".equals(sgdb)) {
+//			schema = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SCHEMA);
+//		}
+//
+//		StringBuilder query = new StringBuilder();
+//		query.append("update " + schema + "TB_PEDESTRE set ");
+//
+//		query.append("ID_EMPRESA = ").append(idEmpresa).append(" ");
+//
+//		if (idDepartamento != null)
+//			query.append(", ID_DEPARTAMENTO = ").append(idDepartamento).append(" ");
+//		if (idCentro != null)
+//			query.append(", ID_CENTRO_CUSTO = ").append(idCentro).append(" ");
+//		if (idCargo != null)
+//			query.append(", ID_CARGO = ").append(idCargo).append(" ");
+//
+//		query.append("where ID_CLIENTE = ").append(idCliente).append(" and TIPO_PEDESTRE = 'PEDESTRE' ")
+//				.append(" and ALTERAR_EM_MASSA = 1 ");
+//
+//		query.append(concatenaFiltros(arg));
+//
+//		return query.toString();
+//	}
+	
 	public String queryAlterarDadosDeEmpresa(Long idEmpresa, Long idDepartamento, Long idCentro, Long idCargo,
-			Long idCliente, Map<String, Object> arg) {
+	        Long idCliente, Map<String, Object> arg, List<Long> idsSelecionados) {
 
-		String sgdb = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SGDB);
-		String schema = "";
+	    String sgdb = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SGDB);
+	    String schema = "";
+	    if (sgdb == null || "".equals(sgdb)) {
+	        sgdb = "mysql";
+	    }
+
+	    if ("plsql".equals(sgdb)) {
+	        schema = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SCHEMA);
+	    }
+
+	    StringBuilder query = new StringBuilder();
+	    query.append("update ").append(schema).append("TB_PEDESTRE set ");
+
+	    query.append("ID_EMPRESA = ").append(idEmpresa).append(" ");
+
+	    if (idDepartamento != null)
+	        query.append(", ID_DEPARTAMENTO = ").append(idDepartamento).append(" ");
+	    if (idCentro != null)
+	        query.append(", ID_CENTRO_CUSTO = ").append(idCentro).append(" ");
+	    if (idCargo != null)
+	        query.append(", ID_CARGO = ").append(idCargo).append(" ");
+
+	    query.append("where ID_CLIENTE = ").append(idCliente)
+	         .append(" and TIPO_PEDESTRE = 'PEDESTRE' ");
+
+	    query.append(" and ID_PEDESTRE in (")
+	         .append(idsSelecionados.stream().map(String::valueOf).collect(java.util.stream.Collectors.joining(",")))
+	         .append(") ");
+
+	    query.append(concatenaFiltros(arg));
+
+	    return query.toString();
+	}
+
+
+//	public String queryDesativarRegras(Long idCliente, Map<String, Object> arg) {
+//		StringBuilder query = new StringBuilder();
+//
+//		String sgdb = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SGDB);
+//		String schema = "";
+//		String funcData = "";
+//		
+//		if (sgdb == null || "".equals(sgdb)) {
+//			sgdb = "mysql";
+//			funcData = "CURDATE()";
+//		}
+//
+//		if ("plsql".equals(sgdb)) {
+//			schema = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SCHEMA);
+//			funcData = "GETDATE()";
+//		}
+//		
+//		query.append("update ")
+//		     .append(schema)
+//		     .append("RE_PEDESTRE_REGRA ")
+//		     .append("set DATA_REMOVIDO = ")
+//		     .append(funcData)
+//		     .append(", REMOVIDO = 1 ");
+//
+//		query.append("where ID_PEDESTRE in ( ");
+//		query.append("select ID_PEDESTRE from " + schema + "TB_PEDESTRE ");
+//		query.append("where ID_CLIENTE = ").append(idCliente).append(" and TIPO_PEDESTRE = 'PEDESTRE' ")
+//				.append(" and ALTERAR_EM_MASSA = 1 ");
+//
+//		query.append(concatenaFiltros(arg));
+//		query.append(")");
+//
+//		System.out.println("Consulta de apagar regra ");
+//		System.out.println("SQL GERADO:\n" + query);
+//
+//		return query.toString();
+//	}
+	
+	public String queryDesativarRegras(Long idCliente, Map<String, Object> arg, List<Long> idsSelecionados) {
+	    StringBuilder query = new StringBuilder();
+
+	    String sgdb = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SGDB);
+	    String schema = "";
+		String funcData = "";
+		
 		if (sgdb == null || "".equals(sgdb)) {
 			sgdb = "mysql";
+			funcData = "CURDATE()";
 		}
 
 		if ("plsql".equals(sgdb)) {
 			schema = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SCHEMA);
+			funcData = "GETDATE()";
 		}
+		
+	    query.append("update ")
+	         .append(schema)
+	         .append("RE_PEDESTRE_REGRA ")
+	         .append("set DATA_REMOVIDO = ")
+	         .append(funcData)
+	         .append(", REMOVIDO = 1 ");
 
-		StringBuilder query = new StringBuilder();
-		query.append("update " + schema + "TB_PEDESTRE set ");
+	    query.append("where ID_PEDESTRE in (")
+	         .append(idsSelecionados.stream().map(String::valueOf).collect(java.util.stream.Collectors.joining(",")))
+	         .append(")");
 
-		query.append("ID_EMPRESA = ").append(idEmpresa).append(" ");
+	    System.out.println("SQL DESATIVAR REGRAS:\n" + query);
 
-		if (idDepartamento != null)
-			query.append(", ID_DEPARTAMENTO = ").append(idDepartamento).append(" ");
-		if (idCentro != null)
-			query.append(", ID_CENTRO_CUSTO = ").append(idCentro).append(" ");
-		if (idCargo != null)
-			query.append(", ID_CARGO = ").append(idCargo).append(" ");
-
-		query.append("where ID_CLIENTE = ").append(idCliente).append(" and TIPO_PEDESTRE = 'PEDESTRE' ")
-				.append(" and (ALTERAR_EM_MASSA IS NULL OR ALTERAR_EM_MASSA = 1) ");
-
-		query.append(concatenaFiltros(arg));
-
-		return query.toString();
+	    return query.toString();
 	}
 
-	public String queryDesativarRegras(Long idCliente, Map<String, Object> arg) {
-		StringBuilder query = new StringBuilder();
+	public List<String> queryCriarNovasRegrasEmLotes(PedestreRegraEntity pedestreRegra,
+            List<Long> idsSelecionados,
+			int limite) {
 
-		String sgdb = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SGDB);
-		String schema = "";
-		if (sgdb == null || "".equals(sgdb)) {
-			sgdb = "mysql";
+		List<String> queries = new ArrayList<>();
+
+		if (idsSelecionados == null || idsSelecionados.isEmpty()) {
+			return queries;
 		}
-
-		if ("plsql".equals(sgdb)) {
-			schema = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SCHEMA);
-		}
-
-		query.append("update " + schema + "RE_PEDESTRE_REGRA set DATA_REMOVIDO = curdate(), REMOVIDO = 1 ");
-		query.append("where ID_PEDESTRE in ( ");
-		query.append("select ID_PEDESTRE from " + schema + "TB_PEDESTRE ");
-		query.append("where ID_CLIENTE = ").append(idCliente).append(" and TIPO_PEDESTRE = 'PEDESTRE' ")
-				.append(" and (ALTERAR_EM_MASSA IS NULL OR ALTERAR_EM_MASSA = 1) ");
-
-		query.append(concatenaFiltros(arg));
-		query.append(")");
-
-		return query.toString();
-	}
-
-	@SuppressWarnings("unchecked")
-	public String queryCriarNovasRegras(PedestreRegraEntity pedestreRegra, Map<String, Object> args) {
-		StringBuilder query = new StringBuilder();
 
 		try {
-			Long idCliente = (Long) args.get("cliente.id");
-
-			HashMap<String, Object> argsFixos = new HashMap<String, Object>();
-			argsFixos.put("ID_CLIENTE", idCliente);
-			argsFixos.put("TIPO", TipoPedestre.PEDESTRE);
-			List<PedestreEntity> listaPedestres = (List<PedestreEntity>) pesquisaArgFixos(PedestreEntity.class,
-					"findAllParaAlterarEmMassa", argsFixos);
-
-//			List<PedestreEntity> listaPedestres = (List<PedestreEntity>) 
-//					pesquisaSimples(PedestreEntity.class, "findAll", args);
-
-			if (listaPedestres == null || listaPedestres.isEmpty())
-				return null;
-
 			String sgdb = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SGDB);
 			String schema = "";
-			if (sgdb == null || "".equals(sgdb)) {
+			String funcData = "";
+
+			// default
+			if (sgdb == null || sgdb.isEmpty()) {
 				sgdb = "mysql";
+				funcData = "CURDATE()"; // MySQL
 			}
 
 			if ("plsql".equals(sgdb)) {
 				schema = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SCHEMA);
+				funcData = "GETDATE()"; // SQL Server
+			}
+			
+			if ("oracle".equals(sgdb)) {
+				schema = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SCHEMA);
+				funcData = "SYSDATE()"; // SQL Server
 			}
 
-			query.append(
-					"insert into " + schema + "RE_PEDESTRE_REGRA (VERSAO, ID_REGRA, DATA_ALTERACAO, DATA_CRIACAO ");
+			// Cabeçalho fixo do INSERT
+			StringBuilder header = new StringBuilder();
+			header.append("INSERT INTO ").append(schema).append("RE_PEDESTRE_REGRA ")
+					.append("(VERSAO, ID_REGRA, DATA_ALTERACAO, DATA_CRIACAO");
 
 			if (pedestreRegra.getValidade() != null)
-				query.append(", VALIDADE");
+				header.append(", VALIDADE");
 			if (pedestreRegra.getDataInicioPeriodo() != null)
-				query.append(", DATA_INICIO_PERIODO");
+				header.append(", DATA_INICIO_PERIODO");
 			if (pedestreRegra.getDataFimPeriodo() != null)
-				query.append(", DATA_FIM_PERIODO");
+				header.append(", DATA_FIM_PERIODO");
 			if (pedestreRegra.getQtdeDeCreditos() != null)
-				query.append(", QTDE_CREDITOS");
+				header.append(", QTDE_CREDITOS");
 			if (pedestreRegra.getDiasValidadeCredito() != null)
-				query.append(", DIAS_VALIDADE_CREDITO");
+				header.append(", DIAS_VALIDADE_CREDITO");
 
-			query.append(", ID_PEDESTRE) values ");
+			header.append(", ID_PEDESTRE) VALUES ");
 
-			for (PedestreEntity pedestre : listaPedestres) {
-				if (TipoPedestre.VISITANTE.equals(pedestre.getTipo()))
-					continue;
-				if (Boolean.FALSE.equals(pedestre.getAlterarEmMassa()))
-					continue;
+			StringBuilder query = new StringBuilder();
+			query.append(header);
 
-				query.append(" (0, ").append(pedestreRegra.getRegra().getId());
-				query.append(", curdate(), curdate()");
+			boolean first = true;
+			int count = 0;
+
+			for (Long idPedestre : idsSelecionados) {
+
+				// se atingiu o limite do lote, fecha e começa outro
+				if (count >= limite) {
+					queries.add(query.toString());
+					query = new StringBuilder();
+					query.append(header);
+					first = true;
+					count = 0;
+				}
+
+				if (!first) {
+					query.append(", ");
+				}
+				first = false;
+
+				query.append("(0, ").append(pedestreRegra.getRegra().getId()).append(", ").append(funcData).append(", ")
+						.append(funcData);
 
 				if (pedestreRegra.getValidade() != null)
 					query.append(", :VALIDADE");
@@ -2857,18 +3129,350 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 				if (pedestreRegra.getDiasValidadeCredito() != null)
 					query.append(", ").append(pedestreRegra.getDiasValidadeCredito());
 
-				query.append(", ").append(pedestre.getId()).append("), ");
+				query.append(", ").append(idPedestre).append(")");
+
+				count++;
 			}
+
+			// adiciona o último lote se tiver algo
+			if (count > 0) {
+				queries.add(query.toString());
+			}
+
+			return queries;
 
 		} catch (Exception e) {
 			e.printStackTrace();
+			return queries;
 		}
-
-		if (query.toString().endsWith(", "))
-			return query.substring(0, query.length() - 2);
-
-		return query.toString();
 	}
+	
+//	@SuppressWarnings("unchecked")
+//	public List<String> queryCriarNovasRegrasEmLotes(PedestreRegraEntity pedestreRegra, Map<String, Object> args, int limite) {
+//
+//	    List<String> queries = new ArrayList<>();
+//
+//	    try {
+//	        Long idCliente = (Long) args.get("cliente.id");
+//
+//	        HashMap<String, Object> argsFixos = new HashMap<>();
+//	        argsFixos.put("ID_CLIENTE", idCliente);
+//	        argsFixos.put("TIPO", TipoPedestre.PEDESTRE);
+//
+//	        List<PedestreEntity> listaPedestres =
+//	                (List<PedestreEntity>) pesquisaArgFixos(
+//	                        PedestreEntity.class,
+//	                        "findAllParaAlterarEmMassa",
+//	                        argsFixos
+//	                );
+//
+//	        if (listaPedestres == null || listaPedestres.isEmpty()) {
+//	            return queries;
+//	        }
+//
+//	        String sgdb = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SGDB);
+//	        String schema = "";
+//	        String funcData = "";
+//
+//	        // default
+//	        if (sgdb == null || sgdb.isEmpty()) {
+//	            sgdb = "mysql";
+//	        }
+//
+//	        if ("plsql".equals(sgdb)) {
+//	            schema = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SCHEMA);
+//	            funcData = "GETDATE()"; // SQL Server
+//	        } else {
+//	            funcData = "CURDATE()"; // MySQL
+//	        }
+//
+//	        // Cabeçalho fixo do INSERT (igual ao seu)
+//	        StringBuilder header = new StringBuilder();
+//	        header.append("INSERT INTO ")
+//	              .append(schema)
+//	              .append("RE_PEDESTRE_REGRA ")
+//	              .append("(VERSAO, ID_REGRA, DATA_ALTERACAO, DATA_CRIACAO");
+//
+//	        if (pedestreRegra.getValidade() != null)
+//	            header.append(", VALIDADE");
+//	        if (pedestreRegra.getDataInicioPeriodo() != null)
+//	            header.append(", DATA_INICIO_PERIODO");
+//	        if (pedestreRegra.getDataFimPeriodo() != null)
+//	            header.append(", DATA_FIM_PERIODO");
+//	        if (pedestreRegra.getQtdeDeCreditos() != null)
+//	            header.append(", QTDE_CREDITOS");
+//	        if (pedestreRegra.getDiasValidadeCredito() != null)
+//	            header.append(", DIAS_VALIDADE_CREDITO");
+//
+//	        header.append(", ID_PEDESTRE) VALUES ");
+//
+//	        StringBuilder query = new StringBuilder();
+//	        query.append(header);
+//
+//	        boolean first = true;
+//	        int count = 0;
+//
+//	        for (PedestreEntity pedestre : listaPedestres) {
+//
+//	            if (TipoPedestre.VISITANTE.equals(pedestre.getTipo()))
+//	                continue;
+//
+//	            if (Boolean.FALSE.equals(pedestre.getAlterarEmMassa()))
+//	                continue;
+//
+//	            // Se atingiu o limite, fecha o lote atual e começa outro
+//	            if (count >= limite) {
+//	                if (!first) {
+//	                    queries.add(query.toString());
+//	                }
+//	                query = new StringBuilder();
+//	                query.append(header);
+//	                first = true;
+//	                count = 0;
+//	            }
+//
+//	            if (!first) {
+//	                query.append(", ");
+//	            }
+//	            first = false;
+//
+//	            query.append("(0, ")
+//	                 .append(pedestreRegra.getRegra().getId())
+//	                 .append(", ")
+//	                 .append(funcData)
+//	                 .append(", ")
+//	                 .append(funcData);
+//
+//	            if (pedestreRegra.getValidade() != null)
+//	                query.append(", :VALIDADE");
+//	            if (pedestreRegra.getDataInicioPeriodo() != null)
+//	                query.append(", :DATA_INICIO_PERIODO");
+//	            if (pedestreRegra.getDataFimPeriodo() != null)
+//	                query.append(", :DATA_FIM_PERIODO");
+//	            if (pedestreRegra.getQtdeDeCreditos() != null)
+//	                query.append(", ").append(pedestreRegra.getQtdeDeCreditos());
+//	            if (pedestreRegra.getDiasValidadeCredito() != null)
+//	                query.append(", ").append(pedestreRegra.getDiasValidadeCredito());
+//
+//	            query.append(", ")
+//	                 .append(pedestre.getId())
+//	                 .append(")");
+//
+//	            count++;
+//	        }
+//
+//	        // adiciona o último lote
+//	        if (!first) {
+//	            queries.add(query.toString());
+//	        }
+//
+//	        return queries;
+//
+//	    } catch (Exception e) {
+//	        e.printStackTrace();
+//	        return queries;
+//	    }
+//	}
+	
+//	@SuppressWarnings("unchecked")
+//	public String queryCriarNovasRegras(PedestreRegraEntity pedestreRegra, Map<String, Object> args) {
+//	    StringBuilder query = new StringBuilder();
+//
+//	    try {
+//	        Long idCliente = (Long) args.get("cliente.id");
+//
+//	        HashMap<String, Object> argsFixos = new HashMap<>();
+//	        argsFixos.put("ID_CLIENTE", idCliente);
+//	        argsFixos.put("TIPO", TipoPedestre.PEDESTRE);
+//
+//	        List<PedestreEntity> listaPedestres =
+//	                (List<PedestreEntity>) pesquisaArgFixos(
+//	                        PedestreEntity.class,
+//	                        "findAllParaAlterarEmMassa",
+//	                        argsFixos
+//	                );
+//
+//	        if (listaPedestres == null || listaPedestres.isEmpty()) {
+//	            return null;
+//	        }
+//
+//	        String sgdb = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SGDB);
+//	        String schema = "";
+//	        String funcData = "";
+//
+//	        // default
+//	        if (sgdb == null || sgdb.isEmpty()) {
+//	            sgdb = "mysql";
+//	        }
+//
+//	        if ("plsql".equals(sgdb)) {
+//	            schema = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SCHEMA);
+//	            funcData = "GETDATE()"; // SQL Server
+//	        } else {
+//	            funcData = "CURDATE()"; // MySQL
+//	        }
+//
+//	        query.append("INSERT INTO ")
+//	             .append(schema)
+//	             .append("RE_PEDESTRE_REGRA ")
+//	             .append("(VERSAO, ID_REGRA, DATA_ALTERACAO, DATA_CRIACAO");
+//
+//	        if (pedestreRegra.getValidade() != null)
+//	            query.append(", VALIDADE");
+//	        if (pedestreRegra.getDataInicioPeriodo() != null)
+//	            query.append(", DATA_INICIO_PERIODO");
+//	        if (pedestreRegra.getDataFimPeriodo() != null)
+//	            query.append(", DATA_FIM_PERIODO");
+//	        if (pedestreRegra.getQtdeDeCreditos() != null)
+//	            query.append(", QTDE_CREDITOS");
+//	        if (pedestreRegra.getDiasValidadeCredito() != null)
+//	            query.append(", DIAS_VALIDADE_CREDITO");
+//
+//	        query.append(", ID_PEDESTRE) VALUES ");
+//
+//	        boolean first = true;
+//
+//	        for (PedestreEntity pedestre : listaPedestres) {
+//
+//	            if (TipoPedestre.VISITANTE.equals(pedestre.getTipo()))
+//	                continue;
+//
+//	            if (Boolean.FALSE.equals(pedestre.getAlterarEmMassa()))
+//	                continue;
+//
+//	            if (!first) {
+//	                query.append(", ");
+//	            }
+//	            first = false;
+//
+//	            query.append("(0, ")
+//	                 .append(pedestreRegra.getRegra().getId())
+//	                 .append(", ")
+//	                 .append(funcData)
+//	                 .append(", ")
+//	                 .append(funcData);
+//
+//	            if (pedestreRegra.getValidade() != null)
+//	                query.append(", :VALIDADE");
+//	            if (pedestreRegra.getDataInicioPeriodo() != null)
+//	                query.append(", :DATA_INICIO_PERIODO");
+//	            if (pedestreRegra.getDataFimPeriodo() != null)
+//	                query.append(", :DATA_FIM_PERIODO");
+//	            if (pedestreRegra.getQtdeDeCreditos() != null)
+//	                query.append(", ").append(pedestreRegra.getQtdeDeCreditos());
+//	            if (pedestreRegra.getDiasValidadeCredito() != null)
+//	                query.append(", ").append(pedestreRegra.getDiasValidadeCredito());
+//
+//	            query.append(", ")
+//	                 .append(pedestre.getId())
+//	                 .append(")");
+//	        }
+//
+//	        // Nenhum registro válido para inserir
+//	        if (first) {
+//	            return null;
+//	        }
+//
+//	        System.out.println("Consulta de criar regra");
+//	        System.out.println("SQL GERADO:\n" + query);
+//
+//	        return query.toString();
+//
+//	    } catch (Exception e) {
+//	        e.printStackTrace();
+//	        return null;
+//	    }
+//	}
+
+//	@SuppressWarnings("unchecked")
+//	public String queryCriarNovasRegras(PedestreRegraEntity pedestreRegra, Map<String, Object> args) {
+//		StringBuilder query = new StringBuilder();
+//
+//		try {
+//			Long idCliente = (Long) args.get("cliente.id");
+//
+//			HashMap<String, Object> argsFixos = new HashMap<String, Object>();
+//			argsFixos.put("ID_CLIENTE", idCliente);
+//			argsFixos.put("TIPO", TipoPedestre.PEDESTRE);
+//			List<PedestreEntity> listaPedestres = (List<PedestreEntity>) pesquisaArgFixos(PedestreEntity.class,
+//					"findAllParaAlterarEmMassa", argsFixos);
+//
+////			List<PedestreEntity> listaPedestres = (List<PedestreEntity>) 
+////					pesquisaSimples(PedestreEntity.class, "findAll", args);
+//
+//			if (listaPedestres == null || listaPedestres.isEmpty())
+//				return null;
+//
+//			String sgdb = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SGDB);
+//			String schema = "";
+//			String funcData = "";
+//			
+//			if (sgdb == null || "".equals(sgdb)) {
+//				sgdb = "mysql";
+//				funcData = "CURDATE()";
+//			}
+//
+//			if ("plsql".equals(sgdb)) {
+//				schema = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SCHEMA);
+//				funcData = "GETDATE()";
+//			}
+//
+//			query.append(
+//					"insert into " + schema + "RE_PEDESTRE_REGRA (VERSAO, ID_REGRA, DATA_ALTERACAO, DATA_CRIACAO ");
+//
+//			if (pedestreRegra.getValidade() != null)
+//				query.append(", VALIDADE");
+//			if (pedestreRegra.getDataInicioPeriodo() != null)
+//				query.append(", DATA_INICIO_PERIODO");
+//			if (pedestreRegra.getDataFimPeriodo() != null)
+//				query.append(", DATA_FIM_PERIODO");
+//			if (pedestreRegra.getQtdeDeCreditos() != null)
+//				query.append(", QTDE_CREDITOS");
+//			if (pedestreRegra.getDiasValidadeCredito() != null)
+//				query.append(", DIAS_VALIDADE_CREDITO");
+//
+//			query.append(", ID_PEDESTRE) values ");
+//
+//			for (PedestreEntity pedestre : listaPedestres) {
+//				if (TipoPedestre.VISITANTE.equals(pedestre.getTipo()))
+//					continue;
+//				if (Boolean.FALSE.equals(pedestre.getAlterarEmMassa()))
+//					continue;
+//
+//				query.append(" (0, ").append(pedestreRegra.getRegra().getId());
+//				query.append(", ").append(funcData).append(", ").append(funcData);
+//
+//
+//				if (pedestreRegra.getValidade() != null)
+//					query.append(", :VALIDADE");
+//				if (pedestreRegra.getDataInicioPeriodo() != null)
+//					query.append(", :DATA_INICIO_PERIODO");
+//				if (pedestreRegra.getDataFimPeriodo() != null)
+//					query.append(", :DATA_FIM_PERIODO");
+//				if (pedestreRegra.getQtdeDeCreditos() != null)
+//					query.append(", ").append(pedestreRegra.getQtdeDeCreditos());
+//				if (pedestreRegra.getDiasValidadeCredito() != null)
+//					query.append(", ").append(pedestreRegra.getDiasValidadeCredito());
+//
+//				query.append(", ").append(pedestre.getId()).append("), ");
+//			}
+//
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//
+//		if (query.toString().endsWith(", ")) {		
+//			System.out.println("Consulta de criar regra com if");
+//			System.out.println("consulta : " + query.toString());
+//			
+//			return query.substring(0, query.length() - 2);
+//		}
+//
+//		System.out.println("Consulta de criar regra sem if ");
+//		System.out.println("consulta : " + query.toString());
+//		
+//		return query.toString();
+//	}
 
 	public String queryApagarMarcadoTodosPedestres(Long idCliente) {
 		StringBuilder query = new StringBuilder();
@@ -2885,6 +3489,9 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		query.append("update " + schema + "TB_PEDESTRE set ALTERAR_EM_MASSA = NULL ").append("where ID_CLIENTE = ")
 				.append(idCliente);
 
+		
+        System.out.println("Consulta de apagar marcado regra");
+        System.out.println("SQL GERADO:\n" + query);
 		return query.toString();
 	}
 
@@ -2892,20 +3499,113 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		StringBuilder query = new StringBuilder();
 		String sgdb = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SGDB);
 		String schema = "";
+		String funcData = "";
+		
 		if (sgdb == null || "".equals(sgdb)) {
 			sgdb = "mysql";
+			funcData = "CURRENT_TIMESTAMP";
 		}
 
 		if ("plsql".equals(sgdb)) {
 			schema = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SCHEMA);
+			funcData = "GETDATE()";
 		}
-
-		query.append("update " + schema + "TB_PEDESTRE set DATA_ALTERACAO = current_timestamp() ")
-				.append("where ID_CLIENTE = ").append(idCliente).append(" and TIPO_PEDESTRE = 'PEDESTRE' ")
-				.append(" and (ALTERAR_EM_MASSA IS NULL OR ALTERAR_EM_MASSA = 1) ");
-
+		
+		query.append("update ")
+	     .append(schema)
+	     .append("TB_PEDESTRE ")
+	     .append("set DATA_ALTERACAO = ")
+	     .append(funcData)
+	     .append(" ")
+	     .append("where ID_CLIENTE = ")
+	     .append(idCliente)
+	     .append(" and TIPO_PEDESTRE = 'PEDESTRE' ")
+	     .append("and ALTERAR_EM_MASSA = 1 ");
+		
+		
+        System.out.println("Consulta de mudar data");
+        System.out.println("SQL GERADO:\n" + query);
 		return query.toString();
 	}
+	
+	public String queryApagarMarcadoTodosPedestres(List<Long> idsSelecionados) {
+	    StringBuilder query = new StringBuilder();
+
+	    if (idsSelecionados == null || idsSelecionados.isEmpty()) {
+	        return null; // nada pra fazer
+	    }
+
+	    String sgdb = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SGDB);
+	    String schema = "";
+	    if (sgdb == null || "".equals(sgdb)) {
+	        sgdb = "mysql";
+	    }
+
+	    if ("plsql".equals(sgdb)) {
+	        schema = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SCHEMA);
+	    }
+
+	    query.append("update ")
+	         .append(schema)
+	         .append("TB_PEDESTRE set ALTERAR_EM_MASSA = NULL ")
+	         .append("where ID_PEDESTRE in (");
+
+	    for (int i = 0; i < idsSelecionados.size(); i++) {
+	        if (i > 0) query.append(", ");
+	        query.append(idsSelecionados.get(i));
+	    }
+
+	    query.append(")");
+
+	    System.out.println("Consulta de apagar marcado regra");
+	    System.out.println("SQL GERADO:\n" + query);
+
+	    return query.toString();
+	}
+
+	
+	private String queryMudarDataAlteracaoPedestres(List<Long> idsSelecionados) {
+	    StringBuilder query = new StringBuilder();
+
+	    if (idsSelecionados == null || idsSelecionados.isEmpty()) {
+	        return null; // nada pra fazer
+	    }
+
+	    String sgdb = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SGDB);
+	    String schema = "";
+	    String funcData;
+
+	    if (sgdb == null || "".equals(sgdb)) {
+	        sgdb = "mysql";
+	        funcData = "CURRENT_TIMESTAMP";
+	    } else if ("plsql".equals(sgdb)) {
+	        schema = AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_SCHEMA);
+	        funcData = "GETDATE()";
+	    } else {
+	        funcData = "CURRENT_TIMESTAMP";
+	    }
+
+	    query.append("update ")
+	         .append(schema)
+	         .append("TB_PEDESTRE ")
+	         .append("set DATA_ALTERACAO = ")
+	         .append(funcData)
+	         .append(" ")
+	         .append("where ID_PEDESTRE in (");
+
+	    for (int i = 0; i < idsSelecionados.size(); i++) {
+	        if (i > 0) query.append(", ");
+	        query.append(idsSelecionados.get(i));
+	    }
+
+	    query.append(")");
+
+	    System.out.println("Consulta de mudar data");
+	    System.out.println("SQL GERADO:\n" + query);
+
+	    return query.toString();
+	}
+
 
 	private String concatenaFiltros(Map<String, Object> args) {
 		StringBuilder sb = new StringBuilder();
