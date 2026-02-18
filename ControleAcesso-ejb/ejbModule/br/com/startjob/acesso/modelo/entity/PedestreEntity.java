@@ -105,7 +105,7 @@ import br.com.startjob.acesso.modelo.utils.EncryptionUtils;
 				+ "order by obj.id asc"),
 		@NamedQuery(name = "PedestreEntity.findAllParaAlterarEmMassa", query = "select obj from PedestreEntity obj "
 				+ "where obj.cliente.id = :ID_CLIENTE " + "and obj.tipo = :TIPO "
-				+ "and (obj.alterarEmMassa is null or obj.alterarEmMassa = true) " + "order by obj.id asc"),
+				+ "and obj.alterarEmMassa = true " + "order by obj.id asc"),
 		@NamedQuery(name = "PedestreEntity.findByIdTemp", query = "select obj from PedestreEntity obj "
 				+ "	left join fetch obj.cliente c " + "where obj.idTemp = :ID_TEMP "
 				+ "and obj.cliente.id = :ID_CLIENTE "),
@@ -384,6 +384,9 @@ public class PedestreEntity extends ClienteBaseEntity {
 
 	@Transient
 	private CadastroExternoEntity facialAtual;
+	
+	@Transient
+	private boolean selecionadoEmMassa;
 
 	public PedestreEntity() {
 
@@ -475,12 +478,7 @@ public class PedestreEntity extends ClienteBaseEntity {
 	}
 
 	private boolean isPermitido(FuncionarioTotvsDto funcionarioTotvsDto) {
-	    return "ok".equalsIgnoreCase(funcionarioTotvsDto.getSituacaoFolha())
-	        && (
-	            "Trabalhado".equalsIgnoreCase(funcionarioTotvsDto.getStatusTrabalho())
-	            || funcionarioTotvsDto.getStatusTrabalho() == null
-	            || funcionarioTotvsDto.getStatusTrabalho().trim().isEmpty()
-	        );
+	    return "ok".equalsIgnoreCase(funcionarioTotvsDto.getSituacaoFolha()) || funcionarioTotvsDto.getSituacaoFolha().isEmpty();
 	}
 
 	public String getAllPhonesFormatted() {
@@ -734,10 +732,10 @@ public class PedestreEntity extends ClienteBaseEntity {
 	}
 
 	public Boolean getAlterarEmMassa() {
-
-		if (alterarEmMassa == null)
-			return Boolean.TRUE;
-
+		
+		if(alterarEmMassa == null)
+			return Boolean.FALSE;
+		
 		return alterarEmMassa;
 	}
 
@@ -1050,6 +1048,14 @@ public class PedestreEntity extends ClienteBaseEntity {
 
 	public void setImportadoEducacional(Boolean importadoEducacional) {
 		this.importadoEducacional = importadoEducacional;
+	}
+
+	public boolean isSelecionadoEmMassa() {
+	    return selecionadoEmMassa;
+	}
+
+	public void setSelecionadoEmMassa(boolean selecionadoEmMassa) {
+	    this.selecionadoEmMassa = selecionadoEmMassa;
 	}
 
 }
