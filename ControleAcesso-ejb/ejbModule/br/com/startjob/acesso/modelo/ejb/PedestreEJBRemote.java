@@ -6,6 +6,7 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.ejb.Remote;
 
@@ -83,7 +84,7 @@ public interface PedestreEJBRemote extends BaseEJBRemote {
 	 * @param args
 	 */
 	public void alterarEmMassa(PedestreRegraEntity pedestreRegra, Long idEmpresa, Long idDepartamento, Long idCentro,
-			Long idCargo, Long idCliente, Map<String, Object> args);
+			Long idCargo, Long idCliente, Map<String, Object> args, List<Long> idsSelecionados);
 
 	/**
 	 * Realiza importação do sistema SOC

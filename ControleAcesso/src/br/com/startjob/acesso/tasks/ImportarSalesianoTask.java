@@ -212,9 +212,9 @@ public class ImportarSalesianoTask extends TimerTask {
 	    String matricula = cadastro.getMatricula();
 	    String cpf = cadastro.getCpf();
 	    String tipo = TipoTotvsEdu.fromTabelaRm(cadastro.getOrigem()).getDesc();
-
-	    System.out.printf("Salvando, nome: %s, matricula: %s, cpf: %s, tipo: %s%n", 
-	            nome, matricula, cpf, tipo);
+	    System.out.println();
+	    System.out.printf("Salvando, nome: %s, matricula: %s, cpf: %s, tipo: %s, status : %s%n", 
+	            nome, matricula, cpf, tipo, cadastro.getCodStatus());
 	    
 	    PedestreEntity pedestre = buscarPedestre(cpf, nome, matricula, cliente, tipo, cadastro);
 
@@ -265,7 +265,7 @@ public class ImportarSalesianoTask extends TimerTask {
 
 	    PedestreEntity pedestre = new PedestreEntity();
 	    pedestre.setNome(nome.toUpperCase());
-	    pedestre.setCpf(cpf);
+	    pedestre.setCpf(normalizarCpf(cpf));
 	    pedestre.setCliente(cliente);
 	    pedestre.setGenero(Genero.fromString(genero));
 	    pedestre.setCodigoCartaoAcesso(codigoCartao);
@@ -293,7 +293,7 @@ public class ImportarSalesianoTask extends TimerTask {
 	    DepartamentoEntity departamento = recuperaDepartamento(tipo, empresa);
 	    
 	    pedestre.setNome(cadastro.getNome().toUpperCase());
-	    pedestre.setCpf(somenteNumeros(cadastro.getCpf()));
+	    pedestre.setCpf(normalizarCpf(cadastro.getCpf()));
 	    pedestre.setStatus(permitido ? Status.ATIVO : Status.INATIVO);
 	    
 	    pedestre.setMatriculaReferencia(cadastro.getMatricula());
@@ -301,6 +301,7 @@ public class ImportarSalesianoTask extends TimerTask {
 	    
 	    pedestre.setEmpresa(empresa);
 	    pedestre.setDepartamento(departamento);
+	    pedestre.setImportadoEducacional(true);
 	    
 	    if("ALUNO".equalsIgnoreCase(tipo)) {
 		    CargoEntity cargo = recuperaCargo(cadastro.getCodTurma(), empresa);
@@ -334,33 +335,23 @@ public class ImportarSalesianoTask extends TimerTask {
 	    return cadastro.getMatricula().concat(String.valueOf(codigo));
 	}
 	
-	public PedestreEntity buscarPedestre(String cpf, String nome, String matricula, ClienteEntity cliente, String tipo, CadastroDTO cadastro) {
-	    PedestreEntity pedestre = null;
-	    
-//	    boolean tipoResponsavel = tipo.toUpperCase().contains("RESPONSAVEL");
-//
-//        if(tipoResponsavel) {
-//        	int codigo = OrigemStatusTotvs.getCodigoPorTipo(cadastro.getOrigem());
-//			matricula = cadastro.getMatricula().concat(String.valueOf(codigo));
-//        }
-	    
-	    // 1. Busca por Matrícula
-	    if (matricula != null && !matricula.trim().isEmpty()) {
-	        System.out.println("Buscando por matrícula: " + matricula);
-	        
-//	        pedestre = buscaPedestrePorMatricula(matricula, cliente.getId());
-	        pedestre = buscaPedestreNomeAndMatriculaReferencia(nome, matricula, cliente.getId());
+	public PedestreEntity buscarPedestre(String cpf, String nome, String matricula, ClienteEntity cliente, String tipo,
+			CadastroDTO cadastro) {
+		PedestreEntity pedestre = null;
 
-	        if (pedestre != null) {
-	            System.out.println("Encontrado por matrícula. nome : " + pedestre.getNome());
-	            return pedestre;
-	        }
+		// 1. Busca por Matrícula
+		System.out.println("Buscando por nome e cpf: ");
 
-	        System.out.println("Não encontrado por matrícula.");
-	    }
-	    
-	    System.out.println("Nenhum pedestre encontrado com os dados fornecidos.");
-	    return null;
+//		pedestre = buscaPedestreNomeAndMatriculaReferencia(nome, cpf, matricula, cliente.getId());
+		pedestre = buscaPedestrePorNomeAndCpf(nome, cpf, cliente.getId());
+
+		if (pedestre != null) {
+			System.out.println("Encontrado por nome e cpf. nome : " + pedestre.getNome());
+			return pedestre;
+		}
+
+		System.out.println("Nenhum pedestre encontrado com os dados fornecidos.");
+		return null;
 	}
 
 	private ClienteEntity buscaClientesPorFilialEColigada(String codColigada, String codFilial) throws Exception {
@@ -404,15 +395,19 @@ public class ImportarSalesianoTask extends TimerTask {
 	}
 
 	@SuppressWarnings("unchecked")
-	private PedestreEntity buscaPedestrePorCpf(String cpf, Long idCliente) {
+	private PedestreEntity buscaPedestrePorNomeAndCpf(String nome, String cpf, Long idCliente) {
+		
+		String cpf_valido = normalizarCpf(cpf);
+		
 		Map<String, Object> args = new HashMap<String, Object>();
-		args.put("CPF", cpf);
+		args.put("NOME", nome);
+		args.put("CPF", cpf_valido);
 		args.put("ID_CLIENTE", idCliente);
 
 		@SuppressWarnings("unchecked")
 		List<PedestreEntity> pedestres;
 		try {
-			pedestres = (List<PedestreEntity>) baseEJB.pesquisaArgFixos(PedestreEntity.class, "findByCpfAndIdCliente",
+			pedestres = (List<PedestreEntity>) baseEJB.pesquisaArgFixos(PedestreEntity.class, "findByNomeAndCpfAndIdCliente",
 					args);
 
 			if (pedestres != null && !pedestres.isEmpty()) {
@@ -426,6 +421,21 @@ public class ImportarSalesianoTask extends TimerTask {
 		return null;
 	}
 	
+	public static String normalizarCpf(String cpf) {
+	    if (cpf == null) return null;
+
+	    // remove pontos, traços, espaços, etc
+	    String apenasNumeros = cpf.replaceAll("\\D", "");
+
+	    if (apenasNumeros.length() > 11) {
+	        throw new IllegalArgumentException("CPF inválido: mais de 11 dígitos");
+	    }
+
+	    // completa com zeros à esquerda
+	    return String.format("%11s", apenasNumeros).replace(' ', '0');
+	}
+
+
 	@SuppressWarnings("unchecked")
 	private PedestreEntity buscaPedestrePorNome(String nome, Long idCliente) {
 		Map<String, Object> args = new HashMap<String, Object>();
@@ -450,7 +460,7 @@ public class ImportarSalesianoTask extends TimerTask {
 	}
 	
 	@SuppressWarnings("unchecked")
-	private PedestreEntity buscaPedestreNomeAndMatriculaReferencia(String nome, String matricula, Long idCliente) {
+	private PedestreEntity buscaPedestreNomeAndMatriculaReferencia(String nome, String cpf , String matricula, Long idCliente) {
 		Map<String, Object> args = new HashMap<String, Object>();
 		
 		args.put("NOME", nome);

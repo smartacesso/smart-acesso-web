@@ -50,9 +50,6 @@ public class WebSocketLiberacaoEndpoint {
 
 			HikivisionEquipamentosRepository.adicionarEquipamentos(clienteId, equipamentos);
 
-			System.out.println("Equipamentos atuais do cliente " + clienteId + ": "
-					+ HikivisionEquipamentosRepository.getEquipamentos(clienteId));
-
 		} catch (JsonProcessingException e) {
 			e.printStackTrace();
 		}

@@ -59,7 +59,7 @@ public class IntegracaoTotvsEducacionalService {
         if(rodarImportacaoCompleta) {
             // 01/01/ANO ATUAL 00:00:00
             Calendar calendar = Calendar.getInstance();
-            calendar.set(Calendar.YEAR, LocalDate.now().getYear());
+            calendar.set(Calendar.YEAR, LocalDate.now().getYear() - 2);
             calendar.set(Calendar.MONTH, Calendar.JANUARY);
             calendar.set(Calendar.DAY_OF_MONTH, 1);
             calendar.set(Calendar.HOUR_OF_DAY, 0);

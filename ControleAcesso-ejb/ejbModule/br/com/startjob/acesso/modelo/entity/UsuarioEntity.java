@@ -131,6 +131,9 @@ public class UsuarioEntity extends ClienteBaseEntity {
 	@Column(name="ACESSA_WEB", nullable=true)
 	private Boolean acessaWeb = true;
 	
+	@Column(name="CADASTRO_SIMPLES", nullable=true)
+	private Boolean cadastroSimples = true;
+	
 	@Column(name="USUARIO_MASTER", nullable=true)
 	private Boolean usuarioMaster = false;
 	
@@ -258,6 +261,12 @@ public class UsuarioEntity extends ClienteBaseEntity {
 	}
 	public void setExpedidora(Boolean expedidora) {
 		this.expedidora = expedidora;
+	}
+	public Boolean getCadastroSimples() {
+		return cadastroSimples;
+	}
+	public void setCadastroSimples(Boolean cadastroSimples) {
+		this.cadastroSimples = cadastroSimples;
 	}
 	
 }

@@ -53,7 +53,18 @@ import br.com.startjob.acesso.modelo.utils.EncryptionUtils;
 @Table(name = "TB_PEDESTRE", indexes = { @Index(name = "idx_pedestrian_nome", columnList = "NOME"),
 		@Index(name = "idx_pedestrian_cpf", columnList = "CPF"), @Index(name = "idx_pedestrian_rg", columnList = "RG"),
 		@Index(name = "idx_pedestrian_matricula", columnList = "MATRICULA"),
-		@Index(name = "idx_pedestrian_card_number", columnList = "CARTAO_ACESSO"), })
+		@Index(name = "idx_pedestrian_card_number", columnList = "CARTAO_ACESSO"),
+		@Index(name = "idx_pedestrian_cliente", columnList = "ID_CLIENTE"),
+		@Index(name = "idx_pedestre_cliente_removido_id", columnList = "ID_CLIENTE, REMOVIDO, ID_PEDESTRE"),
+		@Index(name = "idx_pedestre_cliente_removido_id_tipo", columnList = "ID_CLIENTE, REMOVIDO, ID_PEDESTRE, TIPO_PEDESTRE"),
+		@Index(name = "idx_pedestre_tipo", columnList = "ID_CLIENTE, REMOVIDO, TIPO_PEDESTRE"),
+		@Index(name = "idx_pedestre_tipo_removido", columnList = "REMOVIDO, TIPO_PEDESTRE"),
+		@Index(name = "idx_pedestre_empresa", columnList = "ID_EMPRESA"),
+		@Index(name = "idx_pedestre_departamento", columnList = "ID_DEPARTAMENTO"),
+		@Index(name = "idx_pedestre_centrocusto", columnList = "ID_CENTRO_CUSTO"),
+		@Index(name = "idx_pedestre_cargo", columnList = "ID_CARGO"),
+		@Index(name = "idx_pedestre_cliente_nome", columnList = "ID_CLIENTE, NOME"),
+		@Index(name = "idx_pedestre_cliente_cpf", columnList = "ID_CLIENTE, CPF") })
 @NamedQueries({
 		@NamedQuery(name = "PedestreEntity.findAll", query = "select obj " + "from PedestreEntity obj "
 				+ "where (obj.removido = false or obj.removido is null) " + "order by obj.id asc"),
@@ -68,12 +79,9 @@ import br.com.startjob.acesso.modelo.utils.EncryptionUtils;
 				+ " left join obj.responsaveis res " + " left join fetch obj.cotas c "
 				+ "where obj.id = :ID order by obj.id asc"),
 		@NamedQuery(name = "PedestreEntity.findAllComEmpresa", query = "select obj from PedestreEntity obj "
-				+ " left join fetch obj.empresa e " 
-				+ " left join fetch obj.departamento d " 
-				+ " left join fetch obj.centroCusto cc " 
-				+ " left join fetch obj.cargo c " 
-				+ "where (obj.removido = false or obj.removido is null) "
-				+ "order by obj.id asc"),
+				+ " left join fetch obj.empresa e " + " left join fetch obj.departamento d "
+				+ " left join fetch obj.centroCusto cc " + " left join fetch obj.cargo c "
+				+ "where (obj.removido = false or obj.removido is null) " + "order by obj.id asc"),
 		@NamedQuery(name = "PedestreEntity.findByCpf", query = "select obj from PedestreEntity obj "
 				+ "where obj.cpf = :CPF_PEDESTRE " + " and (obj.removido = false or obj.removido is null) "
 				+ " order by obj.id asc"),
@@ -92,11 +100,8 @@ import br.com.startjob.acesso.modelo.utils.EncryptionUtils;
 		@NamedQuery(name = "PedestreEntity.findByCardNumber", query = "select obj from PedestreEntity obj "
 				+ "where obj.codigoCartaoAcesso = :CARD_NUMBER " + "order by obj.id desc"),
 		@NamedQuery(name = "PedestreEntity.findAllPedestresComEmpresa", query = "select obj from PedestreEntity obj "
-				+ " left join fetch obj.empresa e " 
-				+ " left join fetch obj.departamento d " 
-				+ " left join fetch obj.centroCusto cc " 
-				+ " left join fetch obj.cargo c " 
-				+ "where (obj.removido = false or obj.removido is null) "
+				+ " left join obj.empresa e " + " left join obj.departamento d " + " left join obj.centroCusto cc "
+				+ " left join obj.cargo c " + "where (obj.removido = false or obj.removido is null) "
 				+ "and obj.tipo = 'PEDESTRE' " + "order by obj.id asc"),
 		@NamedQuery(name = "PedestreEntity.findPedestresByIdComRegras", query = "select obj from PedestreEntity obj "
 				+ "left join fetch obj.endereco " + "left join fetch obj.regras " + "where obj.id = :ID "),
@@ -104,8 +109,8 @@ import br.com.startjob.acesso.modelo.utils.EncryptionUtils;
 				+ " left join fetch obj.empresa e " + "where obj.id = :ID " + "and obj.cliente.id = :ID_CLIENTE "
 				+ "order by obj.id asc"),
 		@NamedQuery(name = "PedestreEntity.findAllParaAlterarEmMassa", query = "select obj from PedestreEntity obj "
-				+ "where obj.cliente.id = :ID_CLIENTE " + "and obj.tipo = :TIPO "
-				+ "and (obj.alterarEmMassa is null or obj.alterarEmMassa = true) " + "order by obj.id asc"),
+				+ "where obj.cliente.id = :ID_CLIENTE " + "and obj.tipo = :TIPO " + "and obj.alterarEmMassa = true "
+				+ "order by obj.id asc"),
 		@NamedQuery(name = "PedestreEntity.findByIdTemp", query = "select obj from PedestreEntity obj "
 				+ "	left join fetch obj.cliente c " + "where obj.idTemp = :ID_TEMP "
 				+ "and obj.cliente.id = :ID_CLIENTE "),
@@ -139,9 +144,12 @@ import br.com.startjob.acesso.modelo.utils.EncryptionUtils;
 		@NamedQuery(name = "PedestreEntity.findByMatriculaAndIdCliente", query = "select distinct obj from PedestreEntity obj "
 				+ "where obj.matricula = :MATRICULA " + "and obj.cliente.id = :ID_CLIENTE "),
 		@NamedQuery(name = "PedestreEntity.findByCpfAndIdCliente", query = "select distinct obj from PedestreEntity obj "
-				+ "where obj.cpf = :CPF " + "and obj.cliente.id = :ID_CLIENTE "),
+				+ "left join fetch obj.cotas " + "left join fetch obj.empresa " + "where obj.cpf = :CPF "
+				+ "and obj.cliente.id = :ID_CLIENTE "),
 		@NamedQuery(name = "PedestreEntity.findByNomeAndIdCliente", query = "select distinct obj from PedestreEntity obj "
 				+ "where obj.nome = :NOME " + "and obj.cliente.id = :ID_CLIENTE "),
+		@NamedQuery(name = "PedestreEntity.findByNomeAndCpfAndIdCliente", query = "select distinct obj from PedestreEntity obj "
+				+ "where obj.nome = :NOME " + "and obj.cpf = :CPF " + "and obj.cliente.id = :ID_CLIENTE "),
 		@NamedQuery(name = "PedestreEntity.findAllAlteradoEmMassa", query = "select distinct obj from PedestreEntity obj "
 				+ "where obj.tipo = 'PEDESTRE' " + "and (obj.alterarEmMassa IS NULL OR obj.alterarEmMassa = 1) "
 				+ "and obj.cliente.id = :ID_CLIENTE "),
@@ -332,10 +340,6 @@ public class PedestreEntity extends ClienteBaseEntity {
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "AUTO_ATENDIMENTO_AT", nullable = true)
 	private Date autoAtendimentoAt;
-
-//	@ManyToOne(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
-//	@JoinColumn(name = "ID_RESPONSAVEL", nullable = true)
-//	private ResponsibleEntity responsavel;
 	
 	@ManyToMany
 	@JoinTable(
@@ -379,6 +383,9 @@ public class PedestreEntity extends ClienteBaseEntity {
 
 	@Transient
 	private CadastroExternoEntity facialAtual;
+	
+	@Transient
+	private boolean selecionadoEmMassa;
 
 	public PedestreEntity() {
 
@@ -390,7 +397,7 @@ public class PedestreEntity extends ClienteBaseEntity {
 		this.nome = funcionarioSeniorDto.getNome();
 		this.matricula = funcionarioSeniorDto.getNumeroMatricula() + funcionarioSeniorDto.getEmpresa()+funcionarioSeniorDto.getNumCracha();
 		this.telefone = funcionarioSeniorDto.getDddtelefone() + funcionarioSeniorDto.getNumtelefone();
-		this.codigoCartaoAcesso = funcionarioSeniorDto.getNumCracha();
+		this.codigoCartaoAcesso = funcionarioSeniorDto.getNumCracha() != null ? funcionarioSeniorDto.getNumCracha() : null;
 		this.rg = funcionarioSeniorDto.getRg();
 		this.codigoPermissao = funcionarioSeniorDto.getCodPrm(); // codigo permissao
 		this.cliente = empresaEntity.getCliente();
@@ -423,7 +430,7 @@ public class PedestreEntity extends ClienteBaseEntity {
 		this.matricula = funcionarioSeniorDto.getNumeroMatricula() + funcionarioSeniorDto.getEmpresa()+funcionarioSeniorDto.getNumCracha();
 		this.telefone = funcionarioSeniorDto.getDddtelefone() + funcionarioSeniorDto.getNumtelefone();
 		
-		this.codigoCartaoAcesso = funcionarioSeniorDto.getNumCracha();
+//		this.codigoCartaoAcesso = funcionarioSeniorDto.getNumCracha();
 		
 		this.rg = funcionarioSeniorDto.getRg();
 		this.codigoPermissao = funcionarioSeniorDto.getCodPrm(); // codigo permissao
@@ -460,13 +467,17 @@ public class PedestreEntity extends ClienteBaseEntity {
 	    + ", horaInicial=[" + funcionarioTotvsDto.getHoraInicial() + "]"
 	    + ", horaFinal=[" + funcionarioTotvsDto.getHoraFinal() + "]");
 		
-		if(funcionarioTotvsDto.getSituacaoFolha().trim().equals("OK")) {
+		if(isPermitido(funcionarioTotvsDto)) {
 			this.setStatus(Status.ATIVO);
 			this.observacoes = "Funcionario ATIVO com situação da folha: " + funcionarioTotvsDto.getSituacaoFolha() + ", situacao de escala: " + funcionarioTotvsDto.getStatusTrabalho() +  ", atualizado dia " + LocalDate.now().toString();
 		}else {
 			this.setStatus(Status.INATIVO);
 			this.observacoes = "Funcionario INVATIVO com situação da folha: " + funcionarioTotvsDto.getSituacaoFolha() + ", situacao de escala: " + funcionarioTotvsDto.getStatusTrabalho() + ", atualizado dia " + LocalDate.now().toString();
 		}		
+	}
+
+	private boolean isPermitido(FuncionarioTotvsDto funcionarioTotvsDto) {
+	    return "ok".equalsIgnoreCase(funcionarioTotvsDto.getSituacaoFolha()) || funcionarioTotvsDto.getSituacaoFolha().isEmpty();
 	}
 
 	public String getAllPhonesFormatted() {
@@ -499,6 +510,11 @@ public class PedestreEntity extends ClienteBaseEntity {
 	
 	public boolean isVisitante() {
 		return TipoPedestre.VISITANTE.equals(this.tipo);
+	}
+	
+	
+	public boolean isPedestre() {
+		return TipoPedestre.PEDESTRE.equals(this.tipo);
 	}
 	
 	public boolean autoAtendimentoLiberado() {
@@ -715,10 +731,10 @@ public class PedestreEntity extends ClienteBaseEntity {
 	}
 
 	public Boolean getAlterarEmMassa() {
-
-		if (alterarEmMassa == null)
-			return Boolean.TRUE;
-
+		
+		if(alterarEmMassa == null)
+			return Boolean.FALSE;
+		
 		return alterarEmMassa;
 	}
 
@@ -1031,6 +1047,14 @@ public class PedestreEntity extends ClienteBaseEntity {
 
 	public void setImportadoEducacional(Boolean importadoEducacional) {
 		this.importadoEducacional = importadoEducacional;
+	}
+
+	public boolean isSelecionadoEmMassa() {
+	    return selecionadoEmMassa;
+	}
+
+	public void setSelecionadoEmMassa(boolean selecionadoEmMassa) {
+	    this.selecionadoEmMassa = selecionadoEmMassa;
 	}
 
 }

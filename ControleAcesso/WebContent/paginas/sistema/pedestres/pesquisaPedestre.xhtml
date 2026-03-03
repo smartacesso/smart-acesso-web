@@ -60,13 +60,11 @@
 				<!-- Filtros à direita -->
 				<p:toolbarGroup align="right"
 					styleClass="flex flex-wrap gap-2 justify-start md:justify-end w-full md:w-auto">
-					
+
 					<p:commandButton id="abrirDialogFiltro"
-						 rendered="#{consultaPedestreController.exibeImportarPedestresSenior()}" 
-		                 value="Importar"
-		                 icon="pi pi-filter"
-		                 styleClass="btn-white-text" 
-		                 onclick="PF('dialogFiltroPedestre').show(); return false;" />
+						rendered="#{consultaPedestreController.exibeImportarPedestresSenior()}"
+						value="Importar" icon="pi pi-filter" styleClass="btn-white-text"
+						onclick="PF('dialogFiltroPedestre').show(); return false;" />
 
 					<p:commandButton id="acaoLimpar"
 						action="#{consultaPedestreController.limpar}" icon="pi pi-spinner"
@@ -84,8 +82,7 @@
     setTimeout(function() {
         document.getElementById('form:acaoBuscar').click();
     }, 100);
-}"
- />
+}" />
 					<p:selectOneMenu id="filtro-tipoPedestre" rendered="false"
 						value="#{consultaPedestreController.parans['tipo']}"
 						styleClass="filtro-select-menu filtro-tipoPedestre-sync"
@@ -98,8 +95,8 @@
 					<div style="display: inline-flex">
 						<p:commandButton id="acaoBuscar"
 							action="#{consultaPedestreController.buscar}" icon="pi pi-search"
-							process="@form"
-							update="form:tabelaPainel" styleClass="rounded-button" />
+							process="@form" update="form:tabelaPainel"
+							styleClass="rounded-button" />
 
 					</div>
 					<p:commandButton id="acaoFiltroAvancado" icon="pi pi-sliders-h"
@@ -151,30 +148,25 @@
 						<p:outputLabel for="filtro-avancado-nome"
 							value="#{msgs['label.uc008.nome']}" />
 						<p:inputText id="filtro-avancado-nome"
-							value="#{consultaPedestreController.parans['nome']}"
-							size="20"
+							value="#{consultaPedestreController.parans['nome']}" size="20"
 							onblur="sincronizarFiltro(this, 'filtro-nome-sync');"
 							styleClass="filtro-nome-sync" />
 
 						<p:outputLabel for="filtro-avancado-contato"
 							value="#{msgs['label.uc008.contato']}" />
 						<p:inputText id="filtro-avancado-contato"
-							value="#{consultaPedestreController.contatoPesquisa}" 
-							size="20"/>
+							value="#{consultaPedestreController.contatoPesquisa}" size="20" />
 
 						<p:outputLabel for="filtro-avancado-cpf"
 							value="#{msgs['label.uc008.cpf']}" />
 						<p:inputText id="filtro-avancado-cpf"
-							value="#{consultaPedestreController.parans['cpf']}" 
-							size="20"/>
+							value="#{consultaPedestreController.parans['cpf']}" size="20" />
 
 						<p:outputLabel for="filtro-avancado-rg"
 							value="#{msgs['label.uc008.rg']}" />
 						<p:inputMask id="filtro-avancado-rg"
-							value="#{consultaPedestreController.parans['rg']}"
-							size="20"
-							validateMask="false" 
-							autoClear="false" />
+							value="#{consultaPedestreController.parans['rg']}" size="20"
+							validateMask="false" autoClear="false" />
 
 						<p:outputLabel for="filtro-avancado-tipo"
 							value="#{msgs['label.uc008.tipo']}" />
@@ -226,8 +218,7 @@
 							<f:converter converterId="javax.faces.Long" />
 						</p:selectOneMenu>
 
-						<p:outputLabel for="filtro-avancado-local"
-							value="Local" />
+						<p:outputLabel for="filtro-avancado-local" value="Local" />
 						<p:selectOneMenu id="filtro-avancado-local"
 							value="#{consultaPedestreController.parans['uuidLocal']}">
 							<f:selectItems value="#{consultaPedestreController.listaLocais}" />
@@ -259,7 +250,7 @@
 						rendered="#{not empty consultaPedestreController.result}">
 						<p:dataTable id="pedestresTable"
 							value="#{consultaPedestreController.result}" var="pedestre"
-							paginator="true"
+							lazy="true" paginator="true"
 							rows="#{consultaPedestreController.quantPorPagina}"
 							paginatorPosition="bottom" paginatorAlwaysVisible="false"
 							scrollable="true" scrollHeight="flex"
@@ -319,12 +310,13 @@
 								<h:outputText value="#{pedestre.departamento.nome}" />
 							</p:column>
 
-							<p:column headerText="cargo"
+
+							<p:column headerText="centro de custo"
 								styleClass="align-left col-desktop-only">
 								<h:outputText value="#{pedestre.centroCusto.nome}" />
 							</p:column>
 
-							<p:column headerText="centro de custo"
+							<p:column headerText="cargo"
 								styleClass="align-left col-desktop-only">
 								<h:outputText value="#{pedestre.cargo.nome}" />
 							</p:column>
@@ -433,7 +425,7 @@
 				<h:form id="formDialogFiltro">
 					<p:panelGrid columns="2" styleClass="ui-fluid"
 						columnClasses="ui-g-4,ui-g-8">
-						
+
 						<p:outputLabel for="codEmp" value="Empresa:" />
 						<p:inputText id="codEmp"
 							value="#{consultaPedestreController.empresaSelecionada}" />
@@ -461,8 +453,8 @@
 					<p:commandButton value="Executar Integração" icon="pi pi-play"
 						action="#{consultaPedestreController.executarIntegracaoPedestre}"
 						process="@form" update="@form"
-						oncomplete="PF('dialogFiltroPedestre').hide();" 
-						 styleClass="btn-white-text" />
+						oncomplete="PF('dialogFiltroPedestre').hide();"
+						styleClass="btn-white-text" />
 				</h:form>
 			</p:dialog>
 
@@ -503,12 +495,9 @@
 }
 
 /* deixa o texto e ícone branco em botões customizados */
-.btn-white-text,
-.btn-white-text .ui-button-text,
-.btn-white-text .pi {
-    color: #fff !important;
+.btn-white-text, .btn-white-text .ui-button-text, .btn-white-text .pi {
+	color: #fff !important;
 }
-
 </style>
 		</ui:define>
 
