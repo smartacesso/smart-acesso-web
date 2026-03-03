@@ -250,7 +250,7 @@
 						rendered="#{not empty consultaPedestreController.result}">
 						<p:dataTable id="pedestresTable"
 							value="#{consultaPedestreController.result}" var="pedestre"
-							paginator="true"
+							lazy="true" paginator="true"
 							rows="#{consultaPedestreController.quantPorPagina}"
 							paginatorPosition="bottom" paginatorAlwaysVisible="false"
 							scrollable="true" scrollHeight="flex"
