@@ -100,8 +100,8 @@ import br.com.startjob.acesso.modelo.utils.EncryptionUtils;
 		@NamedQuery(name = "PedestreEntity.findByCardNumber", query = "select obj from PedestreEntity obj "
 				+ "where obj.codigoCartaoAcesso = :CARD_NUMBER " + "order by obj.id desc"),
 		@NamedQuery(name = "PedestreEntity.findAllPedestresComEmpresa", query = "select obj from PedestreEntity obj "
-				+ " left join obj.empresa e " + " left join obj.departamento d " + " left join obj.centroCusto cc "
-				+ " left join obj.cargo c " + "where (obj.removido = false or obj.removido is null) "
+				+ " left join fetch obj.empresa e " + " left join fetch obj.departamento d " + " left join fetch obj.centroCusto cc "
+				+ " left join fetch obj.cargo c " + "where (obj.removido = false or obj.removido is null) "
 				+ "and obj.tipo = 'PEDESTRE' " + "order by obj.id asc"),
 		@NamedQuery(name = "PedestreEntity.findPedestresByIdComRegras", query = "select obj from PedestreEntity obj "
 				+ "left join fetch obj.endereco " + "left join fetch obj.regras " + "where obj.id = :ID "),
@@ -155,7 +155,12 @@ import br.com.startjob.acesso.modelo.utils.EncryptionUtils;
 				+ "and obj.cliente.id = :ID_CLIENTE "),
 		@NamedQuery(name = "PedestreEntity.findByNomeAndMatriculaAndIdCliente", query = "select distinct obj from PedestreEntity obj "
 				+ "where obj.nome = :NOME " + "and obj.matriculaReferencia = :MATRICULA_S "
-				+ "and obj.cliente.id = :ID_CLIENTE " + "and (obj.removido = false or obj.removido is null) "), })
+				+ "and obj.cliente.id = :ID_CLIENTE " + "and (obj.removido = false or obj.removido is null) "),
+		@NamedQuery(name = "PedestreEntity.findAllIds", query = "select distinct obj from PedestreEntity obj "
+				+ "where obj.id in :IDS " + "and obj.cliente.id = :ID_CLIENTE "
+				+ "and (obj.removido = false or obj.removido is null) "
+				+ "order by obj.id asc")
+})
 
 @SuppressWarnings("serial")
 public class PedestreEntity extends ClienteBaseEntity {

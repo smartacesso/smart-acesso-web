@@ -4397,7 +4397,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 
 	@Override
 	public void salvarJustificativa(Long idCliente, Date dataInicioJustificativa, Date dataFimJustificativa,
-	        String justificativa, Map<String, Object> parans) {
+	        String justificativa, List<Long> idsSelecionados, Map<String, Object> parans) {
 
 	    Map<String, Object> arg = new HashMap<>(parans);
 	    arg.remove("cliente.id");
@@ -4405,7 +4405,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 	    if (dataInicioJustificativa != null && dataFimJustificativa != null) {
 
 	        // 🔹 Atualiza todos os pedestres marcados
-	        adicionarAgendamento(idCliente, arg, dataInicioJustificativa, dataFimJustificativa, justificativa);
+	        adicionarAgendamento(idCliente, arg, dataInicioJustificativa, dataFimJustificativa, justificativa, idsSelecionados);
 
 	        // 🔹 Apaga marcações de alteração em massa
 	        String query = queryApagarMarcadoTodosPedestres(idCliente);
@@ -4414,8 +4414,10 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 	    }
 	}
 
-	public void adicionarAgendamento(Long idCliente, Map<String, Object> arg, Date dataInicio, Date dataFim, String justificativa) {
-	    List<PedestreEntity> pedestresMarcados = buscaTodosMarcadosEmMassa(idCliente);
+	public void adicionarAgendamento(Long idCliente, Map<String, Object> arg, Date dataInicio, Date dataFim, String justificativa, List<Long> ids) {
+	    List<PedestreEntity> pedestresMarcados = buscaTodosMarcadosEmMassa(idCliente, ids);
+	    
+	    
 	    SimpleDateFormat sdfHour = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss:sss");
 	    
 	    for (PedestreEntity pedestre : pedestresMarcados) {
@@ -4433,14 +4435,15 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 	    }
 	}
 
-	private List<PedestreEntity> buscaTodosMarcadosEmMassa(Long idCliente) {
+	private List<PedestreEntity> buscaTodosMarcadosEmMassa(Long idCliente, List<Long> ids) {
 	    try {
 	        Map<String, Object> args = new HashMap<>();
 	        args.put("ID_CLIENTE", idCliente);
+	        args.put("IDS", ids);
 
 	        @SuppressWarnings("unchecked")
 	        List<PedestreEntity> listaPedestre = (List<PedestreEntity>) pesquisaArgFixos(
-	                PedestreEntity.class, "findAllAlteradoEmMassa", args);
+	                PedestreEntity.class, "findAllIds", args);
 
 	        return (listaPedestre != null) ? listaPedestre : Collections.emptyList();
 

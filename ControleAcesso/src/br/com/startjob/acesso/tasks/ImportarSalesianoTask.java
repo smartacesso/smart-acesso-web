@@ -124,17 +124,58 @@ public class ImportarSalesianoTask extends TimerTask {
 		return null;
 	}
 
+//	private void processaAlunosTotvs(List<CadastroDTO> cadastros) {
+//		for (CadastroDTO aluno : cadastros) {
+//			try {
+//				ClienteEntity cliente = recuperaOuCriaCliente(aluno);
+//				salvarCadastro(aluno, cliente);
+//			} catch (Exception e) {
+//				e.printStackTrace();
+//			}
+//		}
+//	}
+	
 	private void processaAlunosTotvs(List<CadastroDTO> cadastros) {
-		for (CadastroDTO aluno : cadastros) {
-			try {
-				ClienteEntity cliente = recuperaOuCriaCliente(aluno);
-				salvarCadastro(aluno, cliente);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
+
+	    Map<String, CadastroDTO> consolidadosPorCpf = new HashMap<>();
+
+	    for (CadastroDTO cadastro : cadastros) {
+
+	        String cpfNormalizado = normalizarCpf(cadastro.getCpf());
+
+	        CadastroDTO existente = consolidadosPorCpf.get(cpfNormalizado);
+
+	        if (existente == null) {
+	            consolidadosPorCpf.put(cpfNormalizado, cadastro);
+	        } else {
+	            CadastroDTO escolhido = resolveConflito(existente, cadastro);
+	            consolidadosPorCpf.put(cpfNormalizado, escolhido);
+	        }
+	    }
+
+	    // Agora processa somente os consolidados
+	    for (CadastroDTO cadastroFinal : consolidadosPorCpf.values()) {
+	        try {
+	            ClienteEntity cliente = recuperaOuCriaCliente(cadastroFinal);
+	            salvarCadastro(cadastroFinal, cliente);
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	        }
+	    }
 	}
 	
+	private CadastroDTO resolveConflito(CadastroDTO c1, CadastroDTO c2) {
+
+	    boolean ativo1 = PermissoesEduTotvs.isPermitido(c1.getCodStatus());
+	    boolean ativo2 = PermissoesEduTotvs.isPermitido(c2.getCodStatus());
+
+	    // Se qualquer um for ativo, ele prevalece
+	    if (ativo1) return c1;
+	    if (ativo2) return c2;
+
+	    // Se nenhum é ativo, mantém o primeiro
+	    return c1;
+	}
 	
 	private ClienteEntity recuperaOuCriaCliente(CadastroDTO aluno) throws Exception {
 		ClienteEntity clienteRecuperado = buscaClientesPorFilialEColigada(String.valueOf(aluno.getCodColigada()),
