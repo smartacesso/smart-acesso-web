@@ -1123,8 +1123,8 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 
 			LocalTime agora = LocalTime.now();
 
-			boolean trabalhandoAgora = estaNoTurno(horarioExistente.getHorarioInicio(),
-					horarioExistente.getHorarioFim(), agora);
+			boolean trabalhandoAgora = estaNoTurno(pedestreRegra.getRegra().getHorarios().get(0).getHorarioInicio(),
+					pedestreRegra.getRegra().getHorarios().get(0).getHorarioFim(), agora);
 
 
 			if (pedestreRegra == null || pedestreRegra.getRegra() == null) {
@@ -1226,6 +1226,12 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		LocalTime inicio = horarioInicio.toInstant().atZone(ZoneId.systemDefault()).toLocalTime();
 		LocalTime fim = horarioFim.toInstant().atZone(ZoneId.systemDefault()).toLocalTime();
 
+		System.out.println("horarioInicio (Date): " + horarioInicio);
+		System.out.println("horarioFim (Date): " + horarioFim);
+		System.out.println("inicio (LocalTime): " + inicio);
+		System.out.println("fim (LocalTime): " + fim);
+		
+		
 		// Caso o turno não atravesse a meia-noite
 		if (!fim.isBefore(inicio)) {
 			return !agora.isBefore(inicio) && !agora.isAfter(fim);
