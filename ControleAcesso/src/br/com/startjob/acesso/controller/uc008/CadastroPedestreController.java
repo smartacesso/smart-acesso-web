@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -178,6 +180,7 @@ public class CadastroPedestreController extends CadastroBaseController {
 	private boolean exibeCampoLinkCadastroFacialExterno = false;
 	private boolean habilitaAppPedestre = false;
 	private boolean gerarCartaoAutomatico = false;
+	private boolean envioFacial = false;
 
 	private TipoQRCode tipoPadraoQrCode = null;
 
@@ -203,6 +206,7 @@ public class CadastroPedestreController extends CadastroBaseController {
 	private final Gson gson = new Gson();
 
 	private String localPadraoVisitante;
+
 
 	private String localPadraoPedestre;
 	
@@ -377,6 +381,11 @@ public class CadastroPedestreController extends CadastroBaseController {
 				getUsuarioLogado().getCliente().getId());
 		if (param != null)
 			localPadraoVisitante = param.getValor();
+		
+		param = baseEJB.getParametroSistema(BaseConstant.PARAMETERS_NAME.ENVIO_FACIAL,
+				getUsuarioLogado().getCliente().getId());
+		if (param != null)
+			envioFacial = Boolean.valueOf(param.getValor());
 	}
 
 	public boolean verificaObrigatorio(String campo) {
@@ -555,6 +564,8 @@ public class CadastroPedestreController extends CadastroBaseController {
 
 	@Override
 	public String salvar() {
+		String retornoStr = "";
+		
 		PedestreEntity pedestre = getPedestreAtual();
 		pedestre.setCliente(getUsuarioLogado().getCliente());
 
@@ -600,14 +611,62 @@ public class CadastroPedestreController extends CadastroBaseController {
 			}
 		}
 		
-		String jsonStr = gson.toJson(WebSocketPedestrianAccessTO.fromPedestre(pedestre));
-		JsonObject json = JsonParser.parseString(jsonStr).getAsJsonObject();
 
-		// buscar cliente correto pelo idCliente e pegar unidade organizacional
-		WebSocketCadastroEndpoint.enviarParaLocal(pedestre.getCliente().getId().toString(), json.toString());
+		if (envioFacial) {
+			try {
+				
+				String jsonStr = gson.toJson(WebSocketPedestrianAccessTO.fromPedestre(pedestre));
+				String resposta = WebSocketCadastroEndpoint.enviarEEsperar(pedestre.getCliente().getId().toString(),
+						jsonStr);
+				
+				if (!resposta.equals("ok")) {
+
+				    if (TipoPedestre.VISITANTE.equals(pedestre.getTipo())) {
+				        retornoStr = "/paginas/sistema/pedestres/cadastroSimplificado.xhtml?tipo=vi&id=" + pedestre.getId();
+				    } else {
+				        retornoStr = "/paginas/sistema/pedestres/cadastroSimplificado.xhtml?tipo=pe&id=" + pedestre.getId();
+				    }
+
+				    FacesContext.getCurrentInstance()
+				        .getExternalContext()
+				        .getFlash()
+				        .setKeepMessages(true);
+				    
+				    if(resposta.contains("UsuarioErro")) {
+				    	 mensagemAviso("", "msg.info.usuario.nao.enviada");
+				    }else if(resposta.contains("CartaoErro")) {
+				    	mensagemAviso("", "msg.info.cartao.nao.enviada");
+				    }else if (resposta.contains("FotoErro")) {
+				    	mensagemAviso("", "msg.info.foto.nao.enviada");
+				    }
+
+				    redirect(retornoStr);
+
+				    return null;
+				}
+
+			} catch (TimeoutException e) {
+
+				if (TipoPedestre.VISITANTE.equals(pedestre.getTipo())) {
+					retornoStr = "/paginas/sistema/pedestres/cadastroSimplificado.xhtml?tipo=vi&id=" + pedestre.getId();
+				} else {
+					retornoStr = "/paginas/sistema/pedestres/cadastroSimplificado.xhtml?tipo=pe&id=" + pedestre.getId();
+				}
+
+				FacesContext.getCurrentInstance().getExternalContext().getFlash().setKeepMessages(true);
+
+				mensagemAviso("", "msg.info.foto.nao.enviada_time_out");
+
+				redirect(retornoStr);
+
+				return null;
+			}catch (Exception e) {
+				mensagemFatal("", "msg.fatal.pedestre.nao.gravado");
+				e.printStackTrace();
+			}
+		}
 		
 		
-		String retornoStr = "";
 		if (cadastroEmLote) {
 		    UsuarioEntity usuario = getUsuarioLogado();
 		    
@@ -1659,8 +1718,6 @@ public class CadastroPedestreController extends CadastroBaseController {
 		boolean cartaoVazioOuInvalido = cartaoAtual == null ||
 		                                 cartaoAtual.trim().isEmpty() ||
 		                                 cartaoAtual.replace("0", "").isEmpty();
-
-		System.out.println("pedestre cartao : " + cartaoAtual);
 
 		if (cartaoVazioOuInvalido) {
 			String codigo = null;
