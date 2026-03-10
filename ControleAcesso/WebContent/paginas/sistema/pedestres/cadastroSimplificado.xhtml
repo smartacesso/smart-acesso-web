@@ -5,6 +5,9 @@
 	xmlns:p="http://primefaces.org/ui"
 	template="/tema/templates/template.xhtml">
 
+	<ui:define name="titulo">
+    Cadastro Simplificado
+	</ui:define>
 
 	<ui:define name="conteudo">
 
@@ -20,15 +23,14 @@
 			</p:steps>
 
 			<p:separator />
-			<p:messages autoUpdate="true" />
-
 			<!-- STEP 0 - CPF -->
 			<h:panelGroup rendered="#{cadastroPedestreController.step eq 0}">
 				<p:panelGrid columns="1" layout="grid" class="ui-fluid">
 
 					<p:outputLabel value="CPF" />
 					<p:inputMask id="cpf" mask="999.999.999-99"
-						value="#{cadastroPedestreController.cpf}" />
+						value="#{cadastroPedestreController.cpf}" 
+						onclick="this.setSelectionRange(0,0);"/>
 
 					<p:commandButton value="Buscar"
 						action="#{cadastroPedestreController.buscarPorCpf}"
