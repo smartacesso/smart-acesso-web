@@ -549,22 +549,17 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 				if (dadosArquivo.length <= 1)
 					continue;
 
-				if ("centaurus".equals(dadosArquivo[0])) {
+				if ("centauro".equals(dadosArquivo[0])) {
 					importaCentaurus(dadosArquivo, dados);
-
 				} else if ("CST".equals(dadosArquivo[0])) {
 					importaSulacap(dadosArquivo, dados);
-
 				} else if ("gasmig".equals(dadosArquivo[0])) {
 					importaGasmig(dadosArquivo, dados);
-
 				} else if ("actech".equals(dadosArquivo[0])) {
 					importaActech(dadosArquivo, dados);
-
 				} else if ("sesi".equals(dadosArquivo[0])) {
 					importaSesi(dadosArquivo, dados);
-
-				} else if ("smart".equals(dadosArquivo[0])) {
+				} else if ("importar".equals(dadosArquivo[0])) {
 					System.out.println("Padrao smart");
 					importaSmart(dadosArquivo, dados);
 				} else if ("apvs".equals(dadosArquivo[0])) {
@@ -599,8 +594,6 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 	}
 
 	private void importaSmart(String[] dadosArquivo, ImportacaoEntity dados) {
-		// TODO Auto-generated method stub
-
 		String numeroCartao = "";
 		String matricula = "";
 		String nomePedestre = "";
@@ -609,18 +602,15 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 
 		PedestreEntity pedestre = null;
 
-		numeroCartao = dadosArquivo[1];
-		matricula = dadosArquivo[2];
-		nomePedestre = dadosArquivo[3];
-		rg = dadosArquivo[4];
-		cpf = dadosArquivo[5];
-
+		nomePedestre = dadosArquivo[2];
+		String cpfBruto = (dadosArquivo[1] != null || dadosArquivo[1].isEmpty()) ? dadosArquivo[1] : null;
+		cpf = normalizarCpfSeguro(cpfBruto);
 		pedestre = buscaPedestrePorNome(nomePedestre);
 		if (pedestre == null)
 			pedestre = new PedestreEntity();
 		pedestre.setCodigoCartaoAcesso(numeroCartao);
 		pedestre.setMatricula(matricula);
-		pedestre.setNome(nomePedestre);
+		pedestre.setNome(nomePedestre.toUpperCase());
 		pedestre.setCpf(cpf);
 		pedestre.setRg(rg);
 		pedestre.setObservacoes("Importado : " + LocalDate.now());
@@ -651,7 +641,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 
 		numeroCartao = dadosArquivo[1];
 		nomePedestre = dadosArquivo[2];
-		cpf = dadosArquivo[3];
+		cpf = (dadosArquivo[1] != null || dadosArquivo[1].isEmpty()) ? dadosArquivo[1] : null;
 
 		pedestre = buscaPedestrePorNome(nomePedestre);
 		if (pedestre == null)
@@ -718,25 +708,20 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 	}
 
 	public void importaCentaurus(String[] dadosArquivo, ImportacaoEntity dados) {
-
-		String numeroCartao = "";
 		String nomePedestre = "";
-		String rg = "";
-		String cpf = "";
-		String nomeRegra = null;
+		String matricula = "";
 
 		PedestreEntity pedestre = null;
-		numeroCartao = dadosArquivo[1];
-		nomePedestre = dadosArquivo[2];
+		matricula = dadosArquivo[2];
+		nomePedestre = dadosArquivo[3];
 
-		pedestre = buscaPedestrePorNome(nomePedestre);
+		pedestre = buscaPedestrePorMatricula(dados.getCliente().getId(), matricula);
 		if (pedestre == null)
 			pedestre = new PedestreEntity();
-		pedestre.setCodigoCartaoAcesso(numeroCartao);
+		
 		pedestre.setNome(nomePedestre);
-		pedestre.setMatricula(null);
-		pedestre.setCpf(cpf);
-		pedestre.setRg(rg);
+		pedestre.setMatricula(matricula);
+		pedestre.setCodigoCartaoAcesso(null);
 		pedestre.setObservacoes("Importado : " + LocalDate.now());
 
 		pedestre.setExistente(true);
@@ -748,6 +733,10 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		pedestre.setExistente(true);
 		pedestre.setDataRemovido(null);
 		pedestre.setRemovido(null);
+		
+		EmpresaEntity empresa = recuperaEmpresa(dadosArquivo[1], null, dados.getCliente());
+		
+		pedestre.setEmpresa(empresa);
 
 		if (pedestre != null) {
 			salvarObjeto(pedestre);
@@ -1084,6 +1073,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 				System.out.println("Criando...");
 			    pedestre.setAlterado(true);
 			    pedestre = (PedestreEntity) gravaObjeto(pedestre)[0];
+			    return;
 			}
 
 			processarRegrasPorFuncionarioTotvs(pedestre, cliente, funcionarioTotvsDto);
@@ -1096,7 +1086,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 			}
 			
 
-			System.out.println("Status : " + pedestre.getStatus());
+			
 			
 		} catch (Exception e) {
 			throw new RuntimeException("Erro ao processar funcionário TOTVS: " + funcionarioTotvsDto.getMatricula(), e);
@@ -4195,6 +4185,28 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 
 		return atualizaPedestre;
 	}
+	
+	@SuppressWarnings("unchecked")
+	private PedestreEntity buscaPedestrePorMatricula(Long idcliente, String matricula) {
+		PedestreEntity atualizaPedestre = null;
+
+		try {
+			Map<String, Object> args = new HashMap<String, Object>();
+			args.put("ID_CLIENTE", idcliente);
+			args.put("MATRICULA", matricula);
+
+			List<PedestreEntity> listaPedestre = (List<PedestreEntity>) pesquisaArgFixos(PedestreEntity.class,
+					"findByMatriculaAndIdCliente", args);
+
+			if (listaPedestre != null && !listaPedestre.isEmpty()) {
+				atualizaPedestre = listaPedestre.get(0);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return atualizaPedestre;
+	}
 
 	@SuppressWarnings("unchecked")
 	private PedestreEntity buscaPedestrePorRg(String rg) {
@@ -4470,6 +4482,27 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 			e.printStackTrace();
 		}
 		return null;
+	}
+	
+	public static String normalizarCpfSeguro(String cpf) {
+
+	    if (cpf == null) return null;
+	    
+	    if (cpf.isEmpty()) return null;
+
+	    String apenasNumeros = cpf.replaceAll("\\D", "");
+
+	    if (apenasNumeros.length() == 11) {
+	        return apenasNumeros;
+	    }
+
+	    // Se tiver mais de 11, pega os últimos 11 (caso comum em integrações)
+	    if (apenasNumeros.length() > 11) {
+	        return apenasNumeros.substring(apenasNumeros.length() - 11);
+	    }
+
+	    // Se tiver menos, completa com zeros à esquerda
+	    return String.format("%11s", apenasNumeros).replace(' ', '0');
 	}
 	
 }
