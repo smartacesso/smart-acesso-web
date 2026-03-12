@@ -92,6 +92,7 @@ public class GerenciarParametrosController extends BaseController {
 			boolean camposObrigatoriosPedestre = false;
 			boolean validarMatriculasDuplicadas = false;
 			boolean validarCPFDuplicado = false;
+			boolean validarCpfValido = false;
 			boolean validarRGDuplicado = false;
 			boolean validarCartaoAcessoDuplicado = false;
 			boolean cadastroEmLote = false;
@@ -155,6 +156,9 @@ public class GerenciarParametrosController extends BaseController {
 				}
 				if (item.getNome().equals(BaseConstant.PARAMETERS_NAME.VALIDAR_CPF_DUPLICADO)) {
 					validarCPFDuplicado = true;
+				}
+				if (item.getNome().equals(BaseConstant.PARAMETERS_NAME.VALIDA_CPF_VALIDO)) {
+					validarCpfValido = true;
 				}
 				if (item.getNome().equals(BaseConstant.PARAMETERS_NAME.VALIDAR_RG_DUPLICADO)) {
 					validarRGDuplicado = true;
@@ -276,6 +280,11 @@ public class GerenciarParametrosController extends BaseController {
 			}
 			if (!validarCPFDuplicado) {
 				ParametroEntity p = new ParametroEntity(BaseConstant.PARAMETERS_NAME.VALIDAR_CPF_DUPLICADO, "false",
+						getUsuarioLogado().getCliente());
+				parametrosGerais.add(p);
+			}
+			if (!validarCpfValido) {
+				ParametroEntity p = new ParametroEntity(BaseConstant.PARAMETERS_NAME.VALIDA_CPF_VALIDO, "false",
 						getUsuarioLogado().getCliente());
 				parametrosGerais.add(p);
 			}

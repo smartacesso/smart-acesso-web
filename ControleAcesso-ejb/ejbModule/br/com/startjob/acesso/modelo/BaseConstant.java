@@ -116,6 +116,8 @@ public interface BaseConstant {
 		public static final String VALIDAR_MATRICULAS_DUPLICADAS = " ";
 		
 		public static final String VALIDAR_CPF_DUPLICADO = "Validar CPF duplicado";
+		
+		public static final String VALIDA_CPF_VALIDO = "Validar CPF (DIGITO VERIFICADOR)";
 
 		public static final String VALIDAR_RG_DUPLICADO = "Validar RG duplicado";
 

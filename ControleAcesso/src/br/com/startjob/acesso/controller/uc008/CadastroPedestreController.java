@@ -727,7 +727,24 @@ public class CadastroPedestreController extends CadastroBaseController {
 		} else {
 			pedestre = getPedestreAtual();
 			acao = "ok";
-			retornoStr = "/paginas/sistema/pedestres/cadastroPedestre.xhtml?id=" + pedestre.getId() + "&acao=OK";
+			if (usuario != null
+		            && Boolean.TRUE.equals(usuario.getCadastroSimples())
+					&& ( url.contains("cadastroPedestre")
+					|| url.contains("cadastroSimplificado"))) {
+
+				if (TipoPedestre.VISITANTE.equals(pedestre.getTipo())) {
+					retornoStr = "/paginas/sistema/pedestres/cadastroSimplificado.xhtml?tipo=vi&id="
+							+ pedestre.getId();
+				} else {
+					retornoStr = "/paginas/sistema/pedestres/cadastroSimplificado.xhtml?tipo=pe&id="
+							+ pedestre.getId();
+				}
+
+			}else{
+				acao="ok";
+				retornoStr = "/paginas/sistema/pedestres/cadastroPedestre.xhtml?id=" + pedestre.getId() + "&acao=ok";
+			}
+
 		}
 
 		if (tipo != null && !tipo.isEmpty())
@@ -1294,20 +1311,27 @@ public class CadastroPedestreController extends CadastroBaseController {
 	}
 
 	private void criarArquivo(byte[] imagem, String nomeArquivo) {
-	    String caminhoCompleto = AppAmbienteUtils.getResourcesFolder() + "upload/" + nomeArquivo;
-	    System.out.println("caminho completo :" + caminhoCompleto);
 	    try {
-	        // Ensure the directory exists
-	        File diretorio = new File(AppAmbienteUtils.getResourcesFolder() + "upload/");
-	        System.out.println("caminho completo :" + diretorio.getAbsolutePath());
-	        if (!diretorio.exists()) {
-	            diretorio.mkdirs(); // Create directory structure if it doesn't exist
-	        }
+	        // 1. Descobrimos a pasta raiz real da sua aplicação web atual
+	        String diretorioReal = FacesContext.getCurrentInstance().getExternalContext().getRealPath("/resources/upload/");
 
-	        // Write the image file
-	        FileImageOutputStream fileImageOutputStream = new FileImageOutputStream(new File(caminhoCompleto));
-	        fileImageOutputStream.write(imagem, 0, imagem.length);
-	        fileImageOutputStream.close();
+	        if (diretorioReal != null) {
+	            File diretorio = new File(diretorioReal);
+	            if (!diretorio.exists()) {
+	                diretorio.mkdirs(); // Cria a pasta dentro do seu .war se não existir
+	            }
+
+	            // 2. Salva na variável da classe (this) para o método crop() conseguir apagar depois
+	            this.caminhoCompleto = diretorioReal + File.separator + nomeArquivo;
+
+	            FileImageOutputStream fileImageOutputStream = new FileImageOutputStream(new File(this.caminhoCompleto));
+	            fileImageOutputStream.write(imagem, 0, imagem.length);
+	            fileImageOutputStream.close();
+	            
+	            System.out.println("Foto temporária salva em: " + this.caminhoCompleto);
+	        } else {
+	            System.out.println("ERRO: JSF não conseguiu encontrar o caminho real.");
+	        }
 	    } catch (Exception e) {
 	        e.printStackTrace();
 	    }
