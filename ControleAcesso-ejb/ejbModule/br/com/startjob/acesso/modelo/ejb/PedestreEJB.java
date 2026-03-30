@@ -1096,34 +1096,51 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 	private void processarRegrasPorFuncionarioTotvs(PedestreEntity pedestre, ClienteEntity cliente,
 			FuncionarioTotvsDto funcionario) {
 
-		System.out.println("Atualizando regras");
+		
 
 		RegraEntity regra = defineRegraPedestre(cliente, funcionario);
+		
+		if(Objects.isNull(regra)) {
+			 System.out.println("Sem regra existente...saindo ");
+			 return;
+		}
+		
+		HorarioEntity horarioExistente = buscarHorarioPorRegra(regra.getId());
 
+		if (horarioExistente == null) {
+		    System.out.println("Sem horário existente para a regra...saindo " + regra.getNome());
+		    return;
+		}
+		
 		if (Objects.nonNull(regra) && TipoRegra.ACESSO_HORARIO.equals(regra.getTipo())) {
 
-			HorarioEntity horarioExistente = buscarHorarioPorRegra(regra.getId());
+			LocalTime agora = LocalTime.now();
+			boolean trabalhandoAgora = false;
 			PedestreRegraEntity pedestreRegra = buscaRegraAtiva(pedestre.getId());
 			
+			if (pedestreRegra != null && pedestreRegra.getRegra() != null ) {
+			    System.out.println("Pedestre com regra atuva... validando horario de trabalho");
+			    
+			    RegraEntity regraAtual = pedestreRegra.getRegra();
+			    
+				if (regraAtual != null && regraAtual.getHorarios() != null && !regraAtual.getHorarios().isEmpty()) {
 
-			if (horarioExistente == null) {
-			    System.out.println("Sem horário existente para a regra " + regra.getNome());
-			    return;
+				    HorarioEntity horario = regra.getHorarios().get(0);
+
+				    trabalhandoAgora = estaNoTurno(
+				            horario.getHorarioInicio(),
+				            horario.getHorarioFim(),
+				            agora
+				    );
+				}
+
+
+				if (trabalhandoAgora && !"folga".equalsIgnoreCase(pedestreRegra.getRegra().getNome())) {
+				    System.out.println("Funcionario em horario de trabalho... saindo");
+				    return;
+				}
 			}
-
-			LocalTime agora = LocalTime.now();
-
-			boolean trabalhandoAgora = estaNoTurno(pedestreRegra.getRegra().getHorarios().get(0).getHorarioInicio(),
-					pedestreRegra.getRegra().getHorarios().get(0).getHorarioFim(), agora);
-
-
-			if (pedestreRegra == null || pedestreRegra.getRegra() == null) {
-			    System.out.println("Pedestre sem regra ativa");
-			} else if (trabalhandoAgora && !"folga".equalsIgnoreCase(pedestreRegra.getRegra().getNome())) {
-			    System.out.println("Funcionario em horario de trabalho...");
-			    return;
-			}
-
+			
 			apagaPedetreRegras(pedestre.getId());
 
 			if ("Nao Trabalhado".equalsIgnoreCase(funcionario.getStatusTrabalho()) || isHorarioZerado(funcionario.getHoraInicial(), funcionario.getHoraFinal())) {
@@ -2098,7 +2115,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 				return;
 			}
 
-			System.out.println("Atualizando regras do funcionario id : " + pedestre.getId() + " nome : "
+			System.out.println("Atualizando regras do funcionario id : " + funcionario.getNumeroMatricula() + " nome : "
 					+ pedestre.getNome() + ", ESCALA : " + escala.getIdescala());
 
 			horarios = buscaHorariosEscala(escala.getIdescala(), cliente);

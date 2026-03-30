@@ -2439,7 +2439,7 @@ body .ui-button.ui-state-down {
     color: white !important;
 }
 
-body .ui-button.ui-button-text-only .ui-button-text {
+body .botao-branco .ui-button.ui-button-text-only .ui-button-text {
     padding: .429em 1em;
     color: white !important;
 }

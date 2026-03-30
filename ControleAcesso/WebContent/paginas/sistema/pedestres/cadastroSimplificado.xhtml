@@ -4,6 +4,7 @@
 	xmlns:f="http://java.sun.com/jsf/core"
 	xmlns:p="http://primefaces.org/ui"
 	template="/tema/templates/template.xhtml">
+	
 
 	<ui:define name="titulo">
     Cadastro Simplificado
@@ -12,7 +13,7 @@
 	<ui:define name="conteudo">
 
 		<p:panel header="Cadastro Facial"
-			style="max-width:auto;margin:auto;margin-top:40px">
+			style="max-width:auto">
 
 			<!-- STEPS -->
 			<p:steps activeIndex="#{cadastroPedestreController.step}">
@@ -21,8 +22,6 @@
 				<p:menuitem value="Foto" />
 				<p:menuitem value="Confirmação" />
 			</p:steps>
-
-			<p:separator />
 			<!-- STEP 0 - CPF -->
 			<h:panelGroup rendered="#{cadastroPedestreController.step eq 0}">
 				<p:panelGrid columns="1" layout="grid" class="ui-fluid">
@@ -34,7 +33,7 @@
 
 					<p:commandButton value="Buscar"
 						action="#{cadastroPedestreController.buscarPorCpf}"
-						process="@form" update="@form" />
+						process="@form" update="@form"/>
 				</p:panelGrid>
 			</h:panelGroup>
 
@@ -57,11 +56,11 @@
 					</p:selectOneMenu>
 
 					<p:commandButton value="Avançar" icon="pi pi-arrow-right"
-						action="#{cadastroPedestreController.proximo}" process="@form"
-						update="@form" />
+						action="#{cadastroPedestreController.proximo}" process="@this"
+						update="@form" styleClass="botao-branco"/>
 
 					<p:commandButton value="Voltar" icon="pi pi-arrow-left"
-						action="#{cadastroPedestreController.voltar}" process="@form"
+						action="#{cadastroPedestreController.voltar}" process="@this"
 						update="@form" />
 				</p:panelGrid>
 			</h:panelGroup>
@@ -73,27 +72,23 @@
 				<p:panelGrid columns="1" layout="grid" class="ui-fluid"
 					style="text-align:center">
 
-					<p:outputLabel value="Foto" />
-
 					<!-- FOTO REAL -->
 					<p:graphicImage
 						value="#{cadastroPedestreController.getSreamedContent(cadastroPedestreController.entidade.foto)}"
 						rendered="#{not empty cadastroPedestreController.entidade.foto}"
 						stream="false" cache="false"
-						style="height:250px;width:250px;border-radius:50%;margin-bottom:10px; border: 5px solid #00263d;" />
+						style="height:160px;width:160;border-radius:50%; border: 5px solid #005e9f;" />
 
 					<!-- FOTO PADRÃO -->
 					<p:graphicImage
 						value="#{menuController.path}/tema/img/ic_photo_male.png"
 						rendered="#{empty cadastroPedestreController.entidade.foto}"
-						style="height:250px;width:250px;border-radius:50%;margin-bottom:10px; border: 5px solid #00263d;" />
-					<p:spacer height="10" />
+						style="height:160px;width:160px;border-radius:50%; border: 5px solid #005e9f;" />
 
 					<!-- ABRIR WEBCAM -->
 					<p:commandButton value="Tirar Foto" type="button"
 						onclick="PF('pc').attach(); PF('tirarFoto').show();"
-						icon="pi pi-camera" style="width:100%;margin-bottom:10px" />
-
+						icon="pi pi-camera" />
 
 					<!-- AVANÇAR -->
 					<p:commandButton value="Avançar" icon="pi pi-arrow-right"
@@ -102,7 +97,7 @@
 						disabled="#{empty cadastroPedestreController.entidade.foto}" />
 
 					<p:commandButton value="Voltar" icon="pi pi-arrow-left"
-						action="#{cadastroPedestreController.voltar}" process="@form"
+						action="#{cadastroPedestreController.voltar}" process="@this"
 						update="@form" />
 
 				</p:panelGrid>
@@ -141,7 +136,8 @@
 
 			<p:photoCam id="idPc" widgetVar="pc"
 				listener="#{cadastroPedestreController.capturarFoto}"
-				autoStart="false" style="width: 10px" />
+				autoStart="false" width="320" height="240" photoWidth="640"
+				photoHeight="480" format="jpeg" jpegQuality="70" />
 			<p:commandButton value="#{msgs['label.uc008.capturar']}"
 				process="dialogTirarFoto" update="form:dialogCropImage"
 				onclick="PF('pc').capture();"
@@ -152,15 +148,15 @@
 
 		<p:dialog id="dialogCropImage" widgetVar="cropImage"
 			header="#{msgs['label.uc008.cortar.imagem']}" modal="true"
-			closable="false" width="370" position="top" resizable="true"
+			closable="false" width="320" height="240" position="center" resizable="true"
 			positionType="absolute">
 
 			<h:panelGrid columns="2">
 				<p:imageCropper id="imageCroppedTemp"
 					value="#{cadastroPedestreController.croppedImage}"
 					image="/resources/upload/#{cadastroPedestreController.fileNameTemp}"
-					initialCoords="75,0,350,350" aspectRatio="1.0" guides="true"
-					minSize="200,200" cache="false" />
+					initialCoords="120,40,400,400" aspectRatio="1.0" guides="true"
+					minSize="300,300" cache="false" />
 
 			</h:panelGrid>
 
@@ -176,4 +172,8 @@
 
 		</p:dialog>
 	</ui:define>
+	
+	
 </ui:composition>
+
+

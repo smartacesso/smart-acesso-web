@@ -1245,10 +1245,11 @@ public class CadastroPedestreController extends CadastroBaseController {
 	}
 
 	public void capturarFoto(CaptureEvent event) {
-		byte[] data = event.getData();
-		fileNameTemp = getRandomImageName() + ".png";
-		exibeCrop = true;
-		criarArquivo(data, fileNameTemp);
+	    byte[] data = event.getData();
+	    // Agora o PrimeFaces vai saber que deve exportar bytes em JPEG após o corte!
+	    fileNameTemp = getRandomImageName() + ".jpg"; 
+	    exibeCrop = true;
+	    criarArquivo(data, fileNameTemp);
 	}
 
 	public void uploadDocumento(FileUploadEvent event) {
