@@ -1,6 +1,5 @@
 package br.com.startjob.acesso.controller.uc008;
 
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -9,8 +8,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.faces.application.FacesMessage;
@@ -29,7 +26,6 @@ import com.senior.services.Enum.ModoImportacaoFuncionario;
 
 import br.com.startjob.acesso.annotations.UseCase;
 import br.com.startjob.acesso.controller.BaseController;
-import br.com.startjob.acesso.controller.MenuController;
 import br.com.startjob.acesso.modelo.BaseConstant;
 import br.com.startjob.acesso.modelo.ejb.EmpresaEJBRemote;
 import br.com.startjob.acesso.modelo.ejb.PedestreEJBRemote;
@@ -39,8 +35,7 @@ import br.com.startjob.acesso.modelo.entity.LocalEntity;
 import br.com.startjob.acesso.modelo.entity.ParametroEntity;
 import br.com.startjob.acesso.modelo.entity.PedestreEntity;
 import br.com.startjob.acesso.modelo.entity.PedestreRegraEntity;
-import br.com.startjob.acesso.modelo.entity.UsuarioEntity;
-import br.com.startjob.acesso.modelo.enumeration.PerfilAcesso;
+import br.com.startjob.acesso.modelo.entity.base.BaseEntity;
 import br.com.startjob.acesso.modelo.enumeration.Status;
 import br.com.startjob.acesso.modelo.enumeration.TipoArquivo;
 import br.com.startjob.acesso.modelo.enumeration.TipoPedestre;
@@ -88,7 +83,6 @@ public class ConsultaPedestreController extends BaseController {
 	
 	private boolean permiteCampoAdicionalCrachaMatricula = true;
 	private boolean habilitaAppPedestre = false;
-	private MenuController menuController = new MenuController();
 
 	@PostConstruct
 	@Override
@@ -120,6 +114,7 @@ public class ConsultaPedestreController extends BaseController {
 				getUsuarioLogado().getCliente().getId());
 		if(param != null)
 			permiteCampoAdicionalCrachaMatricula = Boolean.valueOf(param.getValor());
+		
 	}
 	
 	public void excluirPedestre() {
@@ -187,7 +182,50 @@ public class ConsultaPedestreController extends BaseController {
 		
 		getParans().put("cliente.id", getUsuarioLogado().getCliente().getId());
 		setNamedQueryPesquisa("findAllComEmpresa");
-		return super.buscar();
+		
+		String retorno =  super.buscar();
+		
+		// 3. Pós-processamento para resolver o N+1
+	    List<BaseEntity> lista = getResult(); 
+	    
+	    if (lista != null && !lista.isEmpty()) {
+	        for (BaseEntity entidadeBase : lista) {
+	            // Faz o cast individual de cada item
+	            PedestreEntity p = (PedestreEntity) entidadeBase;
+	            
+	            p.setNomeRegraAtivaTemporaria(buscarNomeRegraParaLista(p));
+	            
+	            // Força a inicialização (solução de contorno caso o JOIN FETCH esteja falhando)
+	            if(p.getEmpresa() != null) p.getEmpresa().getNome();
+	            if(p.getDepartamento() != null) p.getDepartamento().getNome();
+	            if(p.getCentroCusto() != null) p.getCentroCusto().getNome();
+	            if(p.getCargo() != null) p.getCargo().getNome();
+	        }
+	    }
+	    
+	    return retorno;
+	}
+	
+	// Adaptação do seu método atual para não ser chamado da tela
+	private String buscarNomeRegraParaLista(PedestreEntity pedestre) {
+	    if (pedestre == null || pedestre.getId() == null) {
+	        return "";
+	    }
+	    Map<String, Object> args = new HashMap<>();
+	    args.put("ID_PEDESTRE", pedestre.getId());
+
+	    try {
+	        @SuppressWarnings("unchecked")
+			List<PedestreRegraEntity> regraAtiva = (List<PedestreRegraEntity>) baseEJB.pesquisaArgFixos(
+	                PedestreRegraEntity.class, "findPedestreRegraAtivo", args);
+
+	        if (regraAtiva != null && !regraAtiva.isEmpty() && regraAtiva.get(0).getRegra() != null) {
+	            return regraAtiva.get(0).getRegra().getNome();
+	        }
+	    } catch (Exception e) {
+	        return "";
+	    }
+	    return "";
 	}
 	
 	private void montaListaTiposPedestre() {
@@ -372,13 +410,6 @@ public class ConsultaPedestreController extends BaseController {
 			listaTipoArquivo.add(new SelectItem(arquivo, arquivo.getDescricao()));
 		}
 	}
-	
-	public boolean usuarioTemPermissao() {
-	    // Lógica para verificar se o usuário pode ver os dados
-		UsuarioEntity usuarioLogado = menuController.getUsuarioLogado();
-		return !usuarioLogado.getPerfil().equals(PerfilAcesso.CUIDADOR);
-	}
-
 	
 	public void executarIntegracaoPedestre() {
 	    try {
@@ -641,14 +672,6 @@ public class ConsultaPedestreController extends BaseController {
 
 	public void setHabilitaAppPedestre(boolean habilitaAppPedestre) {
 		this.habilitaAppPedestre = habilitaAppPedestre;
-	}
-
-	public MenuController getMenuController() {
-		return menuController;
-	}
-
-	public void setMenuController(MenuController menuController) {
-		this.menuController = menuController;
 	}
 
 	public static long getSerialversionuid() {

@@ -3,12 +3,10 @@ package br.com.startjob.acesso.modelo.entity;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
-import javax.ejb.EJB;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -37,13 +35,11 @@ import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.Type;
 
-import com.fasterxml.jackson.databind.ser.std.AsArraySerializerBase;
 import com.senior.services.dto.FuncionarioSeniorDto;
 import com.totvs.dto.FuncionarioTotvsDto;
 
 import br.com.startjob.acesso.modelo.entity.base.ClienteBaseEntity;
 import br.com.startjob.acesso.modelo.enumeration.Genero;
-import br.com.startjob.acesso.modelo.enumeration.Permissoes;
 import br.com.startjob.acesso.modelo.enumeration.Status;
 import br.com.startjob.acesso.modelo.enumeration.TipoPedestre;
 import br.com.startjob.acesso.modelo.enumeration.TipoQRCode;
@@ -391,14 +387,16 @@ public class PedestreEntity extends ClienteBaseEntity {
 	
 	@Transient
 	private boolean selecionadoEmMassa;
+	
+	@Transient
+	private String nomeRegraAtivaTemporaria;
+
 
 	public PedestreEntity() {
 
 	}
 
 	public PedestreEntity(final FuncionarioSeniorDto funcionarioSeniorDto, final EmpresaEntity empresaEntity, LocalEntity localPadrao) {
-		LocalDate hoje = LocalDate.now();
-
 		this.nome = funcionarioSeniorDto.getNome();
 		this.matricula = funcionarioSeniorDto.getNumeroMatricula() + funcionarioSeniorDto.getEmpresa()+funcionarioSeniorDto.getNumCracha();
 		this.telefone = funcionarioSeniorDto.getDddtelefone() + funcionarioSeniorDto.getNumtelefone();
@@ -507,10 +505,6 @@ public class PedestreEntity extends ClienteBaseEntity {
 		if (string.isEmpty())
 			return true;
 		return false;
-	}
-	
-	private boolean isCrachaSeniorValido(FuncionarioSeniorDto funcionario) {
-		return Objects.nonNull(funcionario.getNumCracha()) && !funcionario.getNumCracha().isEmpty() && !"0".equals(funcionario.getNumCracha());
 	}
 	
 	public boolean isVisitante() {
@@ -1061,5 +1055,8 @@ public class PedestreEntity extends ClienteBaseEntity {
 	public void setSelecionadoEmMassa(boolean selecionadoEmMassa) {
 	    this.selecionadoEmMassa = selecionadoEmMassa;
 	}
+	
+	public String getNomeRegraAtivaTemporaria() { return nomeRegraAtivaTemporaria; }
+	public void setNomeRegraAtivaTemporaria(String nomeRegraAtivaTemporaria) { this.nomeRegraAtivaTemporaria = nomeRegraAtivaTemporaria; }
 
 }
