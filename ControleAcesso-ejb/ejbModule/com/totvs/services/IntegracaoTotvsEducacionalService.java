@@ -25,13 +25,14 @@ import com.totvs.dto.CadastroDTO;
 
 public class IntegracaoTotvsEducacionalService {
 
-//  private static final String ENDPOINT_CONSULTA = "https://inspetoriasao142787.rm.cloudtotvs.com.br:1503/wsConsultaSQL/IwsConsultaSQL"; //homologacao
-	private static final String ENDPOINT_CONSULTA = "https://inspetoriasao142819.rm.cloudtotvs.com.br:8051/wsConsultaSQL/IwsConsultaSQL";
+  private static final String ENDPOINT_CONSULTA = "https://inspetoriasao142787.rm.cloudtotvs.com.br:1503/wsConsultaSQL/IwsConsultaSQL"; //homologacao
+//	private static final String ENDPOINT_CONSULTA = "https://inspetoriasao142819.rm.cloudtotvs.com.br:8051/wsConsultaSQL/IwsConsultaSQL";
     private static final String USER = "suporte.smart";
     private static final String PASS = "suporte@smart";
 //    private static final String PASS = "pokEnerish";
 //    private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-    private static final SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
+//    private static final SimpleDateFormat sdf = new SimpleDateFormat("MM-dd-yyyy HH:mm:ss");
+    private static final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
     private LocalDate ultimaImportacaoCompleta = null;
     
@@ -69,17 +70,19 @@ public class IntegracaoTotvsEducacionalService {
             String dataDefault = sdf.format(calendar.getTime());
         	
       //  	parameters = "$CODCOLIGADA=1;$FILTRAR_STATUS="+ "1" + ";$DATAALTERACAO=" + dataDefault + ";$FILTRAR_SITUACAO_FUNC="+ "1";
-            parameters = "$CODCOLIGADA=1;$FILTRAR_STATUS=1;$DATAALTERACAO=" + dataDefault + ";$FILTRAR_SITUACAO_FUNC=1";
+            parameters = "$CODCOLIGADA=1;$DATAALTERACAO=" + dataDefault + ";$FILTRAR_STATUS=1;$FILTRAR_SITUACAO_FUNC=1";
         	System.out.println("Primeira importacao. Apenas ativos...data : " + dataDefault);
         	
         } else {
         	String dataFormatada = sdf.format(lastUpdate);
-        	parameters = "$CODCOLIGADA=1;$FILTRAR_STATUS="+ "0" + ";$DATAALTERACAO=" + dataFormatada + ";$FILTRAR_SITUACAO_FUNC="+ "0";
+        	parameters = "$CODCOLIGADA=1;$DATAALTERACAO=" + dataFormatada + ";$FILTRAR_STATUS=0;$FILTRAR_SITUACAO_FUNC=0";
         	System.out.println("Atualizando...");
         }
 
         // Monta a string base64 para Basic Auth
         String auth = Base64.getEncoder().encodeToString((USER + ":" + PASS).getBytes(StandardCharsets.UTF_8));
+        
+        System.out.println("parametros : " + parameters);
 
         String soapRequest =
                 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"

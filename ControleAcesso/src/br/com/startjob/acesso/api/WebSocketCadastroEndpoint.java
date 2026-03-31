@@ -1,10 +1,13 @@
 package br.com.startjob.acesso.api;
 
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import javax.websocket.OnClose;
+import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
 import javax.websocket.Session;
 import javax.websocket.server.PathParam;
@@ -12,6 +15,9 @@ import javax.websocket.server.ServerEndpoint;
 
 @ServerEndpoint("/ws/local/{clienteId}")
 public class WebSocketCadastroEndpoint {
+	
+	
+	private static CompletableFuture<String> respostaAtual;
 	
     public WebSocketCadastroEndpoint() {
         Logger.getLogger(WebSocketCadastroEndpoint.class.getName()).info("WebSocketEndpoint cadastros instanciado.");
@@ -40,5 +46,25 @@ public class WebSocketCadastroEndpoint {
         }
     }
 	
+    
+    @OnMessage
+    public void onMessage(String message, Session session, 
+			@PathParam("clienteId") String clienteId) {
 
+		if (respostaAtual != null && !respostaAtual.isDone()) {
+			respostaAtual.complete(message);
+		}
+		System.out.println("Retorno recebido do cliente " + clienteId + ": " + message);
+
+	}
+    
+    
+	public static String enviarEEsperar(String clienteId, String json) throws Exception {
+
+	    respostaAtual = new CompletableFuture<>();
+
+	    enviarParaLocal(clienteId, json);
+
+	    return respostaAtual.get(10, TimeUnit.SECONDS); // timeout 10s
+	}
 }

@@ -116,6 +116,8 @@ public interface BaseConstant {
 		public static final String VALIDAR_MATRICULAS_DUPLICADAS = " ";
 		
 		public static final String VALIDAR_CPF_DUPLICADO = "Validar CPF duplicado";
+		
+		public static final String VALIDA_CPF_VALIDO = "Validar CPF (DIGITO VERIFICADOR)";
 
 		public static final String VALIDAR_RG_DUPLICADO = "Validar RG duplicado";
 
@@ -141,6 +143,8 @@ public interface BaseConstant {
 		public static final String PREENCHER_CARTAO_COM_MATRICULA = "preencher cartao com matricula";
 		
 		public static final String PREENCHER_CARTAO_AUTO = "preencher cartao automaticamente (8 digitos)";
+		
+		public static final String ENVIO_FACIAL = "Habilitar envio face hikivision";
 		
 		public static final String HABILITA_RELATORIO_RONA = "Habilita relatorio rona";
 		

@@ -118,5 +118,5 @@ public interface PedestreEJBRemote extends BaseEJBRemote {
 	public void importarSponte() throws Exception;
 
 	public void salvarJustificativa(Long idCliente, Date dataInicioJustificativa, Date dataFimJustificativa,
-			String justificativa, Map<String, Object> parans);
+			String justificativa, List<Long> idsSelecionados, Map<String, Object> parans);
 }

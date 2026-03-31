@@ -58,7 +58,8 @@
 							required="#{cadastroPedestreController.verificaObrigatorio('cpf')}"
 							disabled="#{not cadastroPedestreController.usuarioTemPermissao()}"
 							rendered="#{cadastroPedestreController.usuarioTemPermissao()}"
-							style="width: 100%" >
+							style="width: 100%" 
+							onclick="this.setSelectionRange(0,0);">
 
 							<p:ajax event="change" process="@this"
 								listener="#{cadastroPedestreController.onCpfBlur}" />

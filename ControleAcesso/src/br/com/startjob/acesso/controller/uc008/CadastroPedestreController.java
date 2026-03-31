@@ -5,13 +5,11 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
@@ -21,6 +19,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -169,6 +169,7 @@ public class CadastroPedestreController extends CadastroBaseController {
 	private boolean permiteCampoAdicionalCrachaMatricula = true;
 	private boolean validarMatriculasDuplicadas = false;
 	private boolean validarCPFDuplicado = false;
+	private boolean validarCPFValido = false;
 	private boolean validarRGDuplicado = false;
 	private boolean validarCartaoAcessoDuplicado = false;
 	private boolean cadastroEmLote = false;
@@ -178,6 +179,7 @@ public class CadastroPedestreController extends CadastroBaseController {
 	private boolean exibeCampoLinkCadastroFacialExterno = false;
 	private boolean habilitaAppPedestre = false;
 	private boolean gerarCartaoAutomatico = false;
+	private boolean envioFacial = false;
 
 	private TipoQRCode tipoPadraoQrCode = null;
 
@@ -203,6 +205,7 @@ public class CadastroPedestreController extends CadastroBaseController {
 	private final Gson gson = new Gson();
 
 	private String localPadraoVisitante;
+
 
 	private String localPadraoPedestre;
 	
@@ -278,8 +281,10 @@ public class CadastroPedestreController extends CadastroBaseController {
 		else if ("QCA".equalsIgnoreCase(acao))
 			mensagemInfo("", "msg.qrcode.apagado.sucesso");
 
-		else if (acao != null)
-			mensagemInfo("", "msg.pedestre.cadastrado.sucesso");
+		
+		//definir melhor as açoes preenchidas
+//		else if (acao != null)
+//			mensagemInfo("", "msg.pedestre.cadastrado.sucesso");
 
 		acao = null;
 	}
@@ -314,6 +319,11 @@ public class CadastroPedestreController extends CadastroBaseController {
 				getUsuarioLogado().getCliente().getId());
 		if (param != null)
 			validarCPFDuplicado = Boolean.valueOf(param.getValor());
+		
+		param = baseEJB.getParametroSistema(BaseConstant.PARAMETERS_NAME.VALIDA_CPF_VALIDO,
+				getUsuarioLogado().getCliente().getId());
+		if (param != null)
+			validarCPFValido = Boolean.valueOf(param.getValor());
 
 		param = baseEJB.getParametroSistema(BaseConstant.PARAMETERS_NAME.VALIDAR_RG_DUPLICADO,
 				getUsuarioLogado().getCliente().getId());
@@ -377,6 +387,11 @@ public class CadastroPedestreController extends CadastroBaseController {
 				getUsuarioLogado().getCliente().getId());
 		if (param != null)
 			localPadraoVisitante = param.getValor();
+		
+		param = baseEJB.getParametroSistema(BaseConstant.PARAMETERS_NAME.ENVIO_FACIAL,
+				getUsuarioLogado().getCliente().getId());
+		if (param != null)
+			envioFacial = Boolean.valueOf(param.getValor());
 	}
 
 	public boolean verificaObrigatorio(String campo) {
@@ -555,8 +570,18 @@ public class CadastroPedestreController extends CadastroBaseController {
 
 	@Override
 	public String salvar() {
+		String retornoStr = "";
+		
 		PedestreEntity pedestre = getPedestreAtual();
+		UsuarioEntity usuario = getUsuarioLogado();
 		pedestre.setCliente(getUsuarioLogado().getCliente());
+		
+		HttpServletRequest request = (HttpServletRequest)
+		        FacesContext.getCurrentInstance()
+		        .getExternalContext()
+		        .getRequest();
+		
+		String url = request.getRequestURL().toString();
 
 		boolean naoPossuiCamposRepetidos = verificaCamposRepetidos();
 		if (!naoPossuiCamposRepetidos)
@@ -565,7 +590,11 @@ public class CadastroPedestreController extends CadastroBaseController {
 		boolean valido = validaCamposObrigatorios(pedestre);
 		if (!valido)
 			return "";
-
+		
+		boolean validacaoAdicional = verificacaoAdicionais();
+		if (!validacaoAdicional)
+			return "";
+		
 		if (matriculaSequencial && pedestre.getMatricula() == null) {
 			String matricula = buscaUltimaMatriculaCadastrada();
 			pedestre.setMatricula(matricula);
@@ -600,37 +629,122 @@ public class CadastroPedestreController extends CadastroBaseController {
 			}
 		}
 		
-		String jsonStr = gson.toJson(WebSocketPedestrianAccessTO.fromPedestre(pedestre));
-		JsonObject json = JsonParser.parseString(jsonStr).getAsJsonObject();
 
-		// buscar cliente correto pelo idCliente e pegar unidade organizacional
-		WebSocketCadastroEndpoint.enviarParaLocal(pedestre.getCliente().getId().toString(), json.toString());
+		if (envioFacial) {
+			try {
+				
+				String jsonStr = gson.toJson(WebSocketPedestrianAccessTO.fromPedestre(pedestre));
+				String resposta = WebSocketCadastroEndpoint.enviarEEsperar(pedestre.getCliente().getId().toString(),
+						jsonStr);
+				
+				if (!resposta.equals("ok")) {
+					
+					
+					if (usuario != null
+				            && Boolean.TRUE.equals(usuario.getCadastroSimples())
+							&& ( url.contains("cadastroPedestre")
+							|| url.contains("cadastroSimplificado"))) {
+
+						if (TipoPedestre.VISITANTE.equals(pedestre.getTipo())) {
+							retornoStr = "/paginas/sistema/pedestres/cadastroSimplificado.xhtml?tipo=vi&id="
+									+ pedestre.getId();
+						} else {
+							retornoStr = "/paginas/sistema/pedestres/cadastroSimplificado.xhtml?tipo=pe&id="
+									+ pedestre.getId();
+						}
+
+					}else{
+						acao="invalido";
+						retornoStr = "/paginas/sistema/pedestres/cadastroPedestre.xhtml?id=" + pedestre.getId() + "&acao=invalido";
+					}
+
+				    FacesContext.getCurrentInstance()
+				        .getExternalContext()
+				        .getFlash()
+				        .setKeepMessages(true);
+				    
+				    if(resposta.contains("UsuarioErro")) {
+				    	 mensagemAviso("", "msg.info.usuario.nao.enviada");
+				    }else if(resposta.contains("CartaoErro")) {
+				    	mensagemAviso("", "msg.info.cartao.nao.enviada");
+				    }else if (resposta.contains("FotoErro")) {
+				    	mensagemAviso("", "msg.info.foto.nao.enviada");
+				    }
+
+				    redirect(retornoStr);
+
+				    return null;
+				}
+
+			} catch (TimeoutException e) {
+				
+				if (usuario != null
+			            && Boolean.TRUE.equals(usuario.getCadastroSimples())
+						&& ( url.contains("cadastroPedestre")
+						|| url.contains("cadastroSimplificado"))) {
+
+					if (TipoPedestre.VISITANTE.equals(pedestre.getTipo())) {
+						retornoStr = "/paginas/sistema/pedestres/cadastroSimplificado.xhtml?tipo=vi&id="
+								+ pedestre.getId();
+					} else {
+						retornoStr = "/paginas/sistema/pedestres/cadastroSimplificado.xhtml?tipo=pe&id="
+								+ pedestre.getId();
+					}
+
+				}else{
+					acao="invalido";
+					retornoStr = "/paginas/sistema/pedestres/cadastroPedestre.xhtml?id=" + pedestre.getId() + "&acao=invalido";
+				}
+
+				FacesContext.getCurrentInstance().getExternalContext().getFlash().setKeepMessages(true);
+
+				mensagemAviso("", "msg.info.foto.nao.enviada_time_out");
+
+				redirect(retornoStr);
+
+				return null;
+			}catch (Exception e) {
+				mensagemFatal("", "msg.fatal.pedestre.nao.gravado");
+				e.printStackTrace();
+			}
+		}
 		
 		
-		String retornoStr = "";
 		if (cadastroEmLote) {
-		    UsuarioEntity usuario = getUsuarioLogado();
 		    
-			HttpServletRequest request = (HttpServletRequest)
-			        FacesContext.getCurrentInstance()
-			        .getExternalContext()
-			        .getRequest();
-			
-			String url = request.getRequestURL().toString();
-
 		    if (usuario != null
 		            && Boolean.TRUE.equals(usuario.getCadastroSimples())
 					&& ( url.contains("cadastroPedestre")
 					|| url.contains("cadastroSimplificado"))) {
 
+		    	acao = "ok";
 				retornoStr = "/paginas/sistema/pedestres/cadastroSimplificado.xhtml?acao=OK";
 			}else{
+				acao = "ok";
 		    	retornoStr = "/paginas/sistema/pedestres/cadastroPedestre.xhtml?acao=OK";
 		    }
 		    
 		} else {
 			pedestre = getPedestreAtual();
-			retornoStr = "/paginas/sistema/pedestres/cadastroPedestre.xhtml?id=" + pedestre.getId() + "&acao=OK";
+			acao = "ok";
+			if (usuario != null
+		            && Boolean.TRUE.equals(usuario.getCadastroSimples())
+					&& ( url.contains("cadastroPedestre")
+					|| url.contains("cadastroSimplificado"))) {
+
+				if (TipoPedestre.VISITANTE.equals(pedestre.getTipo())) {
+					retornoStr = "/paginas/sistema/pedestres/cadastroSimplificado.xhtml?tipo=vi&id="
+							+ pedestre.getId();
+				} else {
+					retornoStr = "/paginas/sistema/pedestres/cadastroSimplificado.xhtml?tipo=pe&id="
+							+ pedestre.getId();
+				}
+
+			}else{
+				acao="ok";
+				retornoStr = "/paginas/sistema/pedestres/cadastroPedestre.xhtml?id=" + pedestre.getId() + "&acao=ok";
+			}
+
 		}
 
 		if (tipo != null && !tipo.isEmpty())
@@ -674,6 +788,78 @@ public class CadastroPedestreController extends CadastroBaseController {
 		}
 
 		return valido;
+	}
+	
+	private boolean verificacaoAdicionais() {
+		boolean valido = true;
+
+		PedestreEntity pedestre = getPedestreAtual();
+
+		if (validarCPFValido && pedestre.getCpf() != null && !pedestre.getCpf().isEmpty()
+				&& !IsCpfValido(pedestre.getCpf())) {
+			valido = false;
+			mensagemAviso("", "msg.uc008.cpf.nao.valido");
+		}
+
+		return valido;
+	}
+
+	private boolean IsCpfValido(String cpf) {
+
+		if (cpf == null) {
+			return false;
+		}
+
+		// Remove caracteres não numéricos
+		cpf = cpf.replaceAll("[^0-9]", "");
+
+		if (cpf.isEmpty()) {
+			return false;
+		}
+
+		// CPF deve ter 11 dígitos
+		if (cpf.length() != 11) {
+			return false;
+		}
+
+		// Verifica se todos os dígitos são iguais
+		if (cpf.matches("(\\d)\\1{10}")) {
+			return false;
+		}
+
+		try {
+			int soma = 0;
+			int peso = 10;
+
+			// Primeiro dígito verificador
+			for (int i = 0; i < 9; i++) {
+				soma += (cpf.charAt(i) - '0') * peso--;
+			}
+
+			int resto = 11 - (soma % 11);
+			char digito1 = (resto >= 10) ? '0' : (char) (resto + '0');
+
+			if (digito1 != cpf.charAt(9)) {
+				return false;
+			}
+
+			soma = 0;
+			peso = 11;
+
+			// Segundo dígito verificador
+			for (int i = 0; i < 10; i++) {
+				soma += (cpf.charAt(i) - '0') * peso--;
+			}
+
+			resto = 11 - (soma % 11);
+			char digito2 = (resto >= 10) ? '0' : (char) (resto + '0');
+
+			return digito2 == cpf.charAt(10);
+
+		} catch (Exception e) {
+			return false;
+		}
+
 	}
 
 	public boolean validaCamposObrigatorios(PedestreEntity pedestre) {
@@ -1059,10 +1245,11 @@ public class CadastroPedestreController extends CadastroBaseController {
 	}
 
 	public void capturarFoto(CaptureEvent event) {
-		byte[] data = event.getData();
-		fileNameTemp = getRandomImageName() + ".png";
-		exibeCrop = true;
-		criarArquivo(data, fileNameTemp);
+	    byte[] data = event.getData();
+	    // Agora o PrimeFaces vai saber que deve exportar bytes em JPEG após o corte!
+	    fileNameTemp = getRandomImageName() + ".jpg"; 
+	    exibeCrop = true;
+	    criarArquivo(data, fileNameTemp);
 	}
 
 	public void uploadDocumento(FileUploadEvent event) {
@@ -1089,16 +1276,20 @@ public class CadastroPedestreController extends CadastroBaseController {
 	}
 
 	public void crop() {
-		if(croppedImage == null) {
-
-			return;
-		}
-		PedestreEntity pedestre = (PedestreEntity) getEntidade();
-		pedestre.setFoto(croppedImage.getBytes());
-		pedestre.setDataAlteracaoFoto(new Date());
-		exibeCrop = true;
+		System.out.println("croppedImage: " + croppedImage);
+		System.out.println("caminho " + caminhoCompleto);
 		
-		removerArquivo(caminhoCompleto);
+	    if (croppedImage == null) {
+	        return;
+	    }
+
+	    PedestreEntity pedestre = (PedestreEntity) getEntidade();
+	    pedestre.setFoto(croppedImage.getBytes());
+	    pedestre.setDataAlteracaoFoto(new Date());
+
+	    exibeCrop = false;
+
+	    removerArquivo(caminhoCompleto);
 	}
 
 	public void cancelaCrop() {
@@ -1121,18 +1312,27 @@ public class CadastroPedestreController extends CadastroBaseController {
 	}
 
 	private void criarArquivo(byte[] imagem, String nomeArquivo) {
-	    String caminhoCompleto = AppAmbienteUtils.getResourcesFolder() + "upload/" + nomeArquivo;
 	    try {
-	        // Ensure the directory exists
-	        File diretorio = new File(AppAmbienteUtils.getResourcesFolder() + "upload/");
-	        if (!diretorio.exists()) {
-	            diretorio.mkdirs(); // Create directory structure if it doesn't exist
-	        }
+	        // 1. Descobrimos a pasta raiz real da sua aplicação web atual
+	        String diretorioReal = FacesContext.getCurrentInstance().getExternalContext().getRealPath("/resources/upload/");
 
-	        // Write the image file
-	        FileImageOutputStream fileImageOutputStream = new FileImageOutputStream(new File(caminhoCompleto));
-	        fileImageOutputStream.write(imagem, 0, imagem.length);
-	        fileImageOutputStream.close();
+	        if (diretorioReal != null) {
+	            File diretorio = new File(diretorioReal);
+	            if (!diretorio.exists()) {
+	                diretorio.mkdirs(); // Cria a pasta dentro do seu .war se não existir
+	            }
+
+	            // 2. Salva na variável da classe (this) para o método crop() conseguir apagar depois
+	            this.caminhoCompleto = diretorioReal + File.separator + nomeArquivo;
+
+	            FileImageOutputStream fileImageOutputStream = new FileImageOutputStream(new File(this.caminhoCompleto));
+	            fileImageOutputStream.write(imagem, 0, imagem.length);
+	            fileImageOutputStream.close();
+	            
+	            System.out.println("Foto temporária salva em: " + this.caminhoCompleto);
+	        } else {
+	            System.out.println("ERRO: JSF não conseguiu encontrar o caminho real.");
+	        }
 	    } catch (Exception e) {
 	        e.printStackTrace();
 	    }
@@ -1160,7 +1360,7 @@ public class CadastroPedestreController extends CadastroBaseController {
 		args.put("ID_CLIENTE", getUsuarioLogado().getCliente().getId());
 
 		listaEmpresas = new ArrayList<SelectItem>();
-		listaEmpresas.add(new SelectItem(null, "Selecione"));
+		listaEmpresas.add(new SelectItem("", "Selecione"));
 
 		try {
 			List<EmpresaEntity> empresas = (List<EmpresaEntity>) baseEJB.pesquisaArgFixos(EmpresaEntity.class,
@@ -1546,6 +1746,12 @@ public class CadastroPedestreController extends CadastroBaseController {
 					new FacesMessage(FacesMessage.SEVERITY_WARN, "CPF obrigatório", null));
 			return;
 		}
+		
+		if(!IsCpfValido(cpf) && validarCPFValido) {
+			FacesContext.getCurrentInstance().addMessage(null,
+					new FacesMessage(FacesMessage.SEVERITY_WARN, "CPF invalido", null));
+			return;
+		}
 
 		String cpfSemMascara = cpf.replaceAll("\\D", "");
 		Long idCliente = getUsuarioLogado().getCliente().getId();
@@ -1568,7 +1774,7 @@ public class CadastroPedestreController extends CadastroBaseController {
 		this.step = 1;
 	}
 	
-	
+
 	private void montaListaCadastroSimplificado(PedestreEntity pedestre) {
 
 		if (pedestre.getId() != null) {
@@ -1659,8 +1865,6 @@ public class CadastroPedestreController extends CadastroBaseController {
 		boolean cartaoVazioOuInvalido = cartaoAtual == null ||
 		                                 cartaoAtual.trim().isEmpty() ||
 		                                 cartaoAtual.replace("0", "").isEmpty();
-
-		System.out.println("pedestre cartao : " + cartaoAtual);
 
 		if (cartaoVazioOuInvalido) {
 			String codigo = null;
@@ -2646,13 +2850,11 @@ public class CadastroPedestreController extends CadastroBaseController {
     }
 
     public void proximo() {
-        step++;
+        step = Math.min(step + 1, 3);
     }
 
     public void voltar() {
-        if (step > 1) {
-            step--;
-        }
+        step = Math.max(step - 1, 0);
     }
 
 	public String getCpf() {

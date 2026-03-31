@@ -145,7 +145,19 @@ public class AlteracoesEmMassaController extends BaseController{
 		Long idCliente = getUsuarioLogado().getCliente().getId();
 		pedestreRegraAlteracao.setRegra(regraAlteracao);
 		
-		pedestreEJB.salvarJustificativa(idCliente, dataInicioJustificativa, dataFimJustificativa, justificativa, getParans());
+	    // Extrai somente os IDs marcados
+	    List<Long> idsSelecionados = selecao.entrySet()
+	        .stream()
+	        .filter(e -> Boolean.TRUE.equals(e.getValue()))
+	        .map(Map.Entry::getKey)
+	        .collect(Collectors.toList());
+
+	    if (idsSelecionados.isEmpty()) {
+	        mensagemInfo("", "Nenhum pedestre selecionado.");
+	        return;
+	    }
+		
+		pedestreEJB.salvarJustificativa(idCliente, dataInicioJustificativa, dataFimJustificativa, justificativa, idsSelecionados ,getParans());
 		
 		buscar();
 		

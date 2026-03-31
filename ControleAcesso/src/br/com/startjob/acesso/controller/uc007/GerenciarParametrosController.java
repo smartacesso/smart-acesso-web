@@ -82,6 +82,7 @@ public class GerenciarParametrosController extends BaseController {
 		if (all != null) {
 			boolean preencherCartaoComMatricula = false;
 			boolean preencherCartaoAuto = false;
+			boolean envioFacial = false;
 			boolean gerarMatriculaSequencial = false;
 			boolean escolherDigitos = false;
 			boolean tempoToleranciaEntrada = false;
@@ -91,6 +92,7 @@ public class GerenciarParametrosController extends BaseController {
 			boolean camposObrigatoriosPedestre = false;
 			boolean validarMatriculasDuplicadas = false;
 			boolean validarCPFDuplicado = false;
+			boolean validarCpfValido = false;
 			boolean validarRGDuplicado = false;
 			boolean validarCartaoAcessoDuplicado = false;
 			boolean cadastroEmLote = false;
@@ -122,6 +124,10 @@ public class GerenciarParametrosController extends BaseController {
 				if (item.getNome().equals(BaseConstant.PARAMETERS_NAME.PREENCHER_CARTAO_AUTO)) {
 					preencherCartaoAuto = true;
 				}
+				
+				if (item.getNome().equals(BaseConstant.PARAMETERS_NAME.ENVIO_FACIAL)) {
+					envioFacial = true;
+				}
 
 				if (item.getNome().equals(BaseConstant.PARAMETERS_NAME.HORARIO_DISPARO_SOC)) {
 					horarioDisparoSOC = true;
@@ -150,6 +156,9 @@ public class GerenciarParametrosController extends BaseController {
 				}
 				if (item.getNome().equals(BaseConstant.PARAMETERS_NAME.VALIDAR_CPF_DUPLICADO)) {
 					validarCPFDuplicado = true;
+				}
+				if (item.getNome().equals(BaseConstant.PARAMETERS_NAME.VALIDA_CPF_VALIDO)) {
+					validarCpfValido = true;
 				}
 				if (item.getNome().equals(BaseConstant.PARAMETERS_NAME.VALIDAR_RG_DUPLICADO)) {
 					validarRGDuplicado = true;
@@ -221,6 +230,12 @@ public class GerenciarParametrosController extends BaseController {
 						"false", getUsuarioLogado().getCliente());
 				parametrosGerais.add(p);
 			}
+			
+			if (!envioFacial) {
+				ParametroEntity p = new ParametroEntity(BaseConstant.PARAMETERS_NAME.ENVIO_FACIAL,
+						"false", getUsuarioLogado().getCliente());
+				parametrosGerais.add(p);
+			}
 
 			if (!gerarMatriculaSequencial) {
 				ParametroEntity p = new ParametroEntity(BaseConstant.PARAMETERS_NAME.GERAR_MATRICULA_SEQUENCIAL,
@@ -265,6 +280,11 @@ public class GerenciarParametrosController extends BaseController {
 			}
 			if (!validarCPFDuplicado) {
 				ParametroEntity p = new ParametroEntity(BaseConstant.PARAMETERS_NAME.VALIDAR_CPF_DUPLICADO, "false",
+						getUsuarioLogado().getCliente());
+				parametrosGerais.add(p);
+			}
+			if (!validarCpfValido) {
+				ParametroEntity p = new ParametroEntity(BaseConstant.PARAMETERS_NAME.VALIDA_CPF_VALIDO, "false",
 						getUsuarioLogado().getCliente());
 				parametrosGerais.add(p);
 			}

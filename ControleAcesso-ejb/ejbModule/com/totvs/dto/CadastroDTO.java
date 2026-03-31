@@ -16,7 +16,7 @@ public class CadastroDTO {
     private String codTurma;         // string
     private String cpf;              // string
     private String codStatus;        // string (alguns casos pode ser letra, ex: "A")
-    private String curso;         // string
+    private String curso;         	 // string
     private String status;           // string
     private String nivelEnsino;      // string (pode vir vazio ou `<NIVELENSINO />`)
     private int idHabilitacaoFilial; // numerico (pode não vir em todos os resultados)
