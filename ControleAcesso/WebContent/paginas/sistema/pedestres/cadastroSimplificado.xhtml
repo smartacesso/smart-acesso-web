@@ -56,11 +56,11 @@
 					</p:selectOneMenu>
 
 					<p:commandButton value="Avançar" icon="pi pi-arrow-right"
-						action="#{cadastroPedestreController.proximo}" process="@this"
+						action="#{cadastroPedestreController.proximo}" process="@form"
 						update="@form" styleClass="botao-branco"/>
 
 					<p:commandButton value="Voltar" icon="pi pi-arrow-left"
-						action="#{cadastroPedestreController.voltar}" process="@this"
+						action="#{cadastroPedestreController.voltar}" process="@form"
 						update="@form" />
 				</p:panelGrid>
 			</h:panelGroup>
@@ -97,7 +97,7 @@
 						disabled="#{empty cadastroPedestreController.entidade.foto}" />
 
 					<p:commandButton value="Voltar" icon="pi pi-arrow-left"
-						action="#{cadastroPedestreController.voltar}" process="@this"
+						action="#{cadastroPedestreController.voltar}" process="@form"
 						update="@form" />
 
 				</p:panelGrid>
@@ -167,7 +167,7 @@
 				style="margin-top: 10px; margin-right: 10px;" styleClass="whiteIcon" />
 
 			<p:commandButton value="#{msgs['alt.acao.cancelar']}"
-				action="#{cadastroPedestreController.cancelaCrop}" process="@this"
+				action="#{cadastroPedestreController.cancelaCrop}" process="@form"
 				oncomplete="PF('cropImage').hide(); PF('escolherFoto').show(); console.log('Corte cancelado'); return false;" />
 
 		</p:dialog>
