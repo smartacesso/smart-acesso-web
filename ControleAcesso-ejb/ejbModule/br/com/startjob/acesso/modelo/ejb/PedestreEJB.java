@@ -18,14 +18,11 @@ import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -38,12 +35,8 @@ import java.util.stream.Stream;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
-import javax.faces.model.SelectItem;
-import javax.inject.Inject;
 import javax.persistence.Column;
-import javax.persistence.EntityManager;
 import javax.persistence.JoinColumn;
-import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.xml.ws.soap.MTOMFeature;
 
@@ -74,7 +67,6 @@ import com.senior.services.Enum.ModoImportacaoFuncionario;
 import com.senior.services.dto.EmpresaSeniorDto;
 import com.senior.services.dto.FuncionarioSeniorDto;
 import com.senior.services.dto.HorarioPedestreDto;
-import com.senior.services.dto.RegraSeniorDto;
 import com.sponte.SponteService;
 import com.totvs.dto.FuncionarioTotvsDto;
 import com.totvs.dto.HorarioTotvsProtheusDTO;
@@ -93,7 +85,6 @@ import br.com.startjob.acesso.modelo.entity.HorarioEntity;
 import br.com.startjob.acesso.modelo.entity.ImportacaoEntity;
 import br.com.startjob.acesso.modelo.entity.IntegracaoSOCEntity;
 import br.com.startjob.acesso.modelo.entity.IntegracaoSeniorEntity;
-import br.com.startjob.acesso.modelo.entity.IntegracaoTotvsEntity;
 import br.com.startjob.acesso.modelo.entity.LocalEntity;
 import br.com.startjob.acesso.modelo.entity.ParametroEntity;
 import br.com.startjob.acesso.modelo.entity.PedestreEntity;
@@ -105,7 +96,6 @@ import br.com.startjob.acesso.modelo.enumeration.Permissoes;
 import br.com.startjob.acesso.modelo.enumeration.Status;
 import br.com.startjob.acesso.modelo.enumeration.TipoPedestre;
 import br.com.startjob.acesso.modelo.enumeration.TipoRegra;
-import br.com.startjob.acesso.modelo.to.IntervaloTO;
 import br.com.startjob.acesso.modelo.to.UsuarioADTO;
 import br.com.startjob.acesso.modelo.utils.AppAmbienteUtils;
 import br.com.startjob.acesso.modelo.utils.UsuarioAdToPedestreConverter;
@@ -1392,7 +1382,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 	@SuppressWarnings("unchecked")
 	@Override
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
-	@TransactionTimeout(unit = TimeUnit.HOURS, value = 4)
+	@TransactionTimeout(unit = TimeUnit.HOURS, value = 8)
 	public void importarSOC() throws Exception {
 		List<ClienteEntity> clientes = (List<ClienteEntity>) pesquisaSimples(ClienteEntity.class,
 				"findAllComIntegracaoSOC", new HashMap<>());
@@ -1421,16 +1411,14 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 				continue;
 			}
 
-			for (FuncionarioResult funcionario : funcionarios) {
+			for (FuncionarioResult funcionario : funcionarios) {				
 				ClienteEntity clienteFromFuncionario = getClienteFromFuncionario(funcionario.CCUSTO, clientes);		
 				
 				if (clienteFromFuncionario != null) {
 
-					System.out.println(String.format("Gravando funcionario: %s, %s, %s", funcionario.NOME,
-							funcionario.NOMEEMPRESA, funcionario.CCUSTO));
+					System.out.println(String.format("Gravando funcionario: nome : %s, empresa :  %s, centro de custo:  %s, unidade :  %S, status : %S ", funcionario.NOME,
+							funcionario.NOMEEMPRESA, funcionario.CCUSTO, clienteFromFuncionario.getNome(), funcionario.SITUACAO));
 					salvarFuncionario(funcionario, clienteFromFuncionario, configs);
-					System.out.println("salvou no cliente : " + clienteFromFuncionario.getNomeUnidadeOrganizacional()
-							+ "iD :" + clienteFromFuncionario.getId());
 				}
 			}
 		}
@@ -1529,7 +1517,6 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 			pedestre.setEmpresa(recuperaEmpresa(funcionario.NOMEEMPRESA, funcionario.CODIGOEMPRESA, cliente));
 			pedestre.setDepartamento(recuperaDepartamento(funcionario.NOMESETOR, pedestre.getEmpresa()));
 			pedestre.setCargo(recuperaCargo(funcionario.NOMECARGO, pedestre.getEmpresa()));
-			// pedestre.setCentroCusto(null)
 			pedestre.setSempreLiberado(Boolean.TRUE);
 
 		} else {
@@ -1562,7 +1549,6 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 			if (Status.ATIVO.equals(pedestre.getStatus())) {
 				pedestre.setStatus(Status.INATIVO);
 				pedestre.setObservacoes("Situação indicada: " + funcionario.SITUACAO);
-				System.out.println("situação : " + funcionario.SITUACAO);
 			}
 
 			inativo = true;
