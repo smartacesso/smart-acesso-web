@@ -35,9 +35,19 @@ public class PedestreRegraTO {
 	}
 	
 	public static PedestreRegraTO fromDomain(PedestreRegraEntity pedestreRegraEntity) {
+		// 1. Proteção contra elemento nulo vindo do Stream
+		if (pedestreRegraEntity == null) {
+			return null;
+		}
+
 		final PedestreRegraTO pedestreRegraTO = new PedestreRegraTO();
 		pedestreRegraTO.id = pedestreRegraEntity.getId();
-		pedestreRegraTO.idRegra = pedestreRegraEntity.getRegra().getId();
+		
+		// 2. Proteção caso a entidade não tenha uma regra associada
+		if (pedestreRegraEntity.getRegra() != null) {
+			pedestreRegraTO.idRegra = pedestreRegraEntity.getRegra().getId();
+		}
+		
 		pedestreRegraTO.validade = pedestreRegraEntity.getValidade();
 		pedestreRegraTO.qtdeDeCreditos = pedestreRegraEntity.getQtdeDeCreditos();
 		pedestreRegraTO.qtdeTotalDeCreditos = pedestreRegraEntity.getQtdeTotalDeCreditos();
@@ -45,9 +55,11 @@ public class PedestreRegraTO {
 		pedestreRegraTO.dataInicioPeriodo = pedestreRegraEntity.getDataInicioPeriodo();
 		pedestreRegraTO.dataFimPeriodo = pedestreRegraEntity.getDataFimPeriodo();
 		
-		if(Objects.nonNull(pedestreRegraEntity.getHorarios())) {
-			if(pedestreRegraEntity.getRegra().getTipo() == TipoRegra.ACESSO_HORARIO) {
+		// 3. Verifica se os horários e a regra existem antes de validar o tipo
+		if (Objects.nonNull(pedestreRegraEntity.getHorarios()) && pedestreRegraEntity.getRegra() != null) {
+			if (pedestreRegraEntity.getRegra().getTipo() == TipoRegra.ACESSO_HORARIO) {
 				pedestreRegraTO.horarios = pedestreRegraEntity.getHorarios().stream()
+						.filter(Objects::nonNull) // Proteção extra caso exista horário nulo na lista
 						.map(HorarioTO::new)
 						.collect(Collectors.toList());
 			}

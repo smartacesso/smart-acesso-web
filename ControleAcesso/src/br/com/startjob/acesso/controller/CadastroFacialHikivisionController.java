@@ -1,14 +1,12 @@
 package br.com.startjob.acesso.controller;
 
 import java.io.ByteArrayInputStream;
-import java.util.Base64;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
-
+import java.util.concurrent.TimeoutException;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.faces.application.FacesMessage;
@@ -25,16 +23,12 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import br.com.startjob.acesso.api.WebSocketCadastroEndpoint;
-import br.com.startjob.acesso.modelo.ejb.BaseEJB;
 import br.com.startjob.acesso.modelo.ejb.PedestreEJBRemote;
 import br.com.startjob.acesso.modelo.entity.CadastroExternoEntity;
-import br.com.startjob.acesso.modelo.entity.ClienteEntity;
 import br.com.startjob.acesso.modelo.entity.HorarioEntity;
 import br.com.startjob.acesso.modelo.entity.PedestreEntity;
 import br.com.startjob.acesso.modelo.entity.PedestreRegraEntity;
-import br.com.startjob.acesso.modelo.enumeration.TipoPedestre;
 import br.com.startjob.acesso.modelo.enumeration.TipoRegra;
-import br.com.startjob.acesso.to.PedestrianAccessTO;
 import br.com.startjob.acesso.to.WebSocketPedestrianAccessTO;
 
 @SuppressWarnings("serial")
@@ -79,14 +73,14 @@ public class CadastroFacialHikivisionController extends BaseController {
 
 		pedestre = buscaPedestrePeloId(idPedestre, idCliente);
 
-//		if(Objects.nonNull(pedestre) && Objects.nonNull(pedestre.getRegras())) {	
-//			for(PedestreRegraEntity p : pedestre.getRegras()) {
-//				if(Objects.nonNull(p.getRegra()) && p.getRegra().getTipo() == TipoRegra.ACESSO_HORARIO) {
-//					List<HorarioEntity> horarios = buscaHorariosByIdPedestreRegra(p.getId());
-//					p.setHorarios(horarios);
-//				}
-//			}
-//		}
+		if(Objects.nonNull(pedestre) && Objects.nonNull(pedestre.getRegras())) {	
+			for(PedestreRegraEntity p : pedestre.getRegras()) {
+				if(Objects.nonNull(p.getRegra()) && p.getRegra().getTipo() == TipoRegra.ACESSO_HORARIO) {
+					List<HorarioEntity> horarios = buscaHorariosByIdPedestreRegra(p.getId());
+					p.setHorarios(horarios);
+				}
+			}
+		}
 		
 		if (pedestre == null) {
 			return;
@@ -129,32 +123,69 @@ public class CadastroFacialHikivisionController extends BaseController {
 
 	    this.step = 1;
 	}
-
-
+	
 	@Override
 	public String salvar() {
+		String retornoStr = "/cadastroAutoatendimento.xhtml?cliente=" + pedestre.getCliente().getId() + "&idPedestre="
+				+ pedestre.getId() + "&token=" + token;
 		if (!pedestre.autoAtendimentoLiberado()) {
+
 			mensagemFatal("", "msg.fatal.pedestre.nao.gravado");
-			return "";
+			redirect(retornoStr);
+			return null;
 		}
 
 		pedestre.setDataAlteracaoFoto(new Date());
-		String jsonStr = gson.toJson(WebSocketPedestrianAccessTO.fromPedestre(pedestre));
-		JsonObject json = JsonParser.parseString(jsonStr).getAsJsonObject();
+		pedestre.setDataCadastroFotoNaHikivision(new Date());
 
-		// buscar cliente correto pelo idCliente e pegar unidade organizacional
-		WebSocketCadastroEndpoint.enviarParaLocal(pedestre.getCliente().getId().toString(), json.toString());
 		try {
+			// 🔹 Envio websocket
+			String jsonStr = gson.toJson(WebSocketPedestrianAccessTO.fromPedestre(pedestre));
+			JsonObject json = JsonParser.parseString(jsonStr).getAsJsonObject();
+
+			String resposta = WebSocketCadastroEndpoint.enviarEEsperar(pedestre.getCliente().getId().toString(),
+					json.toString());
+
+			// 🔹 Persistência
 			baseEJB.gravaObjeto(pedestre);
+
+			if (!resposta.equals("ok")) {
+				FacesContext.getCurrentInstance().getExternalContext().getFlash().setKeepMessages(true);
+
+				if (resposta.contains("UsuarioErro")) {
+					mensagemAviso("", "msg.info.usuario.nao.enviada");
+				} else if (resposta.contains("CartaoErro")) {
+					mensagemAviso("", "msg.info.cartao.nao.enviada");
+				} else if (resposta.contains("FotoErro")) {
+					mensagemAviso("", "msg.info.foto.nao.enviada");
+				}
+
+				redirect(retornoStr);
+				return null;
+			}
+
+		} catch (TimeoutException e) {
+			FacesContext.getCurrentInstance().getExternalContext().getFlash().setKeepMessages(true);
+
+			mensagemAviso("", "msg.info.foto.nao.enviada_time_out");
+			redirect(retornoStr);
+
+			return null;
+
 		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			FacesContext.getCurrentInstance().getExternalContext().getFlash().setKeepMessages(true);
+
+			mensagemAviso("", "msg.info.usuario.nao.enviada");
+			redirect(retornoStr);
+
+			return null;
 		}
 
-		String retornoStr = "";
+		FacesContext.getCurrentInstance().getExternalContext().getFlash().setKeepMessages(true);
 
-		redirect("/capturaDeFaceConcluida.xhtml");
-		return retornoStr;
+		mensagemInfo("", "msg.info.pedestre.gravado.sucesso");
+		redirect(retornoStr);
+		return null;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -244,13 +275,7 @@ public class CadastroFacialHikivisionController extends BaseController {
 	    }
 	    return null;
 	}
-
-	private void limpaSessao() {
-		setSessioAtrribute("imagem1", "");
-		setSessioAtrribute("imagem2", "");
-		setSessioAtrribute("imagem3", "");
-	}
-
+	
 	public PedestreEntity getPedestre() {
 		return pedestre;
 	}

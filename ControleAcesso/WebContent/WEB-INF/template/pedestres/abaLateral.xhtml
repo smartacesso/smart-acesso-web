@@ -225,7 +225,8 @@
 
 			<p:photoCam id="idPc" widgetVar="pc"
 				listener="#{cadastroPedestreController.capturarFoto}"
-				autoStart="false" />
+				autoStart="false" width="320" height="240" photoWidth="640"
+				photoHeight="480" format="jpeg" jpegQuality="70" />
 			<p:commandButton value="#{msgs['label.uc008.capturar']}"
 				process="dialogTirarFoto" update="form:dialogCropImage"
 				onclick="PF('pc').capture();"
