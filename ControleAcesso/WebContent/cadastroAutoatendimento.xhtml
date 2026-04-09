@@ -7,6 +7,8 @@
 
 <h:head>
 	<title>Autoatendimento - Cadastro</title>
+	
+	<link rel="icon" href="/#{menuController.appName}/tema/img/icon_48x48.png"/>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 </h:head>
 
@@ -73,24 +75,29 @@
 		</p:panel>
 
 		<p:dialog widgetVar="dlgCamera" header="Capturar Foto" modal="true"
-			closable="true" width="400" id="dialogCamera">
+			closable="true" width="400" id="dialogCamera"
+			onShow="PF('webcamWidget').attach()"
+			onHide="PF('webcamWidget').detach()">
 
 			<p:photoCam id="webcam" widgetVar="webcamWidget"
 				listener="#{cadastroFacialHikivisionController.onCapture}"
-				update="formAutoCadastro:fotoPreview" style="margin-bottom: 10px;" />
+				update="formAutoCadastro:fotoPreview" autoStart="false" width="320"
+				height="240" photoWidth="640" photoHeight="480" format="jpeg"
+				jpegQuality="70" style="margin-bottom: 10px;" />
 
 			<h:outputScript>
         function capturarEFecharCamera() {
             PF('webcamWidget').capture();
             setTimeout(function () {
                 PF('dlgCamera').hide();
-            }, 800); // tempo para o listener executar
+            }, 800);
         }
     </h:outputScript>
 
 			<p:commandButton value="Capturar" type="button" icon="pi pi-camera"
 				styleClass="ui-button-primary" onclick="capturarEFecharCamera();"
 				style="width: 100%;" />
+
 		</p:dialog>
 
 	</h:form>
