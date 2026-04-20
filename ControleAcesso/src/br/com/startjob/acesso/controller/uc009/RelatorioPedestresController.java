@@ -131,7 +131,6 @@ public class RelatorioPedestresController extends RelatorioController {
 		// 1. Cliente logado
 		getParans().put("cliente.id", getUsuarioLogado().getCliente().getId());
 		getParans().put("pedestre.tipo", TipoPedestre.PEDESTRE);
-		    if (maior instanceof Date) {
 
 		// 3. Tratamento seguro de Datas
 		Object menor = getParans().get("data_menor_data");
