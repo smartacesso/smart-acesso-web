@@ -1,6 +1,5 @@
 package br.com.startjob.acesso.controller.uc008;
 
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -9,8 +8,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.faces.application.FacesMessage;
@@ -29,7 +26,6 @@ import com.senior.services.Enum.ModoImportacaoFuncionario;
 
 import br.com.startjob.acesso.annotations.UseCase;
 import br.com.startjob.acesso.controller.BaseController;
-import br.com.startjob.acesso.controller.MenuController;
 import br.com.startjob.acesso.modelo.BaseConstant;
 import br.com.startjob.acesso.modelo.ejb.EmpresaEJBRemote;
 import br.com.startjob.acesso.modelo.ejb.PedestreEJBRemote;
@@ -39,8 +35,6 @@ import br.com.startjob.acesso.modelo.entity.LocalEntity;
 import br.com.startjob.acesso.modelo.entity.ParametroEntity;
 import br.com.startjob.acesso.modelo.entity.PedestreEntity;
 import br.com.startjob.acesso.modelo.entity.PedestreRegraEntity;
-import br.com.startjob.acesso.modelo.entity.UsuarioEntity;
-import br.com.startjob.acesso.modelo.enumeration.PerfilAcesso;
 import br.com.startjob.acesso.modelo.enumeration.Status;
 import br.com.startjob.acesso.modelo.enumeration.TipoArquivo;
 import br.com.startjob.acesso.modelo.enumeration.TipoPedestre;
@@ -88,38 +82,52 @@ public class ConsultaPedestreController extends BaseController {
 	
 	private boolean permiteCampoAdicionalCrachaMatricula = true;
 	private boolean habilitaAppPedestre = false;
-	private MenuController menuController = new MenuController();
 
 	@PostConstruct
 	@Override
 	public void init() {
-		super.init();
-		
-		acao = getRequest().getParameter("acao");
-		tipo = getRequest().getParameter("tipo");
-		
-		if(tipo != null && !tipo.isEmpty()) {
-			if("pe".equals(tipo)) {
-				getParans().put("tipo", TipoPedestre.PEDESTRE);
-			
-			} else if("vi".equals(tipo)) {
-				getParans().put("tipo", TipoPedestre.VISITANTE);
-			}
-			setUrlNovoRegistro(getUrlNovoRegistro() + "?tipo=" + tipo);
-		}
-		
-		buscar();
-		montaListaEmpresas();
-		montaListaLocais();
-		montaListaTiposPedestre();
-		
-		tipoArquivo = TipoArquivo.ARQUIVO_TXT;
-		montaListaTipoArquivo();
-		
-		ParametroEntity param = baseEJB.getParametroSistema(BaseConstant.PARAMETERS_NAME.PERMITIR_CAMPO_ADICIONAL_CRACHA,
-				getUsuarioLogado().getCliente().getId());
-		if(param != null)
-			permiteCampoAdicionalCrachaMatricula = Boolean.valueOf(param.getValor());
+	    long t0 = System.currentTimeMillis();
+	    super.init();
+	    System.out.println("PERF: super.init() demorou " + (System.currentTimeMillis() - t0) + "ms");
+	    
+	    long tAcao = System.currentTimeMillis();
+	    acao = getRequest().getParameter("acao");
+	    tipo = getRequest().getParameter("tipo");
+	    
+	    if(tipo != null && !tipo.isEmpty()) {
+	        if("pe".equals(tipo)) {
+	            getParans().put("tipo", TipoPedestre.PEDESTRE);
+	        } else if("vi".equals(tipo)) {
+	            getParans().put("tipo", TipoPedestre.VISITANTE);
+	        }
+	        setUrlNovoRegistro(getUrlNovoRegistro() + "?tipo=" + tipo);
+	    }
+	    System.out.println("PERF: Setup parâmetros demorou " + (System.currentTimeMillis() - tAcao) + "ms");
+	    
+	    long tBusca = System.currentTimeMillis();
+	    
+	    // --- O PULO DO GATO ---
+	    // Apenas chamamos o SEU novo método buscar()! 
+	    // Ele vai mapear tudo certinho e avisar o BaseController para usar a Query Otimizada.
+	    buscar();
+	    // ----------------------
+	    
+	    System.out.println("PERF: buscar() principal demorou " + (System.currentTimeMillis() - tBusca) + "ms");
+	    
+	    long tListas = System.currentTimeMillis();
+	    montaListaEmpresas();
+	    montaListaLocais();
+	    montaListaTiposPedestre();
+	    System.out.println("PERF: Montar Combos (Empresas/Locais) demorou " + (System.currentTimeMillis() - tListas) + "ms");
+	    
+	    long tParam = System.currentTimeMillis();
+	    ParametroEntity param = baseEJB.getParametroSistema(BaseConstant.PARAMETERS_NAME.PERMITIR_CAMPO_ADICIONAL_CRACHA,
+	            getUsuarioLogado().getCliente().getId());
+	    if(param != null)
+	        permiteCampoAdicionalCrachaMatricula = Boolean.valueOf(param.getValor());
+	    System.out.println("PERF: Buscar Parâmetro Sistema demorou " + (System.currentTimeMillis() - tParam) + "ms");
+	    
+	    System.out.println("PERF: INIT TOTAL demorou " + (System.currentTimeMillis() - t0) + "ms");
 	}
 	
 	public void excluirPedestre() {
@@ -180,23 +188,36 @@ public class ConsultaPedestreController extends BaseController {
 	
 	@Override
 	public String buscar() {
-		if(contatoPesquisa != null && !"".equals(contatoPesquisa)) {
-			getParans().put("bloco_or", " (obj.telefone like '%" + contatoPesquisa 
-					+ "%' or obj.celular like '%" + contatoPesquisa + "%')");
-		}
-		
-		getParans().put("cliente.id", getUsuarioLogado().getCliente().getId());
-		setNamedQueryPesquisa("findAllComEmpresa");
-		return super.buscar();
+	    long t0 = System.currentTimeMillis();
+	    
+	    // Limpa para evitar lixo de pesquisas anteriores
+	    getParans().remove("bloco_or");
+	    
+	    if(contatoPesquisa != null && !contatoPesquisa.trim().isEmpty()) {
+	        getParans().put("bloco_or", " (obj.telefone like '%" + contatoPesquisa + "%' or obj.celular like '%" + contatoPesquisa + "%')");
+	    }
+	    
+	    getParans().put("cliente.id", getUsuarioLogado().getCliente().getId());
+	    
+	    // Garanta que o tipo está no mapa de parâmetros
+	    if("pe".equals(tipo)) getParans().put("tipo", TipoPedestre.PEDESTRE);
+	    else if("vi".equals(tipo)) getParans().put("tipo", TipoPedestre.VISITANTE);
+	    
+	    setNamedQueryPesquisa("findAllComEmpresaOtimizado");
+	    
+	    String retorno = super.buscar();
+	    
+	    System.out.println("PERF: Tempo dentro do método buscar(): " + (System.currentTimeMillis() - t0) + "ms");
+	    return retorno;
 	}
 	
 	private void montaListaTiposPedestre() {
 		listaTiposPedestre = new ArrayList<SelectItem>();
-		
-		if("pe".equals(tipo)) {
+
+		if ("pe".equals(tipo)) {
 			listaTiposPedestre.add(new SelectItem(TipoPedestre.PEDESTRE, TipoPedestre.PEDESTRE.toString()));
-		
-		} else if("vi".equals(tipo)) {
+
+		} else if ("vi".equals(tipo)) {
 			listaTiposPedestre.add(new SelectItem(TipoPedestre.VISITANTE, TipoPedestre.VISITANTE.toString()));
 
 		} else {
@@ -225,22 +246,22 @@ public class ConsultaPedestreController extends BaseController {
 	
 	public EmpresaEntity buscaEmpresaPeloId(Long id) {
 		EmpresaEntity empresa = null;
-		
+
 		try {
 			Map<String, Object> args = new HashMap<String, Object>();
 			args.put("ID", id);
 
 			@SuppressWarnings("unchecked")
-			List<EmpresaEntity> empresas = (List<EmpresaEntity>) 
-					empresaEJB.pesquisaArgFixos(EmpresaEntity.class, "findByIdComplete", args);
-			
-			if(empresas != null && !empresas.isEmpty())
+			List<EmpresaEntity> empresas = (List<EmpresaEntity>) empresaEJB.pesquisaArgFixos(EmpresaEntity.class,
+					"findByIdComplete", args);
+
+			if (empresas != null && !empresas.isEmpty())
 				empresa = empresas.get(0);
-			
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 		return empresa;
 	}
 	
@@ -372,13 +393,6 @@ public class ConsultaPedestreController extends BaseController {
 			listaTipoArquivo.add(new SelectItem(arquivo, arquivo.getDescricao()));
 		}
 	}
-	
-	public boolean usuarioTemPermissao() {
-	    // Lógica para verificar se o usuário pode ver os dados
-		UsuarioEntity usuarioLogado = menuController.getUsuarioLogado();
-		return !usuarioLogado.getPerfil().equals(PerfilAcesso.CUIDADOR);
-	}
-
 	
 	public void executarIntegracaoPedestre() {
 	    try {
@@ -641,14 +655,6 @@ public class ConsultaPedestreController extends BaseController {
 
 	public void setHabilitaAppPedestre(boolean habilitaAppPedestre) {
 		this.habilitaAppPedestre = habilitaAppPedestre;
-	}
-
-	public MenuController getMenuController() {
-		return menuController;
-	}
-
-	public void setMenuController(MenuController menuController) {
-		this.menuController = menuController;
 	}
 
 	public static long getSerialversionuid() {

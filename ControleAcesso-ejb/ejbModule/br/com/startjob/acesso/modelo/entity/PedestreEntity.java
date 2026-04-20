@@ -3,12 +3,10 @@ package br.com.startjob.acesso.modelo.entity;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 
-import javax.ejb.EJB;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -37,13 +35,11 @@ import org.hibernate.annotations.Fetch;
 import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.Type;
 
-import com.fasterxml.jackson.databind.ser.std.AsArraySerializerBase;
 import com.senior.services.dto.FuncionarioSeniorDto;
 import com.totvs.dto.FuncionarioTotvsDto;
 
 import br.com.startjob.acesso.modelo.entity.base.ClienteBaseEntity;
 import br.com.startjob.acesso.modelo.enumeration.Genero;
-import br.com.startjob.acesso.modelo.enumeration.Permissoes;
 import br.com.startjob.acesso.modelo.enumeration.Status;
 import br.com.startjob.acesso.modelo.enumeration.TipoPedestre;
 import br.com.startjob.acesso.modelo.enumeration.TipoQRCode;
@@ -159,7 +155,15 @@ import br.com.startjob.acesso.modelo.utils.EncryptionUtils;
 		@NamedQuery(name = "PedestreEntity.findAllIds", query = "select distinct obj from PedestreEntity obj "
 				+ "where obj.id in :IDS " + "and obj.cliente.id = :ID_CLIENTE "
 				+ "and (obj.removido = false or obj.removido is null) "
-				+ "order by obj.id asc")
+				+ "order by obj.id asc"),
+		@NamedQuery(name = "PedestreEntity.findAllComEmpresaOtimizado", query = "select new br.com.startjob.acesso.modelo.entity.PedestreEntity("
+				+ "obj.id, obj.matricula, obj.codigoCartaoAcesso, obj.nome, obj.telefone, obj.celular, "
+				+ "obj.cpf, obj.rg, obj.tipo, e.nome, d.nome, cc.nome, c.nome) " + "from PedestreEntity obj "
+				+ " left join  obj.empresa e " 
+				+ " left join  obj.departamento d "
+				+ " left join  obj.centroCusto cc " 
+				+ " left join  obj.cargo c "
+				+ "where (obj.removido = false or obj.removido is null) " + "order by obj.id asc"),
 })
 
 @SuppressWarnings("serial")
@@ -391,14 +395,45 @@ public class PedestreEntity extends ClienteBaseEntity {
 	
 	@Transient
 	private boolean selecionadoEmMassa;
-
+	
 	public PedestreEntity() {
 
 	}
+	
+	// CONSTRUTOR OTIMIZADO PARA A TELA (Substitui o DTO)
+	public PedestreEntity(Long id, String matricula, String codigoCartaoAcesso, String nome, 
+	                      String telefone, String celular, String cpf, String rg, TipoPedestre tipo, 
+	                      String nomeEmpresa, String nomeDepartamento, String nomeCentroCusto, String nomeCargo) {
+	    this.id = id;
+	    this.matricula = matricula;
+	    this.codigoCartaoAcesso = codigoCartaoAcesso;
+	    this.nome = nome;
+	    this.telefone = telefone;
+	    this.celular = celular;
+	    this.cpf = cpf;
+	    this.rg = rg;
+	    this.tipo = tipo;
+
+	    // "Falsificamos" os relacionamentos apenas com o nome para o XHTML conseguir ler na grid
+	    if (nomeEmpresa != null) {
+	        this.empresa = new EmpresaEntity();
+	        this.empresa.setNome(nomeEmpresa);
+	    }
+	    if (nomeDepartamento != null) {
+	        this.departamento = new DepartamentoEntity();
+	        this.departamento.setNome(nomeDepartamento);
+	    }
+	    if (nomeCentroCusto != null) {
+	        this.centroCusto = new CentroCustoEntity();
+	        this.centroCusto.setNome(nomeCentroCusto);
+	    }
+	    if (nomeCargo != null) {
+	        this.cargo = new CargoEntity();
+	        this.cargo.setNome(nomeCargo);
+	    }
+	}
 
 	public PedestreEntity(final FuncionarioSeniorDto funcionarioSeniorDto, final EmpresaEntity empresaEntity, LocalEntity localPadrao) {
-		LocalDate hoje = LocalDate.now();
-
 		this.nome = funcionarioSeniorDto.getNome();
 		this.matricula = funcionarioSeniorDto.getNumeroMatricula() + funcionarioSeniorDto.getEmpresa()+funcionarioSeniorDto.getNumCracha();
 		this.telefone = funcionarioSeniorDto.getDddtelefone() + funcionarioSeniorDto.getNumtelefone();
@@ -507,10 +542,6 @@ public class PedestreEntity extends ClienteBaseEntity {
 		if (string.isEmpty())
 			return true;
 		return false;
-	}
-	
-	private boolean isCrachaSeniorValido(FuncionarioSeniorDto funcionario) {
-		return Objects.nonNull(funcionario.getNumCracha()) && !funcionario.getNumCracha().isEmpty() && !"0".equals(funcionario.getNumCracha());
 	}
 	
 	public boolean isVisitante() {
@@ -1061,5 +1092,4 @@ public class PedestreEntity extends ClienteBaseEntity {
 	public void setSelecionadoEmMassa(boolean selecionadoEmMassa) {
 	    this.selecionadoEmMassa = selecionadoEmMassa;
 	}
-
 }

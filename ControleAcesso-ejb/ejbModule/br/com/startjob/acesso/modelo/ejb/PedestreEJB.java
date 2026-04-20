@@ -1411,7 +1411,8 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 				continue;
 			}
 
-			for (FuncionarioResult funcionario : funcionarios) {				
+			for (FuncionarioResult funcionario : funcionarios) {	
+
 				ClienteEntity clienteFromFuncionario = getClienteFromFuncionario(funcionario.CCUSTO, clientes);		
 				
 				if (clienteFromFuncionario != null) {
