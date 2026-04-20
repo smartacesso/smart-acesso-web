@@ -318,7 +318,7 @@
 							<p:column headerText="regra ativa"
 								styleClass="align-left col-desktop-only">
 								<h:outputText
-									value="#{pedestre.nomeRegraAtivaTemporaria}" />
+									value="#{consultaPedestreController.buscaRegra(pedestre)}" />
 							</p:column>
 
 							<p:column headerText="#{msgs['alt.acao.editar']}"

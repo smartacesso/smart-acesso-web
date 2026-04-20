@@ -15,9 +15,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.ResourceBundle;
-
 import javax.annotation.Resource;
 import javax.ejb.EJB;
 import javax.faces.FacesException;
@@ -35,7 +33,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang.StringUtils;
-
 import br.com.startjob.acesso.annotations.UseCase;
 import br.com.startjob.acesso.modelo.BaseConstant;
 import br.com.startjob.acesso.modelo.collections.LazyLoadingList;
@@ -45,7 +42,6 @@ import br.com.startjob.acesso.modelo.entity.HistoricoCotaEntity;
 import br.com.startjob.acesso.modelo.entity.ParametroEntity;
 import br.com.startjob.acesso.modelo.entity.UsuarioEntity;
 import br.com.startjob.acesso.modelo.entity.base.BaseEntity;
-import br.com.startjob.acesso.modelo.enumeration.TipoPedestre;
 import br.com.startjob.acesso.modelo.utils.AppAmbienteUtils;
 import br.com.startjob.acesso.utils.CookieUtils;
 import br.com.startjob.acesso.utils.ResourceBundleUtils;
@@ -1169,7 +1165,6 @@ public abstract class BaseController implements Serializable {
 	 * Envia para a tela de novo registro
 	 * @throws 
 	 */
-	@SuppressWarnings("unchecked")
 	public void editar(Object id) throws Exception{
 		
 		if(urlNovoRegistro != null 

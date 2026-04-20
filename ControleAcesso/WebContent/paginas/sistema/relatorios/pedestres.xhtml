@@ -21,6 +21,7 @@
 		</ui:define>
 
 		<ui:define name="tools">
+			<p:importEnum type="br.com.startjob.acesso.modelo.enumeration.TipoPedestre" var="TipoEnum" />
 			<p:toolbar
 				styleClass="flex flex-col md:flex-row justify-between items-center gap-4 w-full max-w-screen-xl">
 
@@ -45,12 +46,13 @@
 						<p:ajax process="@this" update="@form" />
 					</p:commandButton>
 
-					<p:commandButton id="acaoExportar" icon="pi pi-file-excel"
-						ajax="false" title="#{msgs['alt.acao.exportar']}"
-						alt="#{msgs['alt.acao.exportar']}">
-						<p:dataExporter type="xlsx" target="form:pedestresTable"
-							fileName="pedestres" />
-					</p:commandButton>
+					<p:commandButton id="acaoExportar" value="Exportar Excel"
+						icon="pi pi-file-excel" process="@form" update="@none"
+						oncomplete="document.getElementById('form:btnDownloadOculto').click();" />
+
+					<p:commandButton id="btnDownloadOculto" style="display:none;"
+						ajax="false"
+						action="#{relatorioPedestresController.buscarRelatorioPedestre()}" />
 
 					<h:outputText
 						value="Total: #{relatorioPedestresController.result.size()}"

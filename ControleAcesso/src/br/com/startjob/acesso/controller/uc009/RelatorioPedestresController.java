@@ -84,30 +84,110 @@ public class RelatorioPedestresController extends RelatorioController {
 			permiteCampoAdicionalCrachaMatricula = Boolean.valueOf(param.getValor());
 	}
 	
+	
 	@Override
 	public String buscar() {
+	    // Como o BaseController e os botões padrão chamam o buscar(), 
+	    // nós o direcionamos para a busca da tela por padrão.
+	    return buscarTela();
+	}
+	
+	public String buscarTela() {
+	    prepararFiltrosComuns();
+	    
+	    // Para a tela, usamos a query com "SELECT NEW" que retorna a Entidade montada
+	    setNamedQueryPesquisa("findAllComPedestreEmpresaECargo");
+	    
+	    // Deixa o BaseController fazer a paginação nativa
+	    return super.buscar();
+	}
+	
+	public String buscarRelatorioPedestre() {
+	    prepararFiltrosComuns();
+//		//salva parametros na sessão
+	    
+	    // Para o relatório, você pode usar a mesma query, OU usar aquela 
+	    // query focada em Object[] se for puxar milhares de registros de uma vez.
+	    setNamedQueryPesquisa("findAllComPedestreEmpresaECargoOtimizado");
+	    
+	    // Se o relatório for apenas preencher uma lista na memória para gerar o Excel:
+	     try {
+			@SuppressWarnings("unchecked")
+			List<AcessoEntity> dadosRelatorio = (List<AcessoEntity>)  baseEJB.pesquisaSimples(AcessoEntity.class, getNamedQueryPesquisa(), getParans());
+			exportarExcelCustomizado(dadosRelatorio);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	     
+	     return "";
+	}
+
+	/**
+	 * Método auxiliar para não repetir código. 
+	 * Ele arruma o mapa e formata as datas com segurança contra NullPointerException.
+	 */
+	private void prepararFiltrosComuns() {
+		// 1. Cliente logado
 		getParans().put("cliente.id", getUsuarioLogado().getCliente().getId());
 		getParans().put("pedestre.tipo", TipoPedestre.PEDESTRE);
-		
-		setNamedQueryPesquisa("findAllComPedestreEmpresaECargo");
-		
-		   Object menor = getParans().get("data_menor_data");
-		    Object maior = getParans().get("data_maior_data");
-
-		    if (menor instanceof Date) {
-		        dataFim = sdf.format((Date) menor);
-		    } else {
-		        dataFim = menor.toString();
-		    }
-
 		    if (maior instanceof Date) {
-		        dataInicio = sdf.format((Date) maior);
-		    } else {
-		        dataInicio = maior.toString();
-		    }
-		
-		
-		return super.buscar();
+
+		// 3. Tratamento seguro de Datas
+		Object menor = getParans().get("data_menor_data");
+		Object maior = getParans().get("data_maior_data");
+
+		if (menor instanceof Date) {
+			dataFim = sdf.format((Date) menor);
+		} else if (menor != null && !menor.toString().trim().isEmpty()) {
+			dataFim = menor.toString();
+		} else {
+			dataFim = null; // Proteção essencial
+			getParans().put("data_menor_data", null);
+		}
+
+		if (maior instanceof Date) {
+			dataInicio = sdf.format((Date) maior);
+		} else if (maior != null && !maior.toString().trim().isEmpty()) {
+			dataInicio = maior.toString();
+		} else {
+			dataInicio = null; // Proteção essencial
+			getParans().put("data_maior_data", null);
+		}
+
+		// --- 4. PREPARAÇÃO DOS FILTROS DE TEXTO E COMBOS ---
+
+		// Textos: Se o usuário apagar o texto e ficar "", transforma em null
+		Object nome = getParans().get("pedestre.nome");
+		if (nome != null && nome.toString().trim().isEmpty()) {
+			getParans().put("pedestre.nome", null);
+		}
+
+		Object equip = getParans().get("equipamento");
+		if (equip != null && equip.toString().trim().isEmpty()) {
+			getParans().put("equipamento", null);
+		}
+
+		// Combos (IDs): Garante que IDs não válidos (0, vazio ou null) virem Null
+		limparIdZerado("pedestre.empresa.id");
+		limparIdZerado("pedestre.departamento.id");
+		limparIdZerado("pedestre.cargo.id");
+		limparIdZerado("pedestre.centroCusto.id");
+	}
+
+	private void limparIdZerado(String chave) {
+	    Object valor = getParans().get(chave);
+	    
+	    if (valor == null) {
+	        getParans().put(chave, null); // Apenas garante que a chave exista
+	        return;
+	    }
+	    
+	    if (valor instanceof String && ((String) valor).trim().isEmpty()) {
+	        getParans().put(chave, null);
+	    } else if (valor instanceof Number && ((Number) valor).longValue() == 0L) {
+	        getParans().put(chave, null);
+	    }
 	}
 	
 	public void eventoEmpresaSelecionada(ValueChangeEvent event) {

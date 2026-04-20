@@ -27,6 +27,26 @@
 		<param-name>resteasy.scan</param-name>
 		<param-value>true</param-value>
 	</context-param>
+	
+	<!-- Novas configurações -->
+	<!-- Força o salvamento do estado no servidor (crucial para listas lentas) -->
+	<context-param>
+	    <param-name>javax.faces.STATE_SAVING_METHOD</param-name>
+	    <param-value>server</param-value>
+	</context-param>
+	
+	<!-- Melhora a performance ao pular comentários inúteis no HTML final -->
+	<context-param>
+	    <param-name>javax.faces.FACELETS_SKIP_COMMENTS</param-name>
+	    <param-value>true</param-value>
+	</context-param>
+	
+	<!-- Reduz o tempo de verificação de mudanças nos arquivos XHTML em produção -->
+	<context-param>
+	    <param-name>javax.faces.FACELETS_REFRESH_PERIOD</param-name>
+	    <param-value>-1</param-value>
+	</context-param>
+	
 
 	<!-- O Servlet do RESTeasy pega as requests para direcionar para as suas 
 		classes JAX-RS -->

@@ -35,7 +35,6 @@ import br.com.startjob.acesso.modelo.entity.LocalEntity;
 import br.com.startjob.acesso.modelo.entity.ParametroEntity;
 import br.com.startjob.acesso.modelo.entity.PedestreEntity;
 import br.com.startjob.acesso.modelo.entity.PedestreRegraEntity;
-import br.com.startjob.acesso.modelo.entity.base.BaseEntity;
 import br.com.startjob.acesso.modelo.enumeration.Status;
 import br.com.startjob.acesso.modelo.enumeration.TipoArquivo;
 import br.com.startjob.acesso.modelo.enumeration.TipoPedestre;
@@ -87,34 +86,48 @@ public class ConsultaPedestreController extends BaseController {
 	@PostConstruct
 	@Override
 	public void init() {
-		super.init();
-		
-		acao = getRequest().getParameter("acao");
-		tipo = getRequest().getParameter("tipo");
-		
-		if(tipo != null && !tipo.isEmpty()) {
-			if("pe".equals(tipo)) {
-				getParans().put("tipo", TipoPedestre.PEDESTRE);
-			
-			} else if("vi".equals(tipo)) {
-				getParans().put("tipo", TipoPedestre.VISITANTE);
-			}
-			setUrlNovoRegistro(getUrlNovoRegistro() + "?tipo=" + tipo);
-		}
-		
-		buscar();
-		montaListaEmpresas();
-		montaListaLocais();
-		montaListaTiposPedestre();
-		
-		tipoArquivo = TipoArquivo.ARQUIVO_TXT;
-		montaListaTipoArquivo();
-		
-		ParametroEntity param = baseEJB.getParametroSistema(BaseConstant.PARAMETERS_NAME.PERMITIR_CAMPO_ADICIONAL_CRACHA,
-				getUsuarioLogado().getCliente().getId());
-		if(param != null)
-			permiteCampoAdicionalCrachaMatricula = Boolean.valueOf(param.getValor());
-		
+	    long t0 = System.currentTimeMillis();
+	    super.init();
+	    System.out.println("PERF: super.init() demorou " + (System.currentTimeMillis() - t0) + "ms");
+	    
+	    long tAcao = System.currentTimeMillis();
+	    acao = getRequest().getParameter("acao");
+	    tipo = getRequest().getParameter("tipo");
+	    
+	    if(tipo != null && !tipo.isEmpty()) {
+	        if("pe".equals(tipo)) {
+	            getParans().put("tipo", TipoPedestre.PEDESTRE);
+	        } else if("vi".equals(tipo)) {
+	            getParans().put("tipo", TipoPedestre.VISITANTE);
+	        }
+	        setUrlNovoRegistro(getUrlNovoRegistro() + "?tipo=" + tipo);
+	    }
+	    System.out.println("PERF: Setup parâmetros demorou " + (System.currentTimeMillis() - tAcao) + "ms");
+	    
+	    long tBusca = System.currentTimeMillis();
+	    
+	    // --- O PULO DO GATO ---
+	    // Apenas chamamos o SEU novo método buscar()! 
+	    // Ele vai mapear tudo certinho e avisar o BaseController para usar a Query Otimizada.
+	    buscar();
+	    // ----------------------
+	    
+	    System.out.println("PERF: buscar() principal demorou " + (System.currentTimeMillis() - tBusca) + "ms");
+	    
+	    long tListas = System.currentTimeMillis();
+	    montaListaEmpresas();
+	    montaListaLocais();
+	    montaListaTiposPedestre();
+	    System.out.println("PERF: Montar Combos (Empresas/Locais) demorou " + (System.currentTimeMillis() - tListas) + "ms");
+	    
+	    long tParam = System.currentTimeMillis();
+	    ParametroEntity param = baseEJB.getParametroSistema(BaseConstant.PARAMETERS_NAME.PERMITIR_CAMPO_ADICIONAL_CRACHA,
+	            getUsuarioLogado().getCliente().getId());
+	    if(param != null)
+	        permiteCampoAdicionalCrachaMatricula = Boolean.valueOf(param.getValor());
+	    System.out.println("PERF: Buscar Parâmetro Sistema demorou " + (System.currentTimeMillis() - tParam) + "ms");
+	    
+	    System.out.println("PERF: INIT TOTAL demorou " + (System.currentTimeMillis() - t0) + "ms");
 	}
 	
 	public void excluirPedestre() {
@@ -175,66 +188,36 @@ public class ConsultaPedestreController extends BaseController {
 	
 	@Override
 	public String buscar() {
-		if(contatoPesquisa != null && !"".equals(contatoPesquisa)) {
-			getParans().put("bloco_or", " (obj.telefone like '%" + contatoPesquisa 
-					+ "%' or obj.celular like '%" + contatoPesquisa + "%')");
-		}
-		
-		getParans().put("cliente.id", getUsuarioLogado().getCliente().getId());
-		setNamedQueryPesquisa("findAllComEmpresa");
-		
-		String retorno =  super.buscar();
-		
-		// 3. Pós-processamento para resolver o N+1
-	    List<BaseEntity> lista = getResult(); 
+	    long t0 = System.currentTimeMillis();
 	    
-	    if (lista != null && !lista.isEmpty()) {
-	        for (BaseEntity entidadeBase : lista) {
-	            // Faz o cast individual de cada item
-	            PedestreEntity p = (PedestreEntity) entidadeBase;
-	            
-	            p.setNomeRegraAtivaTemporaria(buscarNomeRegraParaLista(p));
-	            
-	            // Força a inicialização (solução de contorno caso o JOIN FETCH esteja falhando)
-	            if(p.getEmpresa() != null) p.getEmpresa().getNome();
-	            if(p.getDepartamento() != null) p.getDepartamento().getNome();
-	            if(p.getCentroCusto() != null) p.getCentroCusto().getNome();
-	            if(p.getCargo() != null) p.getCargo().getNome();
-	        }
+	    // Limpa para evitar lixo de pesquisas anteriores
+	    getParans().remove("bloco_or");
+	    
+	    if(contatoPesquisa != null && !contatoPesquisa.trim().isEmpty()) {
+	        getParans().put("bloco_or", " (obj.telefone like '%" + contatoPesquisa + "%' or obj.celular like '%" + contatoPesquisa + "%')");
 	    }
 	    
+	    getParans().put("cliente.id", getUsuarioLogado().getCliente().getId());
+	    
+	    // Garanta que o tipo está no mapa de parâmetros
+	    if("pe".equals(tipo)) getParans().put("tipo", TipoPedestre.PEDESTRE);
+	    else if("vi".equals(tipo)) getParans().put("tipo", TipoPedestre.VISITANTE);
+	    
+	    setNamedQueryPesquisa("findAllComEmpresaOtimizado");
+	    
+	    String retorno = super.buscar();
+	    
+	    System.out.println("PERF: Tempo dentro do método buscar(): " + (System.currentTimeMillis() - t0) + "ms");
 	    return retorno;
-	}
-	
-	// Adaptação do seu método atual para não ser chamado da tela
-	private String buscarNomeRegraParaLista(PedestreEntity pedestre) {
-	    if (pedestre == null || pedestre.getId() == null) {
-	        return "";
-	    }
-	    Map<String, Object> args = new HashMap<>();
-	    args.put("ID_PEDESTRE", pedestre.getId());
-
-	    try {
-	        @SuppressWarnings("unchecked")
-			List<PedestreRegraEntity> regraAtiva = (List<PedestreRegraEntity>) baseEJB.pesquisaArgFixos(
-	                PedestreRegraEntity.class, "findPedestreRegraAtivo", args);
-
-	        if (regraAtiva != null && !regraAtiva.isEmpty() && regraAtiva.get(0).getRegra() != null) {
-	            return regraAtiva.get(0).getRegra().getNome();
-	        }
-	    } catch (Exception e) {
-	        return "";
-	    }
-	    return "";
 	}
 	
 	private void montaListaTiposPedestre() {
 		listaTiposPedestre = new ArrayList<SelectItem>();
-		
-		if("pe".equals(tipo)) {
+
+		if ("pe".equals(tipo)) {
 			listaTiposPedestre.add(new SelectItem(TipoPedestre.PEDESTRE, TipoPedestre.PEDESTRE.toString()));
-		
-		} else if("vi".equals(tipo)) {
+
+		} else if ("vi".equals(tipo)) {
 			listaTiposPedestre.add(new SelectItem(TipoPedestre.VISITANTE, TipoPedestre.VISITANTE.toString()));
 
 		} else {
@@ -263,22 +246,22 @@ public class ConsultaPedestreController extends BaseController {
 	
 	public EmpresaEntity buscaEmpresaPeloId(Long id) {
 		EmpresaEntity empresa = null;
-		
+
 		try {
 			Map<String, Object> args = new HashMap<String, Object>();
 			args.put("ID", id);
 
 			@SuppressWarnings("unchecked")
-			List<EmpresaEntity> empresas = (List<EmpresaEntity>) 
-					empresaEJB.pesquisaArgFixos(EmpresaEntity.class, "findByIdComplete", args);
-			
-			if(empresas != null && !empresas.isEmpty())
+			List<EmpresaEntity> empresas = (List<EmpresaEntity>) empresaEJB.pesquisaArgFixos(EmpresaEntity.class,
+					"findByIdComplete", args);
+
+			if (empresas != null && !empresas.isEmpty())
 				empresa = empresas.get(0);
-			
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 		return empresa;
 	}
 	

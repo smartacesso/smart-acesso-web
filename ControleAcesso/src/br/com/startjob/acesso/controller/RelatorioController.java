@@ -8,15 +8,21 @@ import java.util.List;
 import java.util.Map;
 
 import javax.ejb.EJB;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
 import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.SelectItem;
 
-import org.primefaces.event.SelectEvent;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.primefaces.model.StreamedContent;
 
 import br.com.startjob.acesso.modelo.ejb.EmpresaEJBRemote;
+import br.com.startjob.acesso.modelo.entity.AcessoEntity;
 import br.com.startjob.acesso.modelo.entity.EmpresaEntity;
 import br.com.startjob.acesso.modelo.entity.EquipamentoEntity;
+import br.com.startjob.acesso.modelo.entity.base.BaseEntity;
 import br.com.startjob.acesso.utils.Utils;
 
 @SuppressWarnings("serial")
@@ -151,11 +157,9 @@ public abstract class RelatorioController extends BaseController {
 			
 			if(equipamentos != null && !equipamentos.isEmpty()) {
 				equipamentos.forEach(equipamento -> {
-					String identificador = null;
-					if(equipamento.getMarca().contains("TopData"))
-						identificador = "Inner " + equipamento.getIdentificador().split(";")[0];
-					else
-						identificador = equipamento.getIdentificador();
+					if(equipamento.getMarca().contains("TopData")) {
+					} else {
+					}
 					
 					listaEquipamentos.add(new SelectItem(equipamento.getNome(), equipamento.getNome()));
 				});
@@ -177,5 +181,98 @@ public abstract class RelatorioController extends BaseController {
 	
 	public StreamedContent getStreamedContent(byte[] foto) {
 		return Utils.getStreamedContent(foto);
+	}
+	
+	public void exportarExcelCustomizado(List<AcessoEntity> registrosTela) {
+	    System.out.println("--- INICIANDO EXPORTAÇÃO DA PÁGINA ATUAL ---");
+
+	    if (registrosTela == null || registrosTela.isEmpty()) {
+	        System.out.println("Nenhum dado na tela para exportar.");
+	        mensagemAviso("", "Não há dados na tela para exportar.");
+	        return;
+	    }
+
+	    try (SXSSFWorkbook workbook = new SXSSFWorkbook(100)) {
+	        workbook.setCompressTempFiles(true);
+	        Sheet sheet = workbook.createSheet("Relatório de Acessos");
+	        int rowNum = 0;
+	        
+	        criarCabecalho(sheet.createRow(rowNum++));
+
+	        // Faz o loop direto na lista da tela
+	        for (BaseEntity baseObj : registrosTela) {
+	            
+	            // Faz o cast (conversão) para a sua Entidade real
+	            AcessoEntity acesso = (AcessoEntity) baseObj;
+
+	            Row row = sheet.createRow(rowNum++);
+	            
+	            // Lógica de proteção contra NullPointerException ao navegar nos relacionamentos
+	            String matricula = acesso.getPedestre() != null ? safe(acesso.getPedestre().getMatricula()) : "";
+	            String nome = acesso.getPedestre() != null ? safe(acesso.getPedestre().getNome()) : "";
+	            
+	            String empresa = (acesso.getPedestre() != null && acesso.getPedestre().getEmpresa() != null) 
+	                             ? safe(acesso.getPedestre().getEmpresa().getNome()) : "";
+	                             
+	            String cargo = (acesso.getPedestre() != null && acesso.getPedestre().getCargo() != null) 
+	                           ? safe(acesso.getPedestre().getCargo().getNome()) : "";
+
+	            // Preenchimento chamando os GETTERS da entidade, na mesma ordem do seu cabeçalho
+	            row.createCell(0).setCellValue(matricula); 
+	            row.createCell(1).setCellValue(safe(acesso.getCartaoAcessoRecebido())); 
+	            row.createCell(2).setCellValue(nome); 
+	            row.createCell(3).setCellValue(empresa); 
+	            row.createCell(4).setCellValue(cargo); 
+	            
+	            // Formatação da Data (pode usar Date nativo ou converter para String)
+	            row.createCell(5).setCellValue(safe(acesso.getData())); 
+	            
+	            row.createCell(6).setCellValue(safe(acesso.getEquipamento())); 
+	            row.createCell(7).setCellValue(traduzTipo(safe(acesso.getTipo()))); 
+	            row.createCell(8).setCellValue(safe(acesso.getSentido())); 
+	        }
+
+	        // Fluxo de envio do arquivo único para o navegador
+	        FacesContext fc = FacesContext.getCurrentInstance();
+	        ExternalContext ec = fc.getExternalContext();
+	        ec.responseReset(); 
+	        ec.setResponseContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+	        ec.setResponseHeader("Content-Disposition", "attachment; filename=\"relatorio_pagina.xlsx\"");
+
+	        java.io.OutputStream out = ec.getResponseOutputStream();
+	        workbook.write(out);
+	        out.flush();
+	        workbook.dispose(); 
+	        out.close(); 
+	        fc.responseComplete();
+
+	        System.out.println("--- SUCESSO! ARQUIVO DA PÁGINA GERADO ---");
+
+	    } catch (Throwable e) { 
+	        System.err.println(">>>> ERRO NA GERAÇÃO DO ARQUIVO: " + e.getMessage());
+	        e.printStackTrace();
+	    }
+	}
+
+	// Métodos auxiliares
+	private void criarCabecalho(Row headerRow) {
+	    String[] colunas = {"Matrícula", "Cartão", "Nome", "Empresa", "Cargo", "Data Acesso", "Equipamento", "Tipo Acesso", "Sentido"};
+	    for (int i = 0; i < colunas.length; i++) {
+	        headerRow.createCell(i).setCellValue(colunas[i]);
+	    }
+	}
+
+	private String safe(Object value) {
+	    return value != null ? value.toString() : "";
+	}
+
+	private String traduzTipo(String tipo) {
+	    if (tipo == null) return "";
+	    switch (tipo) {
+	        case "ATIVO": return "LIBERADO";
+	        case "INATIVO": return "BLOQUEADO";
+	        case "INDEFINIDO": return "NÃO GIROU";
+	        default: return tipo;
+	    }
 	}
 }
