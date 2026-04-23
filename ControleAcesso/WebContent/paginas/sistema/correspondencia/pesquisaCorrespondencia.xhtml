@@ -1,0 +1,204 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui">
+
+<body>
+	<ui:composition template="/tema/templates/template.xhtml">
+
+		<ui:define name="titulo">
+			#{msgs['title.sistema']} | Consulta de Correspondências
+		</ui:define>
+
+		<ui:define name="tools">
+			<p:toolbar
+				styleClass="flex flex-column md:flex-row justify-content-between align-items-start gap-3">
+
+				<p:toolbarGroup align="left"
+					styleClass="flex flex-wrap gap-2 justify-start w-full md:w-auto">
+					<div class="align-mobile">
+						<p:commandButton id="acaoNovo"
+							action="#{consultaCorrespondenciaController.novo}"
+							icon="pi pi-plus" process="@this" update="@form"
+							title="Nova Correspondência"
+							styleClass="rounded-button ui-button-success" />
+
+						<p:commandButton id="acaoExportar" icon="pi pi-file-excel"
+							ajax="false" title="Exportar para Excel"
+							styleClass="rounded-button ui-button-flat">
+							<p:dataExporter type="xlsx" target="form:correspondenciaTable"
+								fileName="correspondencias" />
+						</p:commandButton>
+					</div>
+				</p:toolbarGroup>
+
+				<p:toolbarGroup align="right"
+					styleClass="flex flex-wrap gap-2 justify-start md:justify-end w-full md:w-auto">
+
+					<p:commandButton id="acaoLimpar"
+						action="#{consultaCorrespondenciaController.limpar}"
+						icon="pi pi-spinner" process="@this" update="@form"
+						styleClass="rounded-button ui-button-flat" />
+
+					<p:inputText id="filtro-busca-geral" placeholder="Destinatário..."
+						value="#{consultaCorrespondenciaController.parans['destinatario.nome']}"
+						style="width:150px; font-size: 11px;"
+						onkeypress="if(event.key === 'Enter') { event.preventDefault(); document.getElementById('form:acaoBuscar').click(); }" />
+
+					<div style="display: inline-flex">
+						<p:commandButton id="acaoBuscar"
+							action="#{consultaCorrespondenciaController.buscar}"
+							icon="pi pi-search" process="@form" update="form:tabelaPainel"
+							styleClass="rounded-button" />
+					</div>
+
+					<p:commandButton id="acaoFiltroAvancado" icon="pi pi-sliders-h"
+						title="Filtros Avançados" process="@this"
+						update="containerDeFiltro"
+						action="#{consultaCorrespondenciaController.toggleFiltroFlag('filtroCorrespondencia-flag')}"
+						styleClass="col-desktop-only" />
+
+				</p:toolbarGroup>
+			</p:toolbar>
+		</ui:define>
+
+		<ui:define name="conteudo">
+
+			<h:panelGroup id="containerDeFiltro" layout="block">
+				<h:panelGroup id="filtrosAvancadosWrapper" layout="block"
+					rendered="#{consultaCorrespondenciaController.getFiltroFlag('filtroCorrespondencia-flag')}">
+
+					<p:panelGrid columns="4" layout="grid"
+						styleClass="ui-fluid filtros-avancados">
+
+						<p:outputLabel for="f-rastreio" value="Cód. Rastreio:" />
+						<p:inputText id="f-rastreio"
+							value="#{consultaCorrespondenciaController.parans['codigoRastreio']}" />
+
+						<p:outputLabel for="f-tipo" value="Tipo:" />
+						<p:selectOneMenu id="f-tipo"
+							value="#{consultaCorrespondenciaController.parans['tipo']}">
+							<f:selectItem itemLabel="Todos" itemValue="" />
+							<f:selectItem itemLabel="Carta" itemValue="CARTA" />
+							<f:selectItem itemLabel="Pacote" itemValue="PACOTE" />
+							<f:selectItem itemLabel="Documento" itemValue="DOCUMENTO" />
+						</p:selectOneMenu>
+
+						<p:outputLabel for="f-retirado" value="Já Retirado?" />
+						<p:selectOneMenu id="f-retirado"
+							value="#{consultaCorrespondenciaController.parans['confirmaRetirada']}">
+							<f:selectItem itemLabel="Todos" itemValue="" />
+							<f:selectItem itemLabel="Sim" itemValue="S" />
+							<f:selectItem itemLabel="Não" itemValue="N" />
+						</p:selectOneMenu>
+
+						<p:outputLabel for="f-data" value="Data Recebimento:" />
+						<p:calendar id="f-data"
+							value="#{consultaCorrespondenciaController.dataPesquisa}"
+							pattern="dd/MM/yyyy" navigator="true" />
+
+					</p:panelGrid>
+					<p:separator />
+				</h:panelGroup>
+			</h:panelGroup>
+
+			<h:panelGrid width="100%" columns="1" headerClass="h-grid-header">
+				<f:facet name="header">
+					<h:outputText value="Lista de Correspondências" />
+				</f:facet>
+
+				<h:panelGroup id="tabelaPainel" layout="block">
+					<h:panelGroup layout="block"
+						rendered="#{empty consultaCorrespondenciaController.result}">
+						<ui:include src="/tema/templates/vazio.xhtml">
+							<ui:param name="exibe" value="true" />
+							<ui:param name="exibeAdicionar" value="true" />
+						</ui:include>
+					</h:panelGroup>
+
+					<h:panelGroup layout="block"
+						rendered="#{not empty consultaCorrespondenciaController.result}">
+						<p:dataTable id="correspondenciaTable"
+							value="#{consultaCorrespondenciaController.result}" var="item"
+							lazy="true" paginator="true" rows="10" paginatorPosition="bottom"
+							scrollable="true" scrollHeight="flex"
+							styleClass="tabela-responsive">
+
+							<p:column headerText="Recebimento" style="width: 130px">
+								<h:outputText value="#{item.dataRecebimento}">
+									<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+								</h:outputText>
+							</p:column>
+
+							<p:column headerText="Destinatário">
+								<h:outputText value="#{item.destinatario.nome}" />
+							</p:column>
+
+							<p:column headerText="Tipo" styleClass="col-desktop-only">
+								<h:outputText value="#{item.tipo}" />
+							</p:column>
+
+							<p:column headerText="Rastreio">
+								<h:outputText value="#{item.codigoRastreio}" />
+							</p:column>
+
+							<p:column headerText="Status" style="text-align: center;">
+								<h:outputText
+									value="#{item.confirmaRetirada == 'S' ? 'RETIRADO' : 'PENDENTE'}"
+									styleClass="#{item.confirmaRetirada == 'S' ? 'status-retirado' : 'status-pendente'}" />
+							</p:column>
+							
+							<p:column headerText="Ações"
+								style="text-align: center; width: 100px">
+								<p:commandButton icon="pi pi-pencil"
+									action="#{consultaCorrespondenciaController.editar(item.id)}"
+									styleClass="rounded-button ui-button-info ui-button-flat" />
+
+								<p:commandButton icon="pi pi-trash"
+									styleClass="rounded-button ui-button-danger ui-button-flat">
+									<f:setPropertyActionListener value="#{item}"
+										target="#{consultaCorrespondenciaController.correspondenciaSelecionada}" />
+									<p:ajax oncomplete="PF('confirmarExclusao').show()" />
+								</p:commandButton>
+							</p:column>
+
+						</p:dataTable>
+					</h:panelGroup>
+				</h:panelGroup>
+			</h:panelGrid>
+
+			<p:confirmDialog widgetVar="confirmarExclusao" header="Confirmar"
+				message="Deseja excluir este registro?">
+				<p:button value="Não"
+					onclick="PF('confirmarExclusao').hide(); return false;" />
+				<p:commandButton value="Sim"
+					oncomplete="PF('confirmarExclusao').hide();"
+					action="#{consultaCorrespondenciaController.excluirCorrespondencia()}"
+					process="@this" update="@form" />
+			</p:confirmDialog>
+
+			<style>
+.filtros-avancados {
+	margin-bottom: 15px;
+	background: #f9f9f9;
+	padding: 10px;
+	border-radius: 4px;
+}
+
+@media ( max-width : 768px) {
+	.col-desktop-only {
+		display: none !important;
+	}
+}
+
+.align-mobile {
+	padding-top: 15px;
+}
+</style>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>
