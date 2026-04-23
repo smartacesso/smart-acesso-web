@@ -51,7 +51,9 @@
 					<div style="display: inline-flex">
 						<p:commandButton id="acaoBuscar"
 							action="#{consultaCorrespondenciaController.buscar}"
-							icon="pi pi-search" process="@form" update="form:tabelaPainel"
+							icon="pi pi-search" 
+							process="@form" 
+    						update="@form"
 							styleClass="rounded-button" />
 					</div>
 
@@ -110,63 +112,72 @@
 					<h:outputText value="Lista de Correspondências" />
 				</f:facet>
 
-				<h:panelGroup id="tabelaPainel" layout="block">
-					<h:panelGroup layout="block"
-						rendered="#{empty consultaCorrespondenciaController.result}">
-						<ui:include src="/tema/templates/vazio.xhtml">
-							<ui:param name="exibe" value="true" />
-							<ui:param name="exibeAdicionar" value="true" />
-						</ui:include>
-					</h:panelGroup>
+				<h:panelGroup layout="block"
+					rendered="#{not empty consultaCorrespondenciaController.result}">
+					<p:dataTable id="correspondenciaTable"
+						value="#{consultaCorrespondenciaController.result}" var="item"
+						lazy="true" paginator="true" rows="10" paginatorPosition="bottom"
+						scrollable="true" scrollHeight="flex"
+						styleClass="tabela-moderna tabela-responsive">
+						<p:column headerText="Unidade / Destinatário">
+							<div class="info-group">
+								<div class="avatar-icon">
+									<i class="pi pi-box"></i>
+								</div>
+								<div>
+									<span class="primary-text">#{item.destinatario.nome}</span> <span
+										class="secondary-text">#ID: #{item.destinatario.id}</span>
+								</div>
+							</div>
+						</p:column>
 
-					<h:panelGroup layout="block"
-						rendered="#{not empty consultaCorrespondenciaController.result}">
-						<p:dataTable id="correspondenciaTable"
-							value="#{consultaCorrespondenciaController.result}" var="item"
-							lazy="true" paginator="true" rows="10" paginatorPosition="bottom"
-							scrollable="true" scrollHeight="flex"
-							styleClass="tabela-responsive">
+						<p:column headerText="Volume">
+							<div>
+								<span class="primary-text">#{item.tipo != null ?
+									item.tipo : 'Pacote'}</span> <span class="secondary-text">Rastreio:
+									#{item.codigoRastreio != null ? item.codigoRastreio : 'S/N'}</span> <span
+									class="secondary-text">#{item.observacao}</span>
+							</div>
+						</p:column>
 
-							<p:column headerText="Recebimento" style="width: 130px">
-								<h:outputText value="#{item.dataRecebimento}">
-									<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
-								</h:outputText>
-							</p:column>
+						<p:column headerText="Recebimento">
+							<div>
+								<span class="primary-text"> <h:outputText
+										value="#{item.dataRecebimento}">
+										<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+									</h:outputText>
+								</span> <span class="secondary-text">Portaria Principal</span>
+							</div>
+						</p:column>
 
-							<p:column headerText="Destinatário">
-								<h:outputText value="#{item.destinatario.nome}" />
-							</p:column>
+						<p:column headerText="Situação"
+							style="width: 150px; text-align: center;">
+							<h:outputText
+								value="#{item.confirmaRetirada == 'S' ? 'Retirada' : 'Não Retirada'}"
+								styleClass="#{item.confirmaRetirada == 'S' ? 'status-retirado' : 'status-pendente'}" />
+						</p:column>
 
-							<p:column headerText="Tipo" styleClass="col-desktop-only">
-								<h:outputText value="#{item.tipo}" />
-							</p:column>
+						<p:column headerText="" style="text-align: right; width: 180px;">
+							<div class="botoes-acao">
+								<p:commandButton icon="pi pi-check" title="Confirmar Retirada"
+									rendered="#{item.confirmaRetirada == 'N'}"
+									styleClass="rounded-button ui-button-outlined ui-button-secondary" />
 
-							<p:column headerText="Rastreio">
-								<h:outputText value="#{item.codigoRastreio}" />
-							</p:column>
-
-							<p:column headerText="Status" style="text-align: center;">
-								<h:outputText
-									value="#{item.confirmaRetirada == 'S' ? 'RETIRADO' : 'PENDENTE'}"
-									styleClass="#{item.confirmaRetirada == 'S' ? 'status-retirado' : 'status-pendente'}" />
-							</p:column>
-							
-							<p:column headerText="Ações"
-								style="text-align: center; width: 100px">
 								<p:commandButton icon="pi pi-pencil"
 									action="#{consultaCorrespondenciaController.editar(item.id)}"
-									styleClass="rounded-button ui-button-info ui-button-flat" />
+									title="Editar"
+									styleClass="rounded-button ui-button-outlined ui-button-secondary" />
 
-								<p:commandButton icon="pi pi-trash"
-									styleClass="rounded-button ui-button-danger ui-button-flat">
+								<p:commandButton icon="pi pi-trash" title="Excluir"
+									styleClass="rounded-button ui-button-outlined ui-button-secondary">
 									<f:setPropertyActionListener value="#{item}"
 										target="#{consultaCorrespondenciaController.correspondenciaSelecionada}" />
 									<p:ajax oncomplete="PF('confirmarExclusao').show()" />
 								</p:commandButton>
-							</p:column>
+							</div>
+						</p:column>
 
-						</p:dataTable>
-					</h:panelGroup>
+					</p:dataTable>
 				</h:panelGroup>
 			</h:panelGrid>
 
@@ -196,6 +207,104 @@
 
 .align-mobile {
 	padding-top: 15px;
+}
+
+/* Estilos para deixar a tabela com visual de cards horizontais (Imagem de referência) */
+.tabela-moderna .ui-datatable-data>tr>td {
+	border-width: 0 0 1px 0 !important;
+	/* Remove bordas verticais, deixa só a linha de baixo */
+	border-color: #e0e0e0 !important;
+	padding: 15px 10px !important;
+	vertical-align: middle;
+	background-color: transparent !important;
+}
+
+.tabela-moderna .ui-datatable-header, .tabela-moderna th {
+	background: transparent !important;
+	border-width: 0 0 2px 0 !important;
+	border-color: #d0d0d0 !important;
+	color: #555 !important;
+	font-weight: 600 !important;
+}
+
+/* Agrupamento de textos */
+.info-group {
+	display: flex;
+	align-items: center;
+	gap: 15px;
+}
+
+.avatar-icon {
+	background-color: #f4f4f4;
+	border-radius: 50%;
+	width: 40px;
+	height: 40px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: #666;
+	font-size: 1.2rem;
+}
+
+.primary-text {
+	display: block;
+	font-weight: 600;
+	color: #333;
+	font-size: 14px;
+	margin-bottom: 3px;
+}
+
+.secondary-text {
+	display: block;
+	font-size: 12px;
+	color: #888;
+	line-height: 1.3;
+}
+
+/* Cores de Status */
+.status-pendente {
+	color: #d97706; /* Laranja da imagem de referência */
+	font-weight: bold;
+}
+
+.status-retirado {
+	color: #22c55e; /* Verde padrão */
+	font-weight: bold;
+}
+
+/* Espaçamento dos botões de ação */
+.botoes-acao {
+	display: flex;
+	justify-content: flex-end;
+	gap: 8px;
+}
+
+/* Ajustes nos botões outlined para ficarem mais parecidos com a referência */
+.botoes-acao .ui-button.ui-button-outlined {
+	border-color: #ddd !important;
+	color: #555 !important;
+}
+
+.botoes-acao .ui-button.ui-button-outlined:hover {
+	background-color: #f8f9fa !important;
+	border-color: #ccc !important;
+}
+
+/* Manter responsividade */
+@media ( max-width : 768px ) {
+	.col-desktop-only {
+		display: none !important;
+	}
+	.botoes-acao {
+		flex-wrap: wrap;
+		justify-content: flex-start;
+		margin-top: 10px;
+	}
+	.tabela-moderna .ui-datatable-data>tr>td {
+		display: block;
+		width: 100%;
+		text-align: left !important;
+	}
 }
 </style>
 		</ui:define>
