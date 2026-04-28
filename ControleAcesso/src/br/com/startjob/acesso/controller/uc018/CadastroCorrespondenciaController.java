@@ -6,30 +6,34 @@ import java.util.Date;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 import javax.ejb.EJB;
 import javax.faces.model.SelectItem;
 import javax.faces.view.ViewScoped;
 import javax.inject.Named;
+import javax.mail.Session;
 
 import org.primefaces.event.CaptureEvent;
-import org.primefaces.model.StreamedContent;
-
 import br.com.startjob.acesso.annotations.UseCase;
-import br.com.startjob.acesso.controller.CadastroBaseController;
-import br.com.startjob.acesso.modelo.ejb.PedestreEJB;
+import br.com.startjob.acesso.controller.BaseController;
 import br.com.startjob.acesso.modelo.ejb.PedestreEJBRemote;
 import br.com.startjob.acesso.modelo.entity.CorrespondenciaEntity;
 import br.com.startjob.acesso.modelo.entity.PedestreEntity;
+import br.com.startjob.acesso.utils.MailSendUtils;
 
 @Named("cadastroCorrespondenciaController")
 @ViewScoped
 @UseCase(classEntidade=CorrespondenciaEntity.class, funcionalidade="Cadastro de Correspondências", 
 		urlNovoRegistro="/paginas/sistema/correspondencia/cadastroCorrespondencia.jsf", queryEdicao="findByIdComplete")
-public class CadastroCorrespondenciaController extends CadastroBaseController implements Serializable {
+public class CadastroCorrespondenciaController extends BaseController implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
 	private List<SelectItem> listaTipos;
+	
+	@Resource(mappedName = "java:/mail/suporte")
+	private Session mailSession;
+
 	
 	@EJB
 	private PedestreEJBRemote pedestreEJB;
@@ -50,26 +54,34 @@ public class CadastroCorrespondenciaController extends CadastroBaseController im
 		}
 	}
 
-	/**
-	 * Lógica de salvamento personalizada
-	 */
-	@Override
 	public String salvar() {
 		CorrespondenciaEntity entidade = (CorrespondenciaEntity) getEntidade();
-		
-		// Garante o vínculo com o cliente (condomínio) logado
+
 		entidade.setCliente(getUsuarioLogado().getCliente());
 
-		// Lógica para quando marcar a retirada na tela de edição
+		// Flag para saber se é um NOVO registro (para não mandar e-mail se for só uma
+		// edição)
+		boolean isNovoRegistro = (entidade.getId() == null);
+
 		if ("S".equals(entidade.getConfirmaRetirada()) && entidade.getDataRetirada() == null) {
-			entidade.setDataRetirada(new Date());
+			entidade.setDataRetirada(new java.util.Date());
 		}
 
+		// Salva no banco primeiro
 		String retorno = super.salvar();
-		
-		// Redireciona para a consulta com parâmetro de sucesso
+
+		// Dispara o e-mail em background APÓS o salvamento com sucesso
+		if (isNovoRegistro) {
+			try {
+				MailSendUtils.enviaNotificacaoCorrespondencia(entidade, mailSession);
+			} catch (Exception e) {
+				System.err.println("Erro ao tentar enviar e-mail de correspondência: " + e.getMessage());
+				e.printStackTrace();
+				// O e-mail falhou, mas não quebramos a tela do porteiro. Apenas logamos.
+			}
+		}
+
 		redirect("/paginas/sistema/correspondencia/pesquisaCorrespondencia.xhtml?acao=OK");
-		
 		return retorno;
 	}
 

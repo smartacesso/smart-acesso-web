@@ -9,12 +9,24 @@ import br.com.startjob.acesso.modelo.entity.base.BaseEntity;
 @Table(name = "TB_CORRESPONDENCIA")
 @SequenceGenerator(name = "SEQ_CORRESPONDENCIA", sequenceName = "SEQ_CORRESPONDENCIA", allocationSize = 1)
 @NamedQueries({
-	@NamedQuery(
-		    name = "CorrespondenciaEntity.findAll",
-		    query = "select obj from CorrespondenciaEntity obj "
-		          + "left join fetch obj.destinatario d "
-		          + "where (obj.removido = false or obj.removido is null) "
-		          + "order by obj.id asc")
+
+    @NamedQuery(
+        name = "CorrespondenciaEntity.findAll",
+        query = "select obj from CorrespondenciaEntity obj "
+              + "left join fetch obj.destinatario d "
+              + "where (obj.removido = false or obj.removido is null) "
+              + "order by obj.id asc"
+    ),
+
+    @NamedQuery(
+        name = "CorrespondenciaEntity.findByIdComplete",
+        query = "select obj from CorrespondenciaEntity obj "
+              + "left join fetch obj.destinatario d "
+              + "where (obj.removido = false or obj.removido is null) "
+              + "and obj.id = :ID "
+              + "order by obj.id asc"
+    )
+
 })
 public class CorrespondenciaEntity extends BaseEntity {
 
@@ -71,6 +83,14 @@ public class CorrespondenciaEntity extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ID_CLIENTE")
     private ClienteEntity cliente;
+    
+    @Column(name = "NOME_QUEM_RETIROU", length = 150)
+    private String nomeQuemRetirou;
+
+    @Column(name = "DOC_QUEM_RETIROU", length = 50)
+    private String documentoQuemRetirou;
+
+    // Gerar getters e setters para esses dois campos...
 
 	public Long getId() {
 		return id;
@@ -178,6 +198,22 @@ public class CorrespondenciaEntity extends BaseEntity {
 
 	public static long getSerialversionuid() {
 		return serialVersionUID;
+	}
+
+	public String getDocumentoQuemRetirou() {
+		return documentoQuemRetirou;
+	}
+
+	public void setDocumentoQuemRetirou(String documentoQuemRetirou) {
+		this.documentoQuemRetirou = documentoQuemRetirou;
+	}
+
+	public String getNomeQuemRetirou() {
+		return nomeQuemRetirou;
+	}
+
+	public void setNomeQuemRetirou(String nomeQuemRetirou) {
+		this.nomeQuemRetirou = nomeQuemRetirou;
 	}
 
 }

@@ -15,6 +15,7 @@ import com.senior.services.Enum.ModoImportacaoFuncionario;
 import br.com.startjob.acesso.modelo.entity.ClienteEntity;
 import br.com.startjob.acesso.modelo.entity.EmpresaEntity;
 import br.com.startjob.acesso.modelo.entity.ImportacaoEntity;
+import br.com.startjob.acesso.modelo.entity.PedestreEntity;
 import br.com.startjob.acesso.modelo.entity.PedestreRegraEntity;
 
 @Remote
@@ -119,4 +120,8 @@ public interface PedestreEJBRemote extends BaseEJBRemote {
 
 	public void salvarJustificativa(Long idCliente, Date dataInicioJustificativa, Date dataFimJustificativa,
 			String justificativa, List<Long> idsSelecionados, Map<String, Object> parans);
+	
+	public List<PedestreEntity> buscaPedestrePorNomeAndIdCliente(String nome, Long Idcliente);
+	
+	public PedestreEntity buscaPedestrePorId(Long id);
 }

@@ -323,6 +323,15 @@ public class MenuController extends BaseController {
 			cadastros.getElements().add(responsaveis);
 		}
 
+		if (isModuloCorrespondenciaHabilitad()) {
+			// para admins ou gerentes
+			DefaultMenuItem cadastroCorrespondencia = DefaultMenuItem.builder()
+					.value(resource.recuperaChave("menu.cadastro.correspondencia", getFacesContext()))
+					.url(BaseConstant.URL_APLICACAO + "/paginas/sistema/correspondencia/pesquisaCorrespondencia.xhtml")
+					.styleClass("ui-simple-menu").build();
+			cadastros.getElements().add(cadastroCorrespondencia);
+		}
+		
 		// para admins ou gerentes
 		if (PerfilAcesso.ADMINISTRADOR.equals(usuarioLogado.getPerfil())
 				|| PerfilAcesso.GERENTE.equals(usuarioLogado.getPerfil())) {
@@ -332,17 +341,6 @@ public class MenuController extends BaseController {
 					.styleClass("ui-simple-menu").build();
 			cadastros.getElements().add(alteracaoEmMassa);
 		}
-		
-		// para admins ou gerentes
-		if (PerfilAcesso.ADMINISTRADOR.equals(usuarioLogado.getPerfil())
-				|| PerfilAcesso.GERENTE.equals(usuarioLogado.getPerfil())) {
-			DefaultMenuItem cadastroCorrespondencia = DefaultMenuItem.builder()
-					.value(resource.recuperaChave("menu.cadastro.correspondencia", getFacesContext()))
-					.url(BaseConstant.URL_APLICACAO + "/paginas/sistema/correspondencia/pesquisaCorrespondencia.xhtml")
-					.styleClass("ui-simple-menu").build();
-			cadastros.getElements().add(cadastroCorrespondencia);
-		}
-
 
 		menu.getElements().add(cadastros);
 	}

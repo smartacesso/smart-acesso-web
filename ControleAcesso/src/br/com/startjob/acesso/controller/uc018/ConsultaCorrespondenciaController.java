@@ -2,6 +2,9 @@ package br.com.startjob.acesso.controller.uc018;
 
 
 import java.io.Serializable;
+import java.util.Base64;
+import java.util.Date;
+
 import javax.annotation.PostConstruct;
 import javax.faces.view.ViewScoped;
 import javax.inject.Named;
@@ -9,6 +12,7 @@ import javax.inject.Named;
 import br.com.startjob.acesso.annotations.UseCase;
 import br.com.startjob.acesso.controller.BaseController;
 import br.com.startjob.acesso.modelo.entity.CorrespondenciaEntity;
+import br.com.startjob.acesso.utils.MailSendUtils;
 
 @Named("consultaCorrespondenciaController")
 @ViewScoped
@@ -21,6 +25,8 @@ public class ConsultaCorrespondenciaController extends BaseController implements
 	private String filtroRetirado; // "S", "N" ou null para todos
 	private CorrespondenciaEntity correspondenciaSelecionada;
 	private String dataPesquisa;
+	private String nomeRetirada;
+	private String documentoRetirada;
 
 	@PostConstruct
 	@Override
@@ -34,34 +40,56 @@ public class ConsultaCorrespondenciaController extends BaseController implements
 	@Override
 	public String buscar() {
 		// Montamos os parâmetros para a query baseada no seu padrão de framework
-		
+
 		getParans().put("cliente.id", getUsuarioLogado().getCliente().getId());
-		
-//		if (getParans() != null && !getParans().isEmpty()) {
-//			// Busca por nome do destinatário ou código de rastreio
-//			getParans().put("destinatario.nome", paramBuscaGeral);
-//			getParans().put("codigoRastreio", paramBuscaGeral);
-//		}
-		
+
+		getParans().remove("confirmaRetirada");
+
 		if (filtroRetirado != null && !filtroRetirado.isEmpty()) {
 			getParans().put("confirmaRetirada", filtroRetirado);
 		}
 
 		return super.buscar();
 	}
-
-	/**
-	 * Ação para confirmar a retirada diretamente pela lista (atalho)
-	 */
-	public void confirmarRetiradaRapida(CorrespondenciaEntity c) {
-		try {
-			c.setConfirmaRetirada("S");
-			c.setDataRetirada(new java.util.Date());
-			baseEJB.alteraObjeto(c);
-			mensagemInfo("", "Retirada confirmada com sucesso!");
-			buscar();
-		} catch (Exception e) {
-			mensagemFatal("", "Erro ao confirmar retirada.");
+	
+	public void confirmarRetiradaComDados() {
+		if (correspondenciaSelecionada != null) {
+			try {
+				correspondenciaSelecionada.setConfirmaRetirada("S");
+				correspondenciaSelecionada.setDataRetirada(new java.util.Date());
+				
+				// Seta os novos campos vindos do dialog
+				correspondenciaSelecionada.setNomeQuemRetirou(nomeRetirada);
+				correspondenciaSelecionada.setDocumentoQuemRetirou(documentoRetirada);
+				
+				// Salva no banco via EJB
+				baseEJB.alteraObjeto(correspondenciaSelecionada);
+				
+				// ==========================================
+				// DISPARA O E-MAIL DE CONFIRMAÇÃO DE RETIRADA
+				// ==========================================
+				try {
+					MailSendUtils.enviaConfirmacaoRetirada(correspondenciaSelecionada, mailSession);
+				} catch (Exception e) {
+					System.err.println("Erro ao tentar enviar e-mail de confirmação de retirada: " + e.getMessage());
+					e.printStackTrace();
+					// Falhas de e-mail não travam a tela do porteiro
+				}
+				// ==========================================
+				
+				mensagemInfo("", "retirada.confirmada.sucesso");
+				
+				// Limpa os campos para o próximo uso
+				nomeRetirada = "";
+				documentoRetirada = "";
+				
+				// Recarrega a tabela de pesquisa
+				buscar(); 
+				
+			} catch (Exception e) {
+				mensagemFatal("", "retirada.falhou.erro");
+				e.printStackTrace();
+			}
 		}
 	}
 
@@ -72,11 +100,13 @@ public class ConsultaCorrespondenciaController extends BaseController implements
 	public void excluirCorrespondencia() {
 		if (correspondenciaSelecionada != null) {
 			try {
-				baseEJB.excluiObjeto(correspondenciaSelecionada);
-				mensagemInfo("", "Registro excluído.");
+				correspondenciaSelecionada.setRemovido(true);
+				correspondenciaSelecionada.setDataRemovido(new Date());
+				baseEJB.alteraObjeto(correspondenciaSelecionada);
+				mensagemInfo("", "msg.generica.objeto.excluido.sucesso");
 				buscar();
 			} catch (Exception e) {
-				mensagemFatal("", "Não foi possível excluir.");
+				mensagemFatal("", "msg.nao.excluido");
 			}
 		}
 	}
@@ -104,5 +134,28 @@ public class ConsultaCorrespondenciaController extends BaseController implements
 
 	public void setDataPesquisa(String dataPesquisa) {
 		this.dataPesquisa = dataPesquisa;
+	}
+	
+	public String getFotoBase64(byte[] foto) {
+	    if (foto != null && foto.length > 0) {
+	        return Base64.getEncoder().encodeToString(foto);
+	    }
+	    return "";
+	}
+
+	public String getNomeRetirada() {
+	    return nomeRetirada;
+	}
+
+	public void setNomeRetirada(String nomeRetirada) {
+	    this.nomeRetirada = nomeRetirada;
+	}
+
+	public String getDocumentoRetirada() {
+	    return documentoRetirada;
+	}
+
+	public void setDocumentoRetirada(String documentoRetirada) {
+	    this.documentoRetirada = documentoRetirada;
 	}
 }

@@ -1502,4 +1502,17 @@ public abstract class BaseController implements Serializable {
 		}
 		return false;
 	}
+	
+	
+
+	public boolean isModuloCorrespondenciaHabilitad() {
+		ParametroEntity param = baseEJB.getParametroSistema(BaseConstant.PARAMETERS_NAME.HABILITA_MODO_CORRESPONDENCIA,
+				getUsuarioLogado().getCliente().getId());
+
+		if (param != null) {
+			Boolean habilitado = Boolean.valueOf(param.getValor());
+			return habilitado;
+		}
+		return false;
+	}
 }

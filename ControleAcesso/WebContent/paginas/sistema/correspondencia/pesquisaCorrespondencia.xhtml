@@ -51,10 +51,9 @@
 					<div style="display: inline-flex">
 						<p:commandButton id="acaoBuscar"
 							action="#{consultaCorrespondenciaController.buscar}"
-							icon="pi pi-search" 
-							process="@form" 
-    						update="@form"
-							styleClass="rounded-button" />
+							icon="pi pi-search"
+							process="@this filtro-busca-geral containerDeFiltro"
+							update="@form" styleClass="rounded-button" />
 					</div>
 
 					<p:commandButton id="acaoFiltroAvancado" icon="pi pi-sliders-h"
@@ -90,8 +89,9 @@
 						</p:selectOneMenu>
 
 						<p:outputLabel for="f-retirado" value="Já Retirado?" />
+
 						<p:selectOneMenu id="f-retirado"
-							value="#{consultaCorrespondenciaController.parans['confirmaRetirada']}">
+							value="#{consultaCorrespondenciaController.filtroRetirado}">
 							<f:selectItem itemLabel="Todos" itemValue="" />
 							<f:selectItem itemLabel="Sim" itemValue="S" />
 							<f:selectItem itemLabel="Não" itemValue="N" />
@@ -119,20 +119,51 @@
 						lazy="true" paginator="true" rows="10" paginatorPosition="bottom"
 						scrollable="true" scrollHeight="flex"
 						styleClass="tabela-moderna tabela-responsive">
-						<p:column headerText="Unidade / Destinatário">
-							<div class="info-group">
-								<div class="avatar-icon">
-									<i class="pi pi-box"></i>
-								</div>
-								<div>
-									<span class="primary-text">#{item.destinatario.nome}</span> <span
-										class="secondary-text">#ID: #{item.destinatario.id}</span>
+
+						<p:column headerText="Foto"
+							style="width: 80px; text-align: center;">
+							<div class="info-group" style="justify-content: center;">
+								<div style="text-align: center;">
+
+									<h:panelGroup rendered="#{not empty item.fotoVolume}">
+										<img
+											src="data:image/png;base64,#{consultaCorrespondenciaController.getFotoBase64(item.fotoVolume)}"
+											style="width: 40px; height: 40px; object-fit: cover; border-radius: 6px; border: 1px solid #ccc; cursor: pointer;"
+											alt="Pacote" title="Clique para ampliar"
+											onclick="ampliarFoto(this.src);" />
+									</h:panelGroup>
+
+									<h:panelGroup rendered="#{empty item.fotoVolume}">
+										<div class="avatar-icon">
+											<i class="pi pi-box"></i>
+										</div>
+									</h:panelGroup>
+
 								</div>
 							</div>
 						</p:column>
 
+						<p:column headerText="Unidade / Destinatário"
+							style="text-align: center;">
+							<h:panelGroup layout="block" style="text-align: center;">
+
+								<i class="pi pi-box"></i>
+
+								<br />
+
+								<h:outputText value="#{item.destinatario.nome}"
+									styleClass="primary-text" />
+
+								<br />
+
+								<h:outputText value="ID: #{item.destinatario.id}"
+									styleClass="secondary-text" />
+
+							</h:panelGroup>
+						</p:column>
+
 						<p:column headerText="Volume">
-							<div>
+							<div style="text-align: center;">
 								<span class="primary-text">#{item.tipo != null ?
 									item.tipo : 'Pacote'}</span> <span class="secondary-text">Rastreio:
 									#{item.codigoRastreio != null ? item.codigoRastreio : 'S/N'}</span> <span
@@ -140,14 +171,18 @@
 							</div>
 						</p:column>
 
-						<p:column headerText="Recebimento">
-							<div>
+						<p:column headerText="Recebimento" style="text-align: center;">
+							<h:panelGroup layout="block" style="text-align: center;">
 								<span class="primary-text"> <h:outputText
 										value="#{item.dataRecebimento}">
 										<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
 									</h:outputText>
-								</span> <span class="secondary-text">Portaria Principal</span>
-							</div>
+								</span>
+
+								<br />
+
+								<span class="secondary-text"> Portaria Principal </span>
+							</h:panelGroup>
 						</p:column>
 
 						<p:column headerText="Situação"
@@ -159,21 +194,28 @@
 
 						<p:column headerText="" style="text-align: right; width: 180px;">
 							<div class="botoes-acao">
+
 								<p:commandButton icon="pi pi-check" title="Confirmar Retirada"
-									rendered="#{item.confirmaRetirada == 'N'}"
-									styleClass="rounded-button ui-button-outlined ui-button-secondary" />
-
-								<p:commandButton icon="pi pi-pencil"
-									action="#{consultaCorrespondenciaController.editar(item.id)}"
-									title="Editar"
-									styleClass="rounded-button ui-button-outlined ui-button-secondary" />
-
-								<p:commandButton icon="pi pi-trash" title="Excluir"
+									rendered="#{item.confirmaRetirada == 'N'}" process="@this"
+									update="form:painelRetirada"
+									oncomplete="PF('widgetConfirmarRetirada').show()"
 									styleClass="rounded-button ui-button-outlined ui-button-secondary">
 									<f:setPropertyActionListener value="#{item}"
 										target="#{consultaCorrespondenciaController.correspondenciaSelecionada}" />
-									<p:ajax oncomplete="PF('confirmarExclusao').show()" />
 								</p:commandButton>
+
+								<p:commandButton icon="pi pi-pencil" title="Editar"
+									action="#{consultaCorrespondenciaController.editar(item.id)}"
+									process="@this"
+									styleClass="rounded-button ui-button-outlined ui-button-secondary" />
+
+								<p:commandButton icon="pi pi-trash" title="Excluir"
+									process="@this" oncomplete="PF('confirmarExclusao').show()"
+									styleClass="rounded-button ui-button-outlined ui-button-secondary">
+									<f:setPropertyActionListener value="#{item}"
+										target="#{consultaCorrespondenciaController.correspondenciaSelecionada}" />
+								</p:commandButton>
+
 							</div>
 						</p:column>
 
@@ -190,6 +232,75 @@
 					action="#{consultaCorrespondenciaController.excluirCorrespondencia()}"
 					process="@this" update="@form" />
 			</p:confirmDialog>
+
+			<p:dialog id="dialogAmpliarFoto" widgetVar="dialogFotoWidget"
+				modal="true" resizable="false" draggable="false" showHeader="true"
+				header="Foto do Volume" closeOnEscape="true" dismissableMask="true"
+				styleClass="dialog-foto-moderno">
+
+				<div style="text-align: center; padding: 10px;">
+					<img id="imagemAmpliada" src=""
+						style="max-width: 90vw; max-height: 80vh; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);" />
+				</div>
+			</p:dialog>
+
+			<p:dialog id="dialogConfirmarRetirada"
+				widgetVar="widgetConfirmarRetirada" header="Confirmar Retirada"
+				modal="true" resizable="false" width="400" closeOnEscape="true"
+				showEffect="fade" hideEffect="fade">
+
+				<h:panelGroup id="painelRetirada" layout="block"
+					styleClass="ui-fluid">
+					<h:outputText
+						value="Pacote de: #{consultaCorrespondenciaController.correspondenciaSelecionada.destinatario.nome}"
+						style="font-weight: bold; color: #555; display: block; margin-bottom: 15px;" />
+
+					<p:messages id="msgRetirada" showDetail="false" closable="true" />
+
+					<p:panelGrid columns="1" layout="grid"
+						styleClass="ui-panelgrid-blank ui-fluid" style="padding: 0;">
+
+						<p:outputLabel for="nomeRetirada"
+							value="Nome de quem está retirando:" />
+						<p:inputText id="nomeRetirada"
+							value="#{consultaCorrespondenciaController.nomeRetirada}"
+							required="true" requiredMessage="Informe o nome."
+							placeholder="Ex: João da Silva" />
+
+						<p:outputLabel for="docRetirada" value="Documento (RG/CPF):" />
+						<p:inputText id="docRetirada"
+							value="#{consultaCorrespondenciaController.documentoRetirada}"
+							required="true" requiredMessage="Informe o documento."
+							placeholder="Apenas números ou formato padrão" />
+
+					</p:panelGrid>
+
+					<p:separator style="margin-top: 15px; margin-bottom: 15px;" />
+
+					<div
+						style="text-align: right; display: flex; justify-content: flex-end; gap: 10px;">
+						<p:commandButton value="Cancelar" icon="pi pi-times"
+							onclick="PF('widgetConfirmarRetirada').hide(); return false;"
+							styleClass="ui-button-secondary ui-button-flat" />
+
+						<p:commandButton value="Confirmar" icon="pi pi-check"
+							action="#{consultaCorrespondenciaController.confirmarRetiradaComDados}"
+							process="painelRetirada" update="@form"
+							oncomplete="if (args &amp;&amp; !args.validationFailed) PF('widgetConfirmarRetirada').hide();"
+							styleClass="ui-button-success" />
+					</div>
+				</h:panelGroup>
+			</p:dialog>
+
+			<script type="text/javascript">
+				function ampliarFoto(srcBase64) {
+					// 1. Troca a fonte da imagem gigante pela fonte da miniatura clicada
+					document.getElementById('imagemAmpliada').src = srcBase64;
+
+					// 2. Manda o PrimeFaces abrir o modal
+					PF('dialogFotoWidget').show();
+				}
+			</script>
 
 			<style>
 .filtros-avancados {
