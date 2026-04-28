@@ -112,6 +112,7 @@ public class GerenciarParametrosController extends BaseController {
 			boolean habilitaRelatorioRona = false;
 			boolean localPadraoPedestre = false;
 			boolean localPadraoVisitante = false;
+			boolean modoCorrespodencia = false;
 
 			for (BaseEntity baseEntity : all) {
 				ParametroEntity item = (ParametroEntity) baseEntity;
@@ -216,6 +217,9 @@ public class GerenciarParametrosController extends BaseController {
 				}
 				if (item.getNome().equals(BaseConstant.PARAMETERS_NAME.LOCAL_PADRAO_VISITANTE)) {
 					localPadraoVisitante = true;
+				}
+				if (item.getNome().equals(BaseConstant.PARAMETERS_NAME.HABILITA_MODO_CORRESPONDENCIA)) {
+					modoCorrespodencia = true;
 				}
 
 			}
@@ -394,6 +398,12 @@ public class GerenciarParametrosController extends BaseController {
 			
 			if (!localPadraoVisitante) {
 				ParametroEntity p = new ParametroEntity(BaseConstant.PARAMETERS_NAME.LOCAL_PADRAO_VISITANTE, "",
+						getUsuarioLogado().getCliente());
+				parametrosGerais.add(p);
+			}
+			
+			if (!modoCorrespodencia) {
+				ParametroEntity p = new ParametroEntity(BaseConstant.PARAMETERS_NAME.HABILITA_MODO_CORRESPONDENCIA, "false",
 						getUsuarioLogado().getCliente());
 				parametrosGerais.add(p);
 			}

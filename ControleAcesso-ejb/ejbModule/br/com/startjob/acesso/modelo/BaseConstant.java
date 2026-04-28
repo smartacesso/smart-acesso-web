@@ -168,6 +168,8 @@ public interface BaseConstant {
 		public static final String LOCAL_PADRAO_VISITANTE = "Local padrao visitante";
 		
 		public static final String LOCAL_PADRAO_PEDESTRE = "Local padrao pedestre";
+		
+		public static final String HABILITA_MODO_CORRESPONDENCIA = "Modulo correspondencia";
 
 	}
 	

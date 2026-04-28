@@ -62,11 +62,14 @@ import br.com.startjob.acesso.modelo.utils.EncryptionUtils;
 		@Index(name = "idx_pedestre_cliente_nome", columnList = "ID_CLIENTE, NOME"),
 		@Index(name = "idx_pedestre_cliente_cpf", columnList = "ID_CLIENTE, CPF") })
 @NamedQueries({
-		@NamedQuery(name = "PedestreEntity.findAll", query = "select obj " + "from PedestreEntity obj "
+		@NamedQuery(name = "PedestreEntity.findAll", 
+			query = "select obj " + "from PedestreEntity obj "
 				+ "where (obj.removido = false or obj.removido is null) " + "order by obj.id asc"),
-		@NamedQuery(name = "PedestreEntity.findById", query = "select obj from PedestreEntity obj "
+		@NamedQuery(name = "PedestreEntity.findById", 
+			query = "select obj from PedestreEntity obj "
 				+ "where obj.id = :ID order by obj.id asc"),
-		@NamedQuery(name = "PedestreEntity.findByIdComplete", query = "select obj from PedestreEntity obj "
+		@NamedQuery(name = "PedestreEntity.findByIdComplete", 
+			query = "select obj from PedestreEntity obj "
 				+ " left join fetch obj.endereco en " + " left join fetch obj.empresa emp "
 				+ " left join fetch obj.departamento dep " + " left join fetch obj.centroCusto cec "
 				+ " left join fetch obj.cargo ca " + " left join fetch obj.cliente cli " + " left join obj.regras re "
@@ -74,96 +77,129 @@ import br.com.startjob.acesso.modelo.utils.EncryptionUtils;
 				+ " left join obj.biometrias bio " + " left join obj.mensagensPersonalizadas men "
 				+ " left join obj.responsaveis res " + " left join fetch obj.cotas c "
 				+ "where obj.id = :ID order by obj.id asc"),
-		@NamedQuery(name = "PedestreEntity.findAllComEmpresa", query = "select obj from PedestreEntity obj "
+		@NamedQuery(name = "PedestreEntity.findAllComEmpresa", 
+			query = "select obj from PedestreEntity obj "
 				+ " left join fetch obj.empresa e " + " left join fetch obj.departamento d "
 				+ " left join fetch obj.centroCusto cc " + " left join fetch obj.cargo c "
 				+ "where (obj.removido = false or obj.removido is null) " + "order by obj.id asc"),
-		@NamedQuery(name = "PedestreEntity.findByCpf", query = "select obj from PedestreEntity obj "
+		@NamedQuery(name = "PedestreEntity.findByCpf", 
+			query = "select obj from PedestreEntity obj "
 				+ "where obj.cpf = :CPF_PEDESTRE " + " and (obj.removido = false or obj.removido is null) "
 				+ " order by obj.id asc"),
-		@NamedQuery(name = "PedestreEntity.findByRg", query = "select obj from PedestreEntity obj "
+		@NamedQuery(name = "PedestreEntity.findByRg", 
+			query = "select obj from PedestreEntity obj "
 				+ "where obj.rg = :RG " + " and (obj.removido = false or obj.removido is null) "
 				+ " order by obj.id asc"),
-		@NamedQuery(name = "PedestreEntity.findUltimoPedestreCadastrado", query = "select obj from PedestreEntity obj "
+		@NamedQuery(name = "PedestreEntity.findUltimoPedestreCadastrado", 
+			query = "select obj from PedestreEntity obj "
 				+ "where obj.cliente.id = :ID_CLIENTE " + "and obj.matricula is not null " + "and obj.matricula <> '' "
 				+ "order by obj.id desc"),
-		@NamedQuery(name = "PedestreEntity.findById_matricula", query = "select obj from PedestreEntity obj "
+		@NamedQuery(name = "PedestreEntity.findById_matricula", 
+			query = "select obj from PedestreEntity obj "
 				+ "where obj.matricula = :MATRICULA " + "and (obj.removido = false or obj.removido is null) "
 				+ "order by obj.id desc"),
-		@NamedQuery(name = "PedestreEntity.findByNomePedestre", query = "select obj from PedestreEntity obj "
+		@NamedQuery(name = "PedestreEntity.findByNomePedestre", 
+			query = "select obj from PedestreEntity obj "
 				+ "where obj.nome = :NOME " + "and (obj.removido = false or obj.removido is null) "
 				+ "order by obj.id desc"),
-		@NamedQuery(name = "PedestreEntity.findByCardNumber", query = "select obj from PedestreEntity obj "
+		@NamedQuery(name = "PedestreEntity.findByCardNumber", 
+			query = "select obj from PedestreEntity obj "
 				+ "where obj.codigoCartaoAcesso = :CARD_NUMBER " + "order by obj.id desc"),
-		@NamedQuery(name = "PedestreEntity.findAllPedestresComEmpresa", query = "select obj from PedestreEntity obj "
+		@NamedQuery(name = "PedestreEntity.findAllPedestresComEmpresa", 
+			query = "select obj from PedestreEntity obj "
 				+ " left join fetch obj.empresa e " + " left join fetch obj.departamento d " + " left join fetch obj.centroCusto cc "
 				+ " left join fetch obj.cargo c " + "where (obj.removido = false or obj.removido is null) "
 				+ "and obj.tipo = 'PEDESTRE' " + "order by obj.id asc"),
-		@NamedQuery(name = "PedestreEntity.findPedestresByIdComRegras", query = "select obj from PedestreEntity obj "
+		@NamedQuery(name = "PedestreEntity.findPedestresByIdComRegras", 
+			query = "select obj from PedestreEntity obj "
 				+ "left join fetch obj.endereco " + "left join fetch obj.regras " + "where obj.id = :ID "),
-		@NamedQuery(name = "PedestreEntity.findByIdPedestreAndIdCliente", query = "select obj from PedestreEntity obj "
+		@NamedQuery(name = "PedestreEntity.findByIdPedestreAndIdCliente", 
+			query = "select obj from PedestreEntity obj "
 				+ " left join fetch obj.empresa e " + "where obj.id = :ID " + "and obj.cliente.id = :ID_CLIENTE "
 				+ "order by obj.id asc"),
-		@NamedQuery(name = "PedestreEntity.findAllParaAlterarEmMassa", query = "select obj from PedestreEntity obj "
+		@NamedQuery(name = "PedestreEntity.findAllParaAlterarEmMassa", 
+			query = "select obj from PedestreEntity obj "
 				+ "where obj.cliente.id = :ID_CLIENTE " + "and obj.tipo = :TIPO " + "and obj.alterarEmMassa = true "
 				+ "order by obj.id asc"),
-		@NamedQuery(name = "PedestreEntity.findByIdTemp", query = "select obj from PedestreEntity obj "
+		@NamedQuery(name = "PedestreEntity.findByIdTemp", 
+			query = "select obj from PedestreEntity obj "
 				+ "	left join fetch obj.cliente c " + "where obj.idTemp = :ID_TEMP "
 				+ "and obj.cliente.id = :ID_CLIENTE "),
-		@NamedQuery(name = "PedestreEntity.findByLogin", query = "select obj from PedestreEntity obj "
+		@NamedQuery(name = "PedestreEntity.findByLogin", 
+			query = "select obj from PedestreEntity obj "
 				+ " left join fetch obj.cliente c " + "where (obj.removido = false or obj.removido is null) "
 				+ "	and lower(c.nomeUnidadeOrganizacional) = lower(:UNIDADE_ORGANIZACIONAL) "
 				+ "	and obj.login = :LOGIN "),
-		@NamedQuery(name = "PedestreEntity.findByAllStatusLoginPass", query = "select obj from PedestreEntity obj "
+		@NamedQuery(name = "PedestreEntity.findByAllStatusLoginPass", 
+			query = "select obj from PedestreEntity obj "
 				+ " left join fetch obj.cliente c " + "where (obj.removido = false or obj.removido is null) "
 				+ "	   and lower(c.nomeUnidadeOrganizacional) = lower(:UNIDADE_ORGANIZACIONAL) "
 				+ "	   and obj.login = :LOGIN and obj.senha = :SENHA "),
-		@NamedQuery(name = "PedestreEntity.findByMatriculaAndIdEmpresaAndIdCliente", query = "select distinct obj from PedestreEntity obj "
+		@NamedQuery(name = "PedestreEntity.findByMatriculaAndIdEmpresaAndIdCliente", 
+			query = "select distinct obj from PedestreEntity obj "
 				+ "left join fetch obj.empresa e " + "left join fetch obj.equipamentos eq "
 				+ "where obj.matricula = :MATRICULA " + "and e.id = :ID_EMPRESA "
 				+ "and (obj.removido = false or obj.removido is null) " + "and obj.cliente.id = :ID_CLIENTE "),
-
-		@NamedQuery(name = "PedestreEntity.findAllAutoAtendimentoAtivo", query = "select obj "
+		@NamedQuery(name = "PedestreEntity.findAllAutoAtendimentoAtivo", 
+			query = "select obj "
 				+ "from PedestreEntity obj "
 				+ "where (obj.removido = false or obj.removido is null) and obj.cliente.id = :ID_CLIENTE and obj.autoAtendimento = true "
 				+ "order by obj.id asc"),
-		@NamedQuery(name = "PedestreEntity.findByIdWithEmpRegrasAndHorarios", query = "select distinct obj from PedestreEntity obj "
+		@NamedQuery(name = "PedestreEntity.findByIdWithEmpRegrasAndHorarios", 
+			query = "select distinct obj from PedestreEntity obj "
 				+ "left join fetch obj.cliente c " + "left join fetch obj.empresa emp "
 				+ "left join fetch obj.regras r " + "where obj.id = :ID " + "and obj.cliente.id = :ID_CLIENTE "
 				+ "and (obj.removido = false or obj.removido is null) "
 				+ "and (r.removido = false or r.removido is null) " + "order by obj.id asc"),
-		@NamedQuery(name = "PedestreEntity.findByCPFOnBlur", query = "select distinct obj from PedestreEntity obj "
+		@NamedQuery(name = "PedestreEntity.findByCPFOnBlur", 
+			query = "select distinct obj from PedestreEntity obj "
 				+ "where obj.cpf = :CPF " + "and obj.cliente.id = :ID_CLIENTE " + "order by obj.id asc"),
-
-		@NamedQuery(name = "PedestreEntity.findByRGOnBlur", query = "select distinct obj from PedestreEntity obj "
+		@NamedQuery(name = "PedestreEntity.findByRGOnBlur", 
+			query = "select distinct obj from PedestreEntity obj "
 				+ "where obj.rg = :RG " + "and obj.cliente.id = :ID_CLIENTE " + "order by obj.id asc"),
-		@NamedQuery(name = "PedestreEntity.findByMatriculaAndIdCliente", query = "select distinct obj from PedestreEntity obj "
+		@NamedQuery(name = "PedestreEntity.findByMatriculaAndIdCliente", 
+			query = "select distinct obj from PedestreEntity obj "
 				+ "where obj.matricula = :MATRICULA " + "and obj.cliente.id = :ID_CLIENTE "),
-		@NamedQuery(name = "PedestreEntity.findByCpfAndIdCliente", query = "select distinct obj from PedestreEntity obj "
+		@NamedQuery(name = "PedestreEntity.findByCpfAndIdCliente", 
+			query = "select distinct obj from PedestreEntity obj "
 				+ "left join fetch obj.cotas " + "left join fetch obj.empresa " + "where obj.cpf = :CPF "
 				+ "and obj.cliente.id = :ID_CLIENTE "),
-		@NamedQuery(name = "PedestreEntity.findByNomeAndIdCliente", query = "select distinct obj from PedestreEntity obj "
+		@NamedQuery(name = "PedestreEntity.findByNomeAndIdCliente", 
+			query = "select distinct obj from PedestreEntity obj "
 				+ "where obj.nome = :NOME " + "and obj.cliente.id = :ID_CLIENTE "),
-		@NamedQuery(name = "PedestreEntity.findByNomeAndCpfAndIdCliente", query = "select distinct obj from PedestreEntity obj "
+		@NamedQuery(name = "PedestreEntity.findByNomeAndCpfAndIdCliente", 
+			query = "select distinct obj from PedestreEntity obj "
 				+ "where obj.nome = :NOME " + "and obj.cpf = :CPF " + "and obj.cliente.id = :ID_CLIENTE "),
-		@NamedQuery(name = "PedestreEntity.findAllAlteradoEmMassa", query = "select distinct obj from PedestreEntity obj "
+		@NamedQuery(name = "PedestreEntity.findAllAlteradoEmMassa", 
+			query = "select distinct obj from PedestreEntity obj "
 				+ "where obj.tipo = 'PEDESTRE' " + "and (obj.alterarEmMassa IS NULL OR obj.alterarEmMassa = 1) "
 				+ "and obj.cliente.id = :ID_CLIENTE "),
-		@NamedQuery(name = "PedestreEntity.findByNomeAndMatriculaAndIdCliente", query = "select distinct obj from PedestreEntity obj "
+		@NamedQuery(name = "PedestreEntity.findByNomeAndMatriculaAndIdCliente", 
+			query = "select distinct obj from PedestreEntity obj "
 				+ "where obj.nome = :NOME " + "and obj.matriculaReferencia = :MATRICULA_S "
-				+ "and obj.cliente.id = :ID_CLIENTE " + "and (obj.removido = false or obj.removido is null) "),
-		@NamedQuery(name = "PedestreEntity.findAllIds", query = "select distinct obj from PedestreEntity obj "
+				+ "and obj.cliente.id = :ID_CLIENTE " 
+				+ "and (obj.removido = false or obj.removido is null) "),
+		@NamedQuery(name = "PedestreEntity.findAllIds",
+			query = "select distinct obj from PedestreEntity obj "
 				+ "where obj.id in :IDS " + "and obj.cliente.id = :ID_CLIENTE "
 				+ "and (obj.removido = false or obj.removido is null) "
 				+ "order by obj.id asc"),
-		@NamedQuery(name = "PedestreEntity.findAllComEmpresaOtimizado", query = "select new br.com.startjob.acesso.modelo.entity.PedestreEntity("
+		@NamedQuery(name = "PedestreEntity.findAllComEmpresaOtimizado", 
+			query = "select new br.com.startjob.acesso.modelo.entity.PedestreEntity("
 				+ "obj.id, obj.matricula, obj.codigoCartaoAcesso, obj.nome, obj.telefone, obj.celular, "
-				+ "obj.cpf, obj.rg, obj.tipo, e.nome, d.nome, cc.nome, c.nome) " + "from PedestreEntity obj "
+				+ "obj.cpf, obj.rg, obj.tipo, e.nome, d.nome, cc.nome, c.nome) "
+				+ "from PedestreEntity obj "
 				+ " left join  obj.empresa e " 
 				+ " left join  obj.departamento d "
 				+ " left join  obj.centroCusto cc " 
 				+ " left join  obj.cargo c "
 				+ "where (obj.removido = false or obj.removido is null) " + "order by obj.id asc"),
+		@NamedQuery(name = "PedestreEntity.findByNomePedestreLista",
+			 query = "select obj from PedestreEntity obj "
+			          + "where UPPER(obj.nome) LIKE UPPER(:NOME) "
+			          + "and obj.cliente.id = :ID_CLIENTE " 
+			          + "and (obj.removido = false or obj.removido is null) "
+			          + "order by obj.id desc")
 })
 
 @SuppressWarnings("serial")

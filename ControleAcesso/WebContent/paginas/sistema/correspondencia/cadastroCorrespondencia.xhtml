@@ -1,0 +1,160 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui">
+
+<body>
+
+	<ui:composition template="/tema/templates/template.xhtml">
+
+		<ui:define name="titulo">
+			#{msgs['title.sistema']} | #{cadastroCorrespondenciaController.entidade.id != null 
+											? 'Editar Correspondência' 
+											: 'Nova Correspondência'}
+		</ui:define>
+
+		<ui:define name="breadcrumb">
+			<a target="_top" href="/#{menuController.appName}/paginas/principal.xhtml"> 
+				<h:outputText value="#{msgs['title.principal']}" />
+			</a> > 
+			<a target="_top" href="/#{menuController.appName}/paginas/sistema/correspondencia/pesquisaCorrespondencia.xhtml">
+				<h:outputText value="Consulta de Correspondências" />
+			</a> > 
+			<h:outputText value="#{cadastroCorrespondenciaController.entidade.id != null 
+										? 'Editar Registro' 
+										: 'Novo Registro'}" />
+		</ui:define>
+
+		<ui:define name="tools">
+			<h:panelGrid columns="4" styleClass="conteudo_tools">
+				<p:commandButton id="save"
+					action="#{cadastroCorrespondenciaController.salvar}"
+					title="#{msgs['alt.acao.save']}" icon="pi pi-check"
+					styleClass="rounded-button ui-button-success">
+					<p:ajax process="@form" update="@form" />
+				</p:commandButton>
+			</h:panelGrid>
+		</ui:define>
+
+		<ui:define name="conteudo">
+
+			<h:panelGrid width="100%" columns="1" headerClass="h-grid-header">
+				<f:facet name="header">
+					<h:outputText value="#{cadastroCorrespondenciaController.entidade.id != null 
+								? 'Editar Correspondência' 
+								: 'Registro de Correspondência'}" />
+				</f:facet>
+
+				<p:accordionPanel id="cadastroCorrespondenciaTab">
+					
+					<p:tab title="Dados do Volume">
+						<p:panel id="painelDados" styleClass="ui-fluid">
+							<div class="form-grid ui-fluid ui-g">
+
+								<div class="ui-g-12 ui-md-6">
+									<p:outputLabel value="Destinatário:" for="destinatario" indicateRequired="true" />
+									<p:autoComplete id="destinatario" 
+										value="#{cadastroCorrespondenciaController.entidade.destinatario}"
+										completeMethod="#{cadastroCorrespondenciaController.completePedestre}"
+										var="p" itemLabel="#{p.nome}" itemValue="#{p}" 
+										converter="pedestreConverter" forceSelection="true" required="true"
+										placeholder="Digite o nome ou unidade"
+										emptyMessage="Nenhum morador encontrado."
+										scrollHeight="250" 
+										maxResults="15"
+										minQueryLength="3" 
+										delay="600">
+										<p:column>
+											<h:outputText value="#{p.nome}" />
+										</p:column>
+									</p:autoComplete>
+								</div>
+
+								<div class="ui-g-12 ui-md-3">
+									<p:outputLabel value="Tipo de Volume:" for="tipo" indicateRequired="true" />
+									<p:selectOneMenu id="tipo" value="#{cadastroCorrespondenciaController.entidade.tipo}" required="true">
+										<f:selectItems value="#{cadastroCorrespondenciaController.listaTipos}" />
+									</p:selectOneMenu>
+								</div>
+
+								<div class="ui-g-12 ui-md-3">
+									<p:outputLabel value="Código de Rastreio:" for="rastreio" />
+									<p:inputText id="rastreio" value="#{cadastroCorrespondenciaController.entidade.codigoRastreio}" />
+								</div>
+
+								<div class="ui-g-12 ui-md-12">
+									<p:outputLabel value="Observações Adicionais:" for="obs" />
+									<p:inputTextarea id="obs" value="#{cadastroCorrespondenciaController.entidade.observacao}" 
+													 rows="3" autoResize="false" placeholder="Ex: Caixa amassada, entregar urgente..." />
+								</div>
+
+							</div>
+						</p:panel>
+					</p:tab>
+
+					<p:tab title="Registro Fotográfico (Opcional)">
+						<p:panel styleClass="ui-fluid">
+							<div class="ui-g">
+								
+								<div class="ui-g-12 ui-md-6" style="text-align: center;">
+									<p:photoCam widgetVar="pc" listener="#{cadastroCorrespondenciaController.onCapture}" update="painelFoto" />
+									<p:commandButton type="button" value="Capturar Foto" icon="pi pi-camera" 
+													 onclick="PF('pc').capture()" styleClass="ui-button-outlined mt-2" />
+								</div>
+
+								<div class="ui-g-12 ui-md-6" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+									<p:outputPanel id="painelFoto">
+										<h:outputText value="Nenhuma foto capturada." 
+													  rendered="#{empty cadastroCorrespondenciaController.entidade.fotoVolume}" 
+													  style="color: #888;" />
+										
+										<h:panelGroup rendered="#{not empty cadastroCorrespondenciaController.entidade.fotoVolume}">
+											<i class="pi pi-check-circle" style="font-size: 2rem; color: #22c55e; margin-bottom: 10px;"></i>
+											<h:outputText value=" Foto do volume registrada com sucesso!" style="font-weight: bold; color: #22c55e;" />
+											<br/>
+											<h:outputText value="(A imagem será salva no banco ao concluir o cadastro)" style="font-size: 12px; color: #666;" />
+										</h:panelGroup>
+									</p:outputPanel>
+								</div>
+
+							</div>
+						</p:panel>
+					</p:tab>
+
+					<p:tab title="Baixa / Retirada" rendered="#{cadastroCorrespondenciaController.entidade.id != null}">
+						<p:panel styleClass="ui-fluid">
+							<div class="form-grid ui-fluid ui-g">
+								
+								<div class="ui-g-12 ui-md-4">
+									<p:outputLabel value="O morador já retirou o volume?" for="statusRetirada" />
+									<p:selectOneMenu id="statusRetirada" value="#{cadastroCorrespondenciaController.entidade.confirmaRetirada}">
+										<f:selectItem itemLabel="Não (Aguardando)" itemValue="N" />
+										<f:selectItem itemLabel="Sim (Entregue)" itemValue="S" />
+									</p:selectOneMenu>
+								</div>
+								
+								<h:panelGroup layout="block" class="ui-g-12 ui-md-4" rendered="#{cadastroCorrespondenciaController.entidade.dataRetirada != null}">
+									<p:outputLabel value="Data e Hora da Retirada:" />
+									<p:inputText value="#{cadastroCorrespondenciaController.entidade.dataRetirada}" disabled="true">
+										<f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
+									</p:inputText>
+								</h:panelGroup>
+
+							</div>
+						</p:panel>
+					</p:tab>
+
+				</p:accordionPanel>
+			</h:panelGrid>
+			
+			<style>
+				.mt-2 { margin-top: 10px !important; }
+			</style>
+
+		</ui:define>
+	</ui:composition>
+</body>
+</html>
