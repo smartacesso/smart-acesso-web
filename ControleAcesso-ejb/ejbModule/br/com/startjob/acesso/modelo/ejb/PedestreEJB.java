@@ -32,6 +32,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.ejb.LocalBean;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
@@ -101,6 +102,7 @@ import br.com.startjob.acesso.modelo.utils.AppAmbienteUtils;
 import br.com.startjob.acesso.modelo.utils.UsuarioAdToPedestreConverter;
 
 @Stateless
+@LocalBean
 @TransactionAttribute(TransactionAttributeType.REQUIRED)
 public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 
@@ -1411,7 +1413,8 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 				continue;
 			}
 
-			for (FuncionarioResult funcionario : funcionarios) {				
+			for (FuncionarioResult funcionario : funcionarios) {	
+
 				ClienteEntity clienteFromFuncionario = getClienteFromFuncionario(funcionario.CCUSTO, clientes);		
 				
 				if (clienteFromFuncionario != null) {
@@ -4508,4 +4511,45 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 	    return String.format("%11s", apenasNumeros).replace(' ', '0');
 	}
 	
+	@SuppressWarnings("unchecked")
+	public List<PedestreEntity> buscaPedestrePorNomeAndIdCliente(String nome, Long idCliente) {
+	    try {
+	        Map<String, Object> args = new HashMap<>();
+	        args.put("NOME", "%" + nome + "%");
+	        args.put("ID_CLIENTE", idCliente);
+
+	        List<PedestreEntity> listaPedestre = (List<PedestreEntity>) pesquisaArgFixos(
+	                PedestreEntity.class,
+	                "findByNomePedestreLista",
+	                args
+	        );
+
+	        return Optional.ofNullable(listaPedestre).orElse(Collections.emptyList());
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return new ArrayList<>();
+	    }
+	}
+	
+	@SuppressWarnings("unchecked")
+	public PedestreEntity buscaPedestrePorId(Long id) {
+		PedestreEntity atualizaPedestre = null;
+
+		try {
+			Map<String, Object> args = new HashMap<String, Object>();
+			args.put("ID", id);
+
+			List<PedestreEntity> listaPedestre = (List<PedestreEntity>) pesquisaArgFixos(PedestreEntity.class,
+					"findById", args);
+
+			if (listaPedestre != null && !listaPedestre.isEmpty()) {
+				atualizaPedestre = listaPedestre.get(0);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return atualizaPedestre;
+	}
 }

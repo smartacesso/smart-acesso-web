@@ -279,20 +279,14 @@
 
 							<p:column headerText="#{msgs['label.uc008.cpf']}"
 								styleClass="align-left col-desktop-only">
-								<h:outputText value="#{pedestre.cpf}"
-									rendered="#{consultaPedestreController.usuarioTemPermissao()}">
+								<h:outputText value="#{pedestre.cpf}">
 									<f:converter converterId="cpfConverter" />
 								</h:outputText>
-								<h:outputText value="xxx.xxx.xxx-xx"
-									rendered="#{not consultaPedestreController.usuarioTemPermissao()}" />
 							</p:column>
 
 							<p:column headerText="#{msgs['label.uc008.rg']}"
 								styleClass="align-left col-desktop-only">
-								<h:outputText value="#{pedestre.rg}"
-									rendered="#{consultaPedestreController.usuarioTemPermissao()}" />
-								<h:outputText value="xx-xxx-xxx"
-									rendered="#{not consultaPedestreController.usuarioTemPermissao()}" />
+								<h:outputText value="#{pedestre.rg}"/>
 							</p:column>
 
 							<p:column headerText="#{msgs['label.uc008.tipo']}"

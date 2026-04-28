@@ -26,7 +26,10 @@ import br.com.startjob.acesso.modelo.entity.base.ClienteBaseEntity;
 		@Index(name = "idx_pedestre_tipo", columnList = "ID_PEDESTRE, TIPO"),
 		@Index(name = "idx_cliente_data", columnList = "ID_CLIENTE, DATA, SENTIDO, TIPO"),
 		@Index(name = "idx_pedestre_sentido_tipo", columnList = "ID_PEDESTRE, SENTIDO, TIPO, DATA"),
-		@Index(name = "idx_only_pedestre", columnList = "ID_PEDESTRE") })
+		@Index(name = "idx_only_pedestre", columnList = "ID_PEDESTRE"),
+		@Index(name = "idx_acesso_relatorio_base", columnList = "ID_CLIENTE, DATA"),
+        @Index(name = "idx_acesso_relatorio_equip", columnList = "ID_CLIENTE, EQUIPAMENTO, DATA")
+})
 @NamedQueries({
 		@NamedQuery(name = "AcessoEntity.findAll", query = "select obj " + "from AcessoEntity obj "
 				+ "where (obj.removido = false or obj.removido is null) " + "order by obj.id asc"),
@@ -76,7 +79,15 @@ import br.com.startjob.acesso.modelo.entity.base.ClienteBaseEntity;
 				+ "and (obj.removido = false or obj.removido is null) " + "order by obj.data desc"),
 		@NamedQuery(name = "AcessoEntity.findAllByIdPedestreSemData", query = "select obj from AcessoEntity obj "
 				+ "where obj.pedestre.id = :ID_PEDESTRE " + "and (obj.removido = false or obj.removido is null) "
-				+ "order by obj.data desc") })
+				+ "order by obj.data desc"),
+		@NamedQuery(name = "AcessoEntity.findAllComPedestreEmpresaECargoOtimizado", query = "select new br.com.startjob.acesso.modelo.entity.AcessoEntity("
+				+ "p.id, p.matricula, obj.cartaoAcessoRecebido, p.nome, e.nome, c.nome, "
+				+ "obj.data, obj.equipamento, obj.tipo, obj.sentido) " + "from AcessoEntity obj "
+				+ "join obj.pedestre p " + "left join p.empresa e " + "left join p.cargo c "
+				+ "left join p.departamento d " + "left join p.centroCusto cc "
+				+ "where (obj.removido = false or obj.removido is null) "
+				+ "order by obj.data desc")
+})
 @SuppressWarnings("serial")
 public class AcessoEntity extends ClienteBaseEntity {
 
@@ -202,6 +213,34 @@ public class AcessoEntity extends ClienteBaseEntity {
 	public AcessoEntity(String hora, Long qtdePedestresHora) {
 		this.hora = Integer.valueOf(hora);
 		this.qtdePedestresHora = qtdePedestresHora;
+	}
+	
+	// Construtor otimizado para a tela
+	public AcessoEntity(Long idPedestre, String matricula, String cartaoAcessoRecebido, 
+	                    String nomePedestre, String nomeEmpresa, String nomeCargo, 
+	                    Date data, String equipamento, String tipoAcesso, String sentido) {
+	                    
+	    this.cartaoAcessoRecebido = cartaoAcessoRecebido;
+	    this.data = data;
+	    this.equipamento = equipamento;
+	    // Faça o cast do tipoAcesso para o seu Enum se for necessário
+	    // this.tipo = tipoAcesso; 
+	    this.sentido = sentido;
+	    
+	    // Falsifica as entidades filhas para o XHTML ler as colunas sem dar NullPointer
+	    this.pedestre = new PedestreEntity();
+	    this.pedestre.setId(idPedestre);
+	    this.pedestre.setMatricula(matricula);
+	    this.pedestre.setNome(nomePedestre);
+	    
+	    if(nomeEmpresa != null) {
+	        this.pedestre.setEmpresa(new EmpresaEntity());
+	        this.pedestre.getEmpresa().setNome(nomeEmpresa);
+	    }
+	    if(nomeCargo != null) {
+	        this.pedestre.setCargo(new CargoEntity());
+	        this.pedestre.getCargo().setNome(nomeCargo);
+	    }
 	}
 
 	public Long getId() {

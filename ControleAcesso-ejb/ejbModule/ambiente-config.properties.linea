@@ -19,8 +19,8 @@ config.ambiente.nome.app=sistema
 
 
 # Configura��es de identificação
-config.ambiente.support.email=suporte@startjobtec.com.br
-config.ambiente.noreply.email=noreply@startjobtec.com.br
+config.ambiente.support.email=noreply.smartacesso@gmail.com
+config.ambiente.noreply.email=noreply.smartacesso@gmail.com
 config.ambiente.site=https://www.smartempresarial.com.br/
 
 # Configura��o de academia gestora
