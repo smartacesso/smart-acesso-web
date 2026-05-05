@@ -1,5 +1,7 @@
 package br.com.startjob.acesso.controller.uc002;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
@@ -42,17 +44,26 @@ public class PrincipalController extends BaseController {
 			UsuarioEntity usuarioLogado = getUsuarioLogado();
 			if(usuarioLogado != null && usuarioLogado.getId() != null) {
 				
+				LocalDate hoje = LocalDate.now();
+
+				LocalDateTime inicio = hoje.atStartOfDay();
+				LocalDateTime fim = hoje.plusDays(1).atStartOfDay();
+				
 				Map<String, Object> argBase = new HashMap<String, Object>();
 				argBase.put("cliente.id", usuarioLogado.getCliente().getId());
 				argBase.put("dataCriacao_ini_data", DateUtils.getInstance().ajustaDataIni(Calendar.getInstance()).getTime());
 				argBase.put("dataCriacao_fim_data", DateUtils.getInstance().ajustaDataFim(Calendar.getInstance()).getTime());
+
 				
 				//busca quantidade de acessos hoje
 				Map<String, Object> argAcessos = new HashMap<String, Object>();
 				argAcessos.putAll(argBase);
 				argAcessos.put("pedestre_dif", "null");
+				argAcessos.put("inicioDia", inicio);
+				argAcessos.put("fimDia", fim);
+				
 				Integer qtdAcessos = baseEJB
-						.pesquisaSimplesCount(AcessoEntity.class, "findAll", argAcessos);
+						.pesquisaSimplesCount(AcessoEntity.class, "findAcessosHoje", argAcessos);
 				if(qtdAcessos != null)
 					acessos = qtdAcessos + "";
 				
