@@ -1,0 +1,301 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui">
+
+<body>
+	<f:metadata>
+		<f:event type="preRenderView" listener="#{cadastroPedestreController.exibeMensagens}" />
+	</f:metadata>
+
+	<ui:composition template="/tema/templates/template.xhtml">
+
+		<ui:define name="titulo">
+			#{msgs['title.sistema']} | Autoatendimento
+		</ui:define>
+
+		<ui:define name="breadcrumb">
+			<a target="_top" href="/#{menuController.appName}/paginas/principal.xhtml"> 
+                <h:outputText value="#{msgs['title.principal']}" />
+			</a> > 
+			<h:outputText value="Autoatendimento" />
+		</ui:define>
+
+		<ui:define name="tools">
+			<p:toolbar id="painelTools">
+				<p:toolbarGroup align="left">
+					<h:outputText value="Terminal de Autoatendimento SmartAcesso" style="font-weight:bold; color: #2c3e50; font-size: 1.2rem;" />
+				</p:toolbarGroup>
+			</p:toolbar>
+		</ui:define>
+
+		<ui:define name="conteudo">
+			<style type="text/css">
+				.totem-wrapper { display: flex; justify-content: center; padding: 20px; }
+				.totem-container {
+					width: 100%; max-width: 900px; background: #fff; border: 1px solid #ddd;
+					border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); overflow: hidden;
+				}
+				.totem-step { display: none; flex-direction: column; align-items: center; padding: 40px; }
+				.totem-step.active { display: flex; }
+				.totem-h1 { font-size: 2.2rem; color: #333; margin-bottom: 25px; }
+				.input-totem {
+					width: 80%; font-size: 2.2rem; text-align: center;
+					padding: 15px; border: 3px solid #ccc; border-radius: 10px;
+					margin-bottom: 20px; outline: none;
+				}
+				.input-totem:focus { border-color: #3498db; }
+				
+				/* Teclados */
+				.kb-grid { display: grid; gap: 10px; width: 100%; margin-top: 10px; }
+				.kb-num { grid-template-columns: repeat(3, 1fr); max-width: 400px; }
+				.kb-alpha { grid-template-columns: repeat(7, 1fr); max-width: 800px; }
+				.kb-key {
+					padding: 20px; font-size: 1.4rem; font-weight: bold;
+					background: #fff; border: 1px solid #bbb; border-radius: 8px;
+					text-align: center; cursor: pointer; user-select: none;
+				}
+				.kb-key:active { background: #ddd; transform: translateY(2px); }
+				.kb-special { background: #eee; font-size: 1.1rem; }
+
+				.totem-footer {
+					display: flex; justify-content: space-between;
+					padding: 20px; background: #f9f9f9; border-top: 1px solid #eee;
+				}
+				.btn-totem {
+					padding: 15px 40px; font-size: 1.3rem; border-radius: 8px;
+					border: none; cursor: pointer; font-weight: bold; color: white;
+				}
+				.btn-next { background: #2ecc71; }
+				.btn-back { background: #95a5a6; }
+			</style>
+
+			<h:panelGrid width="100%" columns="1" headerClass="h-grid-header">
+				<f:facet name="header">
+					<h:outputText value="Bem-vindo(a) ao Autoatendimento" />
+				</f:facet>
+				
+				<h:column>
+					<div class="totem-wrapper">
+						<div class="totem-container">
+							
+							<p:messages id="mensagensTotem" showDetail="false" closable="true" style="width: 90%; margin: 0 auto;" />
+
+							<h:inputHidden id="cpfHiddenTotem" value="#{cadastroPedestreController.entidade.cpf}" />
+							<h:inputHidden id="nomeHiddenTotem" value="#{cadastroPedestreController.entidade.nome}" />
+							<h:inputHidden id="empresaHiddenTotem" value="#{cadastroPedestreController.entidade.empresa.id}" />
+
+							<p:remoteCommand name="verificarCpfTotemRC" 
+											 process="cpfHiddenTotem @this" 
+											 action="#{cadastroPedestreController.verificarCpfTotem}" 
+											 oncomplete="tratarRetornoCpf(xhr, status, args)" />
+
+							<p:remoteCommand name="enviarDadosProJava" 
+											 process="cpfHiddenTotem nomeHiddenTotem empresaHiddenTotem @this" 
+											 action="#{cadastroPedestreController.salvarAutoatendimento}" 
+											 update="mensagensTotem" />
+
+							<div id="listaDeEmpresasOculta" style="display: none;">
+								<ui:repeat value="#{cadastroPedestreController.listaEmpresas}" var="emp">
+									<h:panelGroup rendered="#{emp.value != null and emp.value != ''}">
+										<div class="empresa-data-item" data-id="#{emp.value}" data-nome="#{emp.label}"></div>
+									</h:panelGroup>
+								</ui:repeat>
+							</div>
+
+							<div id="step-cpf" class="totem-step active">
+								<h1 class="totem-h1">Digite seu CPF</h1>
+								<input type="text" id="input-cpf" class="input-totem" readonly="readonly" />
+								<div id="kb-cpf" class="kb-grid kb-num"></div>
+							</div>
+
+							<div id="step-nome" class="totem-step">
+								<h1 class="totem-h1">Digite seu Nome</h1>
+								<input type="text" id="input-nome" class="input-totem" readonly="readonly" />
+								<div id="kb-nome" class="kb-grid kb-alpha"></div>
+							</div>
+
+							<div id="step-empresa" class="totem-step">
+								<h1 class="totem-h1">Selecione a Empresa</h1>
+								<div id="grid-empresas" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; width: 100%; padding: 10px;"></div>
+							</div>
+
+							<div id="step-obs" class="totem-step">
+								<h1 class="totem-h1">Observações (Opcional)</h1>
+								<input type="text" id="input-obs" class="input-totem" readonly="readonly" />
+								<div id="kb-obs" class="kb-grid kb-alpha"></div>
+							</div>
+
+							<div class="totem-footer">
+								<button type="button" class="btn-totem btn-back" onclick="voltar();">Voltar</button>
+								<button type="button" id="btn-next" class="btn-totem btn-next" onclick="proximo();">Continuar</button>
+							</div>
+							
+						</div>
+					</div>
+				</h:column>
+			</h:panelGrid>
+
+			<script type="text/javascript">
+			//<![CDATA[
+				let etapa = 'CPF';
+				let dados = { cpf: '', nome: '', empresaId: '', obs: '' };
+				const fluxo = ['CPF', 'NOME', 'EMPRESA', 'OBS'];
+
+				window.onload = function() {
+					const numKeys = ['1','2','3','4','5','6','7','8','9','←','0','Limpar'];
+					const alphaKeys = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').concat(['Espaço', '←', 'Limpar']);
+					
+					montarTeclado('kb-cpf', 'input-cpf', numKeys);
+					montarTeclado('kb-nome', 'input-nome', alphaKeys);
+					montarTeclado('kb-obs', 'input-obs', alphaKeys);
+					
+					carregarEmpresasDoJsf();
+				};
+
+				function carregarEmpresasDoJsf() {
+					const itens = document.querySelectorAll('.empresa-data-item');
+					const grid = document.getElementById('grid-empresas');
+					
+					if(itens.length > 0) {
+						itens.forEach(item => {
+							let id = item.getAttribute('data-id');
+							let nome = item.getAttribute('data-nome');
+							
+							let div = document.createElement('div');
+							div.style = "padding: 25px; background: #e6e6fa; border: 1px solid #ccc; border-radius: 10px; text-align: center; font-weight: bold; cursor: pointer;";
+							div.innerText = nome;
+							div.onclick = () => { 
+								dados.empresaId = id; 
+								proximo(); 
+							};
+							grid.appendChild(div);
+						});
+					} else {
+						grid.innerHTML = "<p>Nenhuma empresa encontrada.</p>";
+					}
+				}
+
+				function montarTeclado(id, inputId, teclas) {
+					const container = document.getElementById(id);
+					const input = document.getElementById(inputId);
+					teclas.forEach(t => {
+						let k = document.createElement('div');
+						k.className = 'kb-key' + (t.length > 1 ? ' kb-special' : '');
+						k.innerText = t;
+						k.onclick = () => {
+							if(t === '←') input.value = input.value.slice(0, -1);
+							else if(t === 'Limpar') input.value = '';
+							else if(t === 'Espaço') input.value += ' ';
+							else input.value += t;
+						};
+						container.appendChild(k);
+					});
+				}
+
+				function proximo() {
+					if(etapa === 'CPF') {
+						dados.cpf = document.getElementById('input-cpf').value;
+						if(dados.cpf.length < 11) return alert("Informe um CPF válido.");
+						
+						// Injecta o CPF no campo do JSF para a pesquisa
+						let cpfInput = document.querySelector('[id$="cpfHiddenTotem"]');
+						if(cpfInput) {
+							cpfInput.value = dados.cpf;
+						}
+						
+						// UI Feedback e trigger da pesquisa no Controller
+						document.getElementById('btn-next').innerText = "A pesquisar...";
+						verificarCpfTotemRC(); 
+						return;
+
+					} else if(etapa === 'NOME') {
+						dados.nome = document.getElementById('input-nome').value;
+						if(!dados.nome) return alert("Informe o Nome.");
+						etapa = 'EMPRESA';
+					} else if(etapa === 'EMPRESA') {
+						if(!dados.empresaId) return alert("Por favor, selecione uma empresa.");
+						etapa = 'OBS';
+					} else if(etapa === 'OBS') {
+						dados.obs = document.getElementById('input-obs').value;
+						finalizar();
+						return;
+					}
+					render();
+				}
+
+				// Callback acionado pelo JSF ao terminar a verificação do CPF
+				function tratarRetornoCpf(xhr, status, args) {
+					document.getElementById('btn-next').innerText = "Continuar";
+					
+					if (args && args.existe) {
+						dados.nome = args.nome;
+						document.getElementById('input-nome').value = args.nome;
+						if(args.idEmpresa) {
+							dados.empresaId = args.idEmpresa;
+						}
+					} else {
+						dados.nome = '';
+						document.getElementById('input-nome').value = '';
+					}
+					
+					etapa = 'NOME';
+					render();
+				}
+
+				function voltar() {
+					let i = fluxo.indexOf(etapa);
+					if(i > 0) { 
+						etapa = fluxo[i-1]; 
+						render(); 
+					} else {
+						document.getElementById('input-cpf').value = '';
+					}
+				}
+
+				function render() {
+					document.querySelectorAll('.totem-step').forEach(s => s.classList.remove('active'));
+					document.getElementById('step-' + etapa.toLowerCase()).classList.add('active');
+					
+					document.getElementById('btn-next').style.display = (etapa === 'EMPRESA') ? 'none' : 'block';
+					document.getElementById('btn-next').innerText = (etapa === 'OBS') ? 'Finalizar' : 'Continuar';
+				}
+
+				function finalizar() {
+					let cpfInput = document.querySelector('[id$="cpfHiddenTotem"]');
+					let nomeInput = document.querySelector('[id$="nomeHiddenTotem"]');
+					let empresaInput = document.querySelector('[id$="empresaHiddenTotem"]');
+
+					if (cpfInput && nomeInput && empresaInput) {
+						// Passa os valores coletados pelo JS para o PrimeFaces
+						cpfInput.value = dados.cpf;
+						nomeInput.value = dados.nome;
+						empresaInput.value = dados.empresaId;
+						
+						// Dispara a gravação (salvarAutoatendimento)
+						enviarDadosProJava(); 
+						
+						alert("Aguarde, a processar o seu acesso...");
+
+						// Reset do fluxo para o próximo visitante
+						document.getElementById('input-cpf').value = '';
+						document.getElementById('input-nome').value = '';
+						document.getElementById('input-obs').value = '';
+						dados = { cpf: '', nome: '', empresaId: '', obs: '' };
+						etapa = 'CPF';
+						render();
+					} else {
+						alert("Erro de layout: Campos ocultos do JSF não encontrados na página.");
+						console.error("Inputs hidden do JSF não encontrados no DOM.");
+					}
+				}
+			//]]>
+			</script>
+		</ui:define>
+
+	</ui:composition>
+</body>
+</html>
