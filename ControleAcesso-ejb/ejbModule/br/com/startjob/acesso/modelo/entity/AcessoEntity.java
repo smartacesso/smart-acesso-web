@@ -86,7 +86,15 @@ import br.com.startjob.acesso.modelo.entity.base.ClienteBaseEntity;
 				+ "join obj.pedestre p " + "left join p.empresa e " + "left join p.cargo c "
 				+ "left join p.departamento d " + "left join p.centroCusto cc "
 				+ "where (obj.removido = false or obj.removido is null) "
-				+ "order by obj.data desc")
+				+ "order by obj.data desc"),
+		@NamedQuery(
+			    name = "AcessoEntity.findAcessosHoje",
+			    query = "select obj from AcessoEntity obj "
+			          + "where (obj.removido = false or obj.removido is null) "
+			          + "and obj.data >= :inicioDia "
+			          + "and obj.data < :fimDia "
+			          + "order by obj.id asc"
+			)
 })
 @SuppressWarnings("serial")
 public class AcessoEntity extends ClienteBaseEntity {

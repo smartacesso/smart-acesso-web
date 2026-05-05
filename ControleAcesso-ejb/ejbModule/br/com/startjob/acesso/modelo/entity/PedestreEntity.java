@@ -47,20 +47,24 @@ import br.com.startjob.acesso.modelo.utils.EncryptionUtils;
 
 @Entity
 @Table(name = "TB_PEDESTRE", indexes = { @Index(name = "idx_pedestrian_nome", columnList = "NOME"),
-		@Index(name = "idx_pedestrian_cpf", columnList = "CPF"), @Index(name = "idx_pedestrian_rg", columnList = "RG"),
-		@Index(name = "idx_pedestrian_matricula", columnList = "MATRICULA"),
-		@Index(name = "idx_pedestrian_card_number", columnList = "CARTAO_ACESSO"),
-		@Index(name = "idx_pedestrian_cliente", columnList = "ID_CLIENTE"),
-		@Index(name = "idx_pedestre_cliente_removido_id", columnList = "ID_CLIENTE, REMOVIDO, ID_PEDESTRE"),
-		@Index(name = "idx_pedestre_cliente_removido_id_tipo", columnList = "ID_CLIENTE, REMOVIDO, ID_PEDESTRE, TIPO_PEDESTRE"),
-		@Index(name = "idx_pedestre_tipo", columnList = "ID_CLIENTE, REMOVIDO, TIPO_PEDESTRE"),
-		@Index(name = "idx_pedestre_tipo_removido", columnList = "REMOVIDO, TIPO_PEDESTRE"),
-		@Index(name = "idx_pedestre_empresa", columnList = "ID_EMPRESA"),
-		@Index(name = "idx_pedestre_departamento", columnList = "ID_DEPARTAMENTO"),
-		@Index(name = "idx_pedestre_centrocusto", columnList = "ID_CENTRO_CUSTO"),
-		@Index(name = "idx_pedestre_cargo", columnList = "ID_CARGO"),
-		@Index(name = "idx_pedestre_cliente_nome", columnList = "ID_CLIENTE, NOME"),
-		@Index(name = "idx_pedestre_cliente_cpf", columnList = "ID_CLIENTE, CPF") })
+        @Index(name = "idx_pedestrian_nome", columnList = "NOME"),
+        @Index(name = "idx_pedestrian_cpf", columnList = "CPF"),
+        @Index(name = "idx_pedestrian_rg", columnList = "RG"),
+        @Index(name = "idx_pedestrian_matricula", columnList = "MATRICULA"),
+        @Index(name = "idx_pedestrian_card_number", columnList = "CARTAO_ACESSO"),
+        @Index(name = "idx_pedestrian_cliente", columnList = "ID_CLIENTE"),
+        @Index(name = "idx_pedestre_cliente_removido_id", columnList = "ID_CLIENTE, REMOVIDO, ID_PEDESTRE"),
+        @Index(name = "idx_pedestre_cliente_removido_id_tipo", columnList = "ID_CLIENTE, REMOVIDO, ID_PEDESTRE, TIPO_PEDESTRE"),
+        @Index(name = "idx_pedestre_tipo", columnList = "ID_CLIENTE, REMOVIDO, TIPO_PEDESTRE"),
+        @Index(name = "idx_pedestre_tipo_removido", columnList = "REMOVIDO, TIPO_PEDESTRE"),
+        @Index(name = "idx_pedestre_empresa", columnList = "ID_EMPRESA"),
+        @Index(name = "idx_pedestre_departamento", columnList = "ID_DEPARTAMENTO"),
+        @Index(name = "idx_pedestre_centrocusto", columnList = "ID_CENTRO_CUSTO"),
+        @Index(name = "idx_pedestre_cargo", columnList = "ID_CARGO"),
+        @Index(name = "idx_pedestre_cliente_nome", columnList = "ID_CLIENTE, NOME"),
+        @Index(name = "idx_pedestre_cliente_cpf", columnList = "ID_CLIENTE, CPF"),
+        @Index(name = "idx_pedestre_id_temp_cliente", columnList = "ID_TEMP, ID_CLIENTE")
+})
 @NamedQueries({
 		@NamedQuery(name = "PedestreEntity.findAll", 
 			query = "select obj " + "from PedestreEntity obj "

@@ -657,85 +657,244 @@ public class DesktopApiService extends BaseService {
 		return Response.status(statusResponse).entity("See status code.").build();
 	}
 
+//	@POST
+//	@Path("/uploadVisitantes")
+//	@Produces(MediaType.TEXT_PLAIN)
+//	@Consumes(MediaType.APPLICATION_JSON)
+//	public Response uploadVisitantes(String parans) {
+//		Status statusResponse = Status.OK;
+//
+//		JSONArray jsonArray = new JSONArray(parans);
+//		if (jsonArray.length() <= 0) {
+//			return Response.status(Status.BAD_REQUEST).entity("See status code.").build();
+//		}
+//
+//		try {
+//			for (int i = 0; i < jsonArray.length(); i++) {
+//
+//				JSONObject jsonObject = jsonArray.getJSONObject(i);
+//				PedestreEntity visitante = new PedestreEntity();
+//				try {
+//					if (!jsonObject.getString("id").isEmpty()) {
+//						Long idVisitante = Long.parseLong(jsonObject.getString("id"));
+//
+//						visitante = buscaVisitantePeloId(idVisitante);
+//
+//						setNovosDadosVisitante(jsonObject, visitante);
+//
+//						if (TipoPedestre.VISITANTE.equals(visitante.getTipo())) {
+//							alteraCreditosPedestreRegra(visitante, jsonObject);
+//						}
+//
+//						getEjb("BaseEJB").alteraObjeto(visitante);
+//
+//						visitante = (PedestreEntity) getEjb("PedestreEJB").recuperaObjeto(PedestreEntity.class,
+//								"findByIdComplete", idVisitante);
+//
+//					} else {
+//						Long idCliente = Long.parseLong(jsonObject.getString("idCliente"));
+//						PedestreEntity pedestreExistente = null;
+//
+//						// tenta buscar por visitante já existente
+//						try {
+//							Long idTempVisitante = Long.valueOf(jsonObject.getString("idTemp"));
+//							pedestreExistente = buscaPedestrePorIdTemp(idTempVisitante, idCliente);
+//						} catch (Exception e) {
+//						}
+//
+//						if (pedestreExistente != null) {
+//
+//							visitante = pedestreExistente;
+//
+//						} else {
+//							visitante.setCliente(buscaClientePeloId(idCliente));
+//
+//							setNovosDadosVisitante(jsonObject, visitante);
+//
+//							if (TipoPedestre.VISITANTE.equals(visitante.getTipo())
+//									&& (visitante.getRegras() == null || visitante.getRegras().isEmpty())) {
+//								adicionaRegraParaVisitante(visitante, jsonObject);
+//							}
+//
+//							visitante = (PedestreEntity) getEjb("BaseEJB").gravaObjeto(visitante)[0];
+//
+//						}
+//
+//					}
+//
+//					gravaAcessos(visitante, jsonObject);
+//					gravaBiometrias(visitante, jsonObject);
+//
+//				} catch (Exception e) {
+//					e.printStackTrace();
+//				}
+//			}
+//
+//		} catch (Exception e) {
+//			statusResponse = Status.INTERNAL_SERVER_ERROR;
+//			e.printStackTrace();
+//		}
+//
+//		return Response.status(statusResponse).entity("See status code.").build();
+//	}
+
 	@POST
 	@Path("/uploadVisitantes")
-	@Produces(MediaType.TEXT_PLAIN)
+	@Produces(MediaType.APPLICATION_JSON)
 	@Consumes(MediaType.APPLICATION_JSON)
-	public Response uploadVisitantes(String parans) {
-		Status statusResponse = Status.OK;
+	public Response uploadVisitantes(String params) {
 
-		JSONArray jsonArray = new JSONArray(parans);
-		if (jsonArray.length() <= 0) {
-			return Response.status(Status.BAD_REQUEST).entity("See status code.").build();
-		}
+	    long startTotal = System.currentTimeMillis();
+	    System.out.println("==== INICIO uploadVisitantes ====");
 
-		try {
-			for (int i = 0; i < jsonArray.length(); i++) {
+	    JSONArray jsonArray;
+	    try {
+	        if (params == null || params.isEmpty()) {
+	            return Response.status(Status.BAD_REQUEST).entity("{\"erro\":\"Corpo da requisição vazio\"}").build();
+	        }
+	        jsonArray = new JSONArray(params);
+	    } catch (Exception e) {
+	        System.out.println("Erro crítico ao converter JSON: " + e.getMessage());
+	        return Response.status(Status.BAD_REQUEST).entity("{\"erro\":\"JSON inválido ou malformado\"}").build();
+	    }
 
-				JSONObject jsonObject = jsonArray.getJSONObject(i);
-				PedestreEntity visitante = new PedestreEntity();
-				try {
-					if (!jsonObject.getString("id").isEmpty()) {
-						Long idVisitante = Long.parseLong(jsonObject.getString("id"));
+	    int totalRecebido = jsonArray.length();
+	    System.out.println("Quantidade de registros no pacote: " + totalRecebido);
 
-						visitante = buscaVisitantePeloId(idVisitante);
+	    if (totalRecebido == 0) {
+	        return Response.status(Status.BAD_REQUEST).entity("{\"erro\":\"Lista vazia\"}").build();
+	    }
 
-						setNovosDadosVisitante(jsonObject, visitante);
+	    int processadosComSucesso = 0;
+	    int ignorados = 0;
+	    int erros = 0;
 
-						if (TipoPedestre.VISITANTE.equals(visitante.getTipo())) {
-							alteraCreditosPedestreRegra(visitante, jsonObject);
-						}
+	    for (int i = 0; i < totalRecebido; i++) {
+	        long startItem = System.currentTimeMillis();
+	        JSONObject jsonObject = jsonArray.getJSONObject(i);
 
-						getEjb("BaseEJB").alteraObjeto(visitante);
+	        // ============================================================
+	        // MAPEAMENTO CORRIGIDO (Bate com o getNewVisitanteResponseObj)
+	        // ============================================================
+	        String nome = jsonObject.optString("nome", "").trim(); // Corrigido de "name" para "nome"
+	        String id = jsonObject.optString("id", "").trim();
+	        String idClienteStr = jsonObject.optString("idCliente", "").trim();
+	        String idTempStr = jsonObject.optString("idTemp", "").trim();
 
-						visitante = (PedestreEntity) getEjb("PedestreEJB").recuperaObjeto(PedestreEntity.class,
-								"findByIdComplete", idVisitante);
+	        System.out.println(String.format("\n[Item %d/%d] Nome: [%s] | ID: [%s] | idCliente: [%s]", 
+	                (i + 1), totalRecebido, nome, id, idClienteStr));
 
-					} else {
-						Long idCliente = Long.parseLong(jsonObject.getString("idCliente"));
-						PedestreEntity pedestreExistente = null;
+	        // Validação mínima para não processar "lixo"
+	        if (nome.isEmpty()) {
+	            System.out.println(">> Ignorado: Registro sem identificação (nome/id/idTemp vazios)");
+	            ignorados++;
+	            continue;
+	        }
 
-						// tenta buscar por visitante já existente
-						try {
-							Long idTempVisitante = Long.valueOf(jsonObject.getString("idTemp"));
-							pedestreExistente = buscaPedestrePorIdTemp(idTempVisitante, idCliente);
-						} catch (Exception e) {
-						}
+	        try {
+	            PedestreEntity visitante = null;
 
-						if (pedestreExistente != null) {
+	            // ===============================
+	            // LÓGICA DE ATUALIZAÇÃO (POR ID)
+	            // ===============================
+	            if (!id.isEmpty() && !id.equals("0")) {
+	                Long idVisitante = Long.parseLong(id);
+	                System.out.println("Ação: Atualizando ID " + idVisitante);
+	                
+	                visitante = buscaVisitantePeloId(idVisitante);
+	                
+	                if (visitante != null) {
+	                    setNovosDadosVisitante(jsonObject, visitante);
+	                    
+	                    if (TipoPedestre.VISITANTE.equals(visitante.getTipo())) {
+	                        alteraCreditosPedestreRegra(visitante, jsonObject);
+	                    }
+	                    
+	                    getEjb("BaseEJB").alteraObjeto(visitante);
+	                    
+	                    // Recarrega para garantir integridade
+	                    visitante = (PedestreEntity) getEjb("PedestreEJB")
+	                            .recuperaObjeto(PedestreEntity.class, "findByIdComplete", idVisitante);
+	                } else {
+	                    System.out.println("Aviso: ID informado mas não encontrado no banco. Tentando criar via idTemp.");
+	                }
+	            }
 
-							visitante = pedestreExistente;
+	            // ===============================
+	            // LÓGICA DE CRIAÇÃO / ID TEMP
+	            // ===============================
+	            if (visitante == null) {
+	                if (idClienteStr.isEmpty()) {
+	                    System.out.println(">> Erro: idCliente ausente para novo registro. Pulando.");
+	                    erros++;
+	                    continue;
+	                }
 
-						} else {
-							visitante.setCliente(buscaClientePeloId(idCliente));
+	                Long idCliente = Long.parseLong(idClienteStr);
+	                PedestreEntity pedestreExistente = null;
 
-							setNovosDadosVisitante(jsonObject, visitante);
+	                if (!idTempStr.isEmpty()) {
+	                    try {
+	                        Long idTemp = Long.parseLong(idTempStr);
+	                        pedestreExistente = buscaPedestrePorIdTemp(idTemp, idCliente);
+	                    } catch (Exception e) {
+	                        System.out.println("Erro ao converter idTemp: " + idTempStr);
+	                    }
+	                }
 
-							if (TipoPedestre.VISITANTE.equals(visitante.getTipo())
-									&& (visitante.getRegras() == null || visitante.getRegras().isEmpty())) {
-								adicionaRegraParaVisitante(visitante, jsonObject);
-							}
+	                if (pedestreExistente != null) {
+	                    System.out.println("Ação: Localizado por idTemp. Usando existente.");
+	                    visitante = pedestreExistente;
+	                } else {
+	                    System.out.println("Ação: Criando novo PedestreEntity");
+	                    visitante = new PedestreEntity();
+	                    visitante.setCliente(buscaClientePeloId(idCliente));
+	                    setNovosDadosVisitante(jsonObject, visitante);
 
-							visitante = (PedestreEntity) getEjb("BaseEJB").gravaObjeto(visitante)[0];
+	                    if (TipoPedestre.VISITANTE.equals(visitante.getTipo())
+	                            && (visitante.getRegras() == null || visitante.getRegras().isEmpty())) {
+	                        adicionaRegraParaVisitante(visitante, jsonObject);
+	                    }
 
-						}
+	                    visitante = (PedestreEntity) getEjb("BaseEJB").gravaObjeto(visitante)[0];
+	                }
+	            }
 
-					}
+	            // ===============================
+	            // ACESSOS E BIOMETRIAS (Onde costuma travar)
+	            // ===============================
+	            if (visitante != null) {
+	                gravaAcessos(visitante, jsonObject);
+	                gravaBiometrias(visitante, jsonObject);
+	                processadosComSucesso++;
+	            }
 
-					gravaAcessos(visitante, jsonObject);
-					gravaBiometrias(visitante, jsonObject);
+	            long tempoItem = System.currentTimeMillis() - startItem;
+	            if (tempoItem > 1000) { 
+	                System.out.println("!!! Alerta de Lentidão: Item levou " + tempoItem + "ms");
+	            }
 
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
+	        } catch (Exception e) {
+	            erros++;
+	            System.err.println("ERRO PROCESSANDO ITEM " + i + ": " + e.getMessage());
+	            e.printStackTrace(); // Log completo para erro silencioso virar visível
+	        }
+	    }
 
-		} catch (Exception e) {
-			statusResponse = Status.INTERNAL_SERVER_ERROR;
-			e.printStackTrace();
-		}
+	    long tempoTotal = System.currentTimeMillis() - startTotal;
+	    System.out.println("\n==== RESUMO FINAL ====");
+	    System.out.println("Sucesso: " + processadosComSucesso);
+	    System.out.println("Ignorados: " + ignorados);
+	    System.out.println("Erros: " + erros);
+	    System.out.println("Tempo Total: " + tempoTotal + "ms");
 
-		return Response.status(statusResponse).entity("See status code.").build();
+	    // Retorno JSON para o cliente saber o que aconteceu
+	    String responseJson = String.format(
+	        "{\"status\":\"finalizado\",\"processados\":%d,\"ignorados\":%d,\"erros\":%d,\"tempoTotalMs\":%d}",
+	        processadosComSucesso, ignorados, erros, tempoTotal
+	    );
+
+	    return Response.ok(responseJson).build();
 	}
 	
 	@POST

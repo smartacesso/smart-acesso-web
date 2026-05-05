@@ -332,6 +332,12 @@ public class MenuController extends BaseController {
 			cadastros.getElements().add(cadastroCorrespondencia);
 		}
 		
+		DefaultMenuItem caadastroAuto = DefaultMenuItem.builder()
+				.value("Cadastro autoatendimento")
+				.url(BaseConstant.URL_APLICACAO + "/paginas/sistema/pedestres/cadastroAuto.xhtml")
+				.styleClass("ui-simple-menu").build();
+		cadastros.getElements().add(caadastroAuto);
+		
 		// para admins ou gerentes
 		if (PerfilAcesso.ADMINISTRADOR.equals(usuarioLogado.getPerfil())
 				|| PerfilAcesso.GERENTE.equals(usuarioLogado.getPerfil())) {

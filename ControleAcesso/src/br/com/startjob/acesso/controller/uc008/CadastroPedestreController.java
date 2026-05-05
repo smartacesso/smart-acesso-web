@@ -745,6 +745,70 @@ public class CadastroPedestreController extends CadastroBaseController {
 
 		return retorno;
 	}
+	
+	/**
+	 * Método de salvamento otimizado exclusivo para o Totem de Autoatendimento
+	 */
+	public void salvarAutoatendimento() {
+		try {
+			PedestreEntity pedestre = getPedestreAtual();
+
+			// 1. Configurações padrão do Totem
+			pedestre.setTipo(TipoPedestre.VISITANTE);
+//			pedestre.setAutoAtendimento(true);
+//			pedestre.setAutoAtendimentoAt(new Date());
+			pedestre.setCliente(getUsuarioLogado().getCliente());
+			pedestre.setUsuario(getUsuarioLogado());
+
+			// 2. Validações básicas de segurança (evita salvar se o JS falhar)
+			if (pedestre.getCpf() == null || pedestre.getNome() == null || pedestre.getEmpresa() == null
+					|| pedestre.getEmpresa().getId() == null) {
+				mensagemErro("Atenção", "Dados obrigatórios não preenchidos no Totem.");
+				return;
+			}
+
+			// 3. Verifica se o CPF já existe para atualizar em vez de duplicar
+			PedestreEntity pedestreExistente = buscaPedestrePeloCpf(pedestre.getCpf().replaceAll("\\D", ""),
+					pedestre.getCliente().getId());
+			if (pedestreExistente != null) {
+				// Transfere o ID e dados antigos para atualizar o registo
+				pedestre.setId(pedestreExistente.getId());
+				pedestre.setCodigoCartaoAcesso(pedestreExistente.getCodigoCartaoAcesso());
+				// Pode copiar mais dados se necessário...
+			}
+
+			// 4. Aplica a regra de acesso padrão se for um visitante novo
+			if (pedestre.getRegras() == null || pedestre.getRegras().isEmpty()) {
+				PedestreRegraEntity pedestreRegra = buscaPedestreRegraPadraoVisitante();
+				pedestreRegra.setPedestre(pedestre);
+				pedestre.setRegras(Arrays.asList(pedestreRegra));
+			}
+
+			// 5. Gera cartão de acesso caso não tenha
+			if (pedestre.getCodigoCartaoAcesso() == null || pedestre.getCodigoCartaoAcesso().trim().isEmpty()) {
+				pedestre.setCodigoCartaoAcesso(gerarCartao(pedestre));
+			}
+
+			// 6. Prepara as listas e grava na Base de Dados
+			validaListasPedestre(pedestre);
+
+			String retornoStatus = super.salvar(); // Chama a persistência base do EJB
+
+			if ("ok".equals(retornoStatus)) {
+				// 7. LIMPEZA DA SESSÃO: Essencial para o próximo utilizador do Totem
+				setEntidade(new PedestreEntity());
+				iniciaVariaveisNovoPedestre(getPedestreAtual());
+
+				System.out.println("Autoatendimento salvo com sucesso: " + pedestre.getNome());
+			} else {
+				mensagemErro("Erro", "Falha ao gravar no banco de dados.");
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			mensagemFatal("Erro", "Erro interno no servidor ao processar autoatendimento.");
+		}
+	}
 
 	private boolean verificaCamposRepetidos() {
 		boolean valido = true;
@@ -2454,6 +2518,36 @@ public class CadastroPedestreController extends CadastroBaseController {
 	        return cal.getTime();
 	    }
 	    return null;
+	}
+	
+	/**
+	 * Consulta o CPF no banco de dados durante o fluxo do Totem
+	 * e devolve os dados para preenchimento automático na tela.
+	 */
+	public void verificarCpfTotem() {
+		try {
+			String cpf = getPedestreAtual().getCpf();
+			
+			if (cpf != null && !cpf.isEmpty()) {
+				String cpfLimpo = cpf.replaceAll("\\D", "");
+				PedestreEntity encontrado = buscaPedestrePeloCpf(cpfLimpo, getUsuarioLogado().getCliente().getId());
+
+				if (encontrado != null) {
+					// Devolve os parâmetros para o JavaScript
+					PrimeFaces.current().ajax().addCallbackParam("existe", true);
+					PrimeFaces.current().ajax().addCallbackParam("nome", encontrado.getNome());
+					
+					if (encontrado.getEmpresa() != null && encontrado.getEmpresa().getId() != null) {
+						PrimeFaces.current().ajax().addCallbackParam("idEmpresa", encontrado.getEmpresa().getId());
+					}
+				} else {
+					PrimeFaces.current().ajax().addCallbackParam("existe", false);
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			PrimeFaces.current().ajax().addCallbackParam("existe", false);
+		}
 	}
 	
 	public boolean isPedestre() {

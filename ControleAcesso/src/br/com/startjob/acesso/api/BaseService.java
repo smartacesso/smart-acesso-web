@@ -62,12 +62,25 @@ public class BaseService {
 	 * @param name - nome do EJB
 	 * @return instancia do EJB
 	 */
-	protected BaseEJBRemote getEjb(String name) throws Exception{
+//	protected BaseEJBRemote getEjb(String name) throws Exception{
+//
+//		InitialContext ctx = new InitialContext();
+//		return (BaseEJBRemote) ctx.lookup("java:global" +
+//				"/ControleAcesso-ear/ControleAcesso-ejb/"+name);
+//		
+//	}
+	
+	protected BaseEJBRemote getEjb(String name) throws Exception {
 
-		InitialContext ctx = new InitialContext();
-		return (BaseEJBRemote) ctx.lookup("java:global" +
-				"/ControleAcesso-ear/ControleAcesso-ejb/"+name);
-		
+	    InitialContext ctx = new InitialContext();
+
+	    return (BaseEJBRemote) ctx.lookup(
+	        "java:global/ControleAcesso-ear/ControleAcesso-ejb/"
+	        + name
+	        + "!br.com.startjob.acesso.modelo.ejb."
+	        + name
+	        + "Remote"
+	    );
 	}
 	
 	/**
