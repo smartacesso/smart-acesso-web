@@ -63,7 +63,8 @@ import br.com.startjob.acesso.modelo.utils.EncryptionUtils;
         @Index(name = "idx_pedestre_cargo", columnList = "ID_CARGO"),
         @Index(name = "idx_pedestre_cliente_nome", columnList = "ID_CLIENTE, NOME"),
         @Index(name = "idx_pedestre_cliente_cpf", columnList = "ID_CLIENTE, CPF"),
-        @Index(name = "idx_pedestre_id_temp_cliente", columnList = "ID_TEMP, ID_CLIENTE")
+        @Index(name = "idx_pedestre_id_temp_cliente", columnList = "ID_TEMP, ID_CLIENTE"),
+		@Index(name = "idx_pedestre_login_cliente_removido", columnList = "LOGIN, ID_CLIENTE, REMOVIDO")
 })
 @NamedQueries({
 		@NamedQuery(name = "PedestreEntity.findAll", 
@@ -203,7 +204,16 @@ import br.com.startjob.acesso.modelo.utils.EncryptionUtils;
 			          + "where UPPER(obj.nome) LIKE UPPER(:NOME) "
 			          + "and obj.cliente.id = :ID_CLIENTE " 
 			          + "and (obj.removido = false or obj.removido is null) "
-			          + "order by obj.id desc")
+			          + "order by obj.id desc"),
+		@NamedQuery(name = "PedestreEntity.findByLoginOtimizado",
+			    query = "select new br.com.startjob.acesso.modelo.entity.PedestreEntity(" +
+			            " obj.id, obj.login, obj.senha ) " +
+			            "from PedestreEntity obj " +
+			            "join obj.cliente c " +
+			            "where obj.removido = null " +
+			            "and c.nomeUnidadeOrganizacional = :UNIDADE_ORGANIZACIONAL " +
+			            "and obj.login = :LOGIN"
+			)
 })
 
 @SuppressWarnings("serial")
@@ -438,6 +448,12 @@ public class PedestreEntity extends ClienteBaseEntity {
 	
 	public PedestreEntity() {
 
+	}
+	
+	public PedestreEntity(Long id, String login, String senha) {
+		this.id = id;
+	    this.login = login;
+	    this.senha = senha;
 	}
 	
 	// CONSTRUTOR OTIMIZADO PARA A TELA (Substitui o DTO)

@@ -377,4 +377,6 @@ public interface BaseEJBRemote {
 
 	public void enviaNotificacao(List<AcessoEntity> logs) throws Exception;
 	
+	public int contarAcessosHoje(Date inicioDia, Date fimDia, Long clienteId);
+	
 }

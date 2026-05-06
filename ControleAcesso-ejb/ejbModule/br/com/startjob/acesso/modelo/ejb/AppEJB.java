@@ -14,36 +14,37 @@ import br.com.startjob.acesso.modelo.entity.PedestreEntity;
 public class AppEJB extends BaseEJB implements AppEJBRemote {
 
 	@Override
-	public PedestreEntity buscarPorLoginECliente(String nome, String cliente) {
+	public PedestreEntity buscarPorLoginECliente(String login, String cliente) {
+
+	    long inicio = System.nanoTime();
+	    
+	    System.out.println("cliente recebido: [" + cliente + "]");
+	    System.out.println("login recebido: [" + login + "]");
 
 	    Map<String, Object> args = new HashMap<>();
-	    args.put("LOGIN", nome);
-	    args.put("UNIDADE_ORGANIZACIONAL", cliente);
+	    args.put("LOGIN", login.trim().toLowerCase());
+	    args.put("UNIDADE_ORGANIZACIONAL", cliente.trim().toLowerCase());
 
 	    try {
 	        @SuppressWarnings("unchecked")
-	        List<PedestreEntity> pedestreEncontrado =
+	        List<PedestreEntity> resultado =
 	                (List<PedestreEntity>) this.pesquisaArgFixos(
-	                        PedestreEntity.class, "findByLogin", args
+	                        PedestreEntity.class, "findByLoginOtimizado", args
 	                );
 
-	        if (pedestreEncontrado == null || pedestreEncontrado.isEmpty()) {
+	        if (resultado == null || resultado.isEmpty()) {
 	            return null;
 	        }
 
-	        if (pedestreEncontrado.size() > 1) {
-	            // ⚠️ Ideal logar isso (dados duplicados)
-	            System.err.println("Mais de um usuário encontrado para login: " + nome);
-	        }
-
-	        return pedestreEncontrado.get(0);
+	        return resultado.get(0);
 
 	    } catch (Exception e) {
-	        e.printStackTrace();
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+	        long fim = System.nanoTime();
+	        System.out.println("Tempo de busca (ms): " + (fim - inicio) / 1_000_000);
 	    }
-
-	    return null;
+		return null;
 	}
-	
-	
 }

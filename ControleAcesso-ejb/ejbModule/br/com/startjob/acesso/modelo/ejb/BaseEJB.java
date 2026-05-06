@@ -2264,4 +2264,23 @@ public class BaseEJB implements BaseEJBRemote {
 		q.executeUpdate();
 
 	}
+	
+	public int contarAcessosHoje(Date inicioDia, Date fimDia, Long clienteId) {
+
+	    String jpql = "select count(obj.id) " +
+	                  "from AcessoEntity obj " +
+	                  "where (obj.removido = false or obj.removido is null) " +
+	                  "and obj.data >= :inicioDia " +
+	                  "and obj.data < :fimDia " +
+	                  "and obj.pedestre is not null " +
+	                  "and obj.cliente.id = :clienteId";
+
+	    Long result = (Long) getEntityManager().createQuery(jpql)
+	            .setParameter("inicioDia", inicioDia)
+	            .setParameter("fimDia", fimDia)
+	            .setParameter("clienteId", clienteId)
+	            .getSingleResult();
+
+	    return result != null ? result.intValue() : 0;
+	}
 }

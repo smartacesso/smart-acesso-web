@@ -1,14 +1,15 @@
 package br.com.startjob.acesso.to.app;
 
 public class LoginRequest {
-    private String nome;
+    private String login;
     private String senha;
     private String cliente;
-	public String getNome() {
-		return nome;
+    
+	public String getLogin() {
+		return login;
 	}
-	public void setNome(String nome) {
-		this.nome = nome;
+	public void setLogin(String login) {
+		this.login = login;
 	}
 	public String getSenha() {
 		return senha;
@@ -23,5 +24,4 @@ public class LoginRequest {
 		this.cliente = cliente;
 	}
 
-    // getters e setters
 }

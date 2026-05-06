@@ -40,11 +40,14 @@ public class AppRequestService extends BaseService {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response login(LoginRequest request) {
+		
+		System.out.println("Validando login");
+		
 
 	    try {
 
 	        if (request == null ||
-	            request.getNome() == null ||
+	            request.getLogin() == null ||
 	            request.getSenha() == null ||
 	            request.getCliente() == null) {
 
@@ -52,9 +55,11 @@ public class AppRequestService extends BaseService {
 	                    .entity("Parâmetros inválidos")
 	                    .build();
 	        }
+	        
+	        System.out.println("parametros login : " +  request.getLogin()+ " , cliente : " +  request.getCliente());
 
 	        PedestreEntity usuario = appEjb.buscarPorLoginECliente(
-	                request.getNome(),
+	                request.getLogin(),
 	                request.getCliente()
 	        );
 
@@ -63,6 +68,8 @@ public class AppRequestService extends BaseService {
 	                    .entity("Usuário ou cliente inválido")
 	                    .build();
 	        }
+	        
+	        System.out.println("usuario encontrado");
 
 	        // ⚠️ ideal: usar BCrypt
 	        if (!usuario.getSenha().equals(request.getSenha())) {
@@ -70,6 +77,7 @@ public class AppRequestService extends BaseService {
 	                    .entity("Senha inválida")
 	                    .build();
 	        }
+	        System.out.println("senha valida");
 
 	        String token = JwtUtil.gerarToken(
 	                usuario.getId(),
@@ -79,7 +87,7 @@ public class AppRequestService extends BaseService {
 	        // montar resposta
 	        UsuarioDTO userDto = new UsuarioDTO();
 	        userDto.setId(usuario.getId());
-	        userDto.setNome(usuario.getNome());
+	        userDto.setNome(usuario.getLogin());
 	        userDto.setCliente(request.getCliente());
 
 	        LoginResponse response = new LoginResponse();

@@ -2,8 +2,10 @@ package br.com.startjob.acesso.controller.uc002;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,9 +48,6 @@ public class PrincipalController extends BaseController {
 				
 				LocalDate hoje = LocalDate.now();
 
-				LocalDateTime inicio = hoje.atStartOfDay();
-				LocalDateTime fim = hoje.plusDays(1).atStartOfDay();
-				
 				Map<String, Object> argBase = new HashMap<String, Object>();
 				argBase.put("cliente.id", usuarioLogado.getCliente().getId());
 				argBase.put("dataCriacao_ini_data", DateUtils.getInstance().ajustaDataIni(Calendar.getInstance()).getTime());
@@ -56,16 +55,27 @@ public class PrincipalController extends BaseController {
 
 				
 				//busca quantidade de acessos hoje
-				Map<String, Object> argAcessos = new HashMap<String, Object>();
-				argAcessos.putAll(argBase);
-				argAcessos.put("pedestre_dif", "null");
-				argAcessos.put("inicioDia", inicio);
-				argAcessos.put("fimDia", fim);
+//				Map<String, Object> argAcessos = new HashMap<String, Object>();
+//				argAcessos.put("cliente.id", usuarioLogado.getCliente().getId());
+//				argAcessos.put("pedestre_dif", "null");
+//				argAcessos.put("inicioDia", inicio);
+//				argAcessos.put("fimDia", fim);
+//				
+//				Integer qtdAcessos = baseEJB
+//						.pesquisaSimplesCount(AcessoEntity.class, "findAcessosHoje", argAcessos);
+//				if(qtdAcessos != null)
+//					acessos = qtdAcessos + "";
 				
-				Integer qtdAcessos = baseEJB
-						.pesquisaSimplesCount(AcessoEntity.class, "findAcessosHoje", argAcessos);
+				LocalDateTime inicio = hoje.atStartOfDay();
+				LocalDateTime fim = hoje.plusDays(1).atStartOfDay();
+
+				Date inicioDate = Date.from(inicio.atZone(ZoneId.systemDefault()).toInstant());
+				Date fimDate = Date.from(fim.atZone(ZoneId.systemDefault()).toInstant());
+
+				Integer qtdAcessos = baseEJB.contarAcessosHoje(inicioDate, fimDate, usuarioLogado.getCliente().getId());
 				if(qtdAcessos != null)
 					acessos = qtdAcessos + "";
+				
 				
 				//busca quantidade de visitantes hoje
 				Map<String, Object> argVisitante = new HashMap<String, Object>();

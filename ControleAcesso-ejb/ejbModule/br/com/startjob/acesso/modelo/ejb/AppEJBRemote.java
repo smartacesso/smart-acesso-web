@@ -7,6 +7,6 @@ import br.com.startjob.acesso.modelo.entity.PedestreEntity;
 @Remote
 public interface AppEJBRemote extends BaseEJBRemote {
 
-	PedestreEntity buscarPorLoginECliente(String nome, String cliente);
+	PedestreEntity buscarPorLoginECliente(String login, String cliente);
 
 }
