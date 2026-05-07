@@ -92,6 +92,15 @@ public class CorrespondenciaEntity extends BaseEntity {
 
     // Gerar getters e setters para esses dois campos...
 
+ // Adicione na CorrespondenciaEntity
+    public CorrespondenciaEntity(Long id, Date dataRecebimento, String tipo, String codigoRastreio, String confirmaRetirada) {
+        this.id = id;
+        this.dataRecebimento = dataRecebimento;
+        this.tipo = tipo;
+        this.codigoRastreio = codigoRastreio;
+        this.confirmaRetirada = confirmaRetirada;
+    }
+    
 	public Long getId() {
 		return id;
 	}
