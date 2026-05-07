@@ -32,69 +32,80 @@ import br.com.startjob.acesso.modelo.entity.base.ClienteBaseEntity;
 })
 @NamedQueries({
 		@NamedQuery(name = "AcessoEntity.findAll", query = "select obj " + "from AcessoEntity obj "
-				+ "where (obj.removido = false or obj.removido is null) " + "order by obj.id asc"),
-		@NamedQuery(name = "AcessoEntity.findAllComPedestre", query = "select obj " + "from AcessoEntity obj "
-				+ "join fetch obj.pedestre p " + "where (obj.removido = false or obj.removido is null) "
-				+ "order by obj.data desc"),
-		@NamedQuery(name = "AcessoEntity.findById", query = "select obj from AcessoEntity obj "
-				+ "where obj.id = :ID order by obj.id asc"),
-		@NamedQuery(name = "AcessoEntity.findAllComPedestreEmpresa", query = "select obj " + "from AcessoEntity obj "
-				+ "join fetch obj.pedestre p " + "left join fetch p.empresa "
-				+ "where (obj.removido = false or obj.removido is null) " + "order by obj.data desc"),
-		@NamedQuery(name = "AcessoEntity.findAllComPedestreEmpresaECargo", query = "select obj "
-				+ "from AcessoEntity obj " + "join fetch obj.pedestre p " + "left join fetch p.empresa "
-				+ "left join fetch p.cargo " + "where (obj.removido = false or obj.removido is null) "
-				+ "order by obj.data desc"),
-		@NamedQuery(name = "AcessoEntity.findAllComPedestreNulo", query = "select obj " + "from AcessoEntity obj "
-				+ "where obj.pedestre = null " + "and (obj.removido = false or obj.removido is null) "
-				+ "order by obj.data desc"),
-		@NamedQuery(name = "AcessoEntity.findOcupacaoPorHora", query = "select new br.com.startjob.acesso.modelo.entity.AcessoEntity(hour(obj.data), count(obj.id)) "
-				+ "from AcessoEntity obj " + "where obj.sentido = 'ENTRADA' " + "  and obj.tipo <> 'INATIVO' "
-				+ "  and obj.cliente.id = :ID_CLIENTE " + "  and date(obj.data) = :DATA "
-				+ "  and (lower(obj.pedestre.nome) like lower(concat('%', :NOME_PEDESTRE, '%')) or :NOME_PEDESTRE = null) "
-				+ "  and (obj.pedestre.empresa.id = :ID_EMPRESA or :ID_EMPRESA = null) "
-				+ "  and (obj.equipamento = :EQUIPAMENTO or :EQUIPAMENTO = null) " + "group by hour(obj.data) "),
-		@NamedQuery(name = "AcessoEntity.findOcupacaoPorHoraSqlServer", query = "select new br.com.startjob.acesso.modelo.entity.AcessoEntity(hour(obj.data), count(obj.id)) "
-				+ "from AcessoEntity obj " + "where obj.sentido = 'ENTRADA' " + "  and obj.tipo <> 'INATIVO' "
-				+ "  and obj.cliente.id = :ID_CLIENTE "
-				+ "  and format(obj.data, 'YYYY-MM-DD') = format(:DATA, 'YYYY-MM-DD') "
-				+ "  and (lower(obj.pedestre.nome) like lower(:NOME_PEDESTRE) or :NOME_PEDESTRE = null) "
-				+ "  and (obj.pedestre.empresa.id = :ID_EMPRESA or :ID_EMPRESA = null) "
-				+ "  and (obj.equipamento = :EQUIPAMENTO or :EQUIPAMENTO = null) " + "group by hour(obj.data) "),
-		@NamedQuery(name = "AcessoEntity.findAllPedestresSemSaida", query = "select obj " + "from AcessoEntity obj "
-				+ "join fetch obj.pedestre p " + "left join fetch p.empresa e " + "where p.id != null "
-				+ "	and obj.sentido = 'ENTRADA' " + "	and obj.tipo = 'ATIVO' " + "	and (select count(saida.id) "
-				+ "		from AcessoEntity saida " + "		join saida.pedestre pe " + "		where pe.id = p.id "
-				+ "			and saida.sentido = 'SAIDA' " + "			and saida.data > obj.data) = 0 "
-				+ "order by obj.data desc "),
-		@NamedQuery(name = "AcessoEntity.findLastAccessIndefinidoByIdPedestre", query = "select new br.com.startjob.acesso.modelo.entity.AcessoEntity(obj.id, obj.data) "
-				+ "from AcessoEntity obj " + "	join obj.pedestre p " + "where p.id = :ID_PEDESTRE "
-				+ "and obj.tipo = 'INDEFINIDO' " + "order by obj.id desc"),
-		@NamedQuery(name = "AcessoEntity.findLastAccessByIdAndCurrentLastAccess", query = "select new br.com.startjob.acesso.modelo.entity.AcessoEntity(obj.id) "
-				+ "from AcessoEntity obj " + "	join obj.pedestre p " + "where p.id = :ID_PEDESTRE "
-				+ "and obj.data = :DATA "),
-		@NamedQuery(name = "AcessoEntity.findAllByIdPedestre", query = "select obj from AcessoEntity obj "
-				+ "where obj.pedestre.id = :ID_PEDESTRE " + "AND (:DATA_INICIO IS NULL OR obj.data >= :DATA_INICIO) "
-				+ "AND (:DATA_FIM IS NULL OR obj.data <= :DATA_FIM) "
-				+ "and (obj.removido = false or obj.removido is null) " + "order by obj.data desc"),
-		@NamedQuery(name = "AcessoEntity.findAllByIdPedestreSemData", query = "select obj from AcessoEntity obj "
-				+ "where obj.pedestre.id = :ID_PEDESTRE " + "and (obj.removido = false or obj.removido is null) "
-				+ "order by obj.data desc"),
-		@NamedQuery(name = "AcessoEntity.findAllComPedestreEmpresaECargoOtimizado", query = "select new br.com.startjob.acesso.modelo.entity.AcessoEntity("
-				+ "p.id, p.matricula, obj.cartaoAcessoRecebido, p.nome, e.nome, c.nome, "
-				+ "obj.data, obj.equipamento, obj.tipo, obj.sentido) " + "from AcessoEntity obj "
-				+ "join obj.pedestre p " + "left join p.empresa e " + "left join p.cargo c "
-				+ "left join p.departamento d " + "left join p.centroCusto cc "
-				+ "where (obj.removido = false or obj.removido is null) "
-				+ "order by obj.data desc"),
-		@NamedQuery(
-			    name = "AcessoEntity.findAcessosHoje",
+						+ "where (obj.removido = false or obj.removido is null) " + "order by obj.id asc"),
+		@NamedQuery(name = "AcessoEntity.findAllComPedestre", 
+				query = "select obj " + "from AcessoEntity obj "
+						+ "join fetch obj.pedestre p " + "where (obj.removido = false or obj.removido is null) "
+						+ "order by obj.data desc"),
+		@NamedQuery(name = "AcessoEntity.findById", 
+				query = "select obj from AcessoEntity obj "
+						+ "where obj.id = :ID order by obj.id asc"),
+		@NamedQuery(name = "AcessoEntity.findAllComPedestreEmpresa", 
+				query = "select obj " + "from AcessoEntity obj "
+						+ "join fetch obj.pedestre p " + "left join fetch p.empresa "
+						+ "where (obj.removido = false or obj.removido is null) " + "order by obj.data desc"),
+		@NamedQuery(name = "AcessoEntity.findAllComPedestreEmpresaECargo", 
+				query = "select obj "
+						+ "from AcessoEntity obj " + "join fetch obj.pedestre p " + "left join fetch p.empresa "
+						+ "left join fetch p.cargo " + "where (obj.removido = false or obj.removido is null) "
+						+ "order by obj.data desc"),
+		@NamedQuery(name = "AcessoEntity.findAllComPedestreNulo", 
+				query = "select obj " + "from AcessoEntity obj "
+						+ "where obj.pedestre = null " + "and (obj.removido = false or obj.removido is null) "
+						+ "order by obj.data desc"),
+		@NamedQuery(name = "AcessoEntity.findOcupacaoPorHora", 
+				query = "select new br.com.startjob.acesso.modelo.entity.AcessoEntity(hour(obj.data), count(obj.id)) "
+						+ "from AcessoEntity obj " + "where obj.sentido = 'ENTRADA' " + "  and obj.tipo <> 'INATIVO' "
+						+ "  and obj.cliente.id = :ID_CLIENTE " + "  and date(obj.data) = :DATA "
+						+ "  and (lower(obj.pedestre.nome) like lower(concat('%', :NOME_PEDESTRE, '%')) or :NOME_PEDESTRE = null) "
+						+ "  and (obj.pedestre.empresa.id = :ID_EMPRESA or :ID_EMPRESA = null) "
+						+ "  and (obj.equipamento = :EQUIPAMENTO or :EQUIPAMENTO = null) " + "group by hour(obj.data) "),
+		@NamedQuery(name = "AcessoEntity.findOcupacaoPorHoraSqlServer", 
+				query = "select new br.com.startjob.acesso.modelo.entity.AcessoEntity(hour(obj.data), count(obj.id)) "
+						+ "from AcessoEntity obj " + "where obj.sentido = 'ENTRADA' " + "  and obj.tipo <> 'INATIVO' "
+						+ "  and obj.cliente.id = :ID_CLIENTE "
+						+ "  and format(obj.data, 'YYYY-MM-DD') = format(:DATA, 'YYYY-MM-DD') "
+						+ "  and (lower(obj.pedestre.nome) like lower(:NOME_PEDESTRE) or :NOME_PEDESTRE = null) "
+						+ "  and (obj.pedestre.empresa.id = :ID_EMPRESA or :ID_EMPRESA = null) "
+						+ "  and (obj.equipamento = :EQUIPAMENTO or :EQUIPAMENTO = null) " + "group by hour(obj.data) "),
+		@NamedQuery(name = "AcessoEntity.findAllPedestresSemSaida", 
+				query = "select obj " + "from AcessoEntity obj "
+						+ "join fetch obj.pedestre p " + "left join fetch p.empresa e " + "where p.id != null "
+						+ "	and obj.sentido = 'ENTRADA' " + "	and obj.tipo = 'ATIVO' " + "	and (select count(saida.id) "
+						+ "		from AcessoEntity saida " + "		join saida.pedestre pe " + "		where pe.id = p.id "
+						+ "			and saida.sentido = 'SAIDA' " + "			and saida.data > obj.data) = 0 "
+						+ "order by obj.data desc "),
+		@NamedQuery(name = "AcessoEntity.findLastAccessIndefinidoByIdPedestre", 
+				query = "select new br.com.startjob.acesso.modelo.entity.AcessoEntity(obj.id, obj.data) "
+						+ "from AcessoEntity obj " + "	join obj.pedestre p " + "where p.id = :ID_PEDESTRE "
+						+ "and obj.tipo = 'INDEFINIDO' " + "order by obj.id desc"),
+		@NamedQuery(name = "AcessoEntity.findLastAccessByIdAndCurrentLastAccess", 
+				query = "select new br.com.startjob.acesso.modelo.entity.AcessoEntity(obj.id) "
+						+ "from AcessoEntity obj " + "	join obj.pedestre p " + "where p.id = :ID_PEDESTRE "
+						+ "and obj.data = :DATA "),
+		@NamedQuery(name = "AcessoEntity.findAllByIdPedestre", 
+				query = "select obj from AcessoEntity obj "
+						+ "where obj.pedestre.id = :ID_PEDESTRE " + "AND (:DATA_INICIO IS NULL OR obj.data >= :DATA_INICIO) "
+						+ "AND (:DATA_FIM IS NULL OR obj.data <= :DATA_FIM) "
+						+ "and (obj.removido = false or obj.removido is null) " + "order by obj.data desc"),
+		@NamedQuery(name = "AcessoEntity.findAllByIdPedestreSemData", 
+				query = "select obj from AcessoEntity obj "
+						+ "where obj.pedestre.id = :ID_PEDESTRE " + "and (obj.removido = false or obj.removido is null) "
+						+ "order by obj.data desc"),
+		@NamedQuery(name = "AcessoEntity.findAllComPedestreEmpresaECargoOtimizado", 
+				query = "select new br.com.startjob.acesso.modelo.entity.AcessoEntity("
+						+ "p.id, p.matricula, obj.cartaoAcessoRecebido, p.nome, e.nome, c.nome, "
+						+ "obj.data, obj.equipamento, obj.tipo, obj.sentido) " + "from AcessoEntity obj "
+						+ "join obj.pedestre p " + "left join p.empresa e " + "left join p.cargo c "
+						+ "left join p.departamento d " + "left join p.centroCusto cc "
+						+ "where (obj.removido = false or obj.removido is null) "
+						+ "order by obj.data desc"),
+		@NamedQuery(name = "AcessoEntity.findAcessosHoje",
 			    query = "select obj from AcessoEntity obj "
-			          + "where (obj.removido = false or obj.removido is null) "
-			          + "and obj.data >= :inicioDia "
-			          + "and obj.data < :fimDia "
-			          + "order by obj.id asc"
-			)
+				        + "where (obj.removido = false or obj.removido is null) "
+				        + "and obj.data >= :inicioDia "
+				        + "and obj.data < :fimDia "
+				        + "order by obj.id asc")
 })
 @SuppressWarnings("serial")
 public class AcessoEntity extends ClienteBaseEntity {
@@ -150,6 +161,12 @@ public class AcessoEntity extends ClienteBaseEntity {
 
 	public AcessoEntity() {
 
+	}
+	
+	public AcessoEntity(Long id, Date data, String sentido) {
+	    this.id = id;
+	    this.data = data;
+	    this.sentido = sentido;
 	}
 
 	public AcessoEntity(Long id) {
