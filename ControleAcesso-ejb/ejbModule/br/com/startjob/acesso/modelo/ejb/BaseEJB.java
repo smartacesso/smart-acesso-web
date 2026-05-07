@@ -38,6 +38,7 @@ import org.jboss.logging.Logger;
 
 import br.com.startjob.acesso.modelo.BaseConstant;
 import br.com.startjob.acesso.modelo.entity.AcessoEntity;
+import br.com.startjob.acesso.modelo.entity.ClienteEntity;
 import br.com.startjob.acesso.modelo.entity.MensagemEquipamentoEntity;
 import br.com.startjob.acesso.modelo.entity.ParametroEntity;
 import br.com.startjob.acesso.modelo.entity.PedestreEntity;
@@ -2282,5 +2283,20 @@ public class BaseEJB implements BaseEJBRemote {
 	            .getSingleResult();
 
 	    return result != null ? result.intValue() : 0;
+	}
+	
+	public Long buscaClientesPorUnidadeOrganizacional(String unidadeOrganizacional) throws Exception {
+		Map<String, Object> args = new HashMap<String, Object>();
+		args.put("UNIDADE_ORGANIZACIONAL", unidadeOrganizacional);
+
+		@SuppressWarnings("unchecked")
+		List<ClienteEntity> clientes = (List<ClienteEntity>) pesquisaArgFixos(ClienteEntity.class,
+				"findByUnidadeOrganizacional", args);
+
+		if (clientes != null && !clientes.isEmpty()) {
+			return clientes.get(0).getId();
+		}
+
+		return null;
 	}
 }

@@ -10,6 +10,7 @@ import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 
 import br.com.startjob.acesso.modelo.entity.AcessoEntity;
+import br.com.startjob.acesso.modelo.entity.ClienteEntity;
 import br.com.startjob.acesso.modelo.entity.ParametroEntity;
 import br.com.startjob.acesso.modelo.entity.UsuarioEntity;
 import br.com.startjob.acesso.modelo.entity.base.BaseEntity;
@@ -378,5 +379,7 @@ public interface BaseEJBRemote {
 	public void enviaNotificacao(List<AcessoEntity> logs) throws Exception;
 	
 	public int contarAcessosHoje(Date inicioDia, Date fimDia, Long clienteId);
+	
+	public Long buscaClientesPorUnidadeOrganizacional(String unidadeOrganizacional) throws Exception;
 	
 }
