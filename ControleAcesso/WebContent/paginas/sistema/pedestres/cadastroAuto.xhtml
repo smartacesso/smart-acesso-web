@@ -71,6 +71,33 @@
 				}
 				.btn-next { background: #2ecc71; }
 				.btn-back { background: #95a5a6; }
+				
+				/* Toast Notification */
+				#totem-toast {
+				    position: fixed;
+				    top: 20px;
+				    left: 50%;
+				    transform: translateX(-50%);
+				    background: #e74c3c;
+				    color: white;
+				    padding: 15px 30px;
+				    border-radius: 50px;
+				    font-size: 1.5rem;
+				    font-weight: bold;
+				    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+				    display: none;
+				    z-index: 9999;
+				    animation: fadeInOut 3s forwards;
+				}
+				
+				@keyframes fadeInOut {
+				    0% { opacity: 0; top: 0; }
+				    15% { opacity: 1; top: 20px; }
+				    85% { opacity: 1; top: 20px; }
+				    100% { opacity: 0; top: 0; }
+				}
+				
+				.toast-success { background: #2ecc71 !important; }
 			</style>
 
 			<h:panelGrid width="100%" columns="1" headerClass="h-grid-header">
@@ -79,6 +106,8 @@
 				</f:facet>
 				
 				<h:column>
+					<div id="totem-toast"></div>
+				
 					<div class="totem-wrapper">
 						<div class="totem-container">
 							
@@ -87,16 +116,24 @@
 							<h:inputHidden id="cpfHiddenTotem" value="#{cadastroPedestreController.entidade.cpf}" />
 							<h:inputHidden id="nomeHiddenTotem" value="#{cadastroPedestreController.entidade.nome}" />
 							<h:inputHidden id="empresaHiddenTotem" value="#{cadastroPedestreController.entidade.empresa.id}" />
+							<h:inputHidden id="obsHiddenTotem" value="#{cadastroPedestreController.entidade.observacoes}" />
+							<h:inputHidden id="fotoHiddenTotem" value="#{cadastroPedestreController.fotoBase64}" />
+
+							<p:remoteCommand name="processarFotoNoJava"
+								process="fotoHiddenTotem @this"
+								action="#{cadastroPedestreController.capturarFotoAutoatendimento}"
+								update="foto-preview-container" />
 
 							<p:remoteCommand name="verificarCpfTotemRC" 
 											 process="cpfHiddenTotem @this" 
 											 action="#{cadastroPedestreController.verificarCpfTotem}" 
 											 oncomplete="tratarRetornoCpf(xhr, status, args)" />
 
-							<p:remoteCommand name="enviarDadosProJava" 
-											 process="cpfHiddenTotem nomeHiddenTotem empresaHiddenTotem @this" 
-											 action="#{cadastroPedestreController.salvarAutoatendimento}" 
-											 update="mensagensTotem" />
+							<p:remoteCommand name="enviarDadosProJava"
+								process="cpfHiddenTotem nomeHiddenTotem empresaHiddenTotem obsHiddenTotem fotoHiddenTotem @this"
+								action="#{cadastroPedestreController.salvarAutoatendimento}"
+								update="mensagensTotem"
+								oncomplete="verificarMensagensServidor(xhr, status, args)" />
 
 							<div id="listaDeEmpresasOculta" style="display: none;">
 								<ui:repeat value="#{cadastroPedestreController.listaEmpresas}" var="emp">
@@ -127,6 +164,48 @@
 								<h1 class="totem-h1">Observações (Opcional)</h1>
 								<input type="text" id="input-obs" class="input-totem" readonly="readonly" />
 								<div id="kb-obs" class="kb-grid kb-alpha"></div>
+							</div>
+
+							<div id="step-foto" class="totem-step">
+								<h1 class="totem-h1">Posicione seu rosto para a foto</h1>
+
+								<!-- Trocamos a div simples por h:panelGroup para o JSF conseguir "enxergá-la" -->
+								<h:panelGroup id="foto-preview-container" layout="block"
+									style="text-align:center; width: 100%;">
+
+									<!-- Bloco de Captura (Só aparece se não tiver foto) -->
+									<ui:fragment
+										rendered="#{empty cadastroPedestreController.entidade.foto}">
+										<div
+											style="width: 400px; height: 400px; border-radius: 50%; overflow: hidden; border: 8px solid #3498db; margin: 0 auto; background: #000;">
+											<video id="videoTotem" width="400" height="400"
+												autoplay="autoplay"
+												style="object-fit: cover; transform: scaleX(-1);"></video>
+										</div>
+										<canvas id="canvasTotem" width="400" height="400"
+											style="display:none;"></canvas>
+										<button type="button" class="btn-totem"
+											style="background: #3498db; margin-top: 25px;"
+											onclick="tirarFotoTotem();">CAPTURA FOTO</button>
+									</ui:fragment>
+
+									<!-- Bloco de Resultado (Só aparece após capturar e processar no Java) -->
+									<ui:fragment
+										rendered="#{not empty cadastroPedestreController.entidade.foto}">
+										<p:graphicImage
+											value="#{cadastroPedestreController.getSreamedContent(cadastroPedestreController.entidade.foto)}"
+											stream="false" cache="false"
+											style="width: 400px; height: 400px; border-radius: 50%; border: 8px solid #2ecc71;" />
+										<div style="margin-top: 20px;">
+											<button type="button" class="btn-totem"
+												style="background: #e67e22; margin-right: 10px;"
+												onclick="refazerFoto();">REFAZER</button>
+											<button type="button" class="btn-totem btn-next"
+												onclick="proximo();">CONFIRMAR</button>
+										</div>
+									</ui:fragment>
+
+								</h:panelGroup>
 							</div>
 
 							<div class="totem-footer">
@@ -180,64 +259,79 @@
 				}
 
 				function montarTeclado(id, inputId, teclas) {
-					const container = document.getElementById(id);
-					const input = document.getElementById(inputId);
-					teclas.forEach(t => {
-						let k = document.createElement('div');
-						k.className = 'kb-key' + (t.length > 1 ? ' kb-special' : '');
-						k.innerText = t;
-						k.onclick = () => {
-							if(t === '←') input.value = input.value.slice(0, -1);
-							else if(t === 'Limpar') input.value = '';
-							else if(t === 'Espaço') input.value += ' ';
-							else input.value += t;
-						};
-						container.appendChild(k);
-					});
+				    const container = document.getElementById(id);
+				    const input = document.getElementById(inputId);
+				    teclas.forEach(t => {
+				        let k = document.createElement('div');
+				        k.className = 'kb-key' + (t.length > 1 ? ' kb-special' : '');
+				        k.innerText = t;
+				        k.onclick = () => {
+				            let valorAtual = input.value;
+				            
+				            if (t === '←') {
+				                valorAtual = valorAtual.replace(/\D/g, "").slice(0, -1);
+				            } else if (t === 'Limpar') {
+				                valorAtual = '';
+				            } else if (t === 'Espaço') {
+				                valorAtual += ' ';
+				            } else {
+				                // Se for teclado de CPF, removemos a máscara para adicionar o novo número
+				                if (id === 'kb-cpf') {
+				                    valorAtual = valorAtual.replace(/\D/g, "") + t;
+				                } else {
+				                    valorAtual += t;
+				                }
+				            }
+
+				            // Aplica a máscara apenas se for o campo de CPF
+				            if (id === 'kb-cpf') {
+				                input.value = formatarCPF(valorAtual);
+				            } else {
+				                input.value = valorAtual;
+				            }
+				        };
+				        container.appendChild(k);
+				    });
 				}
 
 				function proximo() {
-					if(etapa === 'CPF') {
-						dados.cpf = document.getElementById('input-cpf').value;
-						if(dados.cpf.length < 11) return alert("Informe um CPF válido.");
-						
-						// Injecta o CPF no campo do JSF para a pesquisa
-						let cpfInput = document.querySelector('[id$="cpfHiddenTotem"]');
-						if(cpfInput) {
-							cpfInput.value = dados.cpf;
-						}
-						
-						// UI Feedback e trigger da pesquisa no Controller
-						document.getElementById('btn-next').innerText = "A pesquisar...";
-						verificarCpfTotemRC(); 
-						return;
-
-					} else if(etapa === 'NOME') {
-						dados.nome = document.getElementById('input-nome').value;
-						if(!dados.nome) return alert("Informe o Nome.");
-						etapa = 'EMPRESA';
-					} else if(etapa === 'EMPRESA') {
-						if(!dados.empresaId) return alert("Por favor, selecione uma empresa.");
-						etapa = 'OBS';
-					} else if(etapa === 'OBS') {
-						dados.obs = document.getElementById('input-obs').value;
-						finalizar();
-						return;
-					}
-					render();
-				}
+			        if(etapa === 'CPF') {
+			            dados.cpf = document.getElementById('input-cpf').value;
+			            if(dados.cpf.replace(/\D/g, "").length < 11) return avisar("Informe um CPF válido.");
+			            document.querySelector('[id$="cpfHiddenTotem"]').value = dados.cpf;
+			            document.getElementById('btn-next').innerText = "A pesquisar...";
+			            verificarCpfTotemRC(); 
+			            return;
+			        } else if(etapa === 'NOME') {
+			            dados.nome = document.getElementById('input-nome').value;
+			            if(!dados.nome) return avisar("Informe o Nome.");
+			            etapa = 'EMPRESA';
+			        } else if(etapa === 'EMPRESA') {
+			            if(!dados.empresaId) return avisar("Por favor, selecione uma empresa.");
+			            etapa = 'OBS';
+			        } else if(etapa === 'OBS') {
+			            dados.obs = document.getElementById('input-obs').value;
+			            etapa = 'FOTO'; // Agora vai para a FOTO antes de finalizar
+			        } else if(etapa === 'FOTO') {
+			            finalizar(); // Finaliza no último passo
+			            return;
+			        }
+			        render();
+			    }
 
 				// Callback acionado pelo JSF ao terminar a verificação do CPF
 				function tratarRetornoCpf(xhr, status, args) {
 					document.getElementById('btn-next').innerText = "Continuar";
 					
-					if (args && args.existe) {
+					if (args && args.existe && args.visitante) {
 						dados.nome = args.nome;
 						document.getElementById('input-nome').value = args.nome;
 						if(args.idEmpresa) {
 							dados.empresaId = args.idEmpresa;
 						}
-					} else {
+					}else if(args && args.existe && !args.visitante){
+						 return avisar("Por favor, apenas visitantes.");
+					}else {
 						dados.nome = '';
 						document.getElementById('input-nome').value = '';
 					}
@@ -257,44 +351,133 @@
 				}
 
 				function render() {
-					document.querySelectorAll('.totem-step').forEach(s => s.classList.remove('active'));
-					document.getElementById('step-' + etapa.toLowerCase()).classList.add('active');
-					
-					document.getElementById('btn-next').style.display = (etapa === 'EMPRESA') ? 'none' : 'block';
-					document.getElementById('btn-next').innerText = (etapa === 'OBS') ? 'Finalizar' : 'Continuar';
-				}
+			        document.querySelectorAll('.totem-step').forEach(s => s.classList.remove('active'));
+			        document.getElementById('step-' + etapa.toLowerCase()).classList.add('active');
+			        
+			        // Exibição dos botões
+			        const btnNext = document.getElementById('btn-next');
+			        btnNext.style.display = (etapa === 'EMPRESA' || etapa === 'FOTO') ? 'none' : 'block';
+			        btnNext.innerText = (etapa === 'OBS') ? 'Ir para Foto' : 'Continuar';
+
+			        // Ligar/Desligar câmera automaticamente
+			        if (etapa === 'FOTO') {
+			            iniciarCameraTotem();
+			        } else {
+			            pararCameraTotem();
+			        }
+			    }
 
 				function finalizar() {
-					let cpfInput = document.querySelector('[id$="cpfHiddenTotem"]');
-					let nomeInput = document.querySelector('[id$="nomeHiddenTotem"]');
-					let empresaInput = document.querySelector('[id$="empresaHiddenTotem"]');
+				    let cpfInput = document.querySelector('[id$="cpfHiddenTotem"]');
+				    let nomeInput = document.querySelector('[id$="nomeHiddenTotem"]');
+				    let empresaInput = document.querySelector('[id$="empresaHiddenTotem"]');
+				    let obsInput = document.querySelector('[id$="obsHiddenTotem"]');
+				    let fotoInput = document.querySelector('[id$="fotoHiddenTotem"]');
 
-					if (cpfInput && nomeInput && empresaInput) {
-						// Passa os valores coletados pelo JS para o PrimeFaces
-						cpfInput.value = dados.cpf;
-						nomeInput.value = dados.nome;
-						empresaInput.value = dados.empresaId;
-						
-						// Dispara a gravação (salvarAutoatendimento)
-						enviarDadosProJava(); 
-						
-						alert("Aguarde, a processar o seu acesso...");
+				    if (cpfInput && nomeInput && empresaInput) {
+				        cpfInput.value = dados.cpf.replace(/\D/g, "");
+				        nomeInput.value = dados.nome;
+				        empresaInput.value = dados.empresaId;
+				        if (obsInput) obsInput.value = dados.obs;
+				        
+				        // Dispara o envio final
+				        enviarDadosProJava(); 
+				        
+				        // Reset total para o próximo usuário
+				        document.getElementById('input-cpf').value = '';
+				        document.getElementById('input-nome').value = '';
+				        document.getElementById('input-obs').value = '';
+				        if (fotoInput) fotoInput.value = '';
+				        
+				        dados = { cpf: '', nome: '', empresaId: '', obs: '', foto: '' };
+				        etapa = 'CPF';
+				        render();
+				    }
+				}
+				
+				function formatarCPF(v) {
+				    v = v.replace(/\D/g, ""); // Remove tudo o que não é dígito
+				    if (v.length > 11) v = v.slice(0, 11); // Limita a 11 caracteres
+				    
+				    v = v.replace(/(\d{3})(\d)/, "$1.$2");       // Coloca ponto após os 3 primeiros dígitos
+				    v = v.replace(/(\d{3})(\d)/, "$1.$2");       // Coloca ponto após os 6 primeiros dígitos
+				    v = v.replace(/(\d{3})(\d{1,2})$/, "$1-$2"); // Coloca hífen antes dos 2 últimos dígitos
+				    return v;
+				}
+				
+				let localStream = null;
 
-						// Reset do fluxo para o próximo visitante
-						document.getElementById('input-cpf').value = '';
-						document.getElementById('input-nome').value = '';
-						document.getElementById('input-obs').value = '';
-						dados = { cpf: '', nome: '', empresaId: '', obs: '' };
-						etapa = 'CPF';
-						render();
-					} else {
-						alert("Erro de layout: Campos ocultos do JSF não encontrados na página.");
-						console.error("Inputs hidden do JSF não encontrados no DOM.");
-					}
+				async function iniciarCameraTotem() {
+				    try {
+				        localStream = await navigator.mediaDevices.getUserMedia({ video: { width: 400, height: 400 } });
+				        const video = document.getElementById('videoTotem');
+				        if(video) video.srcObject = localStream;
+				    } catch (err) {
+				        avisar("Câmera não encontrada ou acesso negado.");
+				    }
+				}
+
+				function tirarFotoTotem() {
+				    const video = document.getElementById('videoTotem');
+				    const canvas = document.getElementById('canvasTotem');
+				    const context = canvas.getContext('2d');
+				    
+				    // Desenha o frame do vídeo no canvas
+				    context.translate(400, 0);
+				    context.scale(-1, 1); // Espelha de volta para a foto ficar natural
+				    context.drawImage(video, 0, 0, 400, 400);
+				    
+				    const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+				    document.querySelector('[id$="fotoHiddenTotem"]').value = dataUrl;
+				    
+				    // Para a câmera e envia para o Java processar (salvar na entidade)
+				    pararCameraTotem();
+				    processarFotoNoJava();
+				}
+
+				function pararCameraTotem() {
+				    if (localStream) {
+				        localStream.getTracks().forEach(track => track.stop());
+				    }
+				}
+
+				function refazerFoto() {
+				    // Comando para o Java limpar a foto da entidade e atualizar o painel
+				    // Você pode criar um remoteCommand para isso ou apenas mudar a etapa no JS
+				    document.querySelector('[id$="fotoHiddenTotem"]').value = '';
+				    iniciarCameraTotem();
+				    // Atualize o h:panelGroup via PrimeFaces se necessário
+				}
+				
+				function avisar(mensagem, tipo = 'error') {
+				    const toast = document.getElementById('totem-toast');
+				    toast.innerText = mensagem;
+				    toast.className = ''; // Limpa classes anteriores
+				    toast.style.display = 'block';
+				    
+				    if (tipo === 'success') toast.classList.add('toast-success');
+				    
+				    // Reinicia animação removendo e recolocando o elemento se necessário, 
+				    // ou apenas escondendo após 3s
+				    setTimeout(() => {
+				        toast.style.display = 'none';
+				    }, 3000);
 				}
 			//]]>
+			
+				function verificarMensagensServidor(xhr, status, args) {
+				    // Busca se existe alguma mensagem de erro renderizada pelo p:messages
+				    const msgElement = document.querySelector('#mensagensTotem .ui-messages-error-detail, #mensagensTotem .ui-messages-info-detail');
+				    if (msgElement) {
+				        avisar(msgElement.innerText, msgElement.classList.contains('ui-messages-error-detail') ? 'error' : 'success');
+				    }
+				}
 			</script>
+			
+			
 		</ui:define>
+		
+		
 
 	</ui:composition>
 </body>
