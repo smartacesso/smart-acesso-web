@@ -205,6 +205,8 @@ public class CadastroPedestreController extends CadastroBaseController {
 	private String cpf;
 	private Boolean cadastroSimplificado = false; 
 	
+	private String fotoBase64; // Ex: "data:image/jpeg;base64,/9j/4AAQSk..."
+
 	@PostConstruct
 	@Override
 	public void init() {
@@ -220,6 +222,21 @@ public class CadastroPedestreController extends CadastroBaseController {
 		acao = getRequest().getParameter("acao");
 		origem = getRequest().getParameter("origem");
 		tipo = getRequest().getParameter("tipo");
+		
+
+		
+		if(tipo == null) {
+			HttpServletRequest request = (HttpServletRequest)
+			        FacesContext.getCurrentInstance()
+			        .getExternalContext()
+			        .getRequest();
+			
+			String url = request.getRequestURL().toString();
+			
+			if(url.contains("cadastroAuto")) {
+				tipo = "VISITANTE";
+			}
+		}
 
 		iniciaListas();
 
@@ -419,11 +436,19 @@ public class CadastroPedestreController extends CadastroBaseController {
 	    pedestre.setTipo(TipoPedestre.PEDESTRE); // valor padrão
 
 	    if (tipo != null && !tipo.isEmpty()) {
+	    	
+			HttpServletRequest request = (HttpServletRequest)
+			        FacesContext.getCurrentInstance()
+			        .getExternalContext()
+			        .getRequest();
+			
+			String url = request.getRequestURL().toString();
+
 
 	        if ("pe".equals(tipo)) {
 	            pedestre.setTipo(TipoPedestre.PEDESTRE);
 
-	        } else if ("vi".equals(tipo)) {
+	        } else if ("vi".equals(tipo) || url.contains("cadastroAuto")) {
 
 	            pedestre.setTipo(TipoPedestre.VISITANTE);
 
@@ -457,7 +482,6 @@ public class CadastroPedestreController extends CadastroBaseController {
 	        }
 	    }
 	}
-
 	
 	@SuppressWarnings("unchecked")
 	private LocalEntity buscaLocalPadrao(String nomeLocal) {
@@ -752,29 +776,22 @@ public class CadastroPedestreController extends CadastroBaseController {
 	public void salvarAutoatendimento() {
 		try {
 			PedestreEntity pedestre = getPedestreAtual();
+			
+			if(pedestre.isPedestre()) {
+				PrimeFaces.current().executeScript("avisar('Liberado apenas para visitantes.', 'error')");
+				return;
+			}
 
 			// 1. Configurações padrão do Totem
 			pedestre.setTipo(TipoPedestre.VISITANTE);
-//			pedestre.setAutoAtendimento(true);
-//			pedestre.setAutoAtendimentoAt(new Date());
 			pedestre.setCliente(getUsuarioLogado().getCliente());
 			pedestre.setUsuario(getUsuarioLogado());
 
 			// 2. Validações básicas de segurança (evita salvar se o JS falhar)
 			if (pedestre.getCpf() == null || pedestre.getNome() == null || pedestre.getEmpresa() == null
 					|| pedestre.getEmpresa().getId() == null) {
-				mensagemErro("Atenção", "Dados obrigatórios não preenchidos no Totem.");
+				PrimeFaces.current().executeScript("avisar('Preencha todos os campos obrigatórios!', 'error')");
 				return;
-			}
-
-			// 3. Verifica se o CPF já existe para atualizar em vez de duplicar
-			PedestreEntity pedestreExistente = buscaPedestrePeloCpf(pedestre.getCpf().replaceAll("\\D", ""),
-					pedestre.getCliente().getId());
-			if (pedestreExistente != null) {
-				// Transfere o ID e dados antigos para atualizar o registo
-				pedestre.setId(pedestreExistente.getId());
-				pedestre.setCodigoCartaoAcesso(pedestreExistente.getCodigoCartaoAcesso());
-				// Pode copiar mais dados se necessário...
 			}
 
 			// 4. Aplica a regra de acesso padrão se for um visitante novo
@@ -793,20 +810,50 @@ public class CadastroPedestreController extends CadastroBaseController {
 			validaListasPedestre(pedestre);
 
 			String retornoStatus = super.salvar(); // Chama a persistência base do EJB
+			
+			if (envioFacial) {
+				try {
 
-			if ("ok".equals(retornoStatus)) {
-				// 7. LIMPEZA DA SESSÃO: Essencial para o próximo utilizador do Totem
-				setEntidade(new PedestreEntity());
-				iniciaVariaveisNovoPedestre(getPedestreAtual());
+					String jsonStr = gson.toJson(WebSocketPedestrianAccessTO.fromPedestre(pedestre));
+					String resposta = WebSocketCadastroEndpoint.enviarEEsperar(pedestre.getCliente().getId().toString(),
+							jsonStr);
 
-				System.out.println("Autoatendimento salvo com sucesso: " + pedestre.getNome());
-			} else {
-				mensagemErro("Erro", "Falha ao gravar no banco de dados.");
+					if (!resposta.equals("ok")) {
+
+						FacesContext.getCurrentInstance().getExternalContext().getFlash().setKeepMessages(true);
+
+						if (resposta.contains("UsuarioErro")) {
+							PrimeFaces.current().executeScript("avisar('Usuario não enviado!', 'error')");
+						} else if (resposta.contains("CartaoErro")) {
+							PrimeFaces.current().executeScript("avisar('Cartão não enviado!', 'error')");
+						} else if (resposta.contains("FotoErro")) {
+							PrimeFaces.current().executeScript("avisar('Foto não enviada!', 'error')");
+						}
+					}
+
+				} catch (TimeoutException e) {
+
+					PrimeFaces.current().executeScript("avisar('Foto não enviada, timeout!', 'error')");
+
+				} catch (Exception e) {
+					PrimeFaces.current().executeScript("avisar('Erro no serviço hikivision', 'error')");
+					e.printStackTrace();
+				}
 			}
+
+//			if ("ok".equals(retornoStatus)) {
+//	            // Mensagem de sucesso
+//	            PrimeFaces.current().executeScript("avisar('Cadastro concluído com sucesso!', 'success')");
+//	            
+//	            setEntidade(new PedestreEntity());
+//	            this.fotoBase64 = null;
+//	        } else {
+//	            PrimeFaces.current().executeScript("avisar('Erro ao gravar no banco.', 'error')");
+//	        }
 
 		} catch (Exception e) {
 			e.printStackTrace();
-			mensagemFatal("Erro", "Erro interno no servidor ao processar autoatendimento.");
+			PrimeFaces.current().executeScript("avisar('Erro interno no servidor hikivision.', 'error')");
 		}
 	}
 
@@ -944,8 +991,14 @@ public class CadastroPedestreController extends CadastroBaseController {
 
 	public void validaListasPedestre(PedestreEntity pedestre) {
 
-		if (pedestre.getEndereco().getCep() == null || "".equals(pedestre.getEndereco().getCep()))
-			pedestre.setEndereco(null);
+		// Se o endereço for nulo, ele já entra no IF e você pode tratar.
+		// Se não for nulo, ele testa se o CEP é vazio.
+		if (pedestre.getEndereco() == null || 
+		    pedestre.getEndereco().getCep() == null || 
+		    pedestre.getEndereco().getCep().trim().isEmpty()) {
+		    
+		    pedestre.setEndereco(null);
+		}
 
 		if (pedestre.getEmpresa().getId() == null) {
 			pedestre.setEmpresa(null);
@@ -2532,7 +2585,17 @@ public class CadastroPedestreController extends CadastroBaseController {
 				String cpfLimpo = cpf.replaceAll("\\D", "");
 				PedestreEntity encontrado = buscaPedestrePeloCpf(cpfLimpo, getUsuarioLogado().getCliente().getId());
 
-				if (encontrado != null) {
+				if (encontrado != null ) {
+					
+					setPedestreAtual(encontrado);
+					iniciaVariaveisEditarPedestre(encontrado);
+					
+					if(encontrado.isPedestre()) {
+						PrimeFaces.current().ajax().addCallbackParam("visitante", false);
+					}else {
+						PrimeFaces.current().ajax().addCallbackParam("visitante", true);
+					}
+					
 					// Devolve os parâmetros para o JavaScript
 					PrimeFaces.current().ajax().addCallbackParam("existe", true);
 					PrimeFaces.current().ajax().addCallbackParam("nome", encontrado.getNome());
@@ -2548,6 +2611,22 @@ public class CadastroPedestreController extends CadastroBaseController {
 			e.printStackTrace();
 			PrimeFaces.current().ajax().addCallbackParam("existe", false);
 		}
+	}
+	
+	public void capturarFotoAutoatendimento() {
+	    if (fotoBase64 != null && fotoBase64.contains(",")) {
+	        try {
+	            String base64Data = fotoBase64.split(",")[1];
+	            byte[] imageBytes = java.util.Base64.getDecoder().decode(base64Data);
+	            
+	            // Atribui a foto à entidade (mesmo campo usado no cadastro simplificado)
+	            getPedestreAtual().setFoto(imageBytes);
+	            
+	            System.out.println("Foto capturada no Totem com sucesso!");
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	        }
+	    }
 	}
 	
 	public boolean isPedestre() {
@@ -2990,5 +3069,8 @@ public class CadastroPedestreController extends CadastroBaseController {
 	public void setLocalPadraoVisitante(String localPadraoVisitante) {
 		this.localPadraoVisitante = localPadraoVisitante;
 	}
+	
+	public String getFotoBase64() { return fotoBase64; }
+	public void setFotoBase64(String fotoBase64) { this.fotoBase64 = fotoBase64; }
 
 }
