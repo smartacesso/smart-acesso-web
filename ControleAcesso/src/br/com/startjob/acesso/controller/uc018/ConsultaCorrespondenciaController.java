@@ -4,6 +4,7 @@ package br.com.startjob.acesso.controller.uc018;
 import java.io.Serializable;
 import java.util.Base64;
 import java.util.Date;
+import java.util.HashMap;
 
 import javax.annotation.PostConstruct;
 import javax.faces.view.ViewScoped;
@@ -32,6 +33,10 @@ public class ConsultaCorrespondenciaController extends BaseController implements
 	@Override
 	public void init() {
 		super.init();
+		
+	    if (getParans() == null) {
+	        setParans(new HashMap<>());
+	    }
 		// Opcional: Iniciar filtrando apenas o que NÃO foi retirado
 		this.filtroRetirado = "N"; 
 		buscar();
@@ -40,7 +45,7 @@ public class ConsultaCorrespondenciaController extends BaseController implements
 	@Override
 	public String buscar() {
 		// Montamos os parâmetros para a query baseada no seu padrão de framework
-
+		
 		getParans().put("cliente.id", getUsuarioLogado().getCliente().getId());
 
 		getParans().remove("confirmaRetirada");
