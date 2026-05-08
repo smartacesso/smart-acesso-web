@@ -2285,7 +2285,7 @@ public class BaseEJB implements BaseEJBRemote {
 	    return result != null ? result.intValue() : 0;
 	}
 	
-	public Long buscaClientesPorUnidadeOrganizacional(String unidadeOrganizacional) throws Exception {
+	public ClienteEntity buscaClientesPorUnidadeOrganizacional(String unidadeOrganizacional) throws Exception {
 		Map<String, Object> args = new HashMap<String, Object>();
 		args.put("UNIDADE_ORGANIZACIONAL", unidadeOrganizacional);
 
@@ -2294,7 +2294,7 @@ public class BaseEJB implements BaseEJBRemote {
 				"findByUnidadeOrganizacional", args);
 
 		if (clientes != null && !clientes.isEmpty()) {
-			return clientes.get(0).getId();
+			return clientes.get(0);
 		}
 
 		return null;

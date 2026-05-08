@@ -380,6 +380,6 @@ public interface BaseEJBRemote {
 	
 	public int contarAcessosHoje(Date inicioDia, Date fimDia, Long clienteId);
 	
-	public Long buscaClientesPorUnidadeOrganizacional(String unidadeOrganizacional) throws Exception;
+	public ClienteEntity buscaClientesPorUnidadeOrganizacional(String unidadeOrganizacional) throws Exception;
 	
 }
