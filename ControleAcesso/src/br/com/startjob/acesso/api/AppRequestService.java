@@ -19,10 +19,13 @@ import javax.ws.rs.core.Response.Status;
 
 import br.com.startjob.acesso.modelo.ejb.AppEJBRemote;
 import br.com.startjob.acesso.modelo.entity.AcessoEntity;
+import br.com.startjob.acesso.modelo.entity.ClienteEntity;
 import br.com.startjob.acesso.modelo.entity.CorrespondenciaEntity;
 import br.com.startjob.acesso.modelo.entity.PedestreEntity;
+import br.com.startjob.acesso.modelo.enumeration.TipoPedestre;
 import br.com.startjob.acesso.modelo.utils.CriptografiaAES;
 import br.com.startjob.acesso.to.app.AcessosRequest;
+import br.com.startjob.acesso.to.app.CadastroRequest;
 import br.com.startjob.acesso.to.app.EncomendaRequest;
 import br.com.startjob.acesso.to.app.LoginRequest;
 import br.com.startjob.acesso.to.app.LoginResponse;
@@ -119,9 +122,9 @@ public class AppRequestService extends BaseService {
 	        
 	        // Recuperar dados que você guardou no token
 	        Long userId = Long.parseLong(claims.getSubject());
-	        String cliente = (String) claims.get("cliente");
+	        String clienteNome = (String) claims.get("cliente");
 	        
-	        Long idCliente = appEjb.buscaClientesPorUnidadeOrganizacional(cliente);
+	        ClienteEntity cliente = appEjb.buscaClientesPorUnidadeOrganizacional(clienteNome);
 
 	        // 3. Validar o corpo da requisição
 	        if (request == null) {
@@ -158,7 +161,7 @@ public class AppRequestService extends BaseService {
 
 	        List<AcessoEntity> lista = appEjb.buscarAcessosPaginados(
 	        	userId,
-	        	idCliente, 
+	        	cliente.getId(), 
 	            dataInicio, 
 	            dataFim,
 	            request.getPagina(),
@@ -189,10 +192,10 @@ public class AppRequestService extends BaseService {
 	    try {
 	        Claims claims = JwtUtil.validarToken(token);
 	        Long userId = Long.parseLong(claims.getSubject());
-	        String cliente = (String) claims.get("cliente");
+	        String clienteNome = (String) claims.get("cliente");
 	        
 	        // Dica: Cacheie esse ID do cliente se possível para não ir ao banco toda hora
-	        Long idCliente = appEjb.buscaClientesPorUnidadeOrganizacional(cliente);
+	        ClienteEntity cliente = appEjb.buscaClientesPorUnidadeOrganizacional(clienteNome);
 
 	        if (request == null) {
 	            return Response.status(Status.BAD_REQUEST).entity("Corpo da requisição vazio").build();
@@ -201,7 +204,7 @@ public class AppRequestService extends BaseService {
 	        // Mudança para CorrespondenciaEntity
 	        List<CorrespondenciaEntity> lista = appEjb.buscarEncomendasPaginada(
 	                userId,
-	                idCliente, 
+	                cliente.getId(), 
 	                request.getPagina(),
 	                request.getTamanho()
 	            );
@@ -212,5 +215,71 @@ public class AppRequestService extends BaseService {
 	        e.printStackTrace(); // Importante para logar erros de cast ou query
 	        return Response.status(Status.UNAUTHORIZED).entity("Token inválido ou erro na consulta").build();
 	    }
+	}
+	
+	@POST
+	@Path("/cadastrar")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response cadastrar(@Context HttpHeaders headers, CadastroRequest novoCadastro) {
+
+		String authHeader = headers.getHeaderString(HttpHeaders.AUTHORIZATION);
+		if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+			return Response.status(Status.UNAUTHORIZED).entity("Token não fornecido").build();
+		}
+
+		String token = authHeader.substring(7);
+
+		try {
+			Claims claims = JwtUtil.validarToken(token);
+			String cliente = (String) claims.get("cliente");
+
+			// Dica: Cacheie esse ID do cliente se possível para não ir ao banco toda hora
+			ClienteEntity clienteEntity = appEjb.buscaClientesPorUnidadeOrganizacional(cliente);
+
+			if (request == null) {
+				return Response.status(Status.BAD_REQUEST).entity("Corpo da requisição vazio").build();
+			}
+
+			PedestreEntity novo = criarNovoCadastro(clienteEntity, novoCadastro);
+
+			// 3. Salvar no Banco via EJB
+			PedestreEntity salva = (PedestreEntity) getEjb("BaseEJB").gravaObjeto(novo)[0];
+			
+
+			// 4. Retornar 201 Created com o objeto/ID
+			return Response.status(Status.CREATED).entity(salva).build();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Erro ao salvar cadastro: " + e.getMessage())
+					.build();
+		}
+	}
+
+	private PedestreEntity criarNovoCadastro(ClienteEntity cliente, CadastroRequest novoDto) {
+		PedestreEntity novo = new PedestreEntity();
+
+		String cpfTratado = tratarCpf(novoDto.getCpf());
+
+		novo.setTipo(TipoPedestre.VISITANTE);
+		novo.setCliente(cliente);
+		novo.setNome(novoDto.getNome());
+		novo.setCpf(cpfTratado);
+		novo.setCelular(novoDto.getCelular());
+		novo.setObservacoes(novo.getObservacoes());
+		novo.setStatus(br.com.startjob.acesso.modelo.enumeration.Status.ATIVO);
+		novo.setCodigoCartaoAcesso(cpfTratado);
+		novo.setAutoAtendimento(true);
+		
+		return novo;
+	}
+
+	private String tratarCpf(String cpf) {
+		if (cpf == null) {
+			return null;
+		}
+
+		return cpf.replaceAll("\\D", "");
 	}
 }
