@@ -131,10 +131,10 @@ public class CadastroPedestreController extends CadastroBaseController {
 	private List<LocalEntity> locais;
 	private String idLocalSelecionado;
 	
-	private List<HistoricoCotaEntity> listaCotas;
-	private Integer mes;
-	private Integer ano;
-	private Long cotaMensal;
+//	private List<HistoricoCotaEntity> listaCotas;
+//	private Integer mes;
+//	private Integer ano;
+//	private Long cotaMensal;
 
 
 	private BiometriaEntity biometria;
@@ -206,6 +206,11 @@ public class CadastroPedestreController extends CadastroBaseController {
 	private Boolean cadastroSimplificado = false; 
 	
 	private String fotoBase64; // Ex: "data:image/jpeg;base64,/9j/4AAQSk..."
+	
+	
+	// 1. Nova lista para o Totem (Objetos completos)
+	private List<EmpresaEntity> listaEmpresasTotem;
+
 
 	@PostConstruct
 	@Override
@@ -258,6 +263,7 @@ public class CadastroPedestreController extends CadastroBaseController {
 		montaListaTipoUsuario();
 		montaListaStatus();
 		montaListaGenero();
+		montaListaEmpresasTotem();
 
 		montaListaEmpresas();
 		montaListaEquipamentosDisponiveis();
@@ -422,7 +428,6 @@ public class CadastroPedestreController extends CadastroBaseController {
 		listaPedestresEquipamentos = new ArrayList<PedestreEquipamentoEntity>();
 		listaPedestreRegra = new ArrayList<PedestreRegraEntity>();
 		responsaveis = new ArrayList<ResponsibleEntity>();
-		listaCotas = new ArrayList<HistoricoCotaEntity>(); 
 	}
 
 	public void iniciaVariaveisNovoPedestre(PedestreEntity pedestre) {
@@ -568,11 +573,6 @@ public class CadastroPedestreController extends CadastroBaseController {
 			montaListaDepartamentos();
 		}
 		
-		if (pedestre.getCotas() != null && !pedestre.getCotas().isEmpty()) {
-			listaCotas = pedestre.getCotas();
-		}
-		
-
 		if (pedestre.getTipoQRCode() != null) {
 			tipoPadraoQrCode = pedestre.getTipoQRCode();
 		}
@@ -770,91 +770,104 @@ public class CadastroPedestreController extends CadastroBaseController {
 		return retorno;
 	}
 	
-	/**
-	 * Método de salvamento otimizado exclusivo para o Totem de Autoatendimento
-	 */
 	public void salvarAutoatendimento() {
-		try {
-			PedestreEntity pedestre = getPedestreAtual();
-			
-			if(pedestre.isPedestre()) {
-				PrimeFaces.current().executeScript("avisar('Liberado apenas para visitantes.', 'error')");
-				return;
-			}
+	    try {
+	        PedestreEntity pedestre = getPedestreAtual();
+	        
+	        if(pedestre.isPedestre()) {
+	            PrimeFaces.current().executeScript("avisar('Liberado apenas para visitantes.', 'error')");
+	            return;
+	        }
 
-			// 1. Configurações padrão do Totem
-			pedestre.setTipo(TipoPedestre.VISITANTE);
-			pedestre.setCliente(getUsuarioLogado().getCliente());
-			pedestre.setUsuario(getUsuarioLogado());
+	        // 1. Configurações padrão do Totem
+	        pedestre.setTipo(TipoPedestre.VISITANTE);
+	        pedestre.setCliente(getUsuarioLogado().getCliente());
+	        pedestre.setUsuario(getUsuarioLogado());
 
-			// 2. Validações básicas de segurança (evita salvar se o JS falhar)
-			if (pedestre.getCpf() == null || pedestre.getNome() == null || pedestre.getEmpresa() == null
-					|| pedestre.getEmpresa().getId() == null) {
-				PrimeFaces.current().executeScript("avisar('Preencha todos os campos obrigatórios!', 'error')");
-				return;
-			}
+	        // 2. Validações básicas
+	        if (pedestre.getCpf() == null || pedestre.getNome() == null || pedestre.getEmpresa() == null
+	                || pedestre.getEmpresa().getId() == null) {
+	            PrimeFaces.current().executeScript("avisar('Preencha todos os campos obrigatórios!', 'error')");
+	            return;
+	        }
 
-			// 4. Aplica a regra de acesso padrão se for um visitante novo
-			if (pedestre.getRegras() == null || pedestre.getRegras().isEmpty()) {
-				PedestreRegraEntity pedestreRegra = buscaPedestreRegraPadraoVisitante();
-				pedestreRegra.setPedestre(pedestre);
-				pedestre.setRegras(Arrays.asList(pedestreRegra));
-			}
+	        // 3. VERIFICA SE VAI PARA APROVAÇÃO (DEVE SER FEITO ANTES DO super.salvar())
+	        boolean vaiParaAprovacao = false;
+	        if (pedestre.getEmpresa() != null && pedestre.getEmpresa().getId() != null) {
+	            EmpresaEntity empDb = buscaEmpresaPorId(pedestre.getEmpresa().getId());
+	            
+	            if (empDb == null || empDb.getAutoAtendimentoLiberado() == null || Boolean.FALSE.equals(empDb.getAutoAtendimentoLiberado())) {
+	                vaiParaAprovacao = true;
+	                pedestre.setAguardandoAprovacao(true); // Marca o campo no objeto
+	            } else {
+	                pedestre.setAguardandoAprovacao(false);
+	            }
+	        }
 
-			// 5. Gera cartão de acesso caso não tenha
-			if (pedestre.getCodigoCartaoAcesso() == null || pedestre.getCodigoCartaoAcesso().trim().isEmpty()) {
-				pedestre.setCodigoCartaoAcesso(gerarCartao(pedestre));
-			}
+	        // 4. Aplica a regra de acesso padrão
+	        if (pedestre.getRegras() == null || pedestre.getRegras().isEmpty()) {
+	            PedestreRegraEntity pedestreRegra = buscaPedestreRegraPadraoVisitante();
+	            pedestreRegra.setPedestre(pedestre);
+	            pedestre.setRegras(Arrays.asList(pedestreRegra));
+	        }
 
-			// 6. Prepara as listas e grava na Base de Dados
-			validaListasPedestre(pedestre);
+	        // 5. Gera cartão de acesso
+	        if (pedestre.getCodigoCartaoAcesso() == null || pedestre.getCodigoCartaoAcesso().trim().isEmpty()) {
+	            pedestre.setCodigoCartaoAcesso(gerarCartao(pedestre));
+	        }
 
-			String retornoStatus = super.salvar(); // Chama a persistência base do EJB
-			
-			if (envioFacial) {
-				try {
+	        // 6. Prepara as listas e GRAVA NO BANCO
+	        validaListasPedestre(pedestre);
+	        String retornoStatus = super.salvar(); 
+	        
+	        
+	        if ("ok".equals(retornoStatus)) {
+	            
+	            // 7. DECIDE O QUE FAZER APÓS SALVAR
+	            if (vaiParaAprovacao) {
+	                // Se foi para aprovação, NÃO envia para a facial. Apenas avisa.
+	                PrimeFaces.current().executeScript("avisar('Cadastro concluído! Ligue na portaria para liberação.', 'error')");
+	            } else {
+	                // Se NÃO foi para aprovação, envia para a catraca facial (!vaiParaAprovacao)
+	                if (envioFacial) {
+	                    try {
+	                        String jsonStr = gson.toJson(WebSocketPedestrianAccessTO.fromPedestre(pedestre));
+	                        String resposta = WebSocketCadastroEndpoint.enviarEEsperar(pedestre.getCliente().getId().toString(), jsonStr);
 
-					String jsonStr = gson.toJson(WebSocketPedestrianAccessTO.fromPedestre(pedestre));
-					String resposta = WebSocketCadastroEndpoint.enviarEEsperar(pedestre.getCliente().getId().toString(),
-							jsonStr);
+	                        if (!resposta.equals("ok")) {
+	                            if (resposta.contains("UsuarioErro")) {
+	                                PrimeFaces.current().executeScript("avisar('Usuario não enviado!', 'error')");
+	                            } else if (resposta.contains("CartaoErro")) {
+	                                PrimeFaces.current().executeScript("avisar('Cartão não enviado!', 'error')");
+	                            } else if (resposta.contains("FotoErro")) {
+	                                PrimeFaces.current().executeScript("avisar('Foto não enviada!', 'error')");
+	                            }
+	                        }
+	                    } catch (TimeoutException e) {
+	                        PrimeFaces.current().executeScript("avisar('Foto não enviada, timeout!', 'error')");
+	                    } catch (Exception e) {
+	                        PrimeFaces.current().executeScript("avisar('Erro no serviço hikivision', 'error')");
+	                        e.printStackTrace();
+	                    }
+	                }
+	                
+	                // Mensagem de sucesso verde caso a catraca seja liberada direto
+	                PrimeFaces.current().executeScript("avisar('Cadastro e liberação realizados com sucesso!', 'success')");
+	            }
 
-					if (!resposta.equals("ok")) {
+	            // 8. LIMPEZA DA SESSÃO: Essencial para o próximo visitante usar o totem
+	            setPedestreAtual(new PedestreEntity());
+	            this.fotoBase64 = null;
+	            iniciaVariaveisNovoPedestre(getPedestreAtual());
 
-						FacesContext.getCurrentInstance().getExternalContext().getFlash().setKeepMessages(true);
+	        } else {
+	            PrimeFaces.current().executeScript("avisar('Erro ao gravar no banco de dados.', 'error')");
+	        }
 
-						if (resposta.contains("UsuarioErro")) {
-							PrimeFaces.current().executeScript("avisar('Usuario não enviado!', 'error')");
-						} else if (resposta.contains("CartaoErro")) {
-							PrimeFaces.current().executeScript("avisar('Cartão não enviado!', 'error')");
-						} else if (resposta.contains("FotoErro")) {
-							PrimeFaces.current().executeScript("avisar('Foto não enviada!', 'error')");
-						}
-					}
-
-				} catch (TimeoutException e) {
-
-					PrimeFaces.current().executeScript("avisar('Foto não enviada, timeout!', 'error')");
-
-				} catch (Exception e) {
-					PrimeFaces.current().executeScript("avisar('Erro no serviço hikivision', 'error')");
-					e.printStackTrace();
-				}
-			}
-
-//			if ("ok".equals(retornoStatus)) {
-//	            // Mensagem de sucesso
-//	            PrimeFaces.current().executeScript("avisar('Cadastro concluído com sucesso!', 'success')");
-//	            
-//	            setEntidade(new PedestreEntity());
-//	            this.fotoBase64 = null;
-//	        } else {
-//	            PrimeFaces.current().executeScript("avisar('Erro ao gravar no banco.', 'error')");
-//	        }
-
-		} catch (Exception e) {
-			e.printStackTrace();
-			PrimeFaces.current().executeScript("avisar('Erro interno no servidor hikivision.', 'error')");
-		}
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        PrimeFaces.current().executeScript("avisar('Erro interno no servidor.', 'error')");
+	    }
 	}
 
 	private boolean verificaCamposRepetidos() {
@@ -1020,12 +1033,6 @@ public class CadastroPedestreController extends CadastroBaseController {
 			pedestre.setDocumentos(listaDocumentos);
 		else
 			pedestre.setDocumentos(new ArrayList<>());
-		if (listaCotas != null && !listaCotas.isEmpty()) {
-			
-			pedestre.setCotas(listaCotas);
-		}else {
-			pedestre.setCotas(new ArrayList<>());
-		}
 		if (listaMensagensEquipamento != null && !listaMensagensEquipamento.isEmpty())
 			pedestre.setMensagensPersonalizadas(listaMensagensEquipamento);
 		else
@@ -1057,54 +1064,6 @@ public class CadastroPedestreController extends CadastroBaseController {
 
 		} else
 			pedestre.setRegras(new ArrayList<>());
-	}
-
-	private PedestreRegraEntity buscaPedestreRegraPadraoVisitante() {
-		RegraEntity regra = buscaRegraPeloNome(BaseConstant.NOME_REGRA_PADRAO_VISITANTE);
-
-		try {
-			if (regra == null)
-				regra = cadastraNovaRegra(BaseConstant.NOME_REGRA_PADRAO_VISITANTE);
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		PedestreRegraEntity pedestreRegra = new PedestreRegraEntity();
-		pedestreRegra.setRegra(regra);
-		pedestreRegra.setQtdeTotalDeCreditos(1l);
-
-		return pedestreRegra;
-	}
-
-	private RegraEntity cadastraNovaRegra(String nomeRegra) throws Exception {
-		RegraEntity regra = new RegraEntity();
-		regra.setNome(nomeRegra);
-		regra.setTipoPedestre(TipoPedestre.VISITANTE);
-		regra.setTipo(TipoRegra.ACESSO_UNICO);
-		regra.setCliente(getUsuarioLogado().getCliente());
-		regra.setStatus(Status.ATIVO);
-
-		regra = (RegraEntity) baseEJB.gravaObjeto(regra)[0];
-
-		return regra;
-	}
-
-	@SuppressWarnings("unchecked")
-	private RegraEntity buscaRegraPeloNome(String nomeRegra) {
-		Map<String, Object> args = new HashMap<>();
-		args.put("NOME_REGRA", nomeRegra);
-		args.put("ID_CLIENTE", getUsuarioLogado().getCliente().getId());
-
-		List<RegraEntity> regras = null;
-
-		try {
-			regras = (List<RegraEntity>) baseEJB.pesquisaArgFixosLimitado(RegraEntity.class, "findByNome", args, 0, 1);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		return regras.stream().findFirst().orElse(null);
 	}
 
 	public void excluirPedestre() {
@@ -2407,39 +2366,39 @@ public class CadastroPedestreController extends CadastroBaseController {
 	    }
 	}
 
-	public void cadastrarCota() {
-	    try {
-	        PedestreEntity pedestre = getPedestreAtual();
-	        if (pedestre == null || pedestre.getId() == null) {
-	            mensagemErro("Erro", "Pedestre não encontrado.");
-	            return;
-	        }
-
-	        HistoricoCotaEntity cota = new HistoricoCotaEntity();
-	        cota.setPedestre(pedestre);
-	        cota.setMes(mes);
-	        cota.setAno(ano);
-	        cota.setCotaMensal(cotaMensal);
-
-	        listaCotas.add(cota); // Atualiza a lista de cotas
-
-	        // Limpa os campos após o cadastro
-	        mes = null;
-	        ano = null;
-	        cotaMensal = null;
-	    } catch (Exception e) {
-	        mensagemErro("Erro ao cadastrar cota", e.getMessage());
-	    }
-	}
+//	public void cadastrarCota() {
+//	    try {
+//	        PedestreEntity pedestre = getPedestreAtual();
+//	        if (pedestre == null || pedestre.getId() == null) {
+//	            mensagemErro("Erro", "Pedestre não encontrado.");
+//	            return;
+//	        }
+//
+//	        HistoricoCotaEntity cota = new HistoricoCotaEntity();
+//	        cota.setPedestre(pedestre);
+//	        cota.setMes(mes);
+//	        cota.setAno(ano);
+//	        cota.setCotaMensal(cotaMensal);
+//
+//	        listaCotas.add(cota); // Atualiza a lista de cotas
+//
+//	        // Limpa os campos após o cadastro
+//	        mes = null;
+//	        ano = null;
+//	        cotaMensal = null;
+//	    } catch (Exception e) {
+//	        mensagemErro("Erro ao cadastrar cota", e.getMessage());
+//	    }
+//	}
 	
-	public void removerCotas(HistoricoCotaEntity cota) {
-		if (cota != null) {
-			cota.setRemovido(true);
-			cota.setDataRemovido(getDataAtual());
-			
-			listaCotas.remove(cota);
-		}
-	}
+//	public void removerCotas(HistoricoCotaEntity cota) {
+//		if (cota != null) {
+//			cota.setRemovido(true);
+//			cota.setDataRemovido(getDataAtual());
+//			
+//			listaCotas.remove(cota);
+//		}
+//	}
 
 	public void onAutoAtendimentoChange() {
 		PedestreEntity pedestre = getPedestreAtual();
@@ -2628,7 +2587,35 @@ public class CadastroPedestreController extends CadastroBaseController {
 	        }
 	    }
 	}
-	
+
+	@SuppressWarnings("unchecked")
+	public void montaListaEmpresasTotem() {
+	    System.out.println("busca empresas totem");
+	    
+	    Map<String, Object> args = new HashMap<String, Object>();
+	    args.put("ID_CLIENTE", getUsuarioLogado().getCliente().getId());
+
+	    try {
+	        this.listaEmpresasTotem = (List<EmpresaEntity>) baseEJB.pesquisaArgFixos(
+	                EmpresaEntity.class, "findAllByIdCliente2", args);
+	                
+	        if (this.listaEmpresasTotem != null) {
+	            // ORDENAÇÃO: 
+	            // Falses (bloqueadas) primeiro, Trues (liberadas) por último.
+	            this.listaEmpresasTotem.sort((e1, e2) -> {
+	                Boolean b1 = e1.getAutoAtendimentoLiberado() != null ? e1.getAutoAtendimentoLiberado() : false;
+	                Boolean b2 = e2.getAutoAtendimentoLiberado() != null ? e2.getAutoAtendimentoLiberado() : false;
+	                
+	                // Compara os booleanos: false vem antes de true por padrão no compare
+	                return b1.compareTo(b2);
+	            });
+	        }
+	                
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        this.listaEmpresasTotem = new ArrayList<>();
+	    }
+	}
 	public boolean isPedestre() {
 		return "pe".equals(tipo);
 	}
@@ -2941,38 +2928,38 @@ public class CadastroPedestreController extends CadastroBaseController {
 	public void setResponsaveis(List<ResponsibleEntity> responsaveis) {
 		this.responsaveis = responsaveis;
 	}
+//
+//	public Integer getMes() {
+//		return mes;
+//	}
+//
+//	public void setMes(Integer mes) {
+//		this.mes = mes;
+//	}
+//
+//	public Integer getAno() {
+//		return ano;
+//	}
+//
+//	public void setAno(Integer ano) {
+//		this.ano = ano;
+//	}
+//
+//	public Long getCotaMensal() {
+//		return cotaMensal;
+//	}
+//
+//	public void setCotaMensal(Long cotaMensal) {
+//		this.cotaMensal = cotaMensal;
+//	}
 
-	public Integer getMes() {
-		return mes;
-	}
+//	public List<HistoricoCotaEntity> getListaCotas() {
+//		return listaCotas;
+//	}
 
-	public void setMes(Integer mes) {
-		this.mes = mes;
-	}
-
-	public Integer getAno() {
-		return ano;
-	}
-
-	public void setAno(Integer ano) {
-		this.ano = ano;
-	}
-
-	public Long getCotaMensal() {
-		return cotaMensal;
-	}
-
-	public void setCotaMensal(Long cotaMensal) {
-		this.cotaMensal = cotaMensal;
-	}
-
-	public List<HistoricoCotaEntity> getListaCotas() {
-		return listaCotas;
-	}
-
-	public void setListaCotas(List<HistoricoCotaEntity> listaCotas) {
-		this.listaCotas = listaCotas;
-	}
+//	public void setListaCotas(List<HistoricoCotaEntity> listaCotas) {
+//		this.listaCotas = listaCotas;
+//	}
 
 	public AcessoEntity getRelatorio() {
 		return relatorio;
@@ -3072,5 +3059,11 @@ public class CadastroPedestreController extends CadastroBaseController {
 	
 	public String getFotoBase64() { return fotoBase64; }
 	public void setFotoBase64(String fotoBase64) { this.fotoBase64 = fotoBase64; }
+	
+	
+	// 2. Novo Getter
+	public List<EmpresaEntity> getListaEmpresasTotem() {
+	    return listaEmpresasTotem;
+	}
 
 }

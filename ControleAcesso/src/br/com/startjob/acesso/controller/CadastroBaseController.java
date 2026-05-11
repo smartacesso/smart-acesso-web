@@ -19,10 +19,15 @@ import org.primefaces.model.StreamedContent;
 
 import com.itextpdf.text.pdf.BarcodeQRCode;
 
+import br.com.startjob.acesso.modelo.BaseConstant;
 import br.com.startjob.acesso.modelo.entity.ClienteEntity;
 import br.com.startjob.acesso.modelo.entity.PedestreEntity;
+import br.com.startjob.acesso.modelo.entity.PedestreRegraEntity;
+import br.com.startjob.acesso.modelo.entity.RegraEntity;
 import br.com.startjob.acesso.modelo.entity.UsuarioEntity;
 import br.com.startjob.acesso.modelo.enumeration.Status;
+import br.com.startjob.acesso.modelo.enumeration.TipoPedestre;
+import br.com.startjob.acesso.modelo.enumeration.TipoRegra;
 import br.com.startjob.acesso.utils.Utils;
 
 public abstract class CadastroBaseController extends BaseController {
@@ -198,4 +203,54 @@ public abstract class CadastroBaseController extends BaseController {
 	public StreamedContent getSreamedContent(byte[] foto) {
 		return Utils.getStreamedContent(foto);
 	}
+	
+	protected PedestreRegraEntity buscaPedestreRegraPadraoVisitante() {
+		RegraEntity regra = buscaRegraPeloNome(BaseConstant.NOME_REGRA_PADRAO_VISITANTE);
+
+		try {
+			if (regra == null)
+				regra = cadastraNovaRegra(BaseConstant.NOME_REGRA_PADRAO_VISITANTE);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		PedestreRegraEntity pedestreRegra = new PedestreRegraEntity();
+		pedestreRegra.setRegra(regra);
+		pedestreRegra.setQtdeTotalDeCreditos(1l);
+
+		return pedestreRegra;
+	}
+	
+
+	@SuppressWarnings("unchecked")
+	private RegraEntity buscaRegraPeloNome(String nomeRegra) {
+		Map<String, Object> args = new HashMap<>();
+		args.put("NOME_REGRA", nomeRegra);
+		args.put("ID_CLIENTE", getUsuarioLogado().getCliente().getId());
+
+		List<RegraEntity> regras = null;
+
+		try {
+			regras = (List<RegraEntity>) baseEJB.pesquisaArgFixosLimitado(RegraEntity.class, "findByNome", args, 0, 1);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return regras.stream().findFirst().orElse(null);
+	}
+
+	private RegraEntity cadastraNovaRegra(String nomeRegra) throws Exception {
+		RegraEntity regra = new RegraEntity();
+		regra.setNome(nomeRegra);
+		regra.setTipoPedestre(TipoPedestre.VISITANTE);
+		regra.setTipo(TipoRegra.ACESSO_UNICO);
+		regra.setCliente(getUsuarioLogado().getCliente());
+		regra.setStatus(Status.ATIVO);
+
+		regra = (RegraEntity) baseEJB.gravaObjeto(regra)[0];
+
+		return regra;
+	}
+
 }

@@ -338,6 +338,13 @@ public class MenuController extends BaseController {
 				.styleClass("ui-simple-menu").build();
 		cadastros.getElements().add(caadastroAuto);
 		
+		
+		DefaultMenuItem aprovacoes = DefaultMenuItem.builder()
+				.value("Aguardando liberação")
+				.url(BaseConstant.URL_APLICACAO + "/paginas/sistema/pedestres/aprovacaoAutoatendimento.xhtml")
+				.styleClass("ui-simple-menu").build();
+		cadastros.getElements().add(aprovacoes);
+		
 		// para admins ou gerentes
 		if (PerfilAcesso.ADMINISTRADOR.equals(usuarioLogado.getPerfil())
 				|| PerfilAcesso.GERENTE.equals(usuarioLogado.getPerfil())) {

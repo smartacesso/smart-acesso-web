@@ -38,6 +38,7 @@ import br.com.startjob.acesso.modelo.BaseConstant;
 import br.com.startjob.acesso.modelo.collections.LazyLoadingList;
 import br.com.startjob.acesso.modelo.collections.LazyLoadingList.LazyLoadingItemListener;
 import br.com.startjob.acesso.modelo.ejb.BaseEJBRemote;
+import br.com.startjob.acesso.modelo.entity.EmpresaEntity;
 import br.com.startjob.acesso.modelo.entity.HistoricoCotaEntity;
 import br.com.startjob.acesso.modelo.entity.ParametroEntity;
 import br.com.startjob.acesso.modelo.entity.UsuarioEntity;
@@ -1514,5 +1515,26 @@ public abstract class BaseController implements Serializable {
 			return habilitado;
 		}
 		return false;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public EmpresaEntity buscaEmpresaPorId(Long idEmpresa) {
+
+		List<EmpresaEntity> empresaEncontrada = null;
+
+		try {
+			Map<String, Object> args = new HashMap<>();
+			args.put("ID", idEmpresa);
+
+			empresaEncontrada = (List<EmpresaEntity>)baseEJB.pesquisaArgFixos(EmpresaEntity.class, "findById", args);
+			
+			if (Objects.isNull(empresaEncontrada) || empresaEncontrada.isEmpty()) {
+				return null;
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return empresaEncontrada.get(0);
 	}
 }

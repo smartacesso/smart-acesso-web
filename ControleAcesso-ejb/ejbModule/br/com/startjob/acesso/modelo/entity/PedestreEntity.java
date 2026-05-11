@@ -75,12 +75,19 @@ import br.com.startjob.acesso.modelo.utils.EncryptionUtils;
 				+ "where obj.id = :ID order by obj.id asc"),
 		@NamedQuery(name = "PedestreEntity.findByIdComplete", 
 			query = "select obj from PedestreEntity obj "
-				+ " left join fetch obj.endereco en " + " left join fetch obj.empresa emp "
-				+ " left join fetch obj.departamento dep " + " left join fetch obj.centroCusto cec "
-				+ " left join fetch obj.cargo ca " + " left join fetch obj.cliente cli " + " left join obj.regras re "
-				+ " left join obj.equipamentos eq " + " left join obj.documentos doc "
-				+ " left join obj.biometrias bio " + " left join obj.mensagensPersonalizadas men "
-				+ " left join obj.responsaveis res " + " left join fetch obj.cotas c "
+				+ " left join fetch obj.endereco en " 
+				+ " left join fetch obj.empresa emp "
+				+ " left join fetch obj.departamento dep " 
+				+ " left join fetch obj.centroCusto cec "
+				+ " left join fetch obj.cargo ca " 
+				+ " left join fetch obj.cliente cli " 
+				+ " left join fetch obj.regras re " 
+				+ " left join obj.equipamentos eq "
+				+ " left join obj.documentos doc "
+				+ " left join obj.biometrias bio " 
+				+ " left join obj.mensagensPersonalizadas men "
+				+ " left join obj.responsaveis res " 
+				+ " left join obj.cotas c " 
 				+ "where obj.id = :ID order by obj.id asc"),
 		@NamedQuery(name = "PedestreEntity.findAllComEmpresa", 
 			query = "select obj from PedestreEntity obj "
@@ -431,6 +438,10 @@ public class PedestreEntity extends ClienteBaseEntity {
 	@Column(name="IMPORTADO_EDUCACIONAL", nullable=true, length=11)
 	private Boolean importadoEducacional;
 	
+	
+	@Column(name = "AGUARDANDO_APROVACAO")
+	private Boolean aguardandoAprovacao = false;
+
 	@Transient
 	private String token;
 
@@ -1147,5 +1158,13 @@ public class PedestreEntity extends ClienteBaseEntity {
 
 	public void setSelecionadoEmMassa(boolean selecionadoEmMassa) {
 	    this.selecionadoEmMassa = selecionadoEmMassa;
+	}
+
+	public Boolean getAguardandoAprovacao() {
+		return aguardandoAprovacao;
+	}
+
+	public void setAguardandoAprovacao(Boolean aguardandoAprovacao) {
+		this.aguardandoAprovacao = aguardandoAprovacao;
 	}
 }

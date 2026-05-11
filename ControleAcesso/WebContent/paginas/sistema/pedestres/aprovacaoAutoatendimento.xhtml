@@ -1,0 +1,172 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui">
+
+<body>
+	<f:metadata>
+		<f:event type="preRenderView" listener="#{aprovacaoPedestreController.exibeMensagens}" />
+	</f:metadata>
+
+	<ui:composition template="/tema/templates/template.xhtml">
+
+		<ui:define name="titulo">
+			#{msgs['title.sistema']} | Aprovação de Autoatendimento
+		</ui:define>
+
+		<ui:define name="breadcrumb">
+			<a target="_top" href="/#{menuController.appName}/paginas/principal.xhtml"> 
+				<h:outputText value="#{msgs['title.principal']}" />
+			</a> > 
+			<h:outputText value="Aprovação de Autoatendimento" />
+		</ui:define>
+
+		<ui:define name="tools">
+			<p:toolbar styleClass="flex flex-column md:flex-row justify-content-between align-items-start gap-3">
+				<!-- Ações à esquerda -->
+				<p:toolbarGroup align="left" styleClass="flex flex-wrap gap-2 justify-start w-full md:w-auto">
+					<div class="align-mobile">
+						<!-- Botão de Atualizar a Fila -->
+						<p:commandButton id="acaoAtualizar" action="#{aprovacaoPedestreController.buscar}" 
+										 icon="pi pi-refresh" process="@this" update="@form" 
+										 title="Atualizar Fila" styleClass="rounded-button ui-button-info" />
+					</div>
+				</p:toolbarGroup>
+
+				<!-- Filtros à direita -->
+				<p:toolbarGroup align="right" styleClass="flex flex-wrap gap-2 justify-start md:justify-end w-full md:w-auto">
+
+					<p:commandButton id="acaoLimpar" action="#{aprovacaoPedestreController.limpar}" 
+									 icon="pi pi-spinner" process="@this" update="@form"
+									 styleClass="rounded-button ui-button-flat" title="Limpar Filtros" />
+
+					<p:inputText id="filtro-busca-geral" placeholder="Buscar por nome ou CPF"
+								 value="#{aprovacaoPedestreController.parans['nome']}"
+								 style="width:180px; font-size: 12px;"
+								 onkeypress="if(event.key === 'Enter') { event.preventDefault(); this.blur(); setTimeout(function() { document.getElementById('form:acaoBuscar').click(); }, 100); }" />
+
+					<div style="display: inline-flex">
+						<p:commandButton id="acaoBuscar" action="#{aprovacaoPedestreController.buscar}" 
+										 icon="pi pi-search" process="@form" update="form:tabelaPainel"
+										 styleClass="rounded-button" />
+					</div>
+				</p:toolbarGroup>
+			</p:toolbar>
+		</ui:define>
+
+		<ui:define name="conteudo">
+
+			<h:panelGrid width="100%" columns="1" headerClass="h-grid-header">
+				<f:facet name="header">
+					<h:outputText value="Fila de Aprovação (Cadastros Pendentes)" />
+				</f:facet>
+
+				<h:panelGroup id="tabelaPainel" layout="block">
+					<h:panelGroup layout="block" rendered="#{empty aprovacaoPedestreController.result}">
+						<div style="text-align: center; padding: 50px;">
+							<i class="pi pi-check-circle" style="font-size: 4rem; color: #2ecc71;"></i>
+							<h3>Fila Vazia!</h3>
+							<p>Nenhum cadastro de autoatendimento aguardando aprovação no momento.</p>
+						</div>
+					</h:panelGroup>
+
+					<h:panelGroup layout="block" rendered="#{not empty aprovacaoPedestreController.result}">
+						<p:dataTable id="pedestresTable" value="#{aprovacaoPedestreController.result}" var="pedestre"
+									 lazy="true" paginator="true" rows="#{aprovacaoPedestreController.quantPorPagina}"
+									 paginatorPosition="bottom" paginatorAlwaysVisible="false"
+									 scrollable="true" scrollHeight="flex" styleClass="tabela-responsive">
+
+							<!-- Foto Capturada no Totem -->
+							<p:column headerText="Foto" style="width: 80px; text-align: center;">
+								<p:graphicImage value="#{aprovacaoPedestreController.getSreamedContent(pedestre.foto)}" 
+												rendered="#{not empty pedestre.foto}"
+												stream="false" cache="false"
+												style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #ccc;" />
+								<i class="pi pi-user" style="font-size: 2rem; color: #999;" rendered="#{empty pedestre.foto}"></i>
+							</p:column>
+
+							<p:column headerText="Data/Hora" styleClass="align-left col-desktop-only">
+								<!-- Ajuste o campo 'dataCadastro' para o campo real da sua entidade -->
+								<h:outputText value="#{pedestre.dataAlteracao}">
+									<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+								</h:outputText>
+							</p:column>
+
+							<p:column headerText="#{msgs['label.uc008.nome']}" styleClass="align-left">
+								<h:outputText value="#{pedestre.nome}" style="font-weight: bold;" />
+							</p:column>
+
+							<p:column headerText="#{msgs['label.uc008.cpf']}" styleClass="align-left">
+								<h:outputText value="#{pedestre.cpf}">
+									<f:converter converterId="cpfConverter" />
+								</h:outputText>
+							</p:column>
+
+							<p:column headerText="#{msgs['label.uc008.empresa']}"
+								styleClass="align-left">
+								<h:outputText
+									value="#{aprovacaoPedestreController.getNomeEmpresa(pedestre)}" />
+							</p:column>
+
+							<p:column headerText="Observação" styleClass="align-left col-desktop-only">
+								<h:outputText value="#{pedestre.observacoes}" />
+							</p:column>
+
+							<!-- BOTÕES DE AÇÃO: APROVAR E REJEITAR -->
+							<p:column headerText="Ações" style="text-align: center; width: 120px;">
+								
+								<!-- Botão Aprovar -->
+								<p:commandButton icon="pi pi-check" title="Aprovar e Liberar Acesso"
+												 styleClass="rounded-button ui-button-success" style="margin-right: 5px;">
+									<f:setPropertyActionListener value="#{pedestre}" target="#{aprovacaoPedestreController.pedestreSelecionado}" />
+									<p:ajax oncomplete="PF('confirmarAprovacao').show()" />
+								</p:commandButton>
+
+								<!-- Botão Rejeitar -->
+								<p:commandButton icon="pi pi-times" title="Rejeitar Cadastro"
+												 styleClass="rounded-button ui-button-danger">
+									<f:setPropertyActionListener value="#{pedestre}" target="#{aprovacaoPedestreController.pedestreSelecionado}" />
+									<p:ajax oncomplete="PF('confirmarRejeicao').show()" />
+								</p:commandButton>
+								
+							</p:column>
+
+						</p:dataTable>
+					</h:panelGroup>
+				</h:panelGroup>
+			</h:panelGrid>
+
+			<!-- Dialog de Confirmação de Aprovação -->
+			<p:confirmDialog id="dialogConfirmarAprovacao" widgetVar="confirmarAprovacao" 
+							 header="Confirmar Aprovação" message="Deseja aprovar este visitante e liberar o acesso na catraca?">
+				<p:button value="Cancelar" onclick="PF('confirmarAprovacao').hide(); return false;" />
+				<p:commandButton value="Sim, Aprovar" oncomplete="PF('confirmarAprovacao').hide();"
+								 action="#{aprovacaoPedestreController.aprovarPedestre()}"
+								 process="@this" update="@form" styleClass="ui-button-success" />
+			</p:confirmDialog>
+
+			<!-- Dialog de Confirmação de Rejeição -->
+			<p:confirmDialog id="dialogConfirmarRejeicao" widgetVar="confirmarRejeicao" 
+							 header="Confirmar Rejeição" message="Tem certeza que deseja rejeitar este cadastro? Os dados serão excluídos.">
+				<p:button value="Cancelar" onclick="PF('confirmarRejeicao').hide(); return false;" />
+				<p:commandButton value="Sim, Rejeitar" oncomplete="PF('confirmarRejeicao').hide();"
+								 action="#{aprovacaoPedestreController.rejeitarPedestre()}"
+								 process="@this" update="@form" styleClass="ui-button-danger" />
+			</p:confirmDialog>
+
+			<style>
+				.tabela-responsive .ui-datatable-scrollable-body { overflow-x: auto; }
+				.align-left { text-align: left !important; }
+				@media (max-width: 768px) {
+					.col-desktop-only { display: none !important; }
+				}
+				.align-mobile { padding-top: 10px; }
+			</style>
+		</ui:define>
+
+	</ui:composition>
+</body>
+</html>

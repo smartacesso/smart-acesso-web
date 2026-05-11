@@ -136,9 +136,14 @@
 								oncomplete="verificarMensagensServidor(xhr, status, args)" />
 
 							<div id="listaDeEmpresasOculta" style="display: none;">
-								<ui:repeat value="#{cadastroPedestreController.listaEmpresas}" var="emp">
-									<h:panelGroup rendered="#{emp.value != null and emp.value != ''}">
-										<div class="empresa-data-item" data-id="#{emp.value}" data-nome="#{emp.label}"></div>
+								<ui:repeat
+									value="#{cadastroPedestreController.listaEmpresasTotem}"
+									var="emp">
+									<h:panelGroup rendered="#{emp.id != null}">
+										<div class="empresa-data-item" data-id="#{emp.id}"
+											data-nome="#{emp.nome}"
+											data-liberado="#{emp.autoAtendimentoLiberado != null ? emp.autoAtendimentoLiberado : 'false'}">
+										</div>
 									</h:panelGroup>
 								</ui:repeat>
 							</div>
@@ -157,7 +162,29 @@
 
 							<div id="step-empresa" class="totem-step">
 								<h1 class="totem-h1">Selecione a Empresa</h1>
-								<div id="grid-empresas" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; width: 100%; padding: 10px;"></div>
+
+								<!-- Grid das empresas (Adicionado min-height para manter o tamanho) -->
+								<div id="grid-empresas"
+									style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; width: 100%; padding: 10px; min-height: 280px; align-content: start;"></div>
+
+								<!-- Controles de Paginação -->
+								<div id="paginacao-empresas"
+									style="display: none; justify-content: space-between; width: 100%; padding: 10px; margin-top: 15px;">
+									<button type="button" class="btn-totem btn-back"
+										id="btn-prev-emp" onclick="mudarPaginaEmpresa(-1)">
+										<i class="pi pi-chevron-left"></i> Anterior
+									</button>
+
+									<span id="indicador-pagina"
+										style="font-size: 1.5rem; font-weight: bold; align-self: center; color: #2c3e50;">Página
+										1</span>
+
+									<button type="button" class="btn-totem"
+										style="background: #3498db;" id="btn-next-emp"
+										onclick="mudarPaginaEmpresa(1)">
+										Próxima <i class="pi pi-chevron-right"></i>
+									</button>
+								</div>
 							</div>
 
 							<div id="step-obs" class="totem-step">
@@ -222,7 +249,12 @@
 			//<![CDATA[
 				let etapa = 'CPF';
 				let dados = { cpf: '', nome: '', empresaId: '', obs: '' };
-				const fluxo = ['CPF', 'NOME', 'EMPRESA', 'OBS'];
+				const fluxo = ['CPF', 'NOME', 'EMPRESA', 'OBS', 'FOTO'];
+				
+				// Variaveis de paginação
+				let empresasData = [];
+				let paginaAtualEmpresas = 0;
+				const itensPorPaginaEmpresas = 6; // Exibe 6 empresas por vez (2 linhas de 3)
 
 				window.onload = function() {
 					const numKeys = ['1','2','3','4','5','6','7','8','9','←','0','Limpar'];
@@ -235,27 +267,96 @@
 					carregarEmpresasDoJsf();
 				};
 
+				// 1. Apenas lê as empresas ocultas e guarda no Array
 				function carregarEmpresasDoJsf() {
-					const itens = document.querySelectorAll('.empresa-data-item');
-					const grid = document.getElementById('grid-empresas');
-					
-					if(itens.length > 0) {
-						itens.forEach(item => {
-							let id = item.getAttribute('data-id');
-							let nome = item.getAttribute('data-nome');
-							
-							let div = document.createElement('div');
-							div.style = "padding: 25px; background: #e6e6fa; border: 1px solid #ccc; border-radius: 10px; text-align: center; font-weight: bold; cursor: pointer;";
-							div.innerText = nome;
-							div.onclick = () => { 
-								dados.empresaId = id; 
-								proximo(); 
-							};
-							grid.appendChild(div);
-						});
-					} else {
-						grid.innerHTML = "<p>Nenhuma empresa encontrada.</p>";
-					}
+				    const itens = document.querySelectorAll('.empresa-data-item');
+				    empresasData = []; // Zera a lista
+				    
+				    if(itens.length > 0) {
+				        itens.forEach(item => {
+				            // Conversão segura: remove espaços e transforma em minúsculo antes de comparar
+				            let liberadoAttr = String(item.getAttribute('data-liberado')).trim().toLowerCase();
+				            
+				            empresasData.push({
+				                id: item.getAttribute('data-id'),
+				                nome: item.getAttribute('data-nome'),
+				                liberado: (liberadoAttr === 'true')
+				            });
+				        });
+				        paginaAtualEmpresas = 0; // Volta para a primeira página
+				        renderizarPaginaEmpresas();
+				    } else {
+				        document.getElementById('grid-empresas').innerHTML = "<p>Nenhuma empresa encontrada.</p>";
+				        document.getElementById('paginacao-empresas').style.display = 'none';
+				    }
+				}
+
+				// 2. Renderiza apenas as empresas da página atual
+				function renderizarPaginaEmpresas() {
+				    const grid = document.getElementById('grid-empresas');
+				    grid.innerHTML = ''; // Limpa as empresas exibidas
+				    
+				    const totalPaginas = Math.ceil(empresasData.length / itensPorPaginaEmpresas);
+				    const inicio = paginaAtualEmpresas * itensPorPaginaEmpresas;
+				    const fim = inicio + itensPorPaginaEmpresas;
+				    const itensPagina = empresasData.slice(inicio, fim); // Corta o array
+				    
+				    itensPagina.forEach(emp => {
+				        let div = document.createElement('div');
+				        
+				        // CSS Aprimorado: A empresa liberada terá sombra, escala maior e cor mais viva
+				        if (emp.liberado) {
+				            div.style.cssText = "padding: 25px; border: 3px solid #2ecc71; border-radius: 10px; text-align: center; font-weight: bold; cursor: pointer; background: #eafff5; color: #27ae60; box-shadow: 0 4px 10px rgba(46, 204, 113, 0.4); transform: scale(1.03); transition: all 0.2s ease-in-out;";
+				        } else {
+				            div.style.cssText = "padding: 25px; border: 1px solid #ddd; border-radius: 10px; text-align: center; font-weight: bold; cursor: not-allowed; background: #f9f9f9; color: #aaa; opacity: 0.6;";
+				        }
+				        
+				        div.innerText = emp.nome;
+				        div.onclick = () => { 
+				            if (!emp.liberado) {
+				                avisar("Esta empresa não permite autoatendimento. Ligue no ramal 95 / 96 para aprovacao");
+				            }
+				            dados.empresaId = emp.id; 
+				            proximo(); 
+				        };
+				        
+				        // Efeito de hover no JavaScript para a empresa liberada
+				        if (emp.liberado) {
+				            div.onmouseover = () => div.style.transform = "scale(1.05)";
+				            div.onmouseout = () => div.style.transform = "scale(1.03)";
+				        }
+				        
+				        grid.appendChild(div);
+				    });
+				    
+				    // Atualiza controles de paginação
+				    const controles = document.getElementById('paginacao-empresas');
+				    const btnPrev = document.getElementById('btn-prev-emp');
+				    const btnNext = document.getElementById('btn-next-emp');
+				    const indicador = document.getElementById('indicador-pagina');
+				    
+				    if (totalPaginas <= 1) {
+				        controles.style.display = 'none'; // Esconde a paginação se tiver menos que 6
+				    } else {
+				        controles.style.display = 'flex';
+				        indicador.innerText = `Página ${paginaAtualEmpresas + 1} de ${totalPaginas}`;
+				        
+				        // Esconde botão "Anterior" se estiver na primeira
+				        btnPrev.style.visibility = paginaAtualEmpresas > 0 ? 'visible' : 'hidden';
+				        // Esconde botão "Próxima" se estiver na última
+				        btnNext.style.visibility = paginaAtualEmpresas < totalPaginas - 1 ? 'visible' : 'hidden';
+				    }
+				}
+
+				// 3. Função chamada pelos botões Anterior e Próximo
+				function mudarPaginaEmpresa(direcao) {
+				    const totalPaginas = Math.ceil(empresasData.length / itensPorPaginaEmpresas);
+				    const novaPagina = paginaAtualEmpresas + direcao;
+				    
+				    if (novaPagina >= 0 && novaPagina < totalPaginas) {
+				        paginaAtualEmpresas = novaPagina;
+				        renderizarPaginaEmpresas();
+				    }
 				}
 
 				function montarTeclado(id, inputId, teclas) {
