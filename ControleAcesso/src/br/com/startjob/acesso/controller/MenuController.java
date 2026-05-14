@@ -191,19 +191,19 @@ public class MenuController extends BaseController {
 
 		DefaultSubMenu configuracaoes = DefaultSubMenu.builder()
 				.label(resource.recuperaChave("menu.configuracao", getFacesContext())).build();
+		
+		DefaultMenuItem rhidConfig = DefaultMenuItem.builder()
+				.value("Rhid configuração")
+				.styleClass("ui-simple-menu")
+				.url(BaseConstant.URL_APLICACAO + "/paginas/sistema/rhid/rhidConfig.xhtml").build();
+		configuracaoes.getElements().add(rhidConfig);
+		
 
 		DefaultMenuItem regras = DefaultMenuItem.builder()
 				.value(resource.recuperaChave("menu.configuracao.regras", getFacesContext()))
 				.styleClass("ui-simple-menu")
 				.url(BaseConstant.URL_APLICACAO + "/paginas/sistema/regras/pesquisaRegra.xhtml").build();
 		configuracaoes.getElements().add(regras);
-
-//        DefaultMenuItem importacao = DefaultMenuItem.builder()
-//        		.value(resource.recuperaChave("menu.configuracao.importacao", getFacesContext()))
-//                .styleClass("ui-simple-menu")
-//                .url("/paginas/cadastro/pesquisaUsuarios.xhtml")
-//                .build();
-//        configuracaoes.getElements().add(importacao);
 
 		DefaultMenuItem parametrosGerais = DefaultMenuItem.builder()
 				.value(resource.recuperaChave("menu.configuracao.gerais", getFacesContext()))

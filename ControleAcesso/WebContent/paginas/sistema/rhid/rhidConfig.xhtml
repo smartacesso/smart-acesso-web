@@ -1,0 +1,51 @@
+<ui:composition template="/tema/templates/template.xhtml"
+    xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:ui="http://java.sun.com/jsf/facelets"
+    xmlns:f="http://java.sun.com/jsf/core"
+    xmlns:h="http://java.sun.com/jsf/html"
+    xmlns:p="http://primefaces.org/ui">
+
+    <ui:define name="titulo">
+        #{msgs['title.sistema']} | Configuração RHID
+    </ui:define>
+
+    <ui:define name="conteudo">
+        <h:form id="formRhid">
+            <p:panel header="Integração RHID - Login Administrativo" styleClass="ui-fluid">
+                <div class="ui-g">
+                    <div class="ui-g-12 ui-md-4">
+                        <p:outputLabel value="E-mail (RHID):" for="emailRhid" />
+                        <p:inputText id="emailRhid" value="#{rhidConfigController.email}" 
+                                     placeholder="ex: adm@smartempresarial.com.br" />
+                    </div>
+
+                    <div class="ui-g-12 ui-md-4">
+                        <p:outputLabel value="Senha (RHID):" for="senhaRhid" />
+                        <p:password id="senhaRhid" value="#{rhidConfigController.senha}" 
+                                    redisplay="true" feedback="false" />
+                    </div>
+
+                    <div class="ui-g-12 ui-md-4">
+                        <p:outputLabel value="Domínio:" for="dominioRhid" />
+                        <p:inputText id="dominioRhid" value="#{rhidConfigController.dominio}" 
+                                     placeholder="ex: smartponto" />
+                    </div>
+                </div>
+
+                <f:facet name="footer">
+                    <p:commandButton value="Testar Conexão e Logar" 
+                                     actionListener="#{rhidConfigController.testarConexao()}"
+                                     update="formRhid" icon="pi pi-sign-in" 
+                                     style="width: auto" />
+                </f:facet>
+            </p:panel>
+
+            <!-- Área para exibir o resultado ou erros -->
+            <p:outputPanel id="displayResult" rendered="#{rhidConfigController.resultado != null}" style="margin-top: 20px">
+                <p:fieldset legend="Retorno da API">
+                    <h:outputText value="#{rhidConfigController.resultado}" style="word-break: break-all; font-family: monospace;" />
+                </p:fieldset>
+            </p:outputPanel>
+        </h:form>
+    </ui:define>
+</ui:composition>
