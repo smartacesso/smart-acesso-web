@@ -98,12 +98,15 @@ public class CorrespondenciaEntity extends BaseEntity {
     
     
  // Adicione na CorrespondenciaEntity
-    public CorrespondenciaEntity(Long id, Date dataRecebimento, String tipo, String codigoRastreio, String confirmaRetirada) {
+    public CorrespondenciaEntity(Long id, Date dataRecebimento, Date dataRetirada, String tipo, String codigoRastreio, String confirmaRetirada, String nomeQuemRetirou, String documentoQuemRetirou) {
         this.id = id;
         this.dataRecebimento = dataRecebimento;
+        this.dataRetirada = dataRetirada;
         this.tipo = tipo;
         this.codigoRastreio = codigoRastreio;
         this.confirmaRetirada = confirmaRetirada;
+        this.nomeQuemRetirou =  nomeQuemRetirou;
+        this.documentoQuemRetirou = documentoQuemRetirou;
     }
     
 	public Long getId() {

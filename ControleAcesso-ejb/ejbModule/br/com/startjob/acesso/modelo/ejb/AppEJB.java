@@ -90,7 +90,7 @@ public class AppEJB extends BaseEJB implements AppEJBRemote {
 	    
 	    StringBuilder jpql = new StringBuilder();
 	    jpql.append("SELECT new br.com.startjob.acesso.modelo.entity.CorrespondenciaEntity(");
-	    jpql.append("c.id, c.dataRecebimento, c.tipo, c.codigoRastreio, c.confirmaRetirada) "); 
+	    jpql.append("c.id, c.dataRecebimento, c.dataRetirada , c.tipo, c.codigoRastreio, c.confirmaRetirada, c.nomeQuemRetirou, c.documentoQuemRetirou) "); 
 	    jpql.append("FROM CorrespondenciaEntity c ");
 	    jpql.append("WHERE c.cliente.id = :idCliente "); 
 	    jpql.append("AND c.destinatario.id = :idPedestre "); 
