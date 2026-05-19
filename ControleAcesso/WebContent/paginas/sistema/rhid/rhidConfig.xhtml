@@ -10,7 +10,8 @@
     </ui:define>
 
     <ui:define name="conteudo">
-        <h:form id="formRhid">
+        <h:panelGroup id="painelRhid" layout="block">
+            
             <p:panel header="Integração RHID - Login Administrativo" styleClass="ui-fluid">
                 <div class="ui-g">
                     <div class="ui-g-12 ui-md-4">
@@ -33,19 +34,24 @@
                 </div>
 
                 <f:facet name="footer">
-                    <p:commandButton value="Testar Conexão e Logar" 
-                                     actionListener="#{rhidConfigController.testarConexao()}"
-                                     update="formRhid" icon="pi pi-sign-in" 
-                                     style="width: auto" />
+                    <p:messages id="msgs" showDetail="true" />
+
+                    <!-- O process e update agora apontam para o nosso panelGroup -->
+                    <p:commandButton value="Testar"
+                        actionListener="#{rhidConfigController.testarConexao}" 
+                        process="painelRhid"
+                        update="painelRhid" />
                 </f:facet>
             </p:panel>
 
             <!-- Área para exibir o resultado ou erros -->
-            <p:outputPanel id="displayResult" rendered="#{rhidConfigController.resultado != null}" style="margin-top: 20px">
+            <p:outputPanel id="displayResult" rendered="#{not empty rhidConfigController.resultado}" style="margin-top: 20px">
                 <p:fieldset legend="Retorno da API">
                     <h:outputText value="#{rhidConfigController.resultado}" style="word-break: break-all; font-family: monospace;" />
                 </p:fieldset>
             </p:outputPanel>
-        </h:form>
+
+        </h:panelGroup>
+
     </ui:define>
 </ui:composition>

@@ -1,16 +1,15 @@
 package br.com.startjob.acesso.controller.rhidController;
 
-import java.io.Serializable;
-
-import javax.faces.view.ViewScoped;
+import javax.annotation.PostConstruct;
 import javax.inject.Named;
+import javax.faces.view.ViewScoped; // IMPORTANTE: O ViewScoped correto para CDI
 
 import br.com.startjob.acesso.controller.BaseController;
 import br.com.startjob.acesso.services.rhid.RhidService;
 
-@Named("rhidConfigController")
+@Named
 @ViewScoped
-public class RhidConfigController extends BaseController implements Serializable {
+public class RhidConfigController extends BaseController{
 
     private static final long serialVersionUID = 1L;
 
@@ -18,25 +17,28 @@ public class RhidConfigController extends BaseController implements Serializable
     private String senha;
     private String dominio;
     private String resultado;
-
-    private final RhidService rhidService = new RhidService("https://rhid.com.br/v2");
+    private RhidService rhidService;
+    
+    
+    @PostConstruct
+    public void init() {
+        rhidService = new RhidService("https://rhid.com.br/v2");
+        System.out.println("Bean carregado - Se o escopo estiver certo, isso aparece só 1x por tela!");
+    }
 
     public void testarConexao() {
-
         try {
-
-            this.resultado = rhidService.login(email, senha, dominio);
-
-            System.out.println("Login realizado com sucesso!");
-
+            // Inicializa o serviço com o que o usuário digitou nos inputs da tela
+            rhidService.inicializarCredenciais(email, senha, dominio);
+            
+            // Força a autenticação para validar se as credenciais estão certas
+            this.resultado = rhidService.loginAutenticar(); 
         } catch (Exception e) {
-
-            e.printStackTrace();
-
             this.resultado = "Erro: " + e.getMessage();
         }
     }
 
+    // Getters e Setters
     public String getEmail() {
         return email;
     }
