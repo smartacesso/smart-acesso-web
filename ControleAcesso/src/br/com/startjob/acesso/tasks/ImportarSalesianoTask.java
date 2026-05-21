@@ -35,6 +35,7 @@ import br.com.startjob.acesso.modelo.enumeration.Genero;
 import br.com.startjob.acesso.modelo.enumeration.PerfilAcesso;
 import br.com.startjob.acesso.modelo.enumeration.Status;
 import br.com.startjob.acesso.modelo.enumeration.TipoPedestre;
+import br.com.startjob.acesso.modelo.utils.CpfUtils;
 import br.com.startjob.acesso.modelo.utils.EncryptionUtils;
 import br.com.startjob.acesso.services.BaseServlet;
 import br.com.startjob.acesso.to.TotvsEdu.NivelDeEnsino;
@@ -141,7 +142,7 @@ public class ImportarSalesianoTask extends TimerTask {
 
 	    for (CadastroDTO cadastro : cadastros) {
 
-	        String cpfNormalizado = normalizarCpfSeguro(cadastro.getCpf());
+	        String cpfNormalizado = CpfUtils.normalizarCpfSeguro(cadastro.getCpf());
 
 	        CadastroDTO existente = consolidadosPorCpf.get(cpfNormalizado);
 
@@ -306,7 +307,7 @@ public class ImportarSalesianoTask extends TimerTask {
 
 	    PedestreEntity pedestre = new PedestreEntity();
 	    pedestre.setNome(nome.toUpperCase());
-	    pedestre.setCpf(normalizarCpfSeguro(cpf));
+	    pedestre.setCpf(CpfUtils.normalizarCpfSeguro(cpf));
 	    pedestre.setCliente(cliente);
 	    pedestre.setGenero(Genero.fromString(genero));
 	    pedestre.setCodigoCartaoAcesso(codigoCartao);
@@ -334,7 +335,7 @@ public class ImportarSalesianoTask extends TimerTask {
 	    DepartamentoEntity departamento = recuperaDepartamento(tipo, empresa);
 	    
 	    pedestre.setNome(cadastro.getNome().toUpperCase());
-	    pedestre.setCpf(normalizarCpfSeguro(cadastro.getCpf()));
+	    pedestre.setCpf(CpfUtils.normalizarCpfSeguro(cadastro.getCpf()));
 	    pedestre.setStatus(permitido ? Status.ATIVO : Status.INATIVO);
 	    
 	    pedestre.setMatriculaReferencia(cadastro.getMatricula());
@@ -438,7 +439,7 @@ public class ImportarSalesianoTask extends TimerTask {
 	@SuppressWarnings("unchecked")
 	private PedestreEntity buscaPedestrePorNomeAndCpf(String nome, String cpf, Long idCliente) {
 		
-		String cpf_valido = normalizarCpfSeguro(cpf);
+		String cpf_valido = CpfUtils.normalizarCpfSeguro(cpf);
 		
 		Map<String, Object> args = new HashMap<String, Object>();
 		args.put("NOME", nome);
@@ -461,26 +462,6 @@ public class ImportarSalesianoTask extends TimerTask {
 
 		return null;
 	}
-	
-	public static String normalizarCpfSeguro(String cpf) {
-
-	    if (cpf == null) return null;
-
-	    String apenasNumeros = cpf.replaceAll("\\D", "");
-
-	    if (apenasNumeros.length() == 11) {
-	        return apenasNumeros;
-	    }
-
-	    // Se tiver mais de 11, pega os últimos 11 (caso comum em integrações)
-	    if (apenasNumeros.length() > 11) {
-	        return apenasNumeros.substring(apenasNumeros.length() - 11);
-	    }
-
-	    // Se tiver menos, completa com zeros à esquerda
-	    return String.format("%11s", apenasNumeros).replace(' ', '0');
-	}
-
 
 	@SuppressWarnings("unchecked")
 	private PedestreEntity buscaPedestrePorNome(String nome, Long idCliente) {
