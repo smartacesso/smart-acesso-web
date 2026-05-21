@@ -112,7 +112,16 @@ public class RhidService implements Serializable {
         // Dispara o fluxo seguro com token gerenciado
         return executarPostComToken("/customerdb/person.svc/a/", person);
     }
-
+    
+    /**
+     * BAIXAR AFD
+     */
+    public String baixarAfd(String dataIni, String dataFim, String jsonIdsEmpresas) {
+        String endpoint = String.format("/report.svc/exporta_arquivo/?tipo=afd&ini=%s&fim=%s", dataIni, dataFim);
+        
+        // jsonIdsEmpresas deve ser a string "[1]" ou similar, conforme seu curl
+        return executarPostComToken(endpoint, jsonIdsEmpresas);
+    }
     /**
      * Extrai o valor do token de dentro do JSON retornado pelo RHID
      */

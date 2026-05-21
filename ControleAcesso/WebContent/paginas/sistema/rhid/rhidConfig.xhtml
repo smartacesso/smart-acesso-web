@@ -9,49 +9,70 @@
         #{msgs['title.sistema']} | Configuração RHID
     </ui:define>
 
-    <ui:define name="conteudo">
-        <h:panelGroup id="painelRhid" layout="block">
-            
-            <p:panel header="Integração RHID - Login Administrativo" styleClass="ui-fluid">
-                <div class="ui-g">
-                    <div class="ui-g-12 ui-md-4">
-                        <p:outputLabel value="E-mail (RHID):" for="emailRhid" />
-                        <p:inputText id="emailRhid" value="#{rhidConfigController.email}" 
-                                     placeholder="ex: adm@smartempresarial.com.br" />
-                    </div>
-
-                    <div class="ui-g-12 ui-md-4">
-                        <p:outputLabel value="Senha (RHID):" for="senhaRhid" />
-                        <p:password id="senhaRhid" value="#{rhidConfigController.senha}" 
-                                    redisplay="true" feedback="false" />
-                    </div>
-
-                    <div class="ui-g-12 ui-md-4">
-                        <p:outputLabel value="Domínio:" for="dominioRhid" />
-                        <p:inputText id="dominioRhid" value="#{rhidConfigController.dominio}" 
-                                     placeholder="ex: smartponto" />
-                    </div>
+   <ui:define name="conteudo">
+    <h:panelGroup id="painelRhid" layout="block">
+        
+        <!-- ADICIONE ESTA LINHA: Ela é responsável por mostrar os alertas de sucesso/erro -->
+        <p:messages id="msgs" showDetail="true" closable="true" />
+        
+        <!-- 1. CONFIGURAÇÕES GLOBAIS E DE ROTINA -->
+        <p:panel header="Configurações Globais do RHiD" styleClass="ui-fluid">
+            <div class="ui-g">
+                <div class="ui-g-12 ui-md-3">
+                    <p:outputLabel value="E-mail Padrão:" for="emailGlobal" />
+                    <p:inputText id="emailGlobal" value="#{rhidConfigController.emailGlobal}" />
                 </div>
+                <div class="ui-g-12 ui-md-3">
+                    <p:outputLabel value="Senha Padrão:" for="senhaGlobal" />
+                    <p:password id="senhaGlobal" value="#{rhidConfigController.senhaGlobal}" redisplay="true" />
+                </div>
+                <div class="ui-g-12 ui-md-3">
+                    <p:outputLabel value="Extrair de:" for="periodo" />
+                    <p:selectOneMenu id="periodo" value="#{rhidConfigController.regraPeriodo}">
+                        <f:selectItem itemLabel="Mês Anterior" itemValue="MES_ANTERIOR" />
+                        <f:selectItem itemLabel="Últimos 30 Dias" itemValue="ULTIMOS_30_DIAS" />
+                    </p:selectOneMenu>
+                </div>
+                <div class="ui-g-12 ui-md-3">
+                    <p:outputLabel value="Executar:" for="recorrencia" />
+                    <p:selectOneMenu id="recorrencia" value="#{rhidConfigController.recorrencia}">
+                        <f:selectItem itemLabel="Todo dia 01" itemValue="DIA_01" />
+                        <f:selectItem itemLabel="Semanal" itemValue="SEMANAL" />
+                    </p:selectOneMenu>
+                </div>
+            </div>
+            <f:facet name="footer">
+                <p:commandButton value="Salvar Configurações" actionListener="#{rhidConfigController.salvarConfiguracaoGlobal}" update="msgs" icon="pi pi-save"/>
+            </f:facet>
+        </p:panel>
 
-                <f:facet name="footer">
-                    <p:messages id="msgs" showDetail="true" />
+        <!-- 2. GESTÃO DOS DOMÍNIOS -->
+        <p:panel header="Domínios para Extração" style="margin-top: 20px;">
+            <div class="ui-g ui-fluid">
+                <div class="ui-g-12 ui-md-4">
+                    <p:inputText value="#{rhidConfigController.novoDominio}" placeholder="Nome do Domínio (ex: direcional1)" />
+                </div>
+                <div class="ui-g-12 ui-md-4">
+                    <p:inputText value="#{rhidConfigController.novoIds}" placeholder="IDs Empresa (ex: [1])" />
+                </div>
+                <div class="ui-g-12 ui-md-4">
+                    <p:commandButton value="Adicionar" actionListener="#{rhidConfigController.adicionarDominio}" update="tabelaDominios" icon="pi pi-plus" />
+                </div>
+            </div>
 
-                    <!-- O process e update agora apontam para o nosso panelGroup -->
-                    <p:commandButton value="Testar"
-                        actionListener="#{rhidConfigController.testarConexao}" 
-                        process="painelRhid"
-                        update="painelRhid" />
-                </f:facet>
-            </p:panel>
+            <p:dataTable id="tabelaDominios" value="#{rhidConfigController.listaDominios}" var="dom" emptyMessage="Nenhum domínio cadastrado." style="margin-top: 15px;">
+                <p:column headerText="Domínio do RHiD">
+                    <h:outputText value="#{dom.nome}" />
+                </p:column>
+                <p:column headerText="Payload (IDs)">
+                    <h:outputText value="#{dom.ids}" />
+                </p:column>
+                <p:column headerText="Ação" width="100" style="text-align: center;">
+                    <p:commandButton icon="pi pi-trash" actionListener="#{rhidConfigController.removerDominio(dom)}" update="tabelaDominios" styleClass="ui-button-danger" />
+                </p:column>
+            </p:dataTable>
+        </p:panel>
 
-            <!-- Área para exibir o resultado ou erros -->
-            <p:outputPanel id="displayResult" rendered="#{not empty rhidConfigController.resultado}" style="margin-top: 20px">
-                <p:fieldset legend="Retorno da API">
-                    <h:outputText value="#{rhidConfigController.resultado}" style="word-break: break-all; font-family: monospace;" />
-                </p:fieldset>
-            </p:outputPanel>
-
-        </h:panelGroup>
-
-    </ui:define>
+    </h:panelGroup>
+</ui:define>
 </ui:composition>
