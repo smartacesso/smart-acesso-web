@@ -37,6 +37,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.primefaces.PrimeFaces;
 import org.primefaces.event.CaptureEvent;
 import org.primefaces.event.FileUploadEvent;
+import org.primefaces.event.SelectEvent;
 import org.primefaces.event.TabChangeEvent;
 import org.primefaces.model.CroppedImage;
 import org.primefaces.model.DefaultStreamedContent;
@@ -144,8 +145,8 @@ public class CadastroPedestreController extends CadastroBaseController {
 
 	private PedestreRegraEntity pedestreRegra;
 	
-	private List<ResponsibleEntity> responsaveis;
-	private ResponsibleEntity responsavel;
+	private List<PedestreEntity> responsaveis;
+	private PedestreEntity responsavel;
 
 	private List<PedestreRegraEntity> listaPedestreRegra;
 
@@ -415,13 +416,13 @@ public class CadastroPedestreController extends CadastroBaseController {
 		mensagemEquipamento = new MensagemEquipamentoEntity();
 		pedestreEquipamento = new PedestreEquipamentoEntity();
 		pedestreRegra = new PedestreRegraEntity();
-		responsavel = new ResponsibleEntity();
+		responsavel = new PedestreEntity();
 
 		listaDocumentos = new ArrayList<DocumentoEntity>();
 		listaMensagensEquipamento = new ArrayList<MensagemEquipamentoEntity>();
 		listaPedestresEquipamentos = new ArrayList<PedestreEquipamentoEntity>();
 		listaPedestreRegra = new ArrayList<PedestreRegraEntity>();
-		responsaveis = new ArrayList<ResponsibleEntity>();
+		responsaveis = new ArrayList<PedestreEntity>();
 		listaCotas = new ArrayList<HistoricoCotaEntity>(); 
 	}
 
@@ -554,7 +555,7 @@ public class CadastroPedestreController extends CadastroBaseController {
 		}
 		
 		if (pedestre.getResponsaveis() != null && !pedestre.getResponsaveis().isEmpty()) {
-		    responsaveis = new ArrayList<>(pedestre.getResponsaveis());
+		    responsaveis = new ArrayList<PedestreEntity>(pedestre.getResponsaveis());
 		} else {
 		    responsaveis = new ArrayList<>();
 		}
@@ -1229,25 +1230,13 @@ public class CadastroPedestreController extends CadastroBaseController {
 
 		return regras;
 	}
-
-	@SuppressWarnings("unchecked")
-	public List<ResponsibleEntity> findResponsibleAutoFill(final String nome) {
-		List<ResponsibleEntity> responsible = null;
-
-		try {
-			Map<String, Object> args = new HashMap<String, Object>();
-			args.put("NOME", "%" + nome + "%");
-			args.put("ID_CLIENTE", getUsuarioLogado().getCliente().getId());
-
-			responsible = (List<ResponsibleEntity>) baseEJB.pesquisaArgFixos(ResponsibleEntity.class, "findAllByNome",
-					args);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		return responsible;
+	
+	public List<PedestreEntity> completeResponsavel(String nome) {
+		// Busca baseada no cliente logado para não vazar dados entre condomínios
+		return pedestreEJB.buscaPedestrePorNomeAndIdCliente(nome, getUsuarioLogado().getCliente().getId());
 	}
 
+	
 	public void montaListaTipoRegra() {
 		listaTipoRegra = new ArrayList<SelectItem>();
 		listaTipoRegra.add(new SelectItem(null, "Selecione"));
@@ -2538,6 +2527,33 @@ public class CadastroPedestreController extends CadastroBaseController {
 
 	    this.listaRelatorios = acessos;
 	}
+	
+	public void adicionarResponsavel(
+	        SelectEvent<PedestreEntity> event){
+
+	    PedestreEntity selecionado =
+	            event.getObject();
+
+	    if(responsaveis == null){
+	        responsaveis = new ArrayList<>();
+	    }
+
+	    boolean existe =
+	            responsaveis
+	            .stream()
+	            .anyMatch(r ->
+	                r.getId()
+	                .equals(
+	                    selecionado.getId()));
+
+	    if(!existe){
+
+	        responsaveis.add(
+	                selecionado);
+	    }
+
+	    responsavel = null;
+	}
 
 	public void onTabChange(TabChangeEvent event) {
 	    String tituloAba = event.getTab().getTitle();
@@ -2926,19 +2942,19 @@ public class CadastroPedestreController extends CadastroBaseController {
 		this.habilitaAppPedestre = habilitaAppPedestre;
 	}
 
-	public ResponsibleEntity getResponsavel() {
+	public PedestreEntity getResponsavel() {
 		return responsavel;
 	}
 
-	public void setResponsavel(ResponsibleEntity responsavel) {
+	public void setResponsavel(PedestreEntity responsavel) {
 		this.responsavel = responsavel;
 	}
 
-	public List<ResponsibleEntity> getResponsaveis() {
+	public List<PedestreEntity> getResponsaveis() {
 		return responsaveis;
 	}
 
-	public void setResponsaveis(List<ResponsibleEntity> responsaveis) {
+	public void setResponsaveis(List<PedestreEntity> responsaveis) {
 		this.responsaveis = responsaveis;
 	}
 

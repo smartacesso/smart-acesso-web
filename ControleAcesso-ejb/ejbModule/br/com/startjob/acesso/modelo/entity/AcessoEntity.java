@@ -163,7 +163,9 @@ public class AcessoEntity extends ClienteBaseEntity {
 
 	}
 	
-	public AcessoEntity(Long id, Date data, String sentido) {
+	public AcessoEntity(Long id, Date data, String sentido, String nome) {
+		this.pedestre = new PedestreEntity();
+		this.pedestre.setNome(nome);
 	    this.id = id;
 	    this.data = data;
 	    this.sentido = sentido;

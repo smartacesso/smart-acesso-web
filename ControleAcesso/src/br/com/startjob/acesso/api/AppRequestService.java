@@ -1,9 +1,13 @@
 package br.com.startjob.acesso.api;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
 import javax.ejb.EJB;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -22,8 +26,10 @@ import br.com.startjob.acesso.modelo.entity.AcessoEntity;
 import br.com.startjob.acesso.modelo.entity.ClienteEntity;
 import br.com.startjob.acesso.modelo.entity.CorrespondenciaEntity;
 import br.com.startjob.acesso.modelo.entity.PedestreEntity;
+import br.com.startjob.acesso.modelo.enumeration.PerfilAcessoApp;
 import br.com.startjob.acesso.modelo.enumeration.TipoPedestre;
 import br.com.startjob.acesso.modelo.utils.CriptografiaAES;
+import br.com.startjob.acesso.modelo.utils.EncryptionUtils;
 import br.com.startjob.acesso.to.app.AcessosRequest;
 import br.com.startjob.acesso.to.app.CadastroRequest;
 import br.com.startjob.acesso.to.app.EncomendaRequest;
@@ -75,18 +81,23 @@ public class AppRequestService extends BaseService {
 			System.out.println("usuario encontrado");
 
 			// ⚠️ ideal: usar BCrypt
-			if (!usuario.getSenha().equals(request.getSenha())) {
+			if (!usuario.getSenha().equals(EncryptionUtils.encrypt(request.getSenha()))) {
 				return Response.status(Status.UNAUTHORIZED).entity("Senha inválida").build();
 			}
 			System.out.println("senha valida");
 
-			String token = JwtUtil.gerarToken(usuario.getId(), request.getCliente());
+			if (usuario.getPerfilApp() == null) {
+				return Response.status(Status.BAD_REQUEST).entity("Sem perfil de usuario").build();
+			}
+			
+			String token = JwtUtil.gerarToken(usuario.getId(), request.getCliente(), usuario.getPerfilApp().name());
 
 			// montar resposta
 			UsuarioDTO userDto = new UsuarioDTO();
 			userDto.setId(usuario.getId());
 			userDto.setNome(usuario.getLogin());
 			userDto.setCliente(request.getCliente());
+			userDto.setPerfil(usuario.getPerfilApp().name());
 
 			LoginResponse response = new LoginResponse();
 			response.setToken(token);
@@ -105,74 +116,144 @@ public class AppRequestService extends BaseService {
 	@Path("/acessos")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response acessos(@Context HttpHeaders headers, AcessosRequest request) {
+	public Response acessos(
+	        @Context HttpHeaders headers,
+	        AcessosRequest request) {
 
-	    // 1. Extrair o Header de Autorização
-	    String authHeader = headers.getHeaderString(HttpHeaders.AUTHORIZATION);
+	    String authHeader =
+	            headers.getHeaderString(
+	                    HttpHeaders.AUTHORIZATION);
 
-	    if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-	        return Response.status(Status.UNAUTHORIZED).entity("Token não fornecido").build();
+	    if (authHeader == null
+	            || !authHeader.startsWith("Bearer ")) {
+
+	        return Response
+	                .status(Status.UNAUTHORIZED)
+	                .entity("Token não fornecido")
+	                .build();
 	    }
 
-	    String token = authHeader.substring(7); // Remove o "Bearer "
+	    String token = authHeader.substring(7);
 
 	    try {
-	        // 2. Validar o Token usando sua JwtUtil
-	        Claims claims = JwtUtil.validarToken(token);
-	        
-	        // Recuperar dados que você guardou no token
-	        Long userId = Long.parseLong(claims.getSubject());
-	        String clienteNome = (String) claims.get("cliente");
-	        
-	        ClienteEntity cliente = appEjb.buscaClientesPorUnidadeOrganizacional(clienteNome);
 
-	        // 3. Validar o corpo da requisição
+	        Claims claims =
+	                JwtUtil.validarToken(token);
+
+	        Long userId =
+	                Long.parseLong(
+	                        claims.getSubject());
+
+	        String clienteNome =
+	                (String) claims.get("cliente");
+
+	        String perfil =
+	                (String) claims.get("perfil");
+
+	        ClienteEntity cliente =
+	                appEjb.buscaClientesPorUnidadeOrganizacional(
+	                        clienteNome);
+
 	        if (request == null) {
-	            return Response.status(Status.BAD_REQUEST).entity("Corpo da requisição vazio").build();
+
+	            return Response
+	                    .status(Status.BAD_REQUEST)
+	                    .entity("Corpo da requisição vazio")
+	                    .build();
 	        }
 
-	        // 4. Lógica de Negócio (exemplo: buscar acessos no banco)
-	        // 4. Chamar o EJB com filtros de data e paginação
-	        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-	        
+	        SimpleDateFormat sdf =
+	                new SimpleDateFormat(
+	                        "yyyy-MM-dd");
+
 	        Date dataInicio = null;
 	        Date dataFim = null;
 
-	     // 1. Trata Data Início
-	        if (request.getDataInicio() != null && !request.getDataInicio().isEmpty()) {
-	            dataInicio = sdf.parse(request.getDataInicio());
+	        if (request.getDataInicio() != null
+	                && !request.getDataInicio().isEmpty()) {
+
+	            dataInicio =
+	                    sdf.parse(
+	                            request.getDataInicio());
 	        }
 
-	        // 2. Trata Data Fim
-	        if (request.getDataFim() != null && !request.getDataFim().isEmpty()) {
-	            dataFim = sdf.parse(request.getDataFim());
-	            
-	            // Ajusta para o final do dia
-	            Calendar cal = Calendar.getInstance();
+	        if (request.getDataFim() != null
+	                && !request.getDataFim().isEmpty()) {
+
+	            dataFim =
+	                    sdf.parse(
+	                            request.getDataFim());
+
+	            Calendar cal =
+	                    Calendar.getInstance();
+
 	            cal.setTime(dataFim);
-	            cal.set(Calendar.HOUR_OF_DAY, 23);
-	            cal.set(Calendar.MINUTE, 59);
-	            cal.set(Calendar.SECOND, 59);
-	            cal.set(Calendar.MILLISECOND, 999);
+
+	            cal.set(
+	                    Calendar.HOUR_OF_DAY,
+	                    23);
+
+	            cal.set(
+	                    Calendar.MINUTE,
+	                    59);
+
+	            cal.set(
+	                    Calendar.SECOND,
+	                    59);
+
+	            cal.set(
+	                    Calendar.MILLISECOND,
+	                    999);
+
 	            dataFim = cal.getTime();
+
 	        } else {
-	             dataFim = new Date(); 
+
+	            dataFim = new Date();
 	        }
+
+	        Set<Long> idsPermitidos = new HashSet<>();
+
+	        PerfilAcessoApp perfilApp = PerfilAcessoApp.valueOf(perfil);
+
+	        switch (perfilApp) {
+	            case RESPONSAVEL:
+	                idsPermitidos.add(userId);
+	                idsPermitidos.addAll(appEjb.buscarIdsTutorados(userId));
+	                break;
+	            case GERENCIAL:
+	                idsPermitidos.add(userId);
+	              idsPermitidos.addAll(appEjb.buscarIdsFuncionarios(userId));
+	                break;
+	            case COMUM:
+	            default:
+	                idsPermitidos.add(userId);
+	        }
+
+	        // Converte o Set de volta para List só para passar para a consulta
+	        List<Long> listaIdsParaBusca = new ArrayList<>(idsPermitidos);
 
 	        List<AcessoEntity> lista = appEjb.buscarAcessosPaginados(
-	        	userId,
-	        	cliente.getId(), 
-	            dataInicio, 
-	            dataFim,
-	            request.getPagina(),
-	            request.getTamanho()
-	        );
+	                listaIdsParaBusca, // Passa a lista limpa aqui!
+	                cliente.getId(),
+	                dataInicio,
+	                dataFim,
+	                request.getPagina(),
+	                request.getTamanho());
 
-	        return Response.ok(lista).build();
-	        
+	        return Response
+	                .ok(lista)
+	                .build();
+
 	    } catch (Exception e) {
-	        // Se o token estiver expirado ou a assinatura for inválida, cairá aqui
-	        return Response.status(Status.UNAUTHORIZED).entity("Token inválido ou expirado").build();
+
+	        e.printStackTrace();
+
+	        return Response
+	                .status(Status.UNAUTHORIZED)
+	                .entity(
+	                        "Token inválido ou erro na consulta")
+	                .build();
 	    }
 	}
 	

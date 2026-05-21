@@ -1625,12 +1625,6 @@ public class DesktopApiService extends BaseService {
 		} catch (Exception e) {
 		}
 		try {
-			visitante.setTipoAcesso(jsonObject.getString("tipoAcesso"));
-			if ("".equals(visitante.getTipoAcesso()))
-				visitante.setTipoAcesso(null);
-		} catch (Exception e) {
-		}
-		try {
 			visitante.setTipoQRCode(TipoQRCode.valueOf(jsonObject.getString("tipoQRCode")));
 		} catch (Exception e) {
 		}

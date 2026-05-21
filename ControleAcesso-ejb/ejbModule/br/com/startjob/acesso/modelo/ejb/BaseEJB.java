@@ -2061,7 +2061,7 @@ public class BaseEJB implements BaseEJBRemote {
 			String title = "Smart Acesso";
 			String message = String.format("Acesso de: %s deu %s", pedestre.getNome(), acesso.getSentido());
 
-			for (ResponsibleEntity responsavel : pedestre.getResponsaveis()) {
+			for (PedestreEntity responsavel : pedestre.getResponsaveis()) {
 				String deviceKey = responsavel.getDeviceKey();
 
 				if (deviceKey == null || deviceKey.trim().isEmpty()) {

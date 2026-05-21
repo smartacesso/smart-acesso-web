@@ -58,8 +58,7 @@
 							required="#{cadastroPedestreController.verificaObrigatorio('cpf')}"
 							disabled="#{not cadastroPedestreController.usuarioTemPermissao()}"
 							rendered="#{cadastroPedestreController.usuarioTemPermissao()}"
-							style="width: 100%" 
-							onclick="this.setSelectionRange(0,0);">
+							style="width: 100%" onclick="this.setSelectionRange(0,0);">
 
 							<p:ajax event="change" process="@this"
 								listener="#{cadastroPedestreController.onCpfBlur}" />
@@ -184,7 +183,7 @@
 							<f:selectItems value="#{cadastroPedestreController.listaCargos}" />
 						</p:selectOneMenu>
 					</div>
-					
+
 					<div class="ui-g-12 ui-md-12">
 						<p:outputLabel value="Local" for="local" />
 						<p:selectOneMenu id="local"
@@ -226,15 +225,19 @@
 						<div class="ui-g-12 ui-md-6">
 							<p:outputLabel value="#{msgs['label.uc008.tipo.acesso']}"
 								for="tipoAcesso" />
+
 							<p:selectOneMenu id="tipoAcesso"
-								value="#{cadastroPedestreController.entidade.tipoAcesso}"
-								required="#{cadastroPedestreController.entidade.login != null}"
+								value="#{cadastroPedestreController.entidade.perfilApp}"
 								style="width: 100%">
-								<f:selectItem itemValue="" itemLabel="Selecione" />
-								<f:selectItem itemValue="NORMAL"
-									itemLabel="#{msgs['label.tipo.acesso.normal']}" />
+
+								<!-- A primeira opção agora é o COMUM, então ele já virá selecionado por padrão na tela -->
+								<f:selectItem itemValue="COMUM"
+									itemLabel="COMUM" />
+								<f:selectItem itemValue="RESPONSAVEL"
+									itemLabel="RESPONSAVEL" />
 								<f:selectItem itemValue="GERENCIAL"
-									itemLabel="#{msgs['label.tipo.acesso.gerencial']}" />
+									itemLabel="GERENCIAL" />
+
 							</p:selectOneMenu>
 						</div>
 					</h:panelGroup>

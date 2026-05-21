@@ -82,7 +82,6 @@ public class PedestrianAccessTO {
 	
 	private String login;
 	private String senha;
-	private String tipoAcesso;
 	private String tipoQRCode;
 	private Date dataCadastroFotoNaHikivision;
 	private String fotoBase64;
@@ -174,9 +173,6 @@ public class PedestrianAccessTO {
 			this.senha = objects[65] == null ? null : objects[65].toString();
 		}catch (Exception e) {}
 		try {
-			this.tipoAcesso = objects[66] == null ? null : objects[66].toString();
-		}catch (Exception e) {}
-		try {
 			this.tipoQRCode = objects[67] == null ? null : objects[67].toString();
 		}catch (Exception e) {}
 		try {
@@ -226,7 +222,6 @@ public class PedestrianAccessTO {
 	        this.qtdAcessoAntesSinc = entity.getQtdAcessoAntesSinc();
 	        this.login = entity.getLogin();
 	        this.dataCadastroFotoNaHikivision = entity.getDataCadastroFotoNaHikivision();
-	        this.tipoAcesso = entity.getTipoAcesso();
 	        this.dataInicioPeriodoAgendamento = entity.getDataInicioPeriodoAgendamento();
 	        this.dataFimPeriodoAgendamento = entity.getDataFimPeriodoAgendamento();
 	        this.justificativa = entity.getJustificativa();
@@ -879,14 +874,6 @@ public class PedestrianAccessTO {
 
 	public void setSenha(String senha) {
 		this.senha = senha;
-	}
-
-	public String getTipoAcesso() {
-		return tipoAcesso;
-	}
-
-	public void setTipoAcesso(String tipoAcesso) {
-		this.tipoAcesso = tipoAcesso;
 	}
 
 	public String getTipoQRCode() {

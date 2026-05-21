@@ -380,7 +380,7 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 				"		usuario.ID_USUARIO as idUsuario, " + // 63
 				" 		rp.BLOQUEADO AS bloqueioRegra, " + // 64
 				"       pd.senha as senha, " + // 65
-				"       pd.TIPO_ACESSO as tipoAcesso, " + // 66
+				"       '' as tipoAcesso, " + //66
 				"       pd.TIPO_QRCODE as tipoQRCode, " + // 67
 				"		pd.DATA_CADASTRO_FOTO_HIKIVISION as dataCadastroFotoHikivision, " + // 68
 				"		h2.ID_PEDESTRE_REGRA as idPedestreRegraPR, " + // 69

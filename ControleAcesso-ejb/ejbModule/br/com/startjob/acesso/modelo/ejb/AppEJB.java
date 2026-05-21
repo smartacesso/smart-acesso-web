@@ -1,5 +1,6 @@
 package br.com.startjob.acesso.modelo.ejb;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -54,14 +55,26 @@ public class AppEJB extends BaseEJB implements AppEJBRemote {
 		return null;
 	}
 	
-	public List<AcessoEntity> buscarAcessosPaginados(Long userId, Long cliente, Date dataInicio, Date dataFim, int pagina, int tamanho) {
+	public List<AcessoEntity> buscarAcessosPaginados(List<Long> ids, Long cliente, Date dataInicio, Date dataFim, int pagina, int tamanho) {
+
+	    if (ids == null || ids.isEmpty()) {
+	        return new ArrayList<>();
+	    }
 
 	    StringBuilder jpql = new StringBuilder();
-	    jpql.append("SELECT new br.com.startjob.acesso.modelo.entity.AcessoEntity(");
-	    jpql.append("a.id, a.data, a.sentido) "); // Ordem deve ser igual ao construtor
+	    
+	    // 1. DISTINCT obriga o banco a NÃO repetir linhas
+	    jpql.append("SELECT DISTINCT new br.com.startjob.acesso.modelo.entity.AcessoEntity(");
+	    
+	    // 2. Pega o nome direto (a.pedestre.nome), sem precisar escrever JOIN em lugar nenhum
+	    jpql.append("a.id, a.data, a.sentido, a.pedestre.nome) "); 
+	    
 	    jpql.append("FROM AcessoEntity a ");
+	    
+	    // ATENÇÃO: O "JOIN a.pedestre p" FOI APAGADO DAQUI!
+	    
 	    jpql.append("WHERE a.cliente.id = :cliente "); 
-	    jpql.append("AND a.pedestre.id = :idPedestre "); 
+	    jpql.append("AND a.pedestre.id IN :ids "); 
 
 	    if (dataInicio != null) {
 	        jpql.append("AND a.data >= :inicio ");
@@ -75,7 +88,7 @@ public class AppEJB extends BaseEJB implements AppEJBRemote {
 	    TypedQuery<AcessoEntity> query = em.createQuery(jpql.toString(), AcessoEntity.class);
 
 	    query.setParameter("cliente", cliente);
-	    query.setParameter("idPedestre", userId);
+	    query.setParameter("ids", ids);
 	    
 	    if (dataInicio != null) query.setParameter("inicio", dataInicio);
 	    if (dataFim != null) query.setParameter("fim", dataFim);
@@ -106,5 +119,42 @@ public class AppEJB extends BaseEJB implements AppEJBRemote {
 	    query.setMaxResults(tamanho);
 
 	    return query.getResultList();
+	}
+
+	@Override
+	public List<Long> buscarIdsTutorados(Long userId) {
+	    StringBuilder jpql = new StringBuilder();
+	    
+	    // Busca apenas o ID para otimizar a consulta
+	    jpql.append("SELECT p.id FROM PedestreEntity p ");
+	    jpql.append("JOIN p.responsaveis r ");
+	    jpql.append("WHERE r.id = :userId ");
+	    jpql.append("AND (p.removido = false OR p.removido is null) ");
+
+	    TypedQuery<Long> query = em.createQuery(jpql.toString(), Long.class);
+	    query.setParameter("userId", userId);
+
+	    List<Long> ids = query.getResultList();
+	    
+	     return ids;
+	}
+
+	@Override
+	public List<Long> buscarIdsFuncionarios(Long userId) {
+
+	    String jpql =
+	        "SELECT p.id " +
+	        "FROM PedestreEntity p " +
+	        "WHERE p.empresa.id = (" +
+	        "   SELECT p2.empresa.id " +
+	        "   FROM PedestreEntity p2 " +
+	        "   WHERE p2.id = :userId" +
+	        ") " +
+	        "AND (p.removido = false OR p.removido IS NULL) " +
+	        "AND p.tipo = 'PEDESTRE'";
+
+	    return em.createQuery(jpql, Long.class)
+	            .setParameter("userId", userId)
+	            .getResultList();
 	}
 }

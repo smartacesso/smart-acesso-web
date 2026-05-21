@@ -4,6 +4,7 @@ public class UsuarioDTO {
     private Long id;
     private String nome;
     private String cliente;
+    private String perfil;
     
 	public Long getId() {
 		return id;
@@ -23,6 +24,13 @@ public class UsuarioDTO {
 	public void setCliente(String cliente) {
 		this.cliente = cliente;
 	}
+	
+    public String getPerfil() {
+        return perfil;
+    }
 
-    // getters e setters
+    public void setPerfil(String perfil) {
+        this.perfil = perfil;
+    }
+
 }

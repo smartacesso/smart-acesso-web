@@ -11,10 +11,11 @@ public class JwtUtil {
 	private static final String SECRET = System.getProperty("jwt.secret");
     private static final long EXPIRATION = 1000 * 60 * 60 * 8; // 8h
 
-    public static String gerarToken(Long userId, String cliente) {
+    public static String gerarToken(Long userId, String cliente, String perfil) {
         return Jwts.builder()
                 .setSubject(String.valueOf(userId))
                 .claim("cliente", cliente)
+                .claim("perfil", perfil)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION))
                 .signWith(SignatureAlgorithm.HS256, SECRET)

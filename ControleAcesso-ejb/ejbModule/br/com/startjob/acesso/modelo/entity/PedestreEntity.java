@@ -40,6 +40,7 @@ import com.totvs.dto.FuncionarioTotvsDto;
 
 import br.com.startjob.acesso.modelo.entity.base.ClienteBaseEntity;
 import br.com.startjob.acesso.modelo.enumeration.Genero;
+import br.com.startjob.acesso.modelo.enumeration.PerfilAcessoApp;
 import br.com.startjob.acesso.modelo.enumeration.Status;
 import br.com.startjob.acesso.modelo.enumeration.TipoPedestre;
 import br.com.startjob.acesso.modelo.enumeration.TipoQRCode;
@@ -206,8 +207,8 @@ import br.com.startjob.acesso.modelo.utils.EncryptionUtils;
 			          + "and (obj.removido = false or obj.removido is null) "
 			          + "order by obj.id desc"),
 		@NamedQuery(name = "PedestreEntity.findByLoginOtimizado",
-			    query = "select new br.com.startjob.acesso.modelo.entity.PedestreEntity(" +
-			            " obj.id, obj.login, obj.senha ) " +
+			 query = "select new br.com.startjob.acesso.modelo.entity.PedestreEntity(" +
+			            " obj.id, obj.login, obj.senha, obj.perfilApp ) " +
 			            "from PedestreEntity obj " +
 			            "join obj.cliente c " +
 			            "where obj.removido = null " +
@@ -355,9 +356,6 @@ public class PedestreEntity extends ClienteBaseEntity {
 	@Transient
 	private String senhaLivre;
 
-	@Column(name = "TIPO_ACESSO", nullable = true, length = 255)
-	private String tipoAcesso;
-
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true, targetEntity = PedestreRegraEntity.class, mappedBy = "pedestre")
 	@Fetch(FetchMode.SUBSELECT)
 	@OrderBy("dataCriacao desc")
@@ -402,13 +400,15 @@ public class PedestreEntity extends ClienteBaseEntity {
 	
 	@ManyToMany
 	@JoinTable(
-	    name = "aluno_responsavel",
+	    name = "pedestre_responsavel",
 	    joinColumns = @JoinColumn(name = "id_pedestre"),
 	    inverseJoinColumns = @JoinColumn(name = "id_responsavel")
 	)
-	private List<ResponsibleEntity> responsaveis;
-	
-	
+	private List<PedestreEntity> responsaveis;
+
+	@ManyToMany(mappedBy = "responsaveis")
+	private List<PedestreEntity> tutorados;
+
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "DATA_INICIO_PERIODO_AGENDAMENTO", nullable = true, length = 30)
 	private Date dataInicioPeriodoAgendamento;
@@ -446,14 +446,23 @@ public class PedestreEntity extends ClienteBaseEntity {
 	@Transient
 	private boolean selecionadoEmMassa;
 	
+	@Enumerated(EnumType.STRING)
+	@Column(name = "PERFIL_APP", nullable = true)
+	private PerfilAcessoApp perfilApp;
+	
+	@Column(name = "DEVICE_KEY", nullable = true, length = 255)
+	private String deviceKey;
+
+
 	public PedestreEntity() {
 
 	}
 	
-	public PedestreEntity(Long id, String login, String senha) {
-		this.id = id;
+	public PedestreEntity(Long id, String login, String senha, PerfilAcessoApp perfilApp) {
+	    this.id = id;
 	    this.login = login;
 	    this.senha = senha;
+	    this.perfilApp = perfilApp;
 	}
 	
 	// CONSTRUTOR OTIMIZADO PARA A TELA (Substitui o DTO)
@@ -954,14 +963,6 @@ public class PedestreEntity extends ClienteBaseEntity {
 		this.senha = senha;
 	}
 
-	public String getTipoAcesso() {
-		return tipoAcesso;
-	}
-
-	public void setTipoAcesso(String tipoAcesso) {
-		this.tipoAcesso = tipoAcesso;
-	}
-
 	public String getSenhaLivre() {
 		return senhaLivre;
 	}
@@ -1028,15 +1029,6 @@ public class PedestreEntity extends ClienteBaseEntity {
 		this.codigoPermissao = codigoPermissao;
 	}
 
-//	public ResponsibleEntity getResponsavel() {
-//		return responsavel;
-//	}
-//
-//	public void setResponsavel(ResponsibleEntity responsavel) {
-//		this.responsavel = responsavel;
-//
-//	}
-
 	public List<HistoricoCotaEntity> getCotas() {
 		return cotas;
 	}
@@ -1045,12 +1037,12 @@ public class PedestreEntity extends ClienteBaseEntity {
 		this.cotas = cotas;
 	}
 
-	public List<ResponsibleEntity> getResponsaveis() {
-		return responsaveis;
+	public List<PedestreEntity> getResponsaveis() {
+	    return responsaveis;
 	}
 
-	public void setResponsaveis(List<ResponsibleEntity> responsaveis) {
-		this.responsaveis = responsaveis;
+	public void setResponsaveis(List<PedestreEntity> responsaveis) {
+	    this.responsaveis = responsaveis;
 	}
 
 	public Boolean getAutoAtendimento() {
@@ -1148,4 +1140,29 @@ public class PedestreEntity extends ClienteBaseEntity {
 	public void setSelecionadoEmMassa(boolean selecionadoEmMassa) {
 	    this.selecionadoEmMassa = selecionadoEmMassa;
 	}
+	
+	public PerfilAcessoApp getPerfilApp() {
+	    return perfilApp;
+	}
+
+	public void setPerfilApp(PerfilAcessoApp perfilApp) {
+	    this.perfilApp = perfilApp;
+	}
+	
+	public List<PedestreEntity> getTutorados() {
+	    return tutorados;
+	}
+
+	public void setTutorados(List<PedestreEntity> tutorados) {
+	    this.tutorados = tutorados;
+	}
+
+	public String getDeviceKey() {
+		return deviceKey;
+	}
+
+	public void setDeviceKey(String deviceKey) {
+		this.deviceKey = deviceKey;
+	}
+	
 }
