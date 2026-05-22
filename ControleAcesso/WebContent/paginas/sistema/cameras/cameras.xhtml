@@ -24,26 +24,22 @@
 	<!-- Conteúdo -->
 	<ui:define name="conteudo">
 
-		<p:panelGrid columns="1" styleClass="form-grid ui-fluid"
-			style="width: 100%;">
-			<div class="ui-g ui-g-nopad"
-				style="justify-content: center; display: flex; flex-wrap: wrap;">
-				<ui:repeat value="#{cameraController.listaCameras}" var="camera">
-					<div class="ui-g-12 ui-md-3"
-						style="padding: 0.25rem; display: flex; justify-content: center;">
-						<p:panel header="#{camera.devName}"
-							style="width: 100%; height: 200px; margin: 0;">
-							<img src="/sistema/tema/img/facial.png" />
-							<br />
-							<p:commandButton value="Liberar"
-								action="#{cameraController.liberarCamera(camera)}"
-								styleClass="ui-button-success rounded-button"
-								style="width: 100%;" />
-						</p:panel>
+		<h2 class="sa-page-title">#{msgs['title.uc008.cameras']}</h2>
+
+		<div class="sa-camera-grid">
+			<ui:repeat value="#{cameraController.listaCameras}" var="camera">
+				<p:panel header="#{camera.devName}" styleClass="sa-camera-card">
+					<div style="text-align: center;">
+						<img src="/#{menuController.appName}/#{menuController.path}/tema/img/facial.png"
+							alt="#{camera.devName}" style="max-width: 100%; height: auto;" />
 					</div>
-				</ui:repeat>
-			</div>
-		</p:panelGrid>
+					<p:commandButton value="Liberar"
+						action="#{cameraController.liberarCamera(camera)}"
+						styleClass="ui-button-success rounded-button w-full"
+						style="width: 100%; margin-top: 0.75rem;" />
+				</p:panel>
+			</ui:repeat>
+		</div>
 
 		<!-- Mensagem quando não há câmeras -->
 		<h:outputText value="#{msgs['msg.nenhum.item.encontrado']}"

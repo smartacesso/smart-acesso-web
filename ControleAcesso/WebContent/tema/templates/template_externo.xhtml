@@ -23,13 +23,10 @@
 	<link type="text/css" rel="stylesheet" href="/#{menuController.appName}/#{menuController.path}/tema/css/sb-admin-2.css" />
 	<link type="text/css" rel="stylesheet" href="/#{menuController.appName}/#{menuController.path}/tema/css/ui-theme.css?v=2" />
 	<link type="text/css" rel="stylesheet" href="/#{menuController.appName}/#{menuController.path}/tema/css/base.css" />
+	<link type="text/css" rel="stylesheet" href="/#{menuController.appName}/#{menuController.path}/tema/css/smart-design.css?v=2" />
 	
 	<!-- fontes -->
-	<link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css" />
-	<link href='https://fonts.googleapis.com/css?family=Kaushan+Script' rel='stylesheet' type='text/css' />
-	<link href='https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic,700italic' rel='stylesheet' type='text/css' />
-	<link href='https://fonts.googleapis.com/css?family=Roboto+Slab:400,100,300,700' rel='stylesheet' type='text/css'/>
-	<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,700" rel="stylesheet"/>
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Open+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet" type="text/css" />
 	<link href="/#{menuController.appName}/#{menuController.path}/tema/fonts/awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
 	
 	<!-- scripts do sistema -->
@@ -95,7 +92,7 @@
 				</div>
 			</nav>
 	
-			<section id="portfoli" class="bg-light-gray">
+			<section id="portfoli" class="bg-light-gray sa-login-page">
 				<div class="container-internal" >
 					<div class="row">
 						<h:form id="form">
@@ -103,10 +100,11 @@
 							<p:ajaxStatus onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" />
              
 							<p:dialog widgetVar="statusDialog" modal="true" 
-									  draggable="false" closable="false" resizable="false" showHeader="false">
-								<div style="margin: 10px">
-								    <p:graphicImage value="/tema/img/status.gif" />
-								    <h:outputText value="Aguarde..." style="font-weight: bold;margin-left: 10px;" />
+									  draggable="false" closable="false" resizable="false" showHeader="false"
+									  styleClass="sa-loading-dialog">
+								<div class="sa-loading-content">
+								    <i class="pi pi-spin pi-spinner" aria-hidden="true"></i>
+								    <h:outputText value="Aguarde..." style="font-weight: 600;" />
 							    </div>
 							</p:dialog>
 						

@@ -14,54 +14,50 @@
 		</ui:define>
 
 		<ui:define name="tools">
-			<p:toolbar
-				styleClass="flex flex-column md:flex-row justify-content-between align-items-start gap-3">
-
-				<p:toolbarGroup align="left"
-					styleClass="flex flex-wrap gap-2 justify-start w-full md:w-auto">
-					<div class="align-mobile">
-						<p:commandButton id="acaoNovo"
-							action="#{consultaCorrespondenciaController.novo}"
-							icon="pi pi-plus" process="@this" update="@form"
-							title="Nova Correspondência"
-							styleClass="rounded-button ui-button-success" />
-
-						<p:commandButton id="acaoExportar" icon="pi pi-file-excel"
-							ajax="false" title="Exportar para Excel"
-							styleClass="rounded-button ui-button-flat">
-							<p:dataExporter type="xlsx" target="form:correspondenciaTable"
-								fileName="correspondencias" />
-						</p:commandButton>
-					</div>
-				</p:toolbarGroup>
-
-				<p:toolbarGroup align="right"
-					styleClass="flex flex-wrap gap-2 justify-start md:justify-end w-full md:w-auto">
-
+			<p:toolbar styleClass="sa-toolbar-wrap">
+				<p:toolbarGroup styleClass="sa-toolbar-actions">
+					<p:commandButton id="acaoNovo"
+						action="#{consultaCorrespondenciaController.novo}"
+						value="Nova"
+						icon="pi pi-plus" iconPos="left"
+						process="@this" update="@form"
+						title="Nova Correspondência"
+						styleClass="sa-btn-label ui-button-success" />
+					<p:commandButton id="acaoExportar"
+						value="Exportar"
+						icon="pi pi-file-excel" iconPos="left"
+						ajax="false" title="Exportar para Excel"
+						styleClass="sa-btn-label ui-button-flat">
+						<p:dataExporter type="xlsx" target="form:correspondenciaTable"
+							fileName="correspondencias" />
+					</p:commandButton>
 					<p:commandButton id="acaoLimpar"
 						action="#{consultaCorrespondenciaController.limpar}"
-						icon="pi pi-spinner" process="@this" update="@form"
-						styleClass="rounded-button ui-button-flat" />
-
-					<p:inputText id="filtro-busca-geral" placeholder="Destinatário..."
-						value="#{consultaCorrespondenciaController.parans['destinatario.nome']}"
-						style="width:150px; font-size: 11px;"
-						onkeypress="if(event.key === 'Enter') { event.preventDefault(); document.getElementById('form:acaoBuscar').click(); }" />
-
-					<div style="display: inline-flex">
+						value="#{msgs['alt.acao.limpar']}"
+						title="#{msgs['alt.acao.limpar']}"
+						icon="pi pi-filter" iconPos="left"
+						process="@this" update="@form"
+						styleClass="sa-btn-label ui-button-flat" />
+					<div class="sa-toolbar-search">
+						<p:inputText id="filtro-busca-geral" placeholder="Destinatário..."
+							value="#{consultaCorrespondenciaController.parans['destinatario.nome']}"
+							styleClass="sa-search-input"
+							onkeypress="if(event.key === 'Enter') { event.preventDefault(); document.getElementById('form:acaoBuscar').click(); }" />
 						<p:commandButton id="acaoBuscar"
 							action="#{consultaCorrespondenciaController.buscar}"
-							icon="pi pi-search"
+							value="#{msgs['alt.acao.buscar']}"
+							title="#{msgs['alt.acao.buscar']}"
+							icon="pi pi-search" iconPos="left"
 							process="@this filtro-busca-geral containerDeFiltro"
-							update="@form" styleClass="rounded-button" />
+							update="@form" styleClass="sa-btn-label" />
 					</div>
-
-					<p:commandButton id="acaoFiltroAvancado" icon="pi pi-sliders-h"
+					<p:commandButton id="acaoFiltroAvancado"
+						value="Filtros"
+						icon="pi pi-sliders-h" iconPos="left"
 						title="Filtros Avançados" process="@this"
 						update="containerDeFiltro"
 						action="#{consultaCorrespondenciaController.toggleFiltroFlag('filtroCorrespondencia-flag')}"
-						styleClass="col-desktop-only" />
-
+						styleClass="sa-btn-label col-desktop-only" />
 				</p:toolbarGroup>
 			</p:toolbar>
 		</ui:define>

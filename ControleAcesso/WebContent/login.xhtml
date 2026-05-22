@@ -20,119 +20,95 @@
 
 		<ui:define name="conteudo">
 
-			<div class="row">
-				<div class="col-md-5 col-sm-6">
-					<div class="collapse navbar-collapse">
+			<div class="sa-login">
 
-						<h:panelGroup style="margin: 0px; padding: 0px;width: 100%">
-							<br />
-							<br />
-							<div class="clearfix"></div>
-							<h4>Bem vindo de volta!</h4>
-							<br />
-							<p class="text-muted">Entre com sua conta existente e tenha
-								todos os seus dados em uma única ferramenta.</p>
-						</h:panelGroup>
+				<div class="sa-login__intro">
+					<h2>Bem vindo de volta!</h2>
+					<p class="text-muted">Entre com sua conta existente e tenha
+						todos os seus dados em uma única ferramenta.</p>
+				</div>
 
+				<div class="sa-login__card">
+					<h3>Preencha seus dados</h3>
+
+					<div class="sa-form-grid">
+
+						<div class="sa-field">
+							<span class="sa-label">
+								<h:outputText value="#{msgs['label.login.organizacao']}" />
+								<h:outputText value="*" styleClass="obrigatorio" />
+							</span>
+							<p:inputText id="unidadeOrganizacional"
+								value="#{loginController.unidadeOrganizacional}"
+								label="#{msgs['label.login.organizacao']}"
+								required="true" title="" />
+						</div>
+
+						<div class="sa-field">
+							<span class="sa-label">
+								<h:outputText value="#{msgs['login.usuario']}" />
+								<h:outputText value="*" styleClass="obrigatorio" />
+							</span>
+							<p:inputText id="usuario" value="#{loginController.usuario}"
+								label="#{msgs['login.usuario']}" required="true" title="" />
+						</div>
+
+						<div class="sa-field sa-field--full">
+							<span class="sa-label">
+								<h:outputText value="#{msgs['login.senha']}" />
+								<h:outputText value="*" styleClass="obrigatorio" />
+							</span>
+							<p:password id="senha" value="#{loginController.senha}"
+								label="#{msgs['login.senha']}" maxlength="30" required="true" />
+						</div>
+
+						<div class="sa-field sa-field--full">
+							<div class="sa-login__actions">
+								<p:commandButton id="btLogin"
+									value="#{msgs['login.botao']}"
+									styleClass="ui-button-success"
+									action="#{loginController.login()}">
+									<p:ajax execute="@all" render="@all" />
+								</p:commandButton>
+								<a class="sa-link-muted" href="javascript:void(PF('esqueciSenha').show());">
+									#{msgs['login.esqueci.senha']}
+								</a>
+							</div>
+						</div>
 
 					</div>
 				</div>
 
-				<div class="col-md-5 col-md-offset-2 col-sm-6">
-
-					<h:panelGroup style="margin: 0px; padding: 0px;width: 100%">
-						<br />
-						<br />
-						<div class="clearfix"></div>
-						<h4>Preencha seus dados</h4>
-					</h:panelGroup>
-
-					<br />
-					<h:panelGrid columns="2" width="auto">
-					
-						<h:column styleClass="verticalMiddle">
-							<h:outputText value="#{msgs['label.login.organizacao']}" />
-							<h:outputText value="*" styleClass="obrigatorio"/> <br/>
-							
-							<p:inputText id="unidadeOrganizacional" value="#{loginController.unidadeOrganizacional}" 
-								label="#{msgs['label.login.organizacao']}"
-								style="width: 120px;padding: 8px;" required="true" title=""/>
-						</h:column>
-
-						<h:column>
-							<h:outputText value="#{msgs['login.usuario']}" style="margin-left: -122px;" />
-							<h:outputText value="*" styleClass="obrigatorio" /><br/>
-						
-							<p:inputText id="usuario" value="#{loginController.usuario}" label="#{msgs['login.usuario']}"
-								style="width: 120px;padding: 8px; margin-left: -122px;" required="true" title=""  >
-							</p:inputText>
-						</h:column>
-
-						<h:column styleClass="verticalMiddle">
-							<h:outputText value="#{msgs['login.senha']}" />
-							<h:outputText value="*" styleClass="obrigatorio" /><br/>
-							<p:password id="senha" value="#{loginController.senha}"
-								style="width: 250px;padding: 8px;" label="#{msgs['login.senha']}"
-								maxlength="30" required="true"/>
-						</h:column>
-						
-						<h:column/>
-
-						<h:column styleClass="verticalMiddle">
-							<div style="margin-top: 15px;">
-								<p:commandButton id="btLogin" 
-									style="padding-left: 15px;padding-right: 15px;"
-									value="#{msgs['login.botao']}"
-									action="#{loginController.login()}">
-									<p:ajax execute="@all" render="@all" />
-								</p:commandButton>
-								<span
-									style="margin-left: 20px; margin-top: 10px; position: absolute">
-									<a href="javascript:void(PF('esqueciSenha').show());">#{msgs['login.esqueci.senha']}</a>
-								</span>
-							</div>
-						</h:column>
-
-					</h:panelGrid>
-
-				</div>
 			</div>
-			
-			<p:dialog header="#{msgs['header.login.esqueci.senha']}" 
-					  widgetVar="esqueciSenha" modal="true" >
-					  
-					  
-				<h:panelGrid columns="2">
-					<h:column>
-						<h:outputText value="#{msgs['label.digite.email']}" />
-					    <br/>
-					    <p:inputText value="#{loginController.email}" size="25">
-					    	<p:ajax execute="@this" render="@this" />
-					    </p:inputText>	
-					</h:column>
-					
-					<h:column>
-						<br/>
-						<p:commandButton id="btSenha" 
-							style="margin-left: 10px;padding-left: 15px;padding-right: 15px;"
-							value="#{msgs['label.ok']}"
-							action="#{loginController.alterarSenha()}">
-							<p:ajax execute="@all" render="@all" />
-						</p:commandButton>
-					</h:column>				
-				
-				</h:panelGrid>
-			    
-			</p:dialog> 
+
+			<p:dialog header="#{msgs['header.login.esqueci.senha']}"
+				widgetVar="esqueciSenha" modal="true" styleClass="sa-dialog">
+
+				<div class="sa-dialog-form">
+					<div class="sa-field">
+						<span class="sa-label">
+							<h:outputText value="#{msgs['label.digite.email']}" />
+						</span>
+						<p:inputText value="#{loginController.email}" styleClass="w-full">
+							<p:ajax execute="@this" render="@this" />
+						</p:inputText>
+					</div>
+					<p:commandButton id="btSenha"
+						value="#{msgs['label.ok']}"
+						styleClass="ui-button-success"
+						action="#{loginController.alterarSenha()}">
+						<p:ajax execute="@all" render="@all" />
+					</p:commandButton>
+				</div>
+
+			</p:dialog>
 
 		</ui:define>
-
 
 		<ui:define name="script">
 
 		</ui:define>
 	</ui:composition>
-
 
 </body>
 </html>

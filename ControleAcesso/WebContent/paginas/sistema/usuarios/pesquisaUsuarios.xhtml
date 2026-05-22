@@ -20,48 +20,42 @@
 		</ui:define>
 
 		<ui:define name="tools">
-			<p:toolbar
-				styleClass="flex flex-col md:flex-row justify-between items-center gap-4 w-full max-w-screen-xl">
-
-				<p:toolbarGroup align="left">
-					<div style="padding-top: 35%">
-						<p:commandButton id="acaoNovo"
-							action="#{consultaUsuarioController.novo}"
-							title="#{msgs['alt.acao.novo.usuario']}" icon="pi pi-plus">
-							<p:ajax process="@this" update="@form" />
-						</p:commandButton>
-					</div>
-				</p:toolbarGroup>
-
-				<p:toolbarGroup align="right"
-					styleClass="flex gap-2 flex-wrap justify-end items-center w-full md:w-auto">
-
+			<p:toolbar styleClass="sa-toolbar-wrap">
+				<p:toolbarGroup styleClass="sa-toolbar-actions">
+					<p:commandButton id="acaoNovo"
+						action="#{consultaUsuarioController.novo}"
+						value="#{msgs['alt.acao.novo.usuario']}"
+						title="#{msgs['alt.acao.novo.usuario']}"
+						icon="pi pi-plus" iconPos="left"
+						styleClass="sa-btn-label ui-button-success">
+						<p:ajax process="@this" update="@form" />
+					</p:commandButton>
 					<p:commandButton id="acaoLimpar"
 						action="#{consultaUsuarioController.limpar()}"
-						title="#{msgs['alt.acao.limpar']}" icon="pi pi-filter"
-						process="@this" update="@form" />
-
-					<p:inputText id="filtro-geral"
-						value="#{consultaUsuarioController.paramBuscaGeral}"
-						placeholder="Buscar por nome ou CPF" 
-						onkeypress="if(event.key === 'Enter') { event.preventDefault(); document.getElementById('form:acaoBuscar').click(); }" />
-
-					<div style="display: inline-flex;">
+						value="#{msgs['alt.acao.limpar']}"
+						title="#{msgs['alt.acao.limpar']}" icon="pi pi-filter" iconPos="left"
+						process="@this" update="@form"
+						styleClass="sa-btn-label ui-button-flat" />
+					<div class="sa-toolbar-search">
+						<p:inputText id="filtro-geral"
+							value="#{consultaUsuarioController.paramBuscaGeral}"
+							placeholder="Buscar por nome ou CPF"
+							styleClass="sa-search-input"
+							onkeypress="if(event.key === 'Enter') { event.preventDefault(); document.getElementById('form:acaoBuscar').click(); }" />
 						<p:commandButton id="acaoBuscar"
 							action="#{consultaUsuarioController.buscar()}"
-							title="#{msgs['alt.acao.buscar']}" icon="pi pi-search"
-							process="@form" update="@form" />
+							value="#{msgs['alt.acao.buscar']}"
+							title="#{msgs['alt.acao.buscar']}" icon="pi pi-search" iconPos="left"
+							process="@form" update="@form"
+							styleClass="sa-btn-label" />
 					</div>
-
 				</p:toolbarGroup>
-
 			</p:toolbar>
-
 		</ui:define>
 
 		<ui:define name="conteudo">
 
-			<h2 class="p-text-center p-mb-3 h-grid-header">#{msgs['title.uc001.consulta.usuarios']}</h2>
+			<h2 class="sa-page-title">#{msgs['title.uc001.consulta.usuarios']}</h2>
 
 			<p:outputPanel styleClass="p-grid">
 
@@ -80,7 +74,7 @@
 						rows="#{consultaUsuarioController.quantPorPagina}"
 						paginatorPosition="bottom" paginatorAlwaysVisible="false"
 						scrollable="true" scrollHeight="flex"
-						styleClass="tabela-responsive">
+						styleClass="tabela-responsive sa-table">
 
 						<p:column headerText="#{msgs['label.uc004.codigo']}"
 							styleClass="align-left col-desktop-only">

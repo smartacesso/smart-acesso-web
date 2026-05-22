@@ -21,41 +21,40 @@
 		</ui:define>
 		
 		<ui:define name="tools">
-			<h:panelGrid columns="4" styleClass="conteudo_tools">
-	
-				<h:commandButton id="acaoNovo"
+			<p:toolbar styleClass="sa-toolbar-wrap">
+				<p:toolbarGroup styleClass="sa-toolbar-actions">
+					<p:commandButton id="acaoNovo"
 						action="#{consultaClienteController.novo}"
-						title="#{msgs['alt.acao.novo.cliente']}" alt="#{msgs['alt.acao.novo.cliente']}"
-						image="#{menuController.path}/tema/img/bt_newer.png">
-					
-					<p:ajax process="@this" update="@form"/>
-				</h:commandButton>
-				
-				<h:commandButton id="acaoBuscar" 
-						action="#{consultaClienteController.buscar()}" 
-						title="#{msgs['alt.acao.buscar']}" alt="#{msgs['alt.acao.buscar']}"
-						image="#{menuController.path}/tema/img/bt_searcher.png">
-					
-					<p:ajax process="@form" update="@form"/>
-				</h:commandButton>
-
-				<h:commandButton id="acaoLimpar" 
+						value="#{msgs['alt.acao.novo.cliente']}"
+						title="#{msgs['alt.acao.novo.cliente']}"
+						icon="pi pi-plus" iconPos="left"
+						styleClass="sa-btn-label ui-button-success">
+						<p:ajax process="@this" update="@form" />
+					</p:commandButton>
+					<p:commandButton id="acaoLimpar"
 						action="#{consultaClienteController.limpar()}"
-						title="#{msgs['alt.acao.limpar']}" alt="#{msgs['alt.acao.limpar']}"
-						image="#{menuController.path}/tema/img/bt_cleaner.png">
-					
-					<p:ajax process="@this" update="@form"/>
-				</h:commandButton>
-				
-			</h:panelGrid>
-			
-			<div style="float: right;">
-				<p:inputText id="filtro-nome" placeholder="Filtrar por nome" style="width:200px;" 
-						value="#{consultaClienteController.parans['nome']}"/>
-				
-				<p:inputText id="filtro-cnpj" placeholder="Filtrar por CNPJ" style="width:200px;"
-						value="#{consultaClienteController.parans['cnpj']}"/>
-			</div>
+						value="#{msgs['alt.acao.limpar']}"
+						title="#{msgs['alt.acao.limpar']}"
+						icon="pi pi-filter" iconPos="left"
+						styleClass="sa-btn-label ui-button-flat">
+						<p:ajax process="@this" update="@form" />
+					</p:commandButton>
+					<p:inputText id="filtro-nome" placeholder="Filtrar por nome"
+						styleClass="sa-search-input"
+						value="#{consultaClienteController.parans['nome']}" />
+					<p:inputText id="filtro-cnpj" placeholder="Filtrar por CNPJ"
+						styleClass="sa-search-input"
+						value="#{consultaClienteController.parans['cnpj']}" />
+					<p:commandButton id="acaoBuscar"
+						action="#{consultaClienteController.buscar()}"
+						value="#{msgs['alt.acao.buscar']}"
+						title="#{msgs['alt.acao.buscar']}"
+						icon="pi pi-search" iconPos="left"
+						styleClass="sa-btn-label">
+						<p:ajax process="@form" update="@form" />
+					</p:commandButton>
+				</p:toolbarGroup>
+			</p:toolbar>
 		</ui:define>
 		
 		<ui:define name="conteudo">

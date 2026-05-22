@@ -171,7 +171,8 @@ public class MenuController extends BaseController {
 			return;
 
 		DefaultSubMenu adm = DefaultSubMenu.builder()
-				.label(resource.recuperaChave("menu.administracao", getFacesContext())).build();
+				.label(resource.recuperaChave("menu.administracao", getFacesContext()))
+				.icon("pi pi-fw pi-shield").build();
 
 		DefaultMenuItem pesquisaCliente = DefaultMenuItem.builder()
 				.value(resource.recuperaChave("menu.administracao.clientes", getFacesContext()))
@@ -190,7 +191,8 @@ public class MenuController extends BaseController {
 			return;
 
 		DefaultSubMenu configuracaoes = DefaultSubMenu.builder()
-				.label(resource.recuperaChave("menu.configuracao", getFacesContext())).build();
+				.label(resource.recuperaChave("menu.configuracao", getFacesContext()))
+				.icon("pi pi-fw pi-cog").build();
 
 		DefaultMenuItem regras = DefaultMenuItem.builder()
 				.value(resource.recuperaChave("menu.configuracao.regras", getFacesContext()))
@@ -223,7 +225,8 @@ public class MenuController extends BaseController {
 			return;
 
 		DefaultSubMenu relatorios = DefaultSubMenu.builder()
-				.label(resource.recuperaChave("menu.relatorio", getFacesContext())).build();
+				.label(resource.recuperaChave("menu.relatorio", getFacesContext()))
+				.icon("pi pi-fw pi-chart-bar").build();
 
 		DefaultMenuItem pedestres = DefaultMenuItem.builder()
 				.value(resource.recuperaChave("menu.relatorio.acesso.pedestre", getFacesContext()))
@@ -280,7 +283,8 @@ public class MenuController extends BaseController {
 			return;
 
 		DefaultSubMenu cadastros = DefaultSubMenu.builder()
-				.label(resource.recuperaChave("menu.cadastro", getFacesContext())).build();
+				.label(resource.recuperaChave("menu.cadastro", getFacesContext()))
+				.icon("pi pi-fw pi-users").build();
 
 		if (PerfilAcesso.ADMINISTRADOR.equals(usuarioLogado.getPerfil())
 				|| PerfilAcesso.GERENTE.equals(usuarioLogado.getPerfil())) {
@@ -357,7 +361,8 @@ public class MenuController extends BaseController {
 			return;
 
 		DefaultSubMenu cameras = DefaultSubMenu.builder()
-				.label(resource.recuperaChave("menu.cameras", getFacesContext())).build();
+				.label(resource.recuperaChave("menu.cameras", getFacesContext()))
+				.icon("pi pi-fw pi-video").build();
 
 		DefaultMenuItem hikivision = DefaultMenuItem.builder()
 				.value(resource.recuperaChave("menu.cameras.hikivision", getFacesContext()))
@@ -373,7 +378,8 @@ public class MenuController extends BaseController {
 
 		menuUsuario = new DefaultMenuModel();
 
-		DefaultSubMenu usuario = DefaultSubMenu.builder().label(usuarioLogado.getNome()).build();
+		DefaultSubMenu usuario = DefaultSubMenu.builder().label(usuarioLogado.getNome())
+				.icon("pi pi-fw pi-user").build();
 
 //		DefaultMenuItem meusDados = DefaultMenuItem.builder()
 //      .value(resources.recuperaChave("menu.usuario.meus.dados", getFacesContext()))
@@ -383,7 +389,8 @@ public class MenuController extends BaseController {
 //		menuUsuario.getElements().add(meusDados);
 
 		DefaultMenuItem sair = DefaultMenuItem.builder()
-				.value(resource.recuperaChave("menu.usuario.sair", getFacesContext())).styleClass("ui-simple-menu")
+				.value(resource.recuperaChave("menu.usuario.sair", getFacesContext()))
+				.icon("pi pi-fw pi-sign-out").styleClass("ui-simple-menu sa-menu-sair")
 				.function(new SerializableFunction<MenuItem, String>() {
 
 					@Override
@@ -400,7 +407,7 @@ public class MenuController extends BaseController {
 
 	private void criaMenuAjuda() {
 
-		DefaultSubMenu ajuda = DefaultSubMenu.builder().label("Ajuda").build();
+		DefaultSubMenu ajuda = DefaultSubMenu.builder().label("Ajuda").icon("pi pi-fw pi-question-circle").build();
 
 		if (PerfilAcesso.ADMINISTRADOR.equals(usuarioLogado.getPerfil())
 				|| PerfilAcesso.GERENTE.equals(usuarioLogado.getPerfil())) {

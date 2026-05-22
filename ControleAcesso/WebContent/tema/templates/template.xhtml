@@ -8,8 +8,6 @@
 	xmlns:c="http://java.sun.com/jsp/jstl/core" 
 	id="html" >
 
-
-
 <h:head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8"></meta>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
@@ -21,201 +19,194 @@
 	
 	<link rel="icon" href="/#{menuController.appName}/tema/img/icon_48x48.png"/>
 	
-	<!-- estilos -->
 	<link type="text/css" rel="stylesheet" href="/#{menuController.appName}/#{menuController.path}/tema/css/bootstrap.min.css" />
 	<link type="text/css" rel="stylesheet" href="/#{menuController.appName}/#{menuController.path}/tema/css/agency.css" />
 	<link type="text/css" rel="stylesheet" href="/#{menuController.appName}/#{menuController.path}/tema/css/sb-admin-2.css" />
 	<link type="text/css" rel="stylesheet" href="/#{menuController.appName}/#{menuController.path}/tema/css/ui-theme.css" />
 	<link type="text/css" rel="stylesheet" href="/#{menuController.appName}/#{menuController.path}/tema/css/base.css" />
+	<link type="text/css" rel="stylesheet" href="/#{menuController.appName}/#{menuController.path}/tema/css/smart-design.css?v=9" />
+	<script type="text/javascript">
+		// Evita flash do sidebar antes do CSS/JS carregar
+		(function () {
+			try {
+				if (window.localStorage &amp;&amp; localStorage.getItem('sa-sidebar-collapsed') === '1') {
+					document.documentElement.classList.add('sa-sidebar-collapsed');
+				}
+			} catch (e) { /* ignore */ }
+		})();
+	</script>
+	<style type="text/css">
+		@media (min-width: 992px) {
+			html.sa-sidebar-collapsed #saSidebar,
+			html.sa-sidebar-collapsed .sa-sidebar-nav {
+				display: none !important;
+			}
+		}
+	</style>
 	
-	<!-- fontes -->
-	<link href="https://fonts.googleapis.com/css?family=Montserrat:400,700" rel="stylesheet" type="text/css" />
-	<link href='https://fonts.googleapis.com/css?family=Kaushan+Script' rel='stylesheet' type='text/css' />
-	<link href='https://fonts.googleapis.com/css?family=Droid+Serif:400,700,400italic,700italic' rel='stylesheet' type='text/css' />
-	<link href='https://fonts.googleapis.com/css?family=Roboto+Slab:400,100,300,700' rel='stylesheet' type='text/css'/>
-	<link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,700" rel="stylesheet"/>
+	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Open+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet" type="text/css" />
 	<link href="/#{menuController.appName}/#{menuController.path}/tema/fonts/awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
 	
-	<!-- scripts do sistema -->
 	<script type="text/javascript" src="/#{menuController.appName}/tema/js/bootstrap.min.js"></script>
-	<script type="text/javascript" src="/#{menuController.appName}/tema/js/base.js"/>
+	<script type="text/javascript" src="/#{menuController.appName}/tema/js/base.js"></script>
+	<script type="text/javascript" src="/#{menuController.appName}/#{menuController.path}/tema/js/sa-layout.js"></script>
 	
-	<!-- algum javascript ou css especifico da página -->
-	<ui:insert name="scripts">
-	
-	</ui:insert>
-		
+	<ui:insert name="scripts"></ui:insert>
 </h:head>
+
 <f:view locale="pt_BR" contentType="text/html" >	
 	
 	<f:loadBundle basename="br.com.startjob.acesso.resources.#{menuController.pathCode}message"
 			var="msgs" />
 
-	<h:body id="body" >
-	
-		<div style="margin: 0px;top: 71px;height: 91%;">
-			<div class="overlay"></div>
-			<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
-			<div class="menu_normal">
-				<div class="overlay"></div>
-				<!-- Menu -->
-				<ui:insert name="menu">
-					<ui:include src="./menu.xhtml" />
-				</ui:insert>
-			</div>
-			</nav>
+	<h:body id="body" class="sa-body-app">
 
-			<h:form id="form" styleClass="form_external" >
-			
-				<p:ajaxStatus onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" />
-             
-				<p:dialog widgetVar="statusDialog" modal="true" 
-						  draggable="false" closable="false" resizable="false" showHeader="false">
-					<div style="margin: 10px">
-					    <p:graphicImage value="/tema/img/status.gif" />
-					    <h:outputText value="Aguarde..." style="font-weight: bold;margin-left: 10px;" />
-				    </div>
-				</p:dialog>
-				
-			
+		<div id="saLayout" class="sa-layout">
 
-				<div class="tools_content" style="background-color: rgb(240,240,241);position: absolute;left: 0;right: 0; top: -80px;" >
-					<!-- Barra de ferramentas -->
-					<div style="margin-left: 20px; margin-right: 20px;">
+			<ui:insert name="menu">
+				<ui:include src="./menu.xhtml" />
+			</ui:insert>
+
+			<div class="sa-main">
+
+				<header class="sa-topbar">
+					<div class="sa-topbar__left">
+						<button type="button" id="saSidebarToggle" class="sa-sidebar-toggle sa-topbar__sidebar-toggle"
+							onclick="saToggleSidebar(); return false;"
+							title="Ocultar menu" aria-label="Ocultar menu"
+							aria-expanded="true" aria-controls="saSidebar">
+							<i class="pi pi-angle-double-left" aria-hidden="true"></i>
+						</button>
+						<button type="button" class="sa-topbar__menu-btn"
+							onclick="saOpenSidebarMobile(); return false;"
+							title="Abrir menu" aria-label="Abrir menu">
+							<i class="pi pi-bars" aria-hidden="true"></i>
+						</button>
+						<div class="sa-topbar__titles">
+							<h1 class="sa-topbar__title">
+								<ui:insert name="pageTitle">
+									<h:outputText value="#{msgs['title.sistema']}" />
+								</ui:insert>
+							</h1>
+							<p class="sa-topbar__subtitle">
+								<ui:insert name="pageSubtitle">
+									<h:outputText value="#{sessionScope.usuario.cliente.nome}"
+										rendered="#{sessionScope.usuario != null}" />
+								</ui:insert>
+							</p>
+						</div>
+					</div>
+					<h:panelGroup layout="block" styleClass="sa-topbar__right"
+						rendered="#{sessionScope.usuario != null}">
+						<span class="sa-topbar__user-name">#{sessionScope.usuario.nome}</span>
+						<span class="sa-topbar__avatar" title="#{sessionScope.usuario.nome}">
+							<i class="pi pi-user" aria-hidden="true"></i>
+						</span>
+					</h:panelGroup>
+				</header>
+
+				<h:form id="form" styleClass="form_external sa-main-form" >
+
+					<p:ajaxStatus onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" />
+
+					<p:dialog widgetVar="statusDialog" modal="true" 
+							  draggable="false" closable="false" resizable="false" showHeader="false"
+							  styleClass="sa-loading-dialog">
+						<div class="sa-loading-content">
+						    <i class="pi pi-spin pi-spinner" aria-hidden="true"></i>
+						    <h:outputText value="Aguarde..." style="font-weight: 600;" />
+					    </div>
+					</p:dialog>
+
+					<div class="tools_content">
 						<ui:insert name="tools">
 							<ui:include src="./tools.xhtml" />
 						</ui:insert>
 					</div>
-				</div>
-				
-				<div class="conteudo_internal total">
-				
-					<!-- Mensagens JSF customizadas -->
-					<p:growl id="growl" showDetail="true" showSummary="false" sticky="true" severity="info,warn,error,fatal" >
-						<p:autoUpdate />
-					</p:growl>
-						
-					<!-- Corpo -->
-					<ui:insert name="conteudo">
-						
-					</ui:insert>
-					<br/><br/>
-					
-				</div>
-				            
-				<footer>
-					<div class="footer_external">
+
+					<main class="conteudo_internal total sa-content">
+
+						<p:growl id="growl" showDetail="true" showSummary="false" sticky="true" severity="info,warn,error,fatal" >
+							<p:autoUpdate />
+						</p:growl>
+
+						<ui:insert name="conteudo"></ui:insert>
+
+					</main>
+
+					<footer class="sa-app-footer">
 						<ui:include src="./footer_external.xhtml" />
-					</div>
-				</footer>
-				
-				<p:dialog header="#{msgs['header.download.app']}"
-					widgetVar="downloads" modal="true" width="400px">
-			
-					<br />
-					<h:panelGrid columns="1">
-						<h:column>
-							<h:outputText value="#{msgs['label.antes.instalar']}" />
-							<br />
-							<a href="#{menuController.urlMain}/downloads/jre-8u201-windows-i586.exe" target="_blank">
-								jre-8u201-windows-i586.exe
-							</a>
-							<br />
-							<br />
-						</h:column>
-						<h:column>
-							<h:outputText value="#{msgs['label.instalar']}" />
-							<br />
-							<a href="#{menuController.urlMain}/downloads/SmartAcessoInstaller.exe" target="_blank">
-								SmartAcessoInstaller.exe
-							</a>
-							<br />
-							<br />
-						</h:column>
-						<h:column>
-							<h:outputText value="#{msgs['label.instalar.depois']}" />
-							<br />
-							<br />
-						</h:column>
-						<h:column>
-							<h:outputText value="#{msgs['label.instalar.depois.2']}" />
-							<br />
-							<br />
-						</h:column>
-					</h:panelGrid>
-			
-				</p:dialog>
-				
-				<p:dialog header="#{msgs['header.download.smart.faces.app']}"
-					widgetVar="downloadSmartFaces" modal="true" width="400px">
-			
-					<br />
-					<h:panelGrid columns="1">
-						<h:column>
-							<h:outputText value="#{msgs['label.antes.instalar']}" />
-							<br />
-							<a href="#{menuController.urlMain}/downloads/jre-8u201-windows-i586.exe" target="_blank">
-								jre-8u201-windows-i586.exe
-							</a>
-							<br />
-							<br />
-						</h:column>
-						<h:column>
-							<h:outputText value="#{msgs['label.instalar.smart.faces']}" />
-							<br />
-							<a href="#{menuController.urlMain}/downloads/SmartFacesInstaller.exe" target="_blank">
-								SmartFacesInstaller.exe
-							</a>
-							<br />
-							<a href="#{menuController.urlMain}/downloads/SmartFacesInstaller-x86.exe" target="_blank">
-								SmartFacesInstaller-x86.exe
-							</a>
-							<br /><br />
-						</h:column>
-						<h:column>
-							<h:outputText value="#{msgs['label.instalar.depois']}" />
-							<br />
-							<br />
-						</h:column>
-						<h:column>
-							<h:outputText value="#{msgs['label.instalar.app.android']}" />
-							<br />
-							<a href="https://play.google.com/store/apps/details?id=br.com.smartacesso&amp;hl=pt_BR&amp;gl=US" target="_blank">
-								SmartAcesso App - Google Play
-							</a>
-							<br />
-							<a href="http://smartacesso.com.br/downloads/smartfaces/smartacesso-app-release.apk" target="_blank">
-								SmartAcesso App - Apk
-							</a>
-							<br />
-							<br />
-						</h:column>
-					</h:panelGrid>
-			
-				</p:dialog>
-				
-				<ui:insert name="modal">
-					<!-- As modais devem ser inseridas nesta área -->
-				</ui:insert>
-				
-			</h:form>
-			
-			<ui:insert name="modalOutForm">
-				<!-- As modais devem ser inseridas nesta área -->
-			</ui:insert>
-			
+					</footer>
+
+					<p:dialog header="#{msgs['header.download.app']}"
+						widgetVar="downloads" modal="true" width="400px">
+						<br />
+						<h:panelGrid columns="1">
+							<h:column>
+								<h:outputText value="#{msgs['label.antes.instalar']}" />
+								<br />
+								<a href="#{menuController.urlMain}/downloads/jre-8u201-windows-i586.exe" target="_blank">jre-8u201-windows-i586.exe</a>
+								<br /><br />
+							</h:column>
+							<h:column>
+								<h:outputText value="#{msgs['label.instalar']}" />
+								<br />
+								<a href="#{menuController.urlMain}/downloads/SmartAcessoInstaller.exe" target="_blank">SmartAcessoInstaller.exe</a>
+								<br /><br />
+							</h:column>
+							<h:column>
+								<h:outputText value="#{msgs['label.instalar.depois']}" />
+								<br /><br />
+							</h:column>
+							<h:column>
+								<h:outputText value="#{msgs['label.instalar.depois.2']}" />
+								<br /><br />
+							</h:column>
+						</h:panelGrid>
+					</p:dialog>
+
+					<p:dialog header="#{msgs['header.download.smart.faces.app']}"
+						widgetVar="downloadSmartFaces" modal="true" width="400px">
+						<br />
+						<h:panelGrid columns="1">
+							<h:column>
+								<h:outputText value="#{msgs['label.antes.instalar']}" />
+								<br />
+								<a href="#{menuController.urlMain}/downloads/jre-8u201-windows-i586.exe" target="_blank">jre-8u201-windows-i586.exe</a>
+								<br /><br />
+							</h:column>
+							<h:column>
+								<h:outputText value="#{msgs['label.instalar.smart.faces']}" />
+								<br />
+								<a href="#{menuController.urlMain}/downloads/SmartFacesInstaller.exe" target="_blank">SmartFacesInstaller.exe</a>
+								<br />
+								<a href="#{menuController.urlMain}/downloads/SmartFacesInstaller-x86.exe" target="_blank">SmartFacesInstaller-x86.exe</a>
+								<br /><br />
+							</h:column>
+							<h:column>
+								<h:outputText value="#{msgs['label.instalar.depois']}" />
+								<br /><br />
+							</h:column>
+							<h:column>
+								<h:outputText value="#{msgs['label.instalar.app.android']}" />
+								<br />
+								<a href="https://play.google.com/store/apps/details?id=br.com.smartacesso&amp;hl=pt_BR&amp;gl=US" target="_blank">SmartAcesso App - Google Play</a>
+								<br />
+								<a href="http://smartacesso.com.br/downloads/smartfaces/smartacesso-app-release.apk" target="_blank">SmartAcesso App - Apk</a>
+								<br /><br />
+							</h:column>
+						</h:panelGrid>
+					</p:dialog>
+
+					<ui:insert name="modal"></ui:insert>
+
+				</h:form>
+
+				<ui:insert name="modalOutForm"></ui:insert>
+
+			</div>
 		</div>
-		
+
 	</h:body>
-	
-	<style>
-		* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-		
-	</style>
-	
 </f:view>
 </html>
