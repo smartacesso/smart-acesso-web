@@ -24,30 +24,35 @@
 			<p:toolbar
 				styleClass="sa-toolbar-wrap flex flex-column md:flex-row justify-content-between align-items-center gap-3">
 
-				<p:toolbarGroup align="left">
+				<p:toolbarGroup styleClass="sa-toolbar-actions">
 					<p:inputText id="filtro-nome" placeholder="Filtrar por nome"
 						onblur="sincronizarFiltro(this, 'filtro-nome-sync');"
-						styleClass="filtro-nome filtro-nome-sync"
+						styleClass="filtro-nome filtro-nome-sync sa-search-input"
 						value="#{relatorioVisitantesController.parans['pedestre.nome']}" 
 						onkeypress="if(event.key === 'Enter') { event.preventDefault(); document.getElementById('form:acaoBuscar').click(); }" />
 
 					<p:commandButton id="acaoBuscar"
 						action="#{relatorioVisitantesController.buscar()}"
+						value="#{msgs['alt.acao.buscar']}"
 						process="@form"
 						update="@form" 
 						title="#{msgs['alt.acao.buscar']}"
-						alt="#{msgs['alt.acao.buscar']}" icon="pi pi-search" />
+						icon="pi pi-search" iconPos="left"
+						styleClass="sa-btn-label" />
 
 					<p:commandButton id="acaoLimpar"
 						action="#{relatorioVisitantesController.limpar()}"
+						value="#{msgs['alt.acao.limpar']}"
 						title="#{msgs['alt.acao.limpar']}"
-						alt="#{msgs['alt.acao.limpar']}" icon="pi pi-filter">
-
+						icon="pi pi-filter" iconPos="left"
+						styleClass="sa-btn-label ui-button-flat">
 						<p:ajax process="@this" update="@form" />
 					</p:commandButton>
 
 					<p:commandButton id="acaoExportar" value="Exportar Excel"
-						icon="pi pi-file-excel" process="@form" update="@none"
+						icon="pi pi-file-excel" iconPos="left"
+						process="@form" update="@none"
+						styleClass="sa-btn-label ui-button-flat"
 						oncomplete="document.getElementById('form:btnDownloadOculto').click();" />
 
 					<p:commandButton id="btnDownloadOculto" style="display:none;"
@@ -60,8 +65,7 @@
 						rendered="#{relatorioVisitantesController.result.size() > 0}" />
 				</p:toolbarGroup>
 
-				<p:toolbarGroup align="right"
-					styleClass="flex gap-2 flex-wrap justify-end items-center w-full md:w-auto">
+				<p:toolbarGroup styleClass="sa-toolbar-filters">
 
 					<p:calendar id="filtro-data-inicio"
 						value="#{relatorioVisitantesController.parans['data_maior_data']}"
@@ -220,7 +224,8 @@
 						rendered="#{not empty relatorioVisitantesController.result}"
 						paginator="true"
 						rows="#{relatorioVisitantesController.quantPorPagina}"
-						paginatorPosition="bottom" paginatorAlwaysVisible="false">
+						paginatorPosition="bottom" paginatorAlwaysVisible="false"
+						styleClass="tabela-responsive sa-table">
 
 						<p:column headerText="#{msgs['label.uc009.foto']}"
 						styleClass="col-desktop-only"
@@ -316,13 +321,6 @@
 
 				</h:column>
 			</h:panelGrid>
-			<style>
-@media ( max-width : 768px) {
-	.col-desktop-only {
-		display: none !important;
-	}
-}
-</style>
 		</ui:define>
 
 	</ui:composition>

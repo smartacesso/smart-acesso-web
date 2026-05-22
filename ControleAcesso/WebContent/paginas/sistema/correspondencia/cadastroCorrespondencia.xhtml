@@ -29,14 +29,18 @@
 		</ui:define>
 
 		<ui:define name="tools">
-			<h:panelGrid columns="4" styleClass="conteudo_tools">
-				<p:commandButton id="save"
-					action="#{cadastroCorrespondenciaController.salvar}"
-					title="#{msgs['alt.acao.save']}" icon="pi pi-check"
-					styleClass="rounded-button ui-button-success">
-					<p:ajax process="@form" update="@form" />
-				</p:commandButton>
-			</h:panelGrid>
+			<p:toolbar styleClass="sa-toolbar-wrap">
+				<p:toolbarGroup styleClass="sa-toolbar-actions">
+					<p:commandButton id="save"
+						action="#{cadastroCorrespondenciaController.salvar}"
+						value="#{msgs['alt.acao.save']}"
+						title="#{msgs['alt.acao.save']}"
+						icon="pi pi-check" iconPos="left"
+						styleClass="sa-btn-label ui-button-success">
+						<p:ajax process="@form" update="@form" />
+					</p:commandButton>
+				</p:toolbarGroup>
+			</p:toolbar>
 		</ui:define>
 
 		<ui:define name="conteudo">

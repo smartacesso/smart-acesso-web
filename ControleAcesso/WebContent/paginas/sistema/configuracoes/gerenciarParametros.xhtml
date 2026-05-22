@@ -23,16 +23,18 @@
 		</ui:define>
 
 		<ui:define name="tools">
-			<h:panelGrid columns="4" styleClass="conteudo_tools">
-
-				<h:commandButton id="save"
-					action="#{gerenciarParametrosController.salvar}"
-					title="#{msgs['alt.acao.save']}"
-					image="#{menuController.path}/tema/img/bt_saver.png">
-					<p:ajax process="@form" update="@form menuForm" />
-				</h:commandButton>
-
-			</h:panelGrid>
+			<p:toolbar styleClass="sa-toolbar-wrap">
+				<p:toolbarGroup styleClass="sa-toolbar-actions">
+					<p:commandButton id="save"
+						action="#{gerenciarParametrosController.salvar}"
+						value="#{msgs['alt.acao.save']}"
+						title="#{msgs['alt.acao.save']}"
+						icon="pi pi-check" iconPos="left"
+						styleClass="sa-btn-label ui-button-success">
+						<p:ajax process="@form" update="@form menuForm" />
+					</p:commandButton>
+				</p:toolbarGroup>
+			</p:toolbar>
 		</ui:define>
 
 		<ui:define name="conteudo">
@@ -45,7 +47,7 @@
 
 				<p:dataTable id="gerenciarParametrosTable"
 					value="#{gerenciarParametrosController.parametrosGerais}"
-					var="item">
+					var="item" styleClass="tabela-responsive sa-table">
 
 					<p:column headerText="#{msgs['label.uc007.nome']}"
 						style="text-align: left">

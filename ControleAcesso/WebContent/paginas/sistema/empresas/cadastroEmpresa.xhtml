@@ -30,16 +30,18 @@
 		</ui:define>
 
 		<ui:define name="tools">
-			<h:panelGrid columns="4" styleClass="conteudo_tools">
-
-				<p:commandButton id="save"
-					action="#{cadastroEmpresaController.salvar}"
-					title="#{msgs['alt.acao.save']}"
-					icon="pi pi-check">
-					<p:ajax process="@form" update="@form" />
-				</p:commandButton>
-
-			</h:panelGrid>
+			<p:toolbar styleClass="sa-toolbar-wrap">
+				<p:toolbarGroup styleClass="sa-toolbar-actions">
+					<p:commandButton id="save"
+						action="#{cadastroEmpresaController.salvar}"
+						value="#{msgs['alt.acao.save']}"
+						title="#{msgs['alt.acao.save']}"
+						icon="pi pi-check" iconPos="left"
+						styleClass="sa-btn-label ui-button-success">
+						<p:ajax process="@form" update="@form" />
+					</p:commandButton>
+				</p:toolbarGroup>
+			</p:toolbar>
 		</ui:define>
 
 		<ui:define name="conteudo">
@@ -56,7 +58,7 @@
 						<p:tab title="#{msgs['label.uc001.dados.empresa']}">
 							<p:panel id="painelCadastroEmpresa"
 								header="Cadastro de empresa" styleClass="ui-fluid">
-								<div class="form-grid ui-fluid ui-g" style="width: 86%;">
+								<div class="form-grid sa-cadastro-grid ui-fluid ui-g">
 
 									<!-- Dados da empresa -->
 									<div class="ui-g-12 ui-md-6">

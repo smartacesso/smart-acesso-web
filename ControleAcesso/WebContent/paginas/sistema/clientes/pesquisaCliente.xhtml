@@ -74,7 +74,7 @@
 					<p:dataTable id="clientesTable" value="#{consultaClienteController.result}" var="cliente" 
 						rendered="#{not empty consultaClienteController.result}" paginator="true" 
 						rows="#{consultaClienteController.quantPorPagina}" paginatorPosition="bottom"
-						paginatorAlwaysVisible="false" >
+						paginatorAlwaysVisible="false" styleClass="tabela-responsive sa-table">
 						
 						<p:column headerText="#{msgs['label.uc001.nome']}" style="text-align: center">
 							<h:outputText value="#{cliente.nome}" />
@@ -94,21 +94,24 @@
 							<h:outputText value="#{cliente.status}" />
 						</p:column>
 						
-						<p:column headerText="#{msgs['alt.acao.editar']}" style="text-align: center;width: 40px">
-							<h:commandButton id="botaoEditarCliente"
+						<p:column headerText="#{msgs['alt.acao.editar']}" styleClass="sa-table-actions-col">
+							<h:panelGroup styleClass="sa-table-actions">
+							<p:commandButton id="botaoEditarCliente"
 								action="#{consultaClienteController.editar(cliente.id)}"
 								title="#{msgs['alt.acao.novo.cliente']}"
-								image="#{menuController.path}/tema/img/bt_edit_min.png">
-							</h:commandButton>
+								icon="pi pi-pencil" styleClass="ui-button-rounded ui-button-info ui-button-flat" />
+							</h:panelGroup>
 						</p:column>
 	
-						<p:column headerText="#{msgs['alt.acao.excluir']}" style="text-align: center;width: 40px">
-							<h:commandButton image="#{menuController.path}/tema/img/bt_remove_min.png" 
-										title="#{msgs['alt.acao.excluir']}" >
+						<p:column headerText="#{msgs['alt.acao.excluir']}" styleClass="sa-table-actions-col">
+							<h:panelGroup styleClass="sa-table-actions">
+							<p:commandButton title="#{msgs['alt.acao.excluir']}"
+								icon="pi pi-trash" styleClass="ui-button-rounded ui-button-danger ui-button-flat" >
 								
 								<f:setPropertyActionListener value="#{cliente}" target="#{consultaClienteController.clienteSelecionado}" />
 								<p:ajax oncomplete="PF('confirmarExclusao').show()"></p:ajax>
-							</h:commandButton>
+							</p:commandButton>
+							</h:panelGroup>
 						</p:column>
 						
 					</p:dataTable>

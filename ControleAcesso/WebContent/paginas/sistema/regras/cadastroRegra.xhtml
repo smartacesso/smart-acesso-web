@@ -27,16 +27,18 @@
 		</ui:define>
 		
 		<ui:define name="tools">
-			<h:panelGrid columns="4" styleClass="conteudo_tools">
-	
-				<h:commandButton id="save"
-					action="#{cadastroRegraAcessoController.salvar}"
-					title="#{msgs['alt.acao.save']}"
-					image="#{menuController.path}/tema/img/bt_saver.png">
-					<p:ajax process="@form" update="@form"/>
-				</h:commandButton>
-				
-			</h:panelGrid>
+			<p:toolbar styleClass="sa-toolbar-wrap">
+				<p:toolbarGroup styleClass="sa-toolbar-actions">
+					<p:commandButton id="save"
+						action="#{cadastroRegraAcessoController.salvar}"
+						value="#{msgs['alt.acao.save']}"
+						title="#{msgs['alt.acao.save']}"
+						icon="pi pi-check" iconPos="left"
+						styleClass="sa-btn-label ui-button-success">
+						<p:ajax process="@form" update="@form" />
+					</p:commandButton>
+				</p:toolbarGroup>
+			</p:toolbar>
 		</ui:define>
 		
 		<ui:define name="conteudo">
@@ -178,21 +180,15 @@
 							rendered="#{cadastroRegraAcessoController.tipoRegra == 'ACESSO_HORARIO' 
 									or cadastroRegraAcessoController.tipoRegra == 'ACESSO_PERIODO'}">
 							
-							<h:panelGrid columns="4" styleClass="conteudo_tools">
-								<f:facet name="header">
-									<h:outputText value="#{msgs['title.uc006.lista.horarios']}" style="font-size: 20px; margin-left: 12px; margin-top: 8px;"/>
-								</f:facet>
-								
-							</h:panelGrid>
-
-							<div style="float: right;">
-								<p:commandButton id="addHorario" value="#{msgs['alt.acao.adicionar']}" 
-										action="#{cadastroRegraAcessoController.adicionarHorario}"
-										update="horarios" style="margin-right: 12px; margin-top: 8px;">
-								</p:commandButton>
+							<div class="flex flex-wrap justify-content-between align-items-center gap-2" style="margin-bottom: 0.75rem;">
+								<h:outputText value="#{msgs['title.uc006.lista.horarios']}" styleClass="sa-page-title" />
+								<p:commandButton id="addHorario" value="#{msgs['alt.acao.adicionar']}"
+									action="#{cadastroRegraAcessoController.adicionarHorario}"
+									update="horarios" icon="pi pi-plus" iconPos="left"
+									styleClass="sa-btn-label ui-button-success" />
 							</div>
 							
-							<p:panelGrid columns="7" id="horarios" style="width: 100%;">
+							<p:panelGrid columns="7" id="horarios" styleClass="w-full">
 							
 								<h:outputText value="#{msgs['msg.nenhum.item.encontrado.adicionar']}" escape="false"
 											  rendered="#{empty cadastroRegraAcessoController.listaHorarios}" />
@@ -200,6 +196,7 @@
 								<p:dataTable id="tableHorarios" value="#{cadastroRegraAcessoController.listaHorarios}" 
 									var="horario" paginator="true" rows="5" paginatorPosition="bottom" 
 									editable="true" editMode="cell" paginatorAlwaysVisible="false"
+									styleClass="tabela-responsive sa-table"
 									rendered="#{not empty cadastroRegraAcessoController.listaHorarios}">
 								
 									<p:column headerText="#{msgs['label.uc006.nome.regra']}" style="text-align: center;">

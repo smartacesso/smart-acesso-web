@@ -90,14 +90,16 @@
 
 		<ui:define name="tools">
 			<p:toolbar id="painelTools"
-				styleClass="flex flex-col md:flex-row justify-between items-center gap-4 w-full max-w-screen-xl">
+				styleClass="sa-toolbar-wrap sa-toolbar-report flex flex-col md:flex-row justify-between items-center gap-4 w-full">
 
-				<!-- Grupo Esquerdo (ações principais) -->
-				<p:toolbarGroup align="left">
+				<p:toolbarGroup styleClass="sa-toolbar-actions">
 
 					<p:commandButton id="save"
 						action="#{cadastroPedestreController.salvar}"
-						title="#{msgs['alt.acao.save']}" icon="pi pi-check">
+						value="#{msgs['alt.acao.save']}"
+						title="#{msgs['alt.acao.save']}"
+						icon="pi pi-check" iconPos="left"
+						styleClass="sa-btn-label ui-button-success">
 						<p:ajax process="@form" update="@form" />
 					</p:commandButton>
 
@@ -150,8 +152,7 @@
 
 				</p:toolbarGroup>
 
-				<!-- Grupo Direito (filtros de data) -->
-				<p:toolbarGroup align="right">
+				<p:toolbarGroup styleClass="sa-toolbar-filters">
 					<p:calendar id="filtro-data-inicio"
 						value="#{cadastroPedestreController.parans['data_maior_data']}"
 						pattern="dd/MM/yyyy HH:mm" navigator="true" showButtonPanel="true"

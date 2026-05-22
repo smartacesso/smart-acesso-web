@@ -1263,3 +1263,168 @@ section.bg-light-gray#portfoli {
 	padding-top: 6rem;
 	min-height: calc(100vh - 200px);
 }
+
+/* —— DataTable responsiva (centralizado — remover <style> das páginas) —— */
+.sa-table-wrap,
+.tabela-responsive,
+.tabela-moderna.tabela-responsive {
+	overflow-x: auto;
+	-webkit-overflow-scrolling: touch;
+	width: 100%;
+}
+
+.tabela-responsive .ui-datatable-scrollable-body,
+.tabela-responsive .ui-datatable-scrollable-header-box {
+	overflow-x: auto;
+}
+
+@media screen and (max-width: 768px) {
+	body .ui-datatable.tabela-responsive thead th,
+	body .ui-datatable.tabela-responsive tbody td,
+	body .ui-datatable.sa-table thead th,
+	body .ui-datatable.sa-table tbody td {
+		font-size: 12px;
+		padding: 6px;
+	}
+}
+
+.align-left {
+	text-align: left !important;
+}
+
+/* —— Toolbar relatórios (dois grupos: ações + filtros/data) —— */
+.tools_content .sa-toolbar-wrap.sa-toolbar-report,
+.sa-toolbar-wrap.sa-toolbar-report {
+	flex-wrap: wrap;
+	align-items: center;
+}
+
+.sa-toolbar-filters,
+.tools_content .sa-toolbar-filters {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.tools_content .sa-toolbar-filters .ui-inputfield,
+.tools_content .sa-toolbar-filters .ui-selectonemenu,
+.tools_content .sa-toolbar-filters .ui-calendar,
+.tools_content .sa-toolbar-filters .ui-calendar input {
+	max-width: 100%;
+}
+
+.tools_content .sa-toolbar-filters .sa-search-input {
+	min-width: 10rem;
+	flex: 1 1 12rem;
+	max-width: 22rem;
+}
+
+.sa-toolbar-total {
+	font-size: 0.875rem;
+	font-weight: 600;
+	color: var(--sa-text-muted);
+	white-space: nowrap;
+}
+
+@media (max-width: 767px) {
+	.sa-toolbar-filters {
+		width: 100%;
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.tools_content .sa-toolbar-filters .ui-inputfield,
+	.tools_content .sa-toolbar-filters .ui-selectonemenu,
+	.tools_content .sa-toolbar-filters .ui-calendar {
+		width: 100% !important;
+		max-width: 20rem;
+		margin-left: auto;
+		margin-right: auto;
+	}
+}
+
+/* —— Estado vazio —— */
+.sa-empty-state {
+	text-align: center;
+	padding: 2rem 1rem;
+	width: 100%;
+}
+
+.sa-empty-state__icon {
+	max-width: 120px;
+	height: auto;
+	opacity: 0.85;
+}
+
+.sa-empty-state__text {
+	font-size: 1.1rem !important;
+	color: var(--sa-text-muted);
+	margin-top: 1rem;
+	display: block;
+}
+
+/* —— Formulários de cadastro —— */
+.sa-cadastro-grid,
+.sa-form-grid.ui-g {
+	width: 100% !important;
+	max-width: 100%;
+}
+
+.sa-cadastro-grid .ui-g-12,
+.sa-form-grid .ui-g-12 {
+	padding: 0.35rem 0.75rem;
+}
+
+.sa-cadastro-grid .ui-outputlabel,
+.sa-form-grid .ui-outputlabel {
+	display: block;
+	margin-bottom: 0.25rem;
+	font-size: 0.8125rem;
+	font-weight: 600;
+	color: var(--sa-text-muted);
+}
+
+.sa-cadastro-grid .ui-inputfield,
+.sa-form-grid .ui-inputfield,
+.sa-form-card .ui-inputfield {
+	width: 100% !important;
+	max-width: 100%;
+	box-sizing: border-box;
+}
+
+.conteudo_internal .form-grid[style*="width"],
+.conteudo_internal div.form-grid[style] {
+	width: 100% !important;
+	max-width: 100%;
+}
+
+/* Ações em tabela (ícones) */
+.sa-table-actions {
+	display: inline-flex;
+	gap: 0.25rem;
+	justify-content: center;
+	flex-wrap: wrap;
+}
+
+body .ui-datatable .sa-table-actions .ui-button {
+	margin: 0 !important;
+}
+
+/* Dialog / mensagens auxiliares */
+.sa-hint-text {
+	color: var(--sa-text-muted);
+	font-size: 0.8125rem;
+}
+
+.btn-white-text,
+.btn-white-text .ui-button-text,
+.btn-white-text .pi {
+	color: #fff !important;
+}
+
+@media (max-width: 768px) {
+	.conteudo_internal .ui-datatable.tabela-responsive {
+		margin-top: 1rem;
+	}
+}

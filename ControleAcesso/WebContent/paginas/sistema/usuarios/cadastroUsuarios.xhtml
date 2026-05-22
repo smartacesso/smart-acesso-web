@@ -31,22 +31,28 @@
 		</ui:define>
 
 		<ui:define name="tools">
-			<h:panelGrid columns="4" styleClass="conteudo_tools">
-
-				<p:commandButton id="save"
-					action="#{cadastroUsuarioController.salvar}"
-					title="#{msgs['alt.acao.save']}" icon="pi pi-check">
-					<p:ajax process="@form" update="@form" />
-				</p:commandButton>
-				<h:commandButton id="editarSenha"
-					rendered="#{cadastroUsuarioController.entidade.id != null}"
-					title="#{msgs['alt.acao.alterar.senha']}"
-					image="#{menuController.path}/tema/img/bt_security.png"
-					action="#{cadastroUsuarioController.buscarLoginUsuario()}">
-					<p:ajax process="@this" update="alteraSenhaDialog"
-						oncomplete="PF('alteraSenha').show(); return false;" />
-				</h:commandButton>
-			</h:panelGrid>
+			<p:toolbar styleClass="sa-toolbar-wrap">
+				<p:toolbarGroup styleClass="sa-toolbar-actions">
+					<p:commandButton id="save"
+						action="#{cadastroUsuarioController.salvar}"
+						value="#{msgs['alt.acao.save']}"
+						title="#{msgs['alt.acao.save']}"
+						icon="pi pi-check" iconPos="left"
+						styleClass="sa-btn-label ui-button-success">
+						<p:ajax process="@form" update="@form" />
+					</p:commandButton>
+					<p:commandButton id="editarSenha"
+						rendered="#{cadastroUsuarioController.entidade.id != null}"
+						value="#{msgs['alt.acao.alterar.senha']}"
+						title="#{msgs['alt.acao.alterar.senha']}"
+						icon="pi pi-lock" iconPos="left"
+						action="#{cadastroUsuarioController.buscarLoginUsuario()}"
+						styleClass="sa-btn-label ui-button-flat">
+						<p:ajax process="@this" update="alteraSenhaDialog"
+							oncomplete="PF('alteraSenha').show(); return false;" />
+					</p:commandButton>
+				</p:toolbarGroup>
+			</p:toolbar>
 		</ui:define>
 
 		<ui:define name="conteudo">

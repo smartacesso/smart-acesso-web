@@ -21,67 +21,61 @@
 		</ui:define>
 
 		<ui:define name="tools">
-			<h:panelGrid columns="4" styleClass="conteudo_tools">
-
-				<h:commandButton id="acaoBuscar"
-					action="#{relatorioPedestresController.buscar()}"
-					title="#{msgs['alt.acao.buscar']}" alt="#{msgs['alt.acao.buscar']}"
-					image="#{menuController.path}/tema/img/bt_searcher.png">
-
-					<p:ajax process="@form" update="@form" />
-				</h:commandButton>
-
-				<h:commandButton id="acaoLimpar"
-					action="#{relatorioPedestresController.limpar()}"
-					title="#{msgs['alt.acao.limpar']}" alt="#{msgs['alt.acao.limpar']}"
-					image="#{menuController.path}/tema/img/bt_cleaner.png">
-
-					<p:ajax process="@this" update="@form" />
-				</h:commandButton>
-
-				<h:commandButton id="acaoExportar"
-					image="#{menuController.path}/tema/img/bt_exporter_xlsx.png"
-					title="#{msgs['alt.acao.exportar']}"
-					alt="#{msgs['alt.acao.exportar']}">
-
-					<p:dataExporter type="pdf" target="form:pedestresTable"
-						fileName="pedestres" />
-				</h:commandButton>
-
-			</h:panelGrid>
-
-			<div style="float: right;">
-
-				<p:outputLabel for="filtro-empresa"
-					value="#{msgs['label.uc009.empresa']}" />
-				<p:selectOneMenu id="filtro-empresa"
-					value="#{relatorioPedestresController.parans['pedestre.empresa.id']}"
-					valueChangeListener="#{relatorioPedestresController.eventoEmpresaSelecionada}">
-					<f:selectItems
-						value="#{relatorioPedestresController.listaEmpresas}" />
-					<f:converter converterId="javax.faces.Long" />
-				</p:selectOneMenu>
-
-				<p:calendar id="filtro-data-inicio"
-					value="#{relatorioPedestresController.parans['data_maior_data']}"
-					pattern="dd/MM/yyyy HH:mm" mask="99/99/9999 99:99" size="20"
-					navigator="true"
-					valueChangeListener="#{relatorioPedestresController.alteraDataInicio}">
-
-
-					<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
-				</p:calendar>
-				até
-				<p:calendar id="filtro-data-fim"
-					value="#{relatorioPedestresController.parans['data_menor_data']}"
-					pattern="dd/MM/yyyy HH:mm" mask="99/99/9999 99:99" size="20"
-					navigator="true"
-					valueChangeListener="#{relatorioPedestresController.alteraDataFim}">
-
-					<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
-				</p:calendar>
-
-			</div>
+			<p:toolbar styleClass="sa-toolbar-wrap sa-toolbar-report flex flex-column md:flex-row justify-content-between align-items-center gap-3">
+				<p:toolbarGroup styleClass="sa-toolbar-actions">
+					<p:commandButton id="acaoBuscar"
+						action="#{relatorioPedestresController.buscar()}"
+						value="#{msgs['alt.acao.buscar']}"
+						title="#{msgs['alt.acao.buscar']}"
+						icon="pi pi-search" iconPos="left"
+						styleClass="sa-btn-label">
+						<p:ajax process="@form" update="@form" />
+					</p:commandButton>
+					<p:commandButton id="acaoLimpar"
+						action="#{relatorioPedestresController.limpar()}"
+						value="#{msgs['alt.acao.limpar']}"
+						title="#{msgs['alt.acao.limpar']}"
+						icon="pi pi-filter" iconPos="left"
+						styleClass="sa-btn-label ui-button-flat">
+						<p:ajax process="@this" update="@form" />
+					</p:commandButton>
+					<p:commandButton id="acaoExportar"
+						value="#{msgs['alt.acao.exportar']}"
+						title="#{msgs['alt.acao.exportar']}"
+						icon="pi pi-file" iconPos="left"
+						ajax="false"
+						styleClass="sa-btn-label ui-button-flat">
+						<p:dataExporter type="pdf" target="form:pedestresTable"
+							fileName="pedestres" />
+					</p:commandButton>
+				</p:toolbarGroup>
+				<p:toolbarGroup styleClass="sa-toolbar-filters">
+					<p:outputLabel for="filtro-empresa"
+						value="#{msgs['label.uc009.empresa']}" />
+					<p:selectOneMenu id="filtro-empresa" styleClass="select-filtro"
+						value="#{relatorioPedestresController.parans['pedestre.empresa.id']}"
+						valueChangeListener="#{relatorioPedestresController.eventoEmpresaSelecionada}">
+						<f:selectItems
+							value="#{relatorioPedestresController.listaEmpresas}" />
+						<f:converter converterId="javax.faces.Long" />
+					</p:selectOneMenu>
+					<p:calendar id="filtro-data-inicio"
+						value="#{relatorioPedestresController.parans['data_maior_data']}"
+						pattern="dd/MM/yyyy HH:mm" mask="99/99/9999 99:99"
+						navigator="true"
+						valueChangeListener="#{relatorioPedestresController.alteraDataInicio}">
+						<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+					</p:calendar>
+					<h:outputText value="até" />
+					<p:calendar id="filtro-data-fim"
+						value="#{relatorioPedestresController.parans['data_menor_data']}"
+						pattern="dd/MM/yyyy HH:mm" mask="99/99/9999 99:99"
+						navigator="true"
+						valueChangeListener="#{relatorioPedestresController.alteraDataFim}">
+						<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+					</p:calendar>
+				</p:toolbarGroup>
+			</p:toolbar>
 		</ui:define>
 
 		<ui:define name="conteudo">
