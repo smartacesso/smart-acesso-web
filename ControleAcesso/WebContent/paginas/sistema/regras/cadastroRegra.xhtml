@@ -53,126 +53,109 @@
 					<p:tabView id="cadastroRegraTab" widgetVar="cadastroRegraWid">
 					
 						<p:tab title="#{msgs['label.uc006.dados.regra']}">
-							<p:panelGrid columns="2" id="painelCadastroRegra" style="width: 100%">
-								
-								<p:column>
+							<p:panel header="#{msgs['label.uc006.dados.regra']}" styleClass="ui-fluid">
+								<div class="form-grid sa-cadastro-grid ui-fluid ui-g" id="painelCadastroRegra">
+
+								<div class="ui-g-12 ui-md-6">
 									<p:outputLabel value="#{msgs['label.uc006.nome.regra']}" for="nome" indicateRequired="true"/>
-									<br />
-									<p:inputText id="nome" value="#{cadastroRegraAcessoController.entidade.nome}" required="true" size="40" />
-								</p:column>
-								
-								<p:column>
+									<p:inputText id="nome" value="#{cadastroRegraAcessoController.entidade.nome}" required="true" />
+								</div>
+
+								<div class="ui-g-12 ui-md-6">
 									<p:outputLabel value="#{msgs['label.uc005.status']}" for="status" indicateRequired="true"/>
-									<br />
 									<p:selectOneMenu id="status" value="#{cadastroRegraAcessoController.entidade.status}" required="true" >
 										<f:selectItems value="#{cadastroRegraAcessoController.listaStatus}"/>
 									</p:selectOneMenu>
-								</p:column>
-								
-								<p:column>
+								</div>
+
+								<div class="ui-g-12 ui-md-6">
 									<p:outputLabel value="#{msgs['label.uc006.data.validade']}" for="dataValidade"/>
-									<br />
 									<p:calendar id="dataValidade" value="#{cadastroRegraAcessoController.entidade.validade}" 
 											pattern="dd/MM/yyyy" mask="99/99/9999" navigator="true"/>
-								</p:column>
-								
-								<p:column>
+								</div>
+
+								<div class="ui-g-12 ui-md-6">
 									<p:outputLabel value="#{msgs['label.uc006.empresa']}" for="empresa"/>
-									<br />
 									<p:selectOneMenu id="empresa" value="#{cadastroRegraAcessoController.idEmpresaSelecionada}">
 										<f:selectItems value="#{cadastroRegraAcessoController.listaEmpresas}"/>
 									</p:selectOneMenu>
-								</p:column>
+								</div>
 
-								<p:column>
+								<div class="ui-g-12 ui-md-6">
 									<p:outputLabel value="#{msgs['label.uc006.tipo.pedestre']}" for="tipoPedestre" indicateRequired="true"/>
-									<br />
 									<p:selectOneMenu id="tipoPedestre" value="#{cadastroRegraAcessoController.entidade.tipoPedestre}" required="true">
 										<f:selectItems value="#{cadastroRegraAcessoController.listaTipoPedestre}"/>
 									</p:selectOneMenu>
-								</p:column>								
-								
-								<p:column>
-									<p:panelGrid columns="3" id="panelTipoRegra" styleClass="grid-interno">
-										<p:column>
+								</div>
+
+								<div class="ui-g-12">
+									<div class="form-grid sa-cadastro-grid ui-fluid ui-g" id="panelTipoRegra">
+										<div class="ui-g-12 ui-md-4">
 											<p:outputLabel value="#{msgs['label.uc006.tipo.regra']}" for="tipoRegra" indicateRequired="true"/>
-											<br />
 											<p:selectOneMenu id="tipoRegra" value="#{cadastroRegraAcessoController.entidade.tipo}" required="true" 
 													valueChangeListener="#{cadastroRegraAcessoController.eventoAlteraListaTipoRegra}">
 												<p:ajax process="@form" update="@form" event="valueChange"/>
 												<f:selectItems value="#{cadastroRegraAcessoController.listaTipoRegra}"/>
 											</p:selectOneMenu>
-										</p:column>
-										
-										<p:column rendered="#{cadastroRegraAcessoController.tipoRegra == 'ACESSO_PERIODO'}">
+										</div>
+
+										<div class="ui-g-12 ui-md-4" rendered="#{cadastroRegraAcessoController.tipoRegra == 'ACESSO_PERIODO'}">
 											<p:outputLabel value="#{msgs['label.uc006.data.inicio']}" indicateRequired="true"/>
-											<br />
 											<p:calendar id="dataInicio" value="#{cadastroRegraAcessoController.entidade.dataInicioPeriodo}" 
-													pattern="dd/MM/yyyy" mask="99/99/9999" size="10" navigator="true"/>
-										</p:column>
-										
-										<p:column rendered="#{cadastroRegraAcessoController.tipoRegra == 'ACESSO_PERIODO'}">
+													pattern="dd/MM/yyyy" mask="99/99/9999" navigator="true"/>
+										</div>
+
+										<div class="ui-g-12 ui-md-4" rendered="#{cadastroRegraAcessoController.tipoRegra == 'ACESSO_PERIODO'}">
 											<p:outputLabel value="#{msgs['label.uc006.data.fim']}" indicateRequired="true"/>
-											<br />
 											<p:calendar id="dataFim" value="#{cadastroRegraAcessoController.entidade.dataFimPeriodo}" 
-													pattern="dd/MM/yyyy" mask="99/99/9999" size="10" navigator="true"/>
-										</p:column>
-										
-										<p:column rendered="#{cadastroRegraAcessoController.tipoRegra == 'ACESSO_CREDITO'}">
+													pattern="dd/MM/yyyy" mask="99/99/9999" navigator="true"/>
+										</div>
+
+										<div class="ui-g-12 ui-md-4" rendered="#{cadastroRegraAcessoController.tipoRegra == 'ACESSO_CREDITO'}">
 											<p:outputLabel value="#{msgs['label.uc008.qtde.creditos']}"/>
-											<br />
 											<p:inputNumber id="qtdeCreditos" value="#{cadastroRegraAcessoController.entidade.qtdeDeCreditos}" 
-													minValue="0" decimalPlaces="0" size="6"/>
-										</p:column>
-										
-										<p:column rendered="#{cadastroRegraAcessoController.tipoRegra == 'ACESSO_CREDITO'}">
+													minValue="0" decimalPlaces="0"/>
+										</div>
+
+										<div class="ui-g-12 ui-md-4" rendered="#{cadastroRegraAcessoController.tipoRegra == 'ACESSO_CREDITO'}">
 											<p:outputLabel value="#{msgs['label.uc008.validade.creditos.dias']}"/>
-											<br />
 											<p:inputNumber id="validadeCreditos" value="#{cadastroRegraAcessoController.entidade.diasValidadeCredito}" 
-													minValue="0" decimalPlaces="0" size="6"/>
-										</p:column>
-										
-										<p:column rendered="#{cadastroRegraAcessoController.tipoRegra == 'ACESSO_ESCALA'}">
+													minValue="0" decimalPlaces="0"/>
+										</div>
+
+										<div class="ui-g-12 ui-md-4" rendered="#{cadastroRegraAcessoController.tipoRegra == 'ACESSO_ESCALA'}">
 											<p:outputLabel value="#{msgs['label.uc006.turnos.disponiveis']}"/>
-											<br />
-											<p:selectOneMenu id="escalasDisponiveis" value="#{cadastroRegraAcessoController.entidade.tipoEscala}"
-													autoWidth="false">
+											<p:selectOneMenu id="escalasDisponiveis" value="#{cadastroRegraAcessoController.entidade.tipoEscala}">
 												<f:selectItems value="#{cadastroRegraAcessoController.listaTipoEscala}"/>
 											</p:selectOneMenu>
-										</p:column>
-										
-										<p:column rendered="#{cadastroRegraAcessoController.tipoRegra == 'ACESSO_ESCALA'}">
-											<p:outputLabel value="#{msgs['label.uc006.horario.inicio.turno']}"/>
-											<br />
-											<p:calendar id="horarioInicioTurno" value="#{cadastroRegraAcessoController.entidade.horarioInicioTurno}" 
-												timeOnly="true" pattern="HH:mm" mask="99:99" size="10" navigator="true"/>
-										</p:column>
-  										
-  										<p:column rendered="#{cadastroRegraAcessoController.tipoRegra == 'ACESSO_ESCALA_3_3'}">
-											<p:outputLabel value="#{msgs['label.uc006.data.inicio']}" indicateRequired="true"/>
-											<br />
-											<p:calendar id="dataInicio3_3" value="#{cadastroRegraAcessoController.entidade.dataInicioPeriodo}" 
-													pattern="dd/MM/yyyy" mask="99/99/9999" size="10" navigator="true"/>
-										</p:column>
-										<p:column rendered="#{cadastroRegraAcessoController.tipoRegra == 'ACESSO_ESCALA_3_3'}">
-											<p:outputLabel value="#{msgs['label.uc006.horario.inicio.turno']}"/>
-											<br />
-											<p:calendar id="horarioInicioTurno3_3" value="#{cadastroRegraAcessoController.entidade.horarioInicioTurno}" 
-												timeOnly="true" pattern="HH:mm" mask="99:99" size="10" navigator="true"/>
-										</p:column>
+										</div>
 
-									
-									</p:panelGrid>
-									
-								</p:column>
-								
-								<p:column>
+										<div class="ui-g-12 ui-md-4" rendered="#{cadastroRegraAcessoController.tipoRegra == 'ACESSO_ESCALA'}">
+											<p:outputLabel value="#{msgs['label.uc006.horario.inicio.turno']}"/>
+											<p:calendar id="horarioInicioTurno" value="#{cadastroRegraAcessoController.entidade.horarioInicioTurno}" 
+												timeOnly="true" pattern="HH:mm" mask="99:99" navigator="true"/>
+										</div>
+
+										<div class="ui-g-12 ui-md-4" rendered="#{cadastroRegraAcessoController.tipoRegra == 'ACESSO_ESCALA_3_3'}">
+											<p:outputLabel value="#{msgs['label.uc006.data.inicio']}" indicateRequired="true"/>
+											<p:calendar id="dataInicio3_3" value="#{cadastroRegraAcessoController.entidade.dataInicioPeriodo}" 
+													pattern="dd/MM/yyyy" mask="99/99/9999" navigator="true"/>
+										</div>
+										<div class="ui-g-12 ui-md-4" rendered="#{cadastroRegraAcessoController.tipoRegra == 'ACESSO_ESCALA_3_3'}">
+											<p:outputLabel value="#{msgs['label.uc006.horario.inicio.turno']}"/>
+											<p:calendar id="horarioInicioTurno3_3" value="#{cadastroRegraAcessoController.entidade.horarioInicioTurno}" 
+												timeOnly="true" pattern="HH:mm" mask="99:99" navigator="true"/>
+										</div>
+									</div>
+								</div>
+
+								<div class="ui-g-12">
 									<p:outputLabel value="#{msgs['label.uc006.descricao']}" for="descricao"/>
-									<br />
-									<p:inputTextarea id="descricao" value="#{cadastroRegraAcessoController.entidade.descricao}" cols="50" rows="4" 
-										maxlength="255"/>
-								</p:column>
-							</p:panelGrid>
+									<p:inputTextarea id="descricao" value="#{cadastroRegraAcessoController.entidade.descricao}" rows="4" 
+										maxlength="255" autoResize="false"/>
+								</div>
+								</div>
+							</p:panel>
 						
 						</p:tab>
 						
@@ -269,11 +252,13 @@
 													minValue="0" decimalPlaces="0" size="6"/>
 									</p:column>
 							        
-							        <p:column headerText="#{msgs['alt.acao.excluir']}" style="text-align: center; width: 35px;">
-										<h:commandButton image="#{menuController.path}/tema/img/bt_remove_min.png" 
-													title="#{msgs['alt.acao.excluir']}" action="#{cadastroRegraAcessoController.removeHorario(horario)}">
-											<p:ajax process="@this" update="form:cadastroRegraTab:tableHorarios form:cadastroRegraTab:horarios"/>
-										</h:commandButton>
+							        <p:column headerText="#{msgs['alt.acao.excluir']}" style="text-align: center; width: 100px;">
+										<p:commandButton icon="pi pi-trash"
+											title="#{msgs['alt.acao.excluir']}"
+											action="#{cadastroRegraAcessoController.removeHorario(horario)}"
+											process="@this"
+											update="form:cadastroRegraTab:tableHorarios form:cadastroRegraTab:horarios"
+											styleClass="ui-button-danger ui-button-flat rounded-button" />
 									</p:column>
 									
 								</p:dataTable>

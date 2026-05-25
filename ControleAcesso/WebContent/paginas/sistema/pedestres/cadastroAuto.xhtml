@@ -25,9 +25,10 @@
 		</ui:define>
 
 		<ui:define name="tools">
-			<p:toolbar id="painelTools">
-				<p:toolbarGroup align="left">
-					<h:outputText value="Terminal de Autoatendimento SmartAcesso" style="font-weight:bold; color: #2c3e50; font-size: 1.2rem;" />
+			<p:toolbar id="painelTools" styleClass="sa-toolbar-wrap">
+				<p:toolbarGroup styleClass="sa-toolbar-actions">
+					<h:outputText value="Terminal de Autoatendimento SmartAcesso"
+						style="font-weight:600; color: var(--sa-text, #2c3e50); font-size: 1.1rem;" />
 				</p:toolbarGroup>
 			</p:toolbar>
 		</ui:define>

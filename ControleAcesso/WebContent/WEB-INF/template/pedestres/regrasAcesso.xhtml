@@ -4,113 +4,102 @@
 	xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:p="http://primefaces.org/ui">
 
-	<style>
-.whiteIcon .ui-icon {
-	color: #fff;
-}
-</style>
+	<p:panel id="painelCadastroPedestreRegras" header="Cadastrar regra"
+		styleClass="ui-fluid">
+		<div class="form-grid sa-cadastro-grid ui-fluid ui-g">
 
-	<p:panel header="Cadastrar regra" id="painelCadastroPedestreRegras" layout="grid"
-		styleClass="form-grid ui-fluid" columns="1">
-		<div class="ui-g">
-			<!-- Linha 1: AutoComplete + Botão Buscar + Validade -->
-			<div class="ui-g-12 ui-md-7"
-				style="display: flex; flex-wrap: nowrap; gap: 0.5rem;">
-				<div style="flex: 1 1 auto;">
-					<p:outputLabel value="#{msgs['label.uc008.regra']}"
-						for="buscarRegraAutoComplete" />
-					<p:autoComplete id="buscarRegraAutoComplete"
-						value="#{cadastroPedestreController.pedestreRegra.regra}"
-						var="regra" itemLabel="#{regra.nome}" itemValue="#{regra}"
-						forceSelection="true" queryDelay="800" cache="true"
-						minQueryLength="2" maxResults="10" style="width: 100%"
-						completeMethod="#{cadastroPedestreController.buscarRegraAutoComplete}">
-						<p:ajax event="itemSelect" update="painelCadastroPedestreRegras" />
-					</p:autoComplete>
-				</div>
-				<div style="padding-left: 0.5rem;">
-					<p:outputLabel value="#{msgs['label.uc008.validade']}"
-						for="validadeRegra" />
-					<p:calendar id="validadeRegra"
-						value="#{cadastroPedestreController.pedestreRegra.validade}"
-						pattern="dd/MM/yyyy" mask="99/99/9999"
-						style="width: 100%; margin-top:-20px" />
-				</div>
-
-				<div class="ui-g-12 ui-md-4" style="padding-top: 2.5rem;">
-					<p:commandButton id="buscarRegras"
-						actionListener="#{cadastroPedestreController.montaListaTipoRegra}"
-						icon="pi pi-search" update="form:dialogEscolherRegra"
-						oncomplete="PF('escolherRegra').show(); return false;"
-						styleClass="whiteIcon" process="@this" style="width: 100%" />
-				</div>
-
+			<div class="ui-g-12 ui-md-5">
+				<p:outputLabel value="#{msgs['label.uc008.regra']}"
+					for="buscarRegraAutoComplete" />
+				<p:autoComplete id="buscarRegraAutoComplete"
+					value="#{cadastroPedestreController.pedestreRegra.regra}"
+					var="regra" itemLabel="#{regra.nome}" itemValue="#{regra}"
+					forceSelection="true" queryDelay="800" cache="true"
+					minQueryLength="2" maxResults="10"
+					completeMethod="#{cadastroPedestreController.buscarRegraAutoComplete}">
+					<p:ajax event="itemSelect" update="painelCadastroPedestreRegras" />
+				</p:autoComplete>
 			</div>
 
+			<div class="ui-g-12 ui-md-3">
+				<p:outputLabel value="#{msgs['label.uc008.validade']}"
+					for="validadeRegra" />
+				<p:calendar id="validadeRegra"
+					value="#{cadastroPedestreController.pedestreRegra.validade}"
+					pattern="dd/MM/yyyy" mask="99/99/9999" />
+			</div>
 
-			<!-- Créditos -->
+			<div class="ui-g-12 ui-md-2">
+				<p:outputLabel value="&#160;" />
+				<p:commandButton id="buscarRegras"
+					actionListener="#{cadastroPedestreController.montaListaTipoRegra}"
+					icon="pi pi-search" title="#{msgs['alt.acao.buscar']}"
+					update="form:dialogEscolherRegra"
+					oncomplete="PF('escolherRegra').show(); return false;"
+					process="@this" styleClass="ui-button-outlined" />
+			</div>
+
 			<h:panelGroup
-				rendered="#{cadastroPedestreController.pedestreRegra.regra.tipo == 'ACESSO_CREDITO'}">
+				rendered="#{cadastroPedestreController.pedestreRegra.regra.tipo == 'ACESSO_CREDITO'}"
+				styleClass="ui-g-12">
 				<div class="ui-g-12 ui-md-4">
 					<p:outputLabel value="#{msgs['label.uc008.qtde.creditos']}"
 						for="qtdeCreditos" />
 					<p:inputNumber id="qtdeCreditos"
 						value="#{cadastroPedestreController.pedestreRegra.regra.qtdeDeCreditos}"
-						minValue="0" decimalPlaces="0" style="width: 100%" />
+						minValue="0" decimalPlaces="0" />
 				</div>
-
 				<div class="ui-g-12 ui-md-4">
 					<p:outputLabel
 						value="#{msgs['label.uc008.validade.creditos.dias']}"
 						for="validadeCreditos" />
 					<p:inputNumber id="validadeCreditos"
 						value="#{cadastroPedestreController.pedestreRegra.regra.diasValidadeCredito}"
-						minValue="0" decimalPlaces="0" style="width: 100%" />
+						minValue="0" decimalPlaces="0" />
 				</div>
 			</h:panelGroup>
 
-			<!-- Período / Escala -->
 			<h:panelGroup
-				rendered="#{cadastroPedestreController.pedestreRegra.regra.tipo == 'ACESSO_PERIODO' or cadastroPedestreController.pedestreRegra.regra.tipo == 'ACESSO_ESCALA'}">
+				rendered="#{cadastroPedestreController.pedestreRegra.regra.tipo == 'ACESSO_PERIODO' or cadastroPedestreController.pedestreRegra.regra.tipo == 'ACESSO_ESCALA'}"
+				styleClass="ui-g-12">
 				<div class="ui-g-12 ui-md-4">
 					<p:outputLabel value="#{msgs['label.uc006.data.inicio']}"
 						for="dataInicio" />
 					<p:calendar id="dataInicio"
 						value="#{cadastroPedestreController.pedestreRegra.regra.dataInicioPeriodo}"
-						pattern="dd/MM/yyyy" mask="99/99/9999" style="width: 100%" />
+						pattern="dd/MM/yyyy" mask="99/99/9999" />
 				</div>
 			</h:panelGroup>
 
 			<h:panelGroup
-				rendered="#{cadastroPedestreController.pedestreRegra.regra.tipo == 'ACESSO_PERIODO'}">
+				rendered="#{cadastroPedestreController.pedestreRegra.regra.tipo == 'ACESSO_PERIODO'}"
+				styleClass="ui-g-12">
 				<div class="ui-g-12 ui-md-4">
 					<p:outputLabel value="#{msgs['label.uc006.data.fim']}"
 						for="dataFim" />
 					<p:calendar id="dataFim"
 						value="#{cadastroPedestreController.pedestreRegra.regra.dataFimPeriodo}"
-						pattern="dd/MM/yyyy" mask="99/99/9999" style="width: 100%" />
+						pattern="dd/MM/yyyy" mask="99/99/9999" />
 				</div>
 			</h:panelGroup>
 
-			<!-- Botão adicionar em linha separada -->
-			<div class="ui-g-12 ui-md-4" style="padding-top: 3rem;">
+			<div class="ui-g-12 ui-md-2">
+				<p:outputLabel value="&#160;" />
 				<p:commandButton id="adicionarRegra"
 					action="#{cadastroPedestreController.adicionarRegra()}"
 					icon="pi pi-plus" process="painelCadastroPedestreRegras"
-					value="Adicionar"
+					value="#{msgs['alt.acao.adicionar']}"
 					update="painelCadastroPedestreRegras regras form:dialogEscolherRegra"
-					style="width: 100%" styleClass="ui-button-success" />
+					styleClass="ui-button-success" />
 			</div>
-
 		</div>
 	</p:panel>
 
-	<br />
+	<p:spacer height="10" />
 
-	<p:panelGrid columns="2" id="regras" style="width: 100%;">
-
+	<p:panel id="regras" header="Regras vinculadas" styleClass="ui-fluid">
 		<h:outputText value="#{msgs['msg.nenhum.item.encontrado.adicionar']}"
-			escape="false"
+			styleClass="sa-empty-state__text" escape="false"
 			rendered="#{empty cadastroPedestreController.listaPedestreRegra}" />
 
 		<p:dataTable id="tableRegras"
@@ -125,10 +114,10 @@
 					style="color: #{pedestreRegra.dataRemovido != null ? 'gray' : 'black'}; 
 					font-weight: #{pedestreRegra.dataRemovido != null ? '' : 'bold'};" />
 
-				<h:button id="ajudaRegra" title="#{msgs[alt.label.ajuda]}"
-					image="#{menuController.path}/tema/img/bt_helper.png"
-					style="height: 20px; margin-left: 2px" onclick="return false;">
-				</h:button>
+				<p:commandButton id="ajudaRegra" icon="pi pi-info-circle"
+					styleClass="ui-button-info ui-button-flat rounded-button"
+					style="margin-left: 5px; width: 2rem; height: 2rem;"
+					onclick="return false;" />
 
 				<p:tooltip id="dicaMostraDadosRegra" for="nomeRegra ajudaRegra"
 					position="bottom">
@@ -186,7 +175,6 @@
 						</h:outputText>
 					</p:column>
 				</p:tooltip>
-
 			</p:column>
 
 			<p:column headerText="#{msgs['label.uc008.validade']}"
@@ -204,25 +192,24 @@
 			</p:column>
 
 			<p:column headerText="#{msgs['alt.acao.excluir']}"
-				style="text-align: center;">
-				<h:commandButton
-					image="#{menuController.path}/tema/img/bt_remove_min.png"
+				style="width: 100px; text-align: center;">
+				<p:commandButton icon="pi pi-trash"
 					rendered="#{pedestreRegra.dataRemovido == null}"
 					title="#{msgs['alt.acao.excluir']}"
-					action="#{cadastroPedestreController.removerRegra(pedestreRegra)}">
-					<p:ajax process="@this"
-						update="form:cadastroPedestreTab:tableRegras form:cadastroPedestreTab:regras" />
-				</h:commandButton>
+					action="#{cadastroPedestreController.removerRegra(pedestreRegra)}"
+					process="@this"
+					update="form:cadastroPedestreTab:tableRegras form:cadastroPedestreTab:regras"
+					styleClass="ui-button-danger ui-button-flat rounded-button" />
 			</p:column>
-
 		</p:dataTable>
-	</p:panelGrid>
+	</p:panel>
+
 	<style>
 @media ( max-width : 768px) {
 	.col-desktop-only {
 		display: none !important;
 	}
 }
-</style>
+	</style>
 
 </ui:composition>

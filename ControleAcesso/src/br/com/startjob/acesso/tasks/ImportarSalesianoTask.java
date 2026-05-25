@@ -13,7 +13,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.TimerTask;
 import java.util.logging.Logger;
@@ -38,11 +37,9 @@ import br.com.startjob.acesso.modelo.enumeration.TipoPedestre;
 import br.com.startjob.acesso.modelo.utils.CpfUtils;
 import br.com.startjob.acesso.modelo.utils.EncryptionUtils;
 import br.com.startjob.acesso.services.BaseServlet;
-import br.com.startjob.acesso.to.TotvsEdu.NivelDeEnsino;
 import br.com.startjob.acesso.to.TotvsEdu.OrigemStatusTotvs;
 import br.com.startjob.acesso.to.TotvsEdu.PermissoesEduTotvs;
 import br.com.startjob.acesso.to.TotvsEdu.TipoTotvsEdu;
-import br.com.startjob.acesso.utils.Utils;
 
 public class ImportarSalesianoTask extends TimerTask {
 

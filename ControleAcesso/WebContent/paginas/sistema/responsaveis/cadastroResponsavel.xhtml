@@ -10,7 +10,7 @@
 	<ui:composition template="/tema/templates/template.xhtml">
 
 		<ui:define name="titulo">
-			#{msgs['title.sistema']} | #{cadastroController.entidade.id != null 
+			#{msgs['title.sistema']} | #{cadastroResponsavelController.entidade.id != null 
 											? msgs['title.uc016.editar.responsavel'] 
 											: msgs['title.uc016.cadastrar.responsavel']}
 		</ui:define>
@@ -24,7 +24,7 @@
 				href="/#{menuController.appName}/paginas/sistema/responsaveis/pesquisaResponsavel.xhtml">
 				<h:outputText value="#{msgs['title.uc016.consulta.responsavel']}" />
 			</a> > <h:outputText
-				value="#{cadastroController.entidade.id != null 
+				value="#{cadastroResponsavelController.entidade.id != null 
 										? msgs['title.uc016.editar.responsavel'] 
 										: msgs['title.uc016.cadastrar.responsavel']}" />
 		</ui:define>
@@ -55,17 +55,16 @@
 
 				<h:column>
 					<p:accordionPanel id="cadastroTab" widgetVar="cadastroWid">
-
 						<p:tab title="#{msgs['label.uc016.dados.responsavel']}">
 							<p:panel header="Cadastro Responsável" styleClass="ui-fluid">
-								<div class="ui-g">
+								<div class="form-grid sa-cadastro-grid ui-fluid ui-g">
 
 									<div class="ui-g-12 ui-md-6">
 										<p:outputLabel value="#{msgs['label.uc016.nome']}" for="nome"
 											indicateRequired="true" />
 										<p:inputText id="nome"
 											value="#{cadastroResponsavelController.entidade.nome}"
-											required="true" size="40" style="width: 100%" />
+											required="true" />
 									</div>
 
 									<div class="ui-g-12 ui-md-6">
@@ -73,7 +72,7 @@
 											for="status" indicateRequired="true" />
 										<p:selectOneMenu id="status"
 											value="#{cadastroResponsavelController.entidade.status}"
-											required="true" style="width: 100%">
+											required="true">
 											<f:selectItems
 												value="#{cadastroResponsavelController.listaStatus}" />
 										</p:selectOneMenu>
@@ -84,7 +83,7 @@
 											value="#{msgs['label.uc016.email.responsavel']}" for="email" />
 										<p:inputText id="email"
 											value="#{cadastroResponsavelController.entidade.email}"
-											size="40" validator="emailValidator" style="width: 100%" />
+											validator="emailValidator" />
 									</div>
 
 									<div class="ui-g-12 ui-md-6">
@@ -93,7 +92,7 @@
 										<p:inputMask id="cpf"
 											value="#{cadastroResponsavelController.entidade.cpf}"
 											mask="999.999.999-99" required="true"
-											converter="cpfConverter" style="width: 100%" />
+											converter="cpfConverter" />
 									</div>
 
 									<div class="ui-g-12 ui-md-6">
@@ -101,7 +100,7 @@
 											indicateRequired="true" />
 										<p:inputMask id="rg"
 											value="#{cadastroResponsavelController.entidade.rg}"
-											required="true" style="width: 100%" />
+											required="true" />
 									</div>
 
 									<div class="ui-g-12 ui-md-6">
@@ -110,7 +109,7 @@
 											for="celular" indicateRequired="true" />
 										<p:inputMask id="celular"
 											value="#{cadastroResponsavelController.entidade.celular}"
-											mask="(99) 9 9999-9999" required="true" style="width: 100%" />
+											mask="(99) 9 9999-9999" required="true" />
 									</div>
 
 									<div class="ui-g-12 ui-md-6">
@@ -119,7 +118,7 @@
 										<p:calendar id="dataNascimento"
 											value="#{cadastroResponsavelController.entidade.dataNascimento}"
 											mask="99/99/9999" pattern="dd/MM/yyyy" locale="pt_BR"
-											navigator="true" style="width: 100%" />
+											navigator="true" />
 									</div>
 
 									<div class="ui-g-12 ui-md-6">
@@ -127,7 +126,7 @@
 											for="descricao" />
 										<p:inputTextarea id="descricao"
 											value="#{cadastroResponsavelController.entidade.descricao}"
-											cols="50" rows="4" maxlength="255" style="width: 100%" />
+											rows="4" maxlength="255" autoResize="false" />
 									</div>
 
 									<div class="ui-g-12 ui-md-6">
@@ -135,7 +134,7 @@
 											for="login" indicateRequired="true" />
 										<p:inputMask id="login"
 											value="#{cadastroResponsavelController.entidade.login}"
-											required="true" style="width: 100%" />
+											required="true" />
 									</div>
 
 									<div class="ui-g-12 ui-md-6">
@@ -144,11 +143,8 @@
 										<p:password id="senha"
 											value="#{cadastroResponsavelController.entidade.password}"
 											required="#{cadastroResponsavelController.entidade.id == null}"
-											redisplay="#{cadastroResponsavelController.entidade.id == null}"
-											style="width: 100%" />
-
+											redisplay="#{cadastroResponsavelController.entidade.id == null}" />
 									</div>
-
 								</div>
 							</p:panel>
 						</p:tab>

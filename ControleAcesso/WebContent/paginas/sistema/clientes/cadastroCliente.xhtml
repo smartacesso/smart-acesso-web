@@ -107,104 +107,91 @@
 
 					<p:tabView id="cadastroClienteTab">
 						<p:tab title="Cadastro de unidade">
-							<p:panelGrid columns="2" id="painelCadastroCliente"
-								style="width: 100%;">
-								<p:column>
+							<p:panel header="Cadastro de unidade" styleClass="ui-fluid">
+								<div class="form-grid sa-cadastro-grid ui-fluid ui-g" id="painelCadastroCliente">
+								<div class="ui-g-12 ui-md-6">
 									<p:outputLabel value="#{msgs['label.uc001.nome']}" for="nome"
 										indicateRequired="true" />
-									<br />
 									<p:inputText id="nome"
 										value="#{cadastroClienteController.entidade.nome}"
-										required="true" size="40" />
-								</p:column>
+										required="true" />
+								</div>
 
-								<p:column>
-									<p:outputLabel value="#{msgs['label.uc001.email']}" for="email"
-										indicateRequired="false" />
-									<br />
+								<div class="ui-g-12 ui-md-6">
+									<p:outputLabel value="#{msgs['label.uc001.email']}" for="email" />
 									<p:inputText id="email"
 										value="#{cadastroClienteController.entidade.email}"
-										required="false" size="40" validator="emailValidator" />
-								</p:column>
+										validator="emailValidator" />
+								</div>
 
-								<p:column>
-									<p:outputLabel value="#{msgs['label.uc001.cnpj']}" for="cnpj"
-										indicateRequired="false" />
-									<br />
+								<div class="ui-g-12 ui-md-6">
+									<p:outputLabel value="#{msgs['label.uc001.cnpj']}" for="cnpj" />
 									<p:inputMask id="cnpj"
 										value="#{cadastroClienteController.entidade.cnpj}"
-										mask="99.999.999/9999-99" required="false"
+										mask="99.999.999/9999-99"
 										converter="cnpjConverter" />
-								</p:column>
+								</div>
 
-								<p:column>
+								<div class="ui-g-12 ui-md-6">
 									<p:outputLabel value="#{msgs['label.uc001.telefone']}"
 										for="telefone" />
-									<br />
 									<p:inputMask id="telefone"
 										value="#{cadastroClienteController.entidade.telefone}"
 										mask="(999) 9999-9999" />
-								</p:column>
+								</div>
 
-								<p:column>
+								<div class="ui-g-12 ui-md-6">
 									<p:outputLabel value="#{msgs['label.uc001.celular']}"
-										for="celular" indicateRequired="false" />
-									<br />
+										for="celular" />
 									<p:inputMask id="celular"
 										value="#{cadastroClienteController.entidade.celular}"
-										mask="(999) 9 9999-9999" required="false" />
-								</p:column>
+										mask="(999) 9 9999-9999" />
+								</div>
 
-								<p:column>
+								<div class="ui-g-12 ui-md-6">
 									<p:outputLabel value="#{msgs['label.uc001.contato']}"
 										for="contato" />
-									<br />
 									<p:inputText id="contato"
-										value="#{cadastroClienteController.entidade.contato}"
-										size="50" />
-								</p:column>
+										value="#{cadastroClienteController.entidade.contato}" />
+								</div>
 
-								<p:column>
+								<div class="ui-g-12 ui-md-6">
 									<p:outputLabel value="#{msgs['label.uc001.status']}"
 										for="status" indicateRequired="true" />
-									<br />
 									<p:selectOneMenu id="status"
 										value="#{cadastroClienteController.entidade.status}"
 										required="true">
 										<f:selectItems
 											value="#{cadastroClienteController.listaStatus}" />
 									</p:selectOneMenu>
-								</p:column>
+								</div>
 
-								<p:column>
+								<div class="ui-g-12 ui-md-6">
 									<p:outputLabel
 										value="#{msgs['label.uc001.nome.unidade.organizacional']}"
 										for="unidadeOrganizacional" />
-									<br />
 									<p:inputText id="unidadeOrganizacional"
 										value="#{cadastroClienteController.entidade.nomeUnidadeOrganizacional}"
 										required="true">
 										<f:validateRegex pattern="[a-zA-Z0-9]+" />
 									</p:inputText>
-								</p:column>
+								</div>
 
-								<p:column
+								<div class="ui-g-12 ui-md-6"
 									rendered="#{cadastroClienteController.entidade.id == null}">
 									<p:outputLabel value="#{msgs['label.uc001.login']}"
 										for="usuarioLogin" indicateRequired="true" />
-									<br />
 									<p:inputText id="usuarioLogin"
 										value="#{cadastroClienteController.usuarioLogin}"
 										required="true">
 										<f:validateRegex pattern="[a-zA-Z0-9]+" />
 									</p:inputText>
-								</p:column>
+								</div>
 
-								<p:column
+								<div class="ui-g-12 ui-md-6"
 									rendered="#{cadastroClienteController.entidade.id == null}">
 									<p:outputLabel value="#{msgs['label.uc001.senha']}"
 										for="senhaLogin" indicateRequired="true" />
-									<br />
 									<p:password id="senhaLogin"
 										value="#{cadastroClienteController.usuarioSenha}"
 										required="true" feedback="true" redisplay="true"
@@ -214,90 +201,78 @@
 										<f:validateRegex
 											pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[@$!%*?&amp;])[A-Za-z0-9@$!%*?&amp;]{8,}$" />
 									</p:password>
-									<br />
+								</div>
+
+								<div class="ui-g-12 ui-md-6"
+									rendered="#{cadastroClienteController.entidade.id == null}">
 									<p:outputLabel for="confirmarSenha" value="Confirmar Senha:"
 										indicateRequired="true" />
-									<br />
 									<p:password id="confirmarSenha"
 										value="#{cadastroUsuarioController.confirmarSenha}"
 										redisplay="true" required="true" feedback="false"
 										validatorMessage="Confirmação obrigatória" />
-									<br />
 									<h:outputText
 										value="A senha deve conter: mínimo 8 caracteres, com letras maiúsculas, minúsculas, números e caracteres especiais."
-										style="color:gray; font-size:12px" />
-
-								</p:column>
-
-							</p:panelGrid>
+										styleClass="sa-hint-text" />
+								</div>
+								</div>
+							</p:panel>
 						</p:tab>
 
 						<p:tab title="#{msgs['label.uc001.endereco']}">
-							<p:panelGrid columns="2" id="painelEnderecoCliente"
-								style="width: 100%;">
-								<p:column>
+							<p:panel header="Cadastro de endereço" styleClass="ui-fluid">
+								<div class="form-grid sa-cadastro-grid ui-fluid ui-g" id="painelEnderecoCliente">
+								<div class="ui-g-12 ui-md-4">
 									<p:outputLabel value="#{msgs['label.uc001.cep']}" for="cep" />
-									<br />
 									<p:inputMask id="cep"
 										value="#{cadastroClienteController.entidade.endereco.cep}"
 										mask="99999-999" />
-								</p:column>
+								</div>
 
-								<p:column>
+								<div class="ui-g-12 ui-md-8">
 									<p:outputLabel value="#{msgs['label.uc001.logradouro']}"
 										for="logradouro" />
-									<br />
 									<p:inputText id="logradouro"
-										value="#{cadastroClienteController.entidade.endereco.logradouro}"
-										size="40" />
-								</p:column>
+										value="#{cadastroClienteController.entidade.endereco.logradouro}" />
+								</div>
 
-								<p:column>
+								<div class="ui-g-12 ui-md-4">
 									<p:outputLabel value="#{msgs['label.uc001.numero']}"
 										for="numero" />
-									<br />
 									<p:inputNumber id="numero"
 										value="#{cadastroClienteController.entidade.endereco.numero}"
-										size="5" minValue="0" decimalPlaces="0" />
-								</p:column>
+										minValue="0" decimalPlaces="0" />
+								</div>
 
-								<p:column>
+								<div class="ui-g-12 ui-md-8">
 									<p:outputLabel value="#{msgs['label.uc001.complemento']}"
 										for="complemento" />
-									<br />
 									<p:inputText id="complemento"
-										value="#{cadastroClienteController.entidade.endereco.complemento}"
-										size="40" />
-								</p:column>
+										value="#{cadastroClienteController.entidade.endereco.complemento}" />
+								</div>
 
-								<p:column>
+								<div class="ui-g-12 ui-md-4">
 									<p:outputLabel value="#{msgs['label.uc001.bairro']}"
 										for="bairro" />
-									<br />
 									<p:inputText id="bairro"
-										value="#{cadastroClienteController.entidade.endereco.bairro}"
-										size="30" />
-								</p:column>
+										value="#{cadastroClienteController.entidade.endereco.bairro}" />
+								</div>
 
-								<p:column>
+								<div class="ui-g-12 ui-md-4">
 									<p:outputLabel value="#{msgs['label.uc001.cidade']}"
 										for="cidade" />
-									<br />
 									<p:inputText id="cidade"
-										value="#{cadastroClienteController.entidade.endereco.cidade}"
-										size="40" />
-								</p:column>
+										value="#{cadastroClienteController.entidade.endereco.cidade}" />
+								</div>
 
-								<p:column>
+								<div class="ui-g-12 ui-md-4">
 									<p:outputLabel value="#{msgs['label.uc001.estado']}"
 										for="estado" />
-									<br />
 									<p:inputText id="estado"
-										value="#{cadastroClienteController.entidade.endereco.estado}"
-										size="5" />
-								</p:column>
-
-							</p:panelGrid>
+										value="#{cadastroClienteController.entidade.endereco.estado}" />
+								</div>
+								</div>
+							</p:panel>
 						</p:tab>
 
 						<p:tab title="#{msgs['label.uc001.planos']}">
@@ -506,13 +481,12 @@
 
 									<p:column headerText="#{msgs['alt.acao.excluir']}"
 										style="text-align: center;">
-										<h:commandButton
-											image="#{menuController.path}/tema/img/bt_remove_min.png"
+										<p:commandButton icon="pi pi-trash"
 											title="#{msgs['alt.acao.excluir']}"
-											action="#{cadastroClienteController.removePlano(plano)}">
-											<p:ajax process="@this"
-												update="form:cadastroClienteTab:tablePlanos form:cadastroClienteTab:planos" />
-										</h:commandButton>
+											action="#{cadastroClienteController.removePlano(plano)}"
+											process="@this"
+											update="form:cadastroClienteTab:tablePlanos form:cadastroClienteTab:planos"
+											styleClass="ui-button-danger ui-button-flat rounded-button" />
 									</p:column>
 
 								</p:dataTable>
@@ -524,36 +498,28 @@
 
 						<p:tab title="#{msgs['label.uc001.integracao.soc']}">
 
-							<p:panelGrid columns="2" style="width: 100%;">
-
-								<p:column>
+							<p:panel header="#{msgs['label.uc001.integracao.soc']}" styleClass="ui-fluid">
+								<div class="form-grid sa-cadastro-grid ui-fluid ui-g">
+								<div class="ui-g-12 ui-md-4">
 									<p:outputLabel value="#{msgs['label.uc001.codigo.externo']}"
-										for="codigoExterno" indicateRequired="false" />
-									<br />
+										for="codigoExterno" />
 									<p:inputText id="codigoExterno"
-										value="#{cadastroClienteController.entidade.integracaoSoc.codigoExterno}"
-										required="false" />
-								</p:column>
-
-								<p:column>
+										value="#{cadastroClienteController.entidade.integracaoSoc.codigoExterno}" />
+								</div>
+								<div class="ui-g-12 ui-md-4">
 									<p:outputLabel value="#{msgs['label.uc001.usuario.externo']}"
-										for="usuarioSoc" indicateRequired="false" />
-									<br />
+										for="usuarioSoc" />
 									<p:inputText id="usuarioSoc"
-										value="#{cadastroClienteController.entidade.integracaoSoc.usuarioSoc}"
-										required="false" />
-								</p:column>
-
-								<p:column>
+										value="#{cadastroClienteController.entidade.integracaoSoc.usuarioSoc}" />
+								</div>
+								<div class="ui-g-12 ui-md-4">
 									<p:outputLabel value="#{msgs['label.uc001.senha.externo']}"
-										for="senhaSoc" indicateRequired="false" />
-									<br />
+										for="senhaSoc" />
 									<p:inputText id="senhaSoc"
-										value="#{cadastroClienteController.entidade.integracaoSoc.senhaSoc}"
-										required="false" />
-								</p:column>
-
-							</p:panelGrid>
+										value="#{cadastroClienteController.entidade.integracaoSoc.senhaSoc}" />
+								</div>
+								</div>
+							</p:panel>
 
 						</p:tab>
 
@@ -661,71 +627,54 @@
 
 						<p:tab title="#{msgs['label.uc001.integracao.ad']}">
 
-							<p:panelGrid columns="2" style="width: 100%;">
-
-								<p:column>
-									<p:outputLabel value="#{msgs['label.uc001.url.ad']}"
-										for="urlAD" indicateRequired="false" />
-									<br />
+							<p:panel header="#{msgs['label.uc001.integracao.ad']}" styleClass="ui-fluid">
+								<div class="form-grid sa-cadastro-grid ui-fluid ui-g">
+								<div class="ui-g-12 ui-md-6">
+									<p:outputLabel value="#{msgs['label.uc001.url.ad']}" for="urlAD" />
 									<p:inputText id="urlAD"
-										value="#{cadastroClienteController.entidade.integracaoAD.url}"
-										required="false" />
-								</p:column>
-
-								<p:column>
+										value="#{cadastroClienteController.entidade.integracaoAD.url}" />
+								</div>
+								<div class="ui-g-12 ui-md-6">
 									<p:outputLabel value="#{msgs['label.uc001.usuario.ad']}"
-										for="usuarioAD" indicateRequired="false" />
-									<br />
+										for="usuarioAD" />
 									<p:inputText id="usuarioAD"
-										value="#{cadastroClienteController.entidade.integracaoAD.usuario}"
-										required="false" />
-								</p:column>
-
-								<p:column>
+										value="#{cadastroClienteController.entidade.integracaoAD.usuario}" />
+								</div>
+								<div class="ui-g-12 ui-md-6">
 									<p:outputLabel value="#{msgs['label.uc001.senha.ad']}"
-										for="senhaAD" indicateRequired="false" />
-									<br />
+										for="senhaAD" />
 									<p:password id="senhaAD"
-										value="#{cadastroClienteController.entidade.integracaoAD.senha}"
-										required="false" />
-								</p:column>
-
-								<p:column>
+										value="#{cadastroClienteController.entidade.integracaoAD.senha}" />
+								</div>
+								<div class="ui-g-12 ui-md-6">
 									<p:outputLabel value="#{msgs['label.uc001.base.ad']}"
-										for="baseAD" indicateRequired="false" />
-									<br />
+										for="baseAD" />
 									<p:password id="baseAD"
-										value="#{cadastroClienteController.entidade.integracaoAD.base}"
-										required="false" />
-								</p:column>
-
-							</p:panelGrid>
+										value="#{cadastroClienteController.entidade.integracaoAD.base}" />
+								</div>
+								</div>
+							</p:panel>
 
 						</p:tab>
 						
 						<p:tab title="#{msgs['label.uc001.integracao.sponte']}">
 
-							<p:panelGrid columns="2" style="width: 100%;">
-
-								<p:column>
+							<p:panel header="#{msgs['label.uc001.integracao.sponte']}" styleClass="ui-fluid">
+								<div class="form-grid sa-cadastro-grid ui-fluid ui-g">
+								<div class="ui-g-12 ui-md-6">
 									<p:outputLabel value="#{msgs['label.uc001.token.sponte']}"
-										for="tokenSponte" indicateRequired="false" />
-									<br />
+										for="tokenSponte" />
 									<p:inputText id="tokenSponte"
-										value="#{cadastroClienteController.entidade.integracaoSponte.token}"
-										required="false" />
-								</p:column>
-
-								<p:column>
+										value="#{cadastroClienteController.entidade.integracaoSponte.token}" />
+								</div>
+								<div class="ui-g-12 ui-md-6">
 									<p:outputLabel value="#{msgs['label.uc001.id.cliente.sponte']}"
-										for="clienteSponte" indicateRequired="false" />
-									<br />
+										for="clienteSponte" />
 									<p:inputText id="clienteSponte"
-										value="#{cadastroClienteController.entidade.integracaoSponte.idCliente}"
-										required="false" />
-								</p:column>
-
-							</p:panelGrid>
+										value="#{cadastroClienteController.entidade.integracaoSponte.idCliente}" />
+								</div>
+								</div>
+							</p:panel>
 
 						</p:tab>
 

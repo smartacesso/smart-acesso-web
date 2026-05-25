@@ -7,14 +7,20 @@
 	<h:form enctype="multipart/form-data" prependId="false">
 		<p:dialog id="dialogEscolherFotoDoc" widgetVar="escolherFotoDoc" header="#{msgs['label.uc008.origem.foto']}" modal="true">
 
-			<p:panelGrid columns="1" style="text-align: center;">
+			<p:panelGrid columns="1" styleClass="ui-fluid" layout="grid">
 				<p:column>
-					<p:button id="abrirCameraDoc" value="#{msgs['alt.acao.tirar.foto']}" update="dialogTirarFotoDoc"
-							onclick="PF('escolherFotoDoc').hide(); PF('pcDoc').attach(); PF('tirarFotoDoc').show(); return false;" style="width: 100%"/>
+					<p:commandButton id="abrirCameraDoc"
+						value="#{msgs['alt.acao.tirar.foto']}" icon="pi pi-camera"
+						update="dialogTirarFotoDoc"
+						onclick="PF('escolherFotoDoc').hide(); PF('pcDoc').attach(); PF('tirarFotoDoc').show(); return false;"
+						styleClass="ui-button-outlined" style="width: 100%" />
 				</p:column>
-				
+
 				<p:column>
-					<p:button value="#{msgs['alt.acao.procurar.arquivo']}" onclick="clicaBotaoDocumentUpload(); return false;" style="width: 100%"/>
+					<p:commandButton value="#{msgs['alt.acao.procurar.arquivo']}"
+						icon="pi pi-upload" type="button"
+						onclick="clicaBotaoDocumentUpload(); return false;"
+						styleClass="ui-button-outlined" style="width: 100%" />
 				</p:column>
 						
 				<p:fileUpload id="acaoAbrirArquivoDoc" listener="#{cadastroPedestreController.uploadDocumento}" multiple="false"
@@ -24,7 +30,9 @@
 				</p:fileUpload>
 				
 				<p:column>
-					<p:button value="#{msgs['alt.acao.cancelar']}" onclick="PF('escolherFotoDoc').hide(); return false;" style="width: 100%"/>
+					<p:commandButton value="#{msgs['alt.acao.cancelar']}" type="button"
+						onclick="PF('escolherFotoDoc').hide(); return false;"
+						styleClass="ui-button-outlined" style="width: 100%" />
 				</p:column>
 			</p:panelGrid>
 			
@@ -37,10 +45,12 @@
 				<p:photoCam id="idPcDoc" widgetVar="pcDoc" listener="#{cadastroPedestreController.capturarFotoDocumento}" autoStart="false" 
 					update="dialogConfirmarFoto"/>
 			
-				<p:commandButton value="#{msgs['label.uc008.capturar']}" 
+				<p:commandButton value="#{msgs['label.uc008.capturar']}"
+					icon="pi pi-camera"
 					process="@this"
 					onclick="PF('pcDoc').capture();"
-					oncomplete="PF('tirarFotoDoc').hide(); PF('confirmarFoto').show(); return false;"/>
+					oncomplete="PF('tirarFotoDoc').hide(); PF('confirmarFoto').show(); return false;"
+					styleClass="ui-button-success" />
 			
 			</p:panelGrid>
 				
@@ -53,14 +63,20 @@
 				<h:graphicImage id="photoDoc" value="#{menuController.urlMain}/resources/upload/#{cadastroPedestreController.documento.nome}" />
 				
 				<p:column>
-					<p:commandButton id="confirmarFotoDoc" value="#{msgs['alt.acao.confirmar']}" 
-							update="form:cadastroPedestreTab:painelCadastroPedestreDocumentos"
-							process="@this" actionListener="#{cadastroPedestreController.removerFotoDocumento}"
-							oncomplete="PF('confirmarFoto').hide(); return false;"/>
-	
-					<p:commandButton id="cancelarFotoDoc" value="#{msgs['alt.acao.cancelar']}"
-							process="@this" actionListener="#{cadastroPedestreController.removerFotoDocumento}"
-							oncomplete="PF('confirmarFoto').hide(); PF('tirarFotoDoc').show(); return false;" />
+					<p:commandButton id="confirmarFotoDoc"
+						value="#{msgs['alt.acao.confirmar']}" icon="pi pi-check"
+						update="form:cadastroPedestreTab:painelCadastroPedestreDocumentos"
+						process="@this"
+						actionListener="#{cadastroPedestreController.removerFotoDocumento}"
+						oncomplete="PF('confirmarFoto').hide(); return false;"
+						styleClass="ui-button-success" />
+
+					<p:commandButton id="cancelarFotoDoc"
+						value="#{msgs['alt.acao.cancelar']}" type="button"
+						process="@this"
+						actionListener="#{cadastroPedestreController.removerFotoDocumento}"
+						oncomplete="PF('confirmarFoto').hide(); PF('tirarFotoDoc').show(); return false;"
+						styleClass="ui-button-outlined" style="margin-left: 0.5rem;" />
 				</p:column>	
 
 			</p:panelGrid>

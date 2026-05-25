@@ -3,56 +3,59 @@
 	xmlns:f="http://java.sun.com/jsf/core"
 	xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:p="http://primefaces.org/ui">
-	
-	<p:dialog id="dialogEscolherResponsavel" header="#{msgs['title.uc016.consulta.responsavel']}" widgetVar="escolherResponsavel" 
-			modal="true" resizable="false">
-		
-		<p:panelGrid id="gridEscolherResponsavel" columns="3">
-			<p:column>
-				<p:outputLabel value="#{msgs['label.uc016.nome']}" for="inputNomeResponsavel"/>
-				<br />
-				<p:inputText id="inputNomeResponsavel" value="#{buscarResponsavelController.parans['nome']}"/>
-			</p:column>
 
-			<p:column>
-				<br />
-				<p:commandButton id="buscarResponsavelButton" value="#{msgs['alt.acao.buscar']}"
-				action="#{buscarResponsavelController.findResponsiblebyName()}"
-					update="gridEscolherResponsavel responsaveis" process="gridEscolherResponsavel"/>
-			</p:column>
-			
-		</p:panelGrid>
-		
-		<br />
-		
-		<p:panelGrid columns="2" id="responsaveis" style="width: 700px">
-		
-			<h:outputText value="#{msgs['msg.nenhum.item.encontrado.buscar']}" escape="false"
-											  rendered="#{empty buscarResponsavelController.result}" />
-		
-			<p:dataTable id="tableEscolherResponsavel" value="#{buscarResponsavelController.result}" var="responsavel"
-					rendered="#{not empty buscarResponsavelController.result}" paginator="true"
-					rows="#{buscarResponsavelController.quantPorPagina}" paginatorPosition="bottom"
-					paginatorAlwaysVisible="false" selectionMode="single" rowKey="#{responsavel.id}"
-					selection="#{cadastroPedestreController.responsavel}">
-				
-				<p:ajax event="rowSelect" update="form:cadastroPedestreTab:painelCadastroResponsavel" 
+	<p:dialog id="dialogEscolherResponsavel"
+		header="#{msgs['title.uc016.consulta.responsavel']}"
+		widgetVar="escolherResponsavel" modal="true" resizable="false" width="700">
+
+		<div class="form-grid sa-cadastro-grid ui-fluid ui-g" id="gridEscolherResponsavel">
+			<div class="ui-g-12 ui-md-8">
+				<p:outputLabel value="#{msgs['label.uc016.nome']}" for="inputNomeResponsavel" />
+				<p:inputText id="inputNomeResponsavel"
+					value="#{buscarResponsavelController.parans['nome']}" />
+			</div>
+
+			<div class="ui-g-12 ui-md-4">
+				<p:outputLabel value="&#160;" />
+				<p:commandButton id="buscarResponsavelButton"
+					value="#{msgs['alt.acao.buscar']}" icon="pi pi-search"
+					action="#{buscarResponsavelController.findResponsiblebyName()}"
+					update="gridEscolherResponsavel responsaveis"
+					process="gridEscolherResponsavel"
+					styleClass="ui-button-success" />
+			</div>
+		</div>
+
+		<p:spacer height="10" />
+
+		<p:outputPanel id="responsaveis">
+			<h:outputText value="#{msgs['msg.nenhum.item.encontrado.buscar']}"
+				styleClass="sa-empty-state__text" escape="false"
+				rendered="#{empty buscarResponsavelController.result}" />
+
+			<p:dataTable id="tableEscolherResponsavel"
+				value="#{buscarResponsavelController.result}" var="responsavel"
+				rendered="#{not empty buscarResponsavelController.result}"
+				paginator="true" rows="#{buscarResponsavelController.quantPorPagina}"
+				paginatorPosition="bottom" paginatorAlwaysVisible="false"
+				selectionMode="single" rowKey="#{responsavel.id}"
+				selection="#{cadastroPedestreController.responsavel}">
+
+				<p:ajax event="rowSelect"
+					update="form:cadastroPedestreTab:painelTabelaResponsaveis responsavelAuto"
 					oncomplete="PF('escolherResponsavel').hide(); return false;" />
-				
+
 				<p:column headerText="#{msgs['label.uc016.nome']}" style="text-align: center">
 					<h:outputText value="#{responsavel.nome}" />
 				</p:column>
-				
+
 				<p:column headerText="#{msgs['label.uc016.dataNascimento']}" style="text-align: center">
 					<h:outputText value="#{responsavel.dataNascimento}">
-					<f:convertDateTime dateStyle="long" pattern="dd/MM/yyyy" />
+						<f:convertDateTime dateStyle="long" pattern="dd/MM/yyyy" />
 					</h:outputText>
 				</p:column>
-				
 			</p:dataTable>
-		
-		</p:panelGrid>
-		
+		</p:outputPanel>
 	</p:dialog>
-	
+
 </ui:composition>

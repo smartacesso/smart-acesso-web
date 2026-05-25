@@ -4,254 +4,210 @@
 	xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:p="http://primefaces.org/ui">
 
+	<p:panel id="painelCadastroPedestre" header="Informações pessoais"
+		styleClass="ui-fluid">
+		<div class="form-grid sa-cadastro-grid ui-fluid ui-g">
 
-	<p:panelGrid id="painelCadastroPedestre" layout="grid"
-		styleClass="form-grid ui-fluid" columns="1">
+			<div class="ui-g-12 ui-md-6">
+				<p:outputLabel value="#{msgs['label.uc008.nome']}" for="nome"
+					indicateRequired="true" />
+				<p:inputText id="nome"
+					value="#{cadastroPedestreController.entidade.nome}"
+					required="true"
+					disabled="#{not cadastroPedestreController.usuarioTemPermissao()}" />
+			</div>
 
-		<p:accordionPanel id="cadastro" cache="true">
+			<div class="ui-g-12 ui-md-6">
+				<p:outputLabel value="#{msgs['label.uc008.data.nascimento']}"
+					for="dataNascimento" />
+				<p:calendar id="dataNascimento" pattern="dd/MM/yyyy"
+					mask="99/99/9999"
+					value="#{cadastroPedestreController.entidade.dataNascimento}"
+					required="#{cadastroPedestreController.verificaObrigatorio('data.nascimento')}" />
+			</div>
 
-			<!-- ABA: Informações pessoais -->
-			<p:tab title="Informações pessoais">
-				<div class="ui-g">
-					<!-- Nome -->
-					<div class="ui-g-12 ui-md-6">
-						<p:outputLabel value="#{msgs['label.uc008.nome']}" for="nome"
-							indicateRequired="true" />
-						<p:inputText id="nome"
-							value="#{cadastroPedestreController.entidade.nome}"
-							required="true" size="40"
-							disabled="#{not cadastroPedestreController.usuarioTemPermissao()}"
-							style="width: 100%" />
-					</div>
+			<div class="ui-g-12 ui-md-6">
+				<p:outputLabel value="#{msgs['label.uc008.email']}" for="email" />
+				<p:inputText id="email"
+					value="#{cadastroPedestreController.entidade.email}"
+					required="#{cadastroPedestreController.verificaObrigatorio('email')}"
+					disabled="#{not cadastroPedestreController.usuarioTemPermissao()}"
+					rendered="#{cadastroPedestreController.usuarioTemPermissao()}" />
+				<h:outputText
+					value="#{cadastroPedestreController.getEmailMascarado()}"
+					rendered="#{not cadastroPedestreController.usuarioTemPermissao()}" />
+			</div>
 
-					<!-- Data de nascimento -->
-					<div class="ui-g-12 ui-md-6">
-						<p:outputLabel value="#{msgs['label.uc008.data.nascimento']}"
-							for="dataNascimento" />
-						<p:calendar id="dataNascimento" pattern="dd/MM/yyyy"
-							mask="99/99/9999"
-							value="#{cadastroPedestreController.entidade.dataNascimento}"
-							required="#{cadastroPedestreController.verificaObrigatorio('data.nascimento')}"
-							style="width: 100%" />
-					</div>
+			<div class="ui-g-12 ui-md-6">
+				<p:outputLabel value="#{msgs['label.uc008.cpf']}" for="cpf" />
+				<p:inputMask id="cpf" mask="999.999.999-99"
+					value="#{cadastroPedestreController.entidade.cpf}"
+					converter="cpfConverter"
+					required="#{cadastroPedestreController.verificaObrigatorio('cpf')}"
+					disabled="#{not cadastroPedestreController.usuarioTemPermissao()}"
+					rendered="#{cadastroPedestreController.usuarioTemPermissao()}"
+					onclick="this.setSelectionRange(0,0);">
+					<p:ajax event="change" process="@this"
+						listener="#{cadastroPedestreController.onCpfBlur}" />
+				</p:inputMask>
+				<h:outputText
+					value="#{cadastroPedestreController.getCpfMascarado()}"
+					rendered="#{not cadastroPedestreController.usuarioTemPermissao()}" />
+			</div>
 
-					<!-- Email -->
-					<div class="ui-g-12 ui-md-6">
-						<p:outputLabel value="#{msgs['label.uc008.email']}" for="email" />
-						<p:inputText id="email"
-							value="#{cadastroPedestreController.entidade.email}"
-							required="#{cadastroPedestreController.verificaObrigatorio('email')}"
-							disabled="#{not cadastroPedestreController.usuarioTemPermissao()}"
-							rendered="#{cadastroPedestreController.usuarioTemPermissao()}"
-							style="width: 100%" />
-						<h:outputText
-							value="#{cadastroPedestreController.getEmailMascarado()}"
-							rendered="#{not cadastroPedestreController.usuarioTemPermissao()}" />
-					</div>
+			<div class="ui-g-12 ui-md-6">
+				<p:outputLabel value="#{msgs['title.uc008.genero']}" for="genero" />
+				<p:selectOneMenu id="genero"
+					value="#{cadastroPedestreController.entidade.genero}"
+					required="#{cadastroPedestreController.verificaObrigatorio('genero')}">
+					<f:selectItems value="#{cadastroPedestreController.listaGenero}" />
+				</p:selectOneMenu>
+			</div>
 
-					<!-- CPF -->
-					<div class="ui-g-12 ui-md-6">
-						<p:outputLabel value="#{msgs['label.uc008.cpf']}" for="cpf" />
-						<p:inputMask id="cpf" mask="999.999.999-99"
-							value="#{cadastroPedestreController.entidade.cpf}"
-							converter="cpfConverter"
-							required="#{cadastroPedestreController.verificaObrigatorio('cpf')}"
-							disabled="#{not cadastroPedestreController.usuarioTemPermissao()}"
-							rendered="#{cadastroPedestreController.usuarioTemPermissao()}"
-							style="width: 100%" onclick="this.setSelectionRange(0,0);">
+			<div class="ui-g-12 ui-md-6">
+				<p:outputLabel value="#{msgs['label.uc008.rg']}" for="rg" />
+				<p:inputText id="rg"
+					value="#{cadastroPedestreController.entidade.rg}"
+					required="#{cadastroPedestreController.verificaObrigatorio('rg')}"
+					disabled="#{not cadastroPedestreController.usuarioTemPermissao()}"
+					onkeyup="$(this).val($(this).val().replace(/[^0-9a-zA-Z]/g, ''));"
+					rendered="#{cadastroPedestreController.usuarioTemPermissao()}">
+					<p:ajax event="change" process="@this"
+						listener="#{cadastroPedestreController.onRgBlur}" />
+				</p:inputText>
+				<h:outputText
+					value="#{cadastroPedestreController.getRgMascarado()}"
+					rendered="#{not cadastroPedestreController.usuarioTemPermissao()}" />
+			</div>
 
-							<p:ajax event="change" process="@this"
-								listener="#{cadastroPedestreController.onCpfBlur}" />
-						</p:inputMask>
-						<h:outputText
-							value="#{cadastroPedestreController.getCpfMascarado()}"
-							rendered="#{not cadastroPedestreController.usuarioTemPermissao()}" />
-					</div>
+			<div class="ui-g-12 ui-md-6">
+				<p:outputLabel value="#{msgs['label.uc008.telefone']}"
+					for="telefone" />
+				<p:inputMask id="telefone" mask="(99) 9999-9999"
+					value="#{cadastroPedestreController.entidade.telefone}"
+					required="#{cadastroPedestreController.verificaObrigatorio('telefone')}"
+					disabled="#{not cadastroPedestreController.usuarioTemPermissao()}" />
+			</div>
 
-					<!-- Gênero -->
-					<div class="ui-g-12 ui-md-6">
-						<p:outputLabel value="#{msgs['title.uc008.genero']}" for="genero" />
-						<p:selectOneMenu id="genero"
-							value="#{cadastroPedestreController.entidade.genero}"
-							required="#{cadastroPedestreController.verificaObrigatorio('genero')}"
-							style="width: 100%">
-							<f:selectItems value="#{cadastroPedestreController.listaGenero}" />
-						</p:selectOneMenu>
-					</div>
+			<div class="ui-g-12 ui-md-6">
+				<p:outputLabel value="#{msgs['label.uc008.celular']}"
+					for="celular" />
+				<p:inputMask id="celular" mask="(99) 9 9999-9999"
+					value="#{cadastroPedestreController.entidade.celular}"
+					required="#{cadastroPedestreController.verificaObrigatorio('celular')}"
+					disabled="#{not cadastroPedestreController.usuarioTemPermissao()}" />
+			</div>
 
-					<!-- RG -->
-					<div class="ui-g-12 ui-md-6">
-						<p:outputLabel value="#{msgs['label.uc008.rg']}" for="rg" />
-						<p:inputText id="rg"
-							value="#{cadastroPedestreController.entidade.rg}"
-							required="#{cadastroPedestreController.verificaObrigatorio('rg')}"
-							disabled="#{not cadastroPedestreController.usuarioTemPermissao()}"
-							onkeyup="$(this).val($(this).val().replace(/[^0-9a-zA-Z]/g, ''));"
-							rendered="#{cadastroPedestreController.usuarioTemPermissao()}"
-							style="width: 100%">
+			<div class="ui-g-12">
+				<p:outputLabel value="#{msgs['label.uc008.observacoes']}"
+					for="observacoes" />
+				<p:inputTextarea id="observacoes"
+					value="#{cadastroPedestreController.entidade.observacoes}"
+					required="#{cadastroPedestreController.verificaObrigatorio('observacoes')}"
+					rows="4" maxlength="300" autoResize="false" />
+			</div>
 
-							<p:ajax event="change" process="@this"
-								listener="#{cadastroPedestreController.onRgBlur}" />
-						</p:inputText>
-						<h:outputText
-							value="#{cadastroPedestreController.getRgMascarado()}"
-							rendered="#{not cadastroPedestreController.usuarioTemPermissao()}" />
-					</div>
+			<div class="ui-g-12 ui-md-6">
+				<p:outputLabel value="#{msgs['label.uc008.empresa']}"
+					for="empresa" />
+				<p:selectOneMenu id="empresa"
+					value="#{cadastroPedestreController.entidade.empresa.id}"
+					valueChangeListener="#{cadastroPedestreController.eventoEmpresaSelecionada}"
+					required="#{cadastroPedestreController.verificaObrigatorio('empresa')}">
+					<f:selectItems
+						value="#{cadastroPedestreController.listaEmpresas}" />
+					<p:ajax process="@this"
+						update="@this departamento centroCusto cargo"
+						event="valueChange" />
+				</p:selectOneMenu>
+			</div>
 
-					<!-- Telefone -->
-					<div class="ui-g-12 ui-md-6">
-						<p:outputLabel value="#{msgs['label.uc008.telefone']}"
-							for="telefone" />
-						<p:inputMask id="telefone" mask="(99) 9999-9999"
-							value="#{cadastroPedestreController.entidade.telefone}"
-							required="#{cadastroPedestreController.verificaObrigatorio('telefone')}"
-							disabled="#{not cadastroPedestreController.usuarioTemPermissao()}"
-							style="width: 100%" />
-					</div>
+			<div class="ui-g-12 ui-md-6">
+				<p:outputLabel value="#{msgs['label.uc008.departamento']}"
+					for="departamento" />
+				<p:selectOneMenu id="departamento"
+					value="#{cadastroPedestreController.entidade.departamento.id}"
+					required="#{cadastroPedestreController.verificaObrigatorio('departamento')}">
+					<f:selectItems
+						value="#{cadastroPedestreController.listaDepartamentos}" />
+				</p:selectOneMenu>
+			</div>
 
-					<!-- Celular -->
-					<div class="ui-g-12 ui-md-6">
-						<p:outputLabel value="#{msgs['label.uc008.celular']}"
-							for="celular" />
-						<p:inputMask id="celular" mask="(99) 9 9999-9999"
-							value="#{cadastroPedestreController.entidade.celular}"
-							required="#{cadastroPedestreController.verificaObrigatorio('celular')}"
-							disabled="#{not cadastroPedestreController.usuarioTemPermissao()}"
-							style="width: 100%" />
-					</div>
+			<div class="ui-g-12 ui-md-6">
+				<p:outputLabel value="#{msgs['label.uc008.centro.custo']}"
+					for="centroCusto" />
+				<p:selectOneMenu id="centroCusto"
+					value="#{cadastroPedestreController.entidade.centroCusto.id}"
+					required="#{cadastroPedestreController.verificaObrigatorio('centro.custo')}">
+					<f:selectItems
+						value="#{cadastroPedestreController.listaCentrosDeCusto}" />
+				</p:selectOneMenu>
+			</div>
 
-					<!-- Observações -->
-					<div class="ui-g-12">
-						<p:outputLabel value="#{msgs['label.uc008.observacoes']}"
-							for="observacoes" />
-						<p:inputTextarea id="observacoes"
-							value="#{cadastroPedestreController.entidade.observacoes}"
-							required="#{cadastroPedestreController.verificaObrigatorio('observacoes')}"
-							rows="4" maxlength="300" autoResize="false" style="width: 100%" />
-					</div>
-					<!-- ABA: Dados Empresa -->
-					<!-- Empresa -->
-					<div class="ui-g-12 ui-md-6">
-						<p:outputLabel value="#{msgs['label.uc008.empresa']}"
-							for="empresa" />
-						<p:selectOneMenu id="empresa"
-							value="#{cadastroPedestreController.entidade.empresa.id}"
-							valueChangeListener="#{cadastroPedestreController.eventoEmpresaSelecionada}"
-							required="#{cadastroPedestreController.verificaObrigatorio('empresa')}"
-							style="width: 100%">
-							<f:selectItems
-								value="#{cadastroPedestreController.listaEmpresas}" />
-							<p:ajax process="@this"
-								update="@this departamento centroCusto cargo"
-								event="valueChange" />
-						</p:selectOneMenu>
-					</div>
+			<div class="ui-g-12 ui-md-6">
+				<p:outputLabel value="#{msgs['label.uc008.cargo']}" for="cargo" />
+				<p:selectOneMenu id="cargo"
+					value="#{cadastroPedestreController.entidade.cargo.id}"
+					required="#{cadastroPedestreController.verificaObrigatorio('cargo')}">
+					<f:selectItems value="#{cadastroPedestreController.listaCargos}" />
+				</p:selectOneMenu>
+			</div>
 
-					<!-- Departamento -->
-					<div class="ui-g-12 ui-md-6">
-						<p:outputLabel value="#{msgs['label.uc008.departamento']}"
-							for="departamento" />
-						<p:selectOneMenu id="departamento"
-							value="#{cadastroPedestreController.entidade.departamento.id}"
-							required="#{cadastroPedestreController.verificaObrigatorio('departamento')}"
-							style="width: 100%">
-							<f:selectItems
-								value="#{cadastroPedestreController.listaDepartamentos}" />
-						</p:selectOneMenu>
-					</div>
+			<div class="ui-g-12">
+				<p:outputLabel value="Local" for="local" />
+				<p:selectOneMenu id="local"
+					value="#{cadastroPedestreController.entidade.uuidLocal}"
+					required="#{cadastroPedestreController.verificaObrigatorio('local')}">
+					<f:selectItems value="#{cadastroPedestreController.listaLocais}" />
+				</p:selectOneMenu>
+			</div>
 
-					<!-- Centro de Custo -->
-					<div class="ui-g-12 ui-md-6">
-						<p:outputLabel value="#{msgs['label.uc008.centro.custo']}"
-							for="centroCusto" />
-						<p:selectOneMenu id="centroCusto"
-							value="#{cadastroPedestreController.entidade.centroCusto.id}"
-							required="#{cadastroPedestreController.verificaObrigatorio('centro.custo')}"
-							style="width: 100%">
-							<f:selectItems
-								value="#{cadastroPedestreController.listaCentrosDeCusto}" />
-						</p:selectOneMenu>
-					</div>
-
-					<!-- Cargo -->
-					<div class="ui-g-12 ui-md-6">
-						<p:outputLabel value="#{msgs['label.uc008.cargo']}" for="cargo" />
-						<p:selectOneMenu id="cargo"
-							value="#{cadastroPedestreController.entidade.cargo.id}"
-							required="#{cadastroPedestreController.verificaObrigatorio('cargo')}"
-							style="width: 100%">
-							<f:selectItems value="#{cadastroPedestreController.listaCargos}" />
-						</p:selectOneMenu>
-					</div>
-
-					<div class="ui-g-12 ui-md-12">
-						<p:outputLabel value="Local" for="local" />
-						<p:selectOneMenu id="local"
-							value="#{cadastroPedestreController.entidade.uuidLocal}"
-							required="#{cadastroPedestreController.verificaObrigatorio('local')}"
-							style="width: 100%">
-							<f:selectItems value="#{cadastroPedestreController.listaLocais}" />
-						</p:selectOneMenu>
-					</div>
-
-					<!-- Login e Senha App -->
-					<h:panelGroup
-						rendered="#{cadastroPedestreController.habilitaAppPedestre}">
-						<div class="ui-g-12" style="font-weight: bold; font-size: 15px">
-							<h:outputText value="#{msgs['label.uc001.dados.de.acesso.app']}" />
-						</div>
-
-						<!-- Login -->
-						<div class="ui-g-12 ui-md-6">
-							<p:outputLabel value="#{msgs['label.uc004.login']}" for="login" />
-							<p:inputText id="login"
-								value="#{cadastroPedestreController.entidade.login}"
-								maxlength="50" required="false" style="width: 100%">
-								<f:validateRegex pattern="[a-zA-Z0-9]+" />
-								<p:ajax update="@this tipoAcesso" />
-							</p:inputText>
-						</div>
-
-						<!-- Senha -->
-						<div class="ui-g-12 ui-md-6"
-							rendered="#{cadastroPedestreController.entidade.senha == null}">
-							<p:outputLabel value="#{msgs['label.uc004.senha']}" for="senha" />
-							<p:inputText id="senha"
-								value="#{cadastroPedestreController.entidade.senhaLivre}"
-								maxlength="30" required="false" style="width: 100%" />
-						</div>
-
-						<!-- Tipo de Acesso -->
-						<div class="ui-g-12 ui-md-6">
-							<p:outputLabel value="#{msgs['label.uc008.tipo.acesso']}"
-								for="tipoAcesso" />
-
-							<p:selectOneMenu id="tipoAcesso"
-								value="#{cadastroPedestreController.entidade.perfilApp}"
-								style="width: 100%">
-
-								<!-- A primeira opção agora é o COMUM, então ele já virá selecionado por padrão na tela -->
-								<f:selectItem itemValue="COMUM"
-									itemLabel="COMUM" />
-								<f:selectItem itemValue="RESPONSAVEL"
-									itemLabel="RESPONSAVEL" />
-								<f:selectItem itemValue="GERENCIAL"
-									itemLabel="GERENCIAL" />
-
-							</p:selectOneMenu>
-						</div>
-					</h:panelGroup>
+			<h:panelGroup layout="block"
+				rendered="#{cadastroPedestreController.habilitaAppPedestre}"
+				styleClass="ui-g-12">
+				<div class="ui-g-12" style="font-weight: bold; font-size: 15px">
+					<h:outputText value="#{msgs['label.uc001.dados.de.acesso.app']}" />
 				</div>
-			</p:tab>
-		</p:accordionPanel>
-	</p:panelGrid>
+
+				<div class="ui-g-12 ui-md-6">
+					<p:outputLabel value="#{msgs['label.uc004.login']}" for="login" />
+					<p:inputText id="login"
+						value="#{cadastroPedestreController.entidade.login}"
+						maxlength="50" required="false">
+						<f:validateRegex pattern="[a-zA-Z0-9]+" />
+						<p:ajax update="@this tipoAcesso" />
+					</p:inputText>
+				</div>
+
+				<div class="ui-g-12 ui-md-6"
+					rendered="#{cadastroPedestreController.entidade.senha == null}">
+					<p:outputLabel value="#{msgs['label.uc004.senha']}" for="senha" />
+					<p:inputText id="senha"
+						value="#{cadastroPedestreController.entidade.senhaLivre}"
+						maxlength="30" required="false" />
+				</div>
+
+				<div class="ui-g-12 ui-md-6">
+					<p:outputLabel value="#{msgs['label.uc008.tipo.acesso']}"
+						for="tipoAcesso" />
+					<p:selectOneMenu id="tipoAcesso"
+						value="#{cadastroPedestreController.entidade.perfilApp}">
+						<f:selectItem itemValue="COMUM" itemLabel="COMUM" />
+						<f:selectItem itemValue="RESPONSAVEL" itemLabel="RESPONSAVEL" />
+						<f:selectItem itemValue="GERENCIAL" itemLabel="GERENCIAL" />
+					</p:selectOneMenu>
+				</div>
+			</h:panelGroup>
+		</div>
+	</p:panel>
+
 	<h:outputScript>
-  $(document).on('focus', '.ui-inputmask', function () {
-    var input = this;
-    setTimeout(function () {
-      input.setSelectionRange(0, 0);
-    }, 50);
-  });
-</h:outputScript>
+		$(document).on('focus', '.ui-inputmask', function () {
+			var input = this;
+			setTimeout(function () {
+				input.setSelectionRange(0, 0);
+			}, 50);
+		});
+	</h:outputScript>
 
 </ui:composition>

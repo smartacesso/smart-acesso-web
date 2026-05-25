@@ -70,12 +70,9 @@
 		
 		<ui:define name="conteudo">
 		
-			<h:panelGrid width="100%" columns="1" headerClass="h-grid-header">
-				<f:facet name="header">
-					<h:outputText value="#{msgs['title.uc006.consulta.regras']}" />
-				</f:facet>
-				
-				<h:column>
+			<h2 class="sa-page-title">#{msgs['title.uc006.consulta.regras']}</h2>
+
+			<p:outputPanel styleClass="p-col-12">
 				
 					<ui:include src="/tema/templates/vazio.xhtml">
 						<ui:param name="exibe" value="#{empty consultaRegraAcessoController.result}" />
@@ -107,26 +104,25 @@
 							<h:outputText value="#{regra.status}" />
 						</p:column>
 						
-						<p:column headerText="#{msgs['alt.acao.editar']}" style="text-align: center;width: 40px">
-							<h:commandButton id="botaoEditarRegra"
+						<p:column headerText="#{msgs['alt.acao.editar']}" style="text-align: center;width: 100px">
+							<p:commandButton id="botaoEditarRegra"
 								action="#{consultaRegraAcessoController.editar(regra.id)}"
 								title="#{msgs['alt.acao.editar']}"
-								image="#{menuController.path}/tema/img/bt_edit_min.png">
-							</h:commandButton>
+								icon="pi pi-pencil"
+								styleClass="ui-button-info ui-button-flat rounded-button" />
 						</p:column>
 						
-						<p:column headerText="#{msgs['alt.acao.excluir']}" style="text-align: center;width: 40px">
-							<h:commandButton image="#{menuController.path}/tema/img/bt_remove_min.png" 
-										title="#{msgs['alt.acao.excluir']}" >
-								
+						<p:column headerText="#{msgs['alt.acao.excluir']}" style="text-align: center;width: 100px">
+							<p:commandButton icon="pi pi-trash"
+								title="#{msgs['alt.acao.excluir']}"
+								styleClass="ui-button-danger ui-button-flat rounded-button">
 								<f:setPropertyActionListener value="#{regra}" target="#{consultaRegraAcessoController.regraSelecionada}" />
-								<p:ajax oncomplete="PF('confirmarExclusao').show()"></p:ajax>
-							</h:commandButton>
+								<p:ajax oncomplete="PF('confirmarExclusao').show()" />
+							</p:commandButton>
 						</p:column>
 						
 					</p:dataTable>
-				</h:column>
-			</h:panelGrid>
+			</p:outputPanel>
 			
 			<p:confirmDialog id="dialogConfirmarExclusao"
 				widgetVar="confirmarExclusao"

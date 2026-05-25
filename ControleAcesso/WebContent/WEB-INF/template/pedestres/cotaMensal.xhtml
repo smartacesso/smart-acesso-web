@@ -4,9 +4,9 @@
 	xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:p="http://primefaces.org/ui">
 
-	<h:panelGroup header="Cadastro de Cota Mensal" styleClass="ui-fluid" id="painelCadastroCotaPedestre">
-		<div class="ui-g" id="painelCadastroCotaPedestre">
-
+	<p:panel id="painelCadastroCotaPedestre" header="Cadastro de Cota Mensal"
+		styleClass="ui-fluid">
+		<div class="form-grid sa-cadastro-grid ui-fluid ui-g">
 			<div class="ui-g-12 ui-md-4">
 				<p:outputLabel value="Mês de Referência" for="mes" />
 				<p:selectOneMenu id="mes" value="#{cadastroPedestreController.mes}">
@@ -28,31 +28,31 @@
 			<div class="ui-g-12 ui-md-4">
 				<p:outputLabel value="Ano" for="ano" />
 				<p:inputNumber id="ano" value="#{cadastroPedestreController.ano}"
-					decimalPlaces="0"/>
+					decimalPlaces="0" />
 			</div>
 
 			<div class="ui-g-12 ui-md-4">
 				<p:outputLabel value="Cota Mensal (horas)" for="cotaMensal" />
 				<p:inputNumber id="cotaMensal"
 					value="#{cadastroPedestreController.cotaMensal}" decimalPlaces="0"
-					minValue="0"/>
+					minValue="0" />
 			</div>
 
-			<div class="ui-g-12 ui-md-12">
-				<p:commandButton id="addCota" value="Adicionar Cota"
+			<div class="ui-g-12">
+				<p:commandButton id="addCota" value="Adicionar Cota" icon="pi pi-plus"
 					action="#{cadastroPedestreController.cadastrarCota}"
 					update="form:cadastroPedestreTab:painelCadastroCotaPedestre form:cadastroPedestreTab:painelCotas"
 					process="form:cadastroPedestreTab:painelCadastroCotaPedestre"
-					styleClass="p-mr-2" style="margin-bottom:5px" />
+					styleClass="ui-button-success" />
 			</div>
 		</div>
-	</h:panelGroup>
+	</p:panel>
 
 	<p:spacer height="10" />
 
-	<h:panelGroup id="painelCotas" header="Cotas Cadastradas"
-		styleClass="ui-fluid">
-		<h:outputText value="Nenhuma cota encontrada." escape="false"
+	<p:panel id="painelCotas" header="Cotas Cadastradas" styleClass="ui-fluid">
+		<h:outputText value="Nenhuma cota encontrada."
+			styleClass="sa-empty-state__text" escape="false"
 			rendered="#{empty cadastroPedestreController.listaCotas}" />
 
 		<p:dataTable id="tableCotas"
@@ -74,15 +74,15 @@
 				<h:outputText value="#{cota.cotaMensal}" />
 			</p:column>
 
-			<p:column headerText="Ações" style="text-align: center;">
-				<h:commandButton
-					image="#{menuController.path}/tema/img/bt_remove_min.png"
+			<p:column headerText="Ações" style="width: 100px; text-align: center;">
+				<p:commandButton icon="pi pi-trash"
 					title="#{msgs['alt.acao.excluir']}"
-					action="#{cadastroPedestreController.removerCotas(cota)}">
-					<p:ajax process="@this"
-						update="form:cadastroPedestreTab:tableCotas form:cadastroPedestreTab:painelCotas" />
-				</h:commandButton>
+					action="#{cadastroPedestreController.removerCotas(cota)}"
+					process="@this"
+					update="form:cadastroPedestreTab:tableCotas form:cadastroPedestreTab:painelCotas"
+					styleClass="ui-button-danger ui-button-flat rounded-button" />
 			</p:column>
 		</p:dataTable>
-	</h:panelGroup>
+	</p:panel>
+
 </ui:composition>

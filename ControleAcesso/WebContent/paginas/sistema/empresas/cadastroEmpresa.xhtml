@@ -264,13 +264,12 @@
 
 									<p:column headerText="#{msgs['alt.acao.excluir']}"
 										style="text-align: center;">
-										<h:commandButton
-											image="#{menuController.path}/tema/img/bt_remove_min.png"
+										<p:commandButton icon="pi pi-trash"
 											title="#{msgs['alt.acao.excluir']}"
-											action="#{cadastroEmpresaController.removeDepartamento(departamento)}">
-											<p:ajax process="@this"
-												update="form:cadastroEmpresaTab:tableDepartamentos form:cadastroEmpresaTab:departamentos" />
-										</h:commandButton>
+											action="#{cadastroEmpresaController.removeDepartamento(departamento)}"
+											process="@this"
+											update="form:cadastroEmpresaTab:tableDepartamentos form:cadastroEmpresaTab:departamentos"
+											styleClass="ui-button-danger ui-button-flat rounded-button" />
 									</p:column>
 
 								</p:dataTable>
@@ -364,13 +363,12 @@
 
 									<p:column headerText="#{msgs['alt.acao.excluir']}"
 										style="text-align: center;">
-										<h:commandButton
-											image="#{menuController.path}/tema/img/bt_remove_min.png"
+										<p:commandButton icon="pi pi-trash"
 											title="#{msgs['alt.acao.excluir']}"
-											action="#{cadastroEmpresaController.removeCentroDeCusto(centro)}">
-											<p:ajax process="@this"
-												update="form:cadastroEmpresaTab:tableCentrosDeCusto form:cadastroEmpresaTab:centrosDeCusto" />
-										</h:commandButton>
+											action="#{cadastroEmpresaController.removeCentroDeCusto(centro)}"
+											process="@this"
+											update="form:cadastroEmpresaTab:tableCentrosDeCusto form:cadastroEmpresaTab:centrosDeCusto"
+											styleClass="ui-button-danger ui-button-flat rounded-button" />
 									</p:column>
 
 								</p:dataTable>
@@ -463,13 +461,12 @@
 
 									<p:column headerText="#{msgs['alt.acao.excluir']}"
 										style="text-align: center;">
-										<h:commandButton
-											image="#{menuController.path}/tema/img/bt_remove_min.png"
+										<p:commandButton icon="pi pi-trash"
 											title="#{msgs['alt.acao.excluir']}"
-											action="#{cadastroEmpresaController.removeCargo(cargo)}">
-											<p:ajax process="@this"
-												update="form:cadastroEmpresaTab:tableCargos form:cadastroEmpresaTab:cargos" />
-										</h:commandButton>
+											action="#{cadastroEmpresaController.removeCargo(cargo)}"
+											process="@this"
+											update="form:cadastroEmpresaTab:tableCargos form:cadastroEmpresaTab:cargos"
+											styleClass="ui-button-danger ui-button-flat rounded-button" />
 									</p:column>
 
 								</p:dataTable>

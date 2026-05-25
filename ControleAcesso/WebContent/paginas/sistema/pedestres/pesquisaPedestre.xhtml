@@ -225,15 +225,11 @@
 
 			</h:panelGroup>
 
-			<h:panelGrid width="100%" columns="1" headerClass="h-grid-header">
-				<f:facet name="header">
-					<h:outputText
-						value="#{consultaPedestreController.parans['tipo'] == 'PEDESTRE' 
+			<h2 class="sa-page-title">#{consultaPedestreController.parans['tipo'] == 'PEDESTRE' 
 											? msgs['title.uc008.consulta.pedestre']
-											: msgs['title.uc008.consulta.visitante']}" />
-				</f:facet>
+											: msgs['title.uc008.consulta.visitante']}</h2>
 
-				<h:panelGroup id="tabelaPainel" layout="block">
+			<p:outputPanel id="tabelaPainel" styleClass="p-col-12">
 					<h:panelGroup layout="block"
 						rendered="#{empty consultaPedestreController.result}">
 						<ui:include src="/tema/templates/vazio.xhtml">
@@ -338,8 +334,7 @@
 
 						</p:dataTable>
 					</h:panelGroup>
-				</h:panelGroup>
-			</h:panelGrid>
+			</p:outputPanel>
 
 			<p:confirmDialog id="dialogConfirmarExclusao"
 				widgetVar="confirmarExclusao" header="#{msgs['alt.acao.confirmar']}"

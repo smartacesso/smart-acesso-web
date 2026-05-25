@@ -4,16 +4,14 @@
 	xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:p="http://primefaces.org/ui">
 
-	<p:panelGrid id="painelCadastroPedestreEquipamentos" layout="grid"
-		columns="1" styleClass="form-grid ui-fluid">
-
-		<div class="ui-g">
+	<p:panel id="painelCadastroPedestreEquipamentos" header="Vincular equipamento"
+		styleClass="ui-fluid">
+		<div class="form-grid sa-cadastro-grid ui-fluid ui-g">
 			<div class="ui-g-12 ui-md-4">
 				<p:outputLabel value="#{msgs['label.uc008.lista.equipamentos']}"
 					for="listaEquipamentos" />
 				<p:selectOneMenu id="listaEquipamentos"
-					value="#{cadastroPedestreController.idEquipamentoSelecionado}"
-					style="width: 100%;">
+					value="#{cadastroPedestreController.idEquipamentoSelecionado}">
 					<f:selectItems
 						value="#{cadastroPedestreController.listaEquipamentosDisponiveis}" />
 				</p:selectOneMenu>
@@ -24,10 +22,11 @@
 					for="validadeEquipamento" />
 				<p:calendar id="validadeEquipamento"
 					value="#{cadastroPedestreController.pedestreEquipamento.validade}"
-					pattern="dd/MM/yyyy" mask="99/99/9999" style="width: 100%;" />
+					pattern="dd/MM/yyyy" mask="99/99/9999" />
 			</div>
 
-			<div class="ui-g-12 ui-md-4" style="padding-top: 2rem;">
+			<div class="ui-g-12 ui-md-4">
+				<p:outputLabel value="&#160;" />
 				<p:commandButton id="addEquipamento"
 					value="#{msgs['alt.acao.adicionar']}"
 					action="#{cadastroPedestreController.adicionaPedestreEquipamento}"
@@ -36,14 +35,13 @@
 					styleClass="ui-button-success" />
 			</div>
 		</div>
-	</p:panelGrid>
+	</p:panel>
 
-	<br />
+	<p:spacer height="10" />
 
-	<p:panelGrid columns="1" id="equipamentos"
-		styleClass="form-grid ui-fluid" style="width: 100%;">
+	<p:panel id="equipamentos" header="Equipamentos vinculados" styleClass="ui-fluid">
 		<h:outputText value="#{msgs['msg.nenhum.item.encontrado.adicionar']}"
-			escape="false"
+			styleClass="sa-empty-state__text" escape="false"
 			rendered="#{empty cadastroPedestreController.listaPedestresEquipamentos}" />
 
 		<p:dataTable id="tableEquipamentos"
@@ -69,23 +67,23 @@
 			</p:column>
 
 			<p:column headerText="#{msgs['alt.acao.excluir']}"
-				style="text-align: center;">
-				<h:commandButton
-					image="#{menuController.path}/tema/img/bt_remove_min.png"
+				style="width: 100px; text-align: center;">
+				<p:commandButton icon="pi pi-trash"
 					title="#{msgs['alt.acao.excluir']}"
-					action="#{cadastroPedestreController.removerPedestreEquipamento(pedestreEquipamento)}">
-					<p:ajax process="@this"
-						update="form:cadastroPedestreTab:tableEquipamentos form:cadastroPedestreTab:equipamentos" />
-				</h:commandButton>
+					action="#{cadastroPedestreController.removerPedestreEquipamento(pedestreEquipamento)}"
+					process="@this"
+					update="form:cadastroPedestreTab:tableEquipamentos form:cadastroPedestreTab:equipamentos"
+					styleClass="ui-button-danger ui-button-flat rounded-button" />
 			</p:column>
 		</p:dataTable>
-	</p:panelGrid>
+	</p:panel>
+
 	<style>
 @media ( max-width : 768px) {
 	.col-desktop-only {
 		display: none !important;
 	}
 }
-</style>
+	</style>
 
 </ui:composition>

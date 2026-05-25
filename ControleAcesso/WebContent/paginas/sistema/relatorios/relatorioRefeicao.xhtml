@@ -10,14 +10,14 @@
 
 	<ui:composition template="/tema/templates/template.xhtml">
 		<ui:define name="titulo">
-            Relatorio de refeicao
-        </ui:define>
+			#{msgs['title.sistema']} | Relatório de Refeição
+		</ui:define>
 
 		<ui:define name="breadcrumb">
 			<a target="_top"
 				href="/#{menuController.appName}/paginas/principal.xhtml"> <h:outputText
 					value="#{msgs['title.principal']}" />
-			</a> > <h:outputText value="#{msgs['title.uc009.relatorio.pedestres']}" />
+			</a> > <h:outputText value="Relatório de Refeição" />
 		</ui:define>
 
 		<ui:define name="tools">
@@ -46,7 +46,7 @@
 						ajax="false"
 						styleClass="sa-btn-label ui-button-flat">
 						<p:dataExporter type="pdf" target="form:pedestresTable"
-							fileName="pedestres" />
+							fileName="refeicoes" />
 					</p:commandButton>
 				</p:toolbarGroup>
 				<p:toolbarGroup styleClass="sa-toolbar-filters">
@@ -79,41 +79,38 @@
 		</ui:define>
 
 		<ui:define name="conteudo">
-			<h:panelGroup layout="block"
-				style="text-align:center; margin-top:20px;">
-				<p:panel header="Relatorio de Refeicoes"
-					style="display:inline-block; text-align:center;">
+			<h:panelGrid width="100%" columns="1" headerClass="h-grid-header">
+				<f:facet name="header">
+					<h:outputText value="Relatório de Refeições" />
+				</f:facet>
 
-					<p:dataTable id="pedestresTable"
-						value="#{relatorioPedestresController.refeicoesCount.entrySet()}"
-						var="entry" rowHover="true" stripedRows="true"
-						style="margin: 0 auto;">
+				<h:column>
+					<p:panel styleClass="ui-fluid">
+						<p:dataTable id="pedestresTable"
+							value="#{relatorioPedestresController.refeicoesCount.entrySet()}"
+							var="entry" rowHover="true" stripedRows="true"
+							styleClass="tabela-responsive sa-table"
+							emptyMessage="Nenhuma refeição encontrada no período.">
 
-						<p:column headerText="Refeicao" style="text-align:center;">
-							<h:outputText value="#{entry.key}" />
-						</p:column>
+							<p:column headerText="Refeição" style="text-align:center;">
+								<h:outputText value="#{entry.key}" />
+							</p:column>
 
-						<p:column headerText="Refeicao" style="text-align:center;">
-							<h:outputText value="#{entry.key}" />
-						</p:column>
+							<p:column headerText="Quantidade" style="text-align:center;">
+								<h:outputText value="#{entry.value}" />
+							</p:column>
 
-						<p:column headerText="Quantidade" style="text-align:center;">
-							<h:outputText value="#{entry.value}" />
-						</p:column>
-
-						<f:facet name="footer">
-							<h:outputText escape="false"
-								value="Total de refeicoes: #{relatorioPedestresController.totalRefeicoes} &#10;
-               Periodo: #{relatorioPedestresController.dataInicio} ate #{relatorioPedestresController.dataFim} &#10;
+							<f:facet name="footer">
+								<h:outputText escape="false"
+									value="Total de refeições: #{relatorioPedestresController.totalRefeicoes} &#10;
+               Período: #{relatorioPedestresController.dataInicio} até #{relatorioPedestresController.dataFim} &#10;
                Empresa: #{relatorioPedestresController.empresaSelecionada.getNome()}"
-								style="font-weight:bold; font-size:14px; text-align:center; display:block; white-space: pre-line;" />
-						</f:facet>
-
-
-					</p:dataTable>
-
-				</p:panel>
-			</h:panelGroup>
+									style="font-weight:bold; text-align:center; display:block; white-space: pre-line;" />
+							</f:facet>
+						</p:dataTable>
+					</p:panel>
+				</h:column>
+			</h:panelGrid>
 		</ui:define>
 	</ui:composition>
 </body>

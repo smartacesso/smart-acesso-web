@@ -103,11 +103,9 @@
 				</h:panelGroup>
 			</h:panelGroup>
 
-			<h:panelGrid width="100%" columns="1" headerClass="h-grid-header">
-				<f:facet name="header">
-					<h:outputText value="Lista de Correspondências" />
-				</f:facet>
+			<h2 class="sa-page-title">Lista de Correspondências</h2>
 
+			<p:outputPanel styleClass="p-col-12">
 				<h:panelGroup layout="block"
 					rendered="#{not empty consultaCorrespondenciaController.result}">
 					<p:dataTable id="correspondenciaTable"
@@ -217,7 +215,7 @@
 
 					</p:dataTable>
 				</h:panelGroup>
-			</h:panelGrid>
+			</p:outputPanel>
 
 			<p:confirmDialog widgetVar="confirmarExclusao" header="Confirmar"
 				message="Deseja excluir este registro?">

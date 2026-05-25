@@ -136,13 +136,11 @@
 								itemValue="DINAMICO_USO" />
 						</p:selectOneMenu>
 
-						<h:button id="btnDoc" title="#{msgs[alt.label.ajuda]}"
-							image="#{menuController.path}/tema/img/bt_helper.png"
-							rendered="#{item.nome.contains('Formato')}" style="height: 20px;"
-							onclick="window.open('https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html'); return false;">
-
-							<f:ajax event="click" execute="@none"></f:ajax>
-						</h:button>
+						<p:commandButton id="btnDoc" type="button" icon="pi pi-info-circle"
+							title="#{msgs[alt.label.ajuda]}"
+							rendered="#{item.nome.contains('Formato')}"
+							onclick="window.open('https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html'); return false;"
+							styleClass="ui-button-info ui-button-flat rounded-button" />
 
 						<p:tooltip for="btnDoc"
 							value="#{msgs['msg.uc007.ver.documentacao']}" />
@@ -174,13 +172,12 @@
 							</p:column>
 
 							<p:column headerText="#{msgs['alt.acao.excluir']}">
-								<h:commandButton
-									image="#{menuController.path}/tema/img/bt_remove_min.png"
+								<p:commandButton icon="pi pi-trash"
 									title="#{msgs['alt.acao.excluir']}"
-									action="#{gerenciarParametrosController.removerCampoObrigatorio(campo)}">
-									<p:ajax process="@this"
-										update="tableCamposObrigatorios form:gerenciarParametrosTable" />
-								</h:commandButton>
+									action="#{gerenciarParametrosController.removerCampoObrigatorio(campo)}"
+									process="@this"
+									update="tableCamposObrigatorios form:gerenciarParametrosTable"
+									styleClass="ui-button-danger ui-button-flat rounded-button" />
 							</p:column>
 
 						</p:dataTable>

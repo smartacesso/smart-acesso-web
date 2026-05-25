@@ -4,15 +4,12 @@
 	xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:p="http://primefaces.org/ui">
 
-	<p:panelGrid id="painelCadastroPedestreDocumentos" layout="grid"
-		columns="1" styleClass="form-grid ui-fluid">
-
-		<div class="ui-g">
-
+	<p:panel id="painelCadastroPedestreDocumentos" header="Adicionar documento"
+		styleClass="ui-fluid">
+		<div class="form-grid sa-cadastro-grid ui-fluid ui-g">
 			<div class="ui-g-12 ui-md-4">
 				<p:outputLabel value="#{msgs['label.uc008.nome']}"
 					for="nomeDocumento" />
-				<br />
 				<p:inputText id="nomeDocumento"
 					value="#{cadastroPedestreController.documento.nome}" />
 			</div>
@@ -20,7 +17,6 @@
 			<div class="ui-g-12 ui-md-4">
 				<p:outputLabel value="#{msgs['label.uc008.vencimento']}"
 					for="vencimentoDocumento" />
-				<br />
 				<p:calendar id="vencimentoDocumento"
 					value="#{cadastroPedestreController.documento.validade}"
 					mask="99/99/9999" pattern="dd/MM/yyyy" />
@@ -28,28 +24,29 @@
 
 			<div class="ui-g-12 ui-md-4">
 				<p:outputLabel value="#{msgs['label.uc008.escolher.documento']}" />
-				<br />
-				<p:button id="escolherArquivoDocumento" value="Escolher arquivo"
-					onclick="PF('escolherFotoDoc').show(); return false;" />
+				<p:commandButton id="escolherArquivoDocumento"
+					value="Escolher arquivo" icon="pi pi-upload"
+					onclick="PF('escolherFotoDoc').show(); return false;"
+					type="button" styleClass="ui-button-outlined" />
 			</div>
 
 			<div class="ui-g-12 ui-md-4">
-				<br />
+				<p:outputLabel value="&#160;" />
 				<p:commandButton id="addDocumento"
 					action="#{cadastroPedestreController.adicionaDocumento}"
-					value="#{msgs['alt.acao.adicionar']}"
+					value="#{msgs['alt.acao.adicionar']}" icon="pi pi-plus"
 					update="painelCadastroPedestreDocumentos documentos form:dialogTirarFotoDoc"
-					process="painelCadastroPedestreDocumentos" />
+					process="painelCadastroPedestreDocumentos"
+					styleClass="ui-button-success" />
 			</div>
 		</div>
-	</p:panelGrid>
+	</p:panel>
 
-	<br />
+	<p:spacer height="10" />
 
-	<p:panelGrid id="documentos" columns="1"
-		styleClass="form-grid ui-fluid" style="width: 100%;">
+	<p:panel id="documentos" header="Documentos cadastrados" styleClass="ui-fluid">
 		<h:outputText value="#{msgs['msg.nenhum.item.encontrado.adicionar']}"
-			escape="false"
+			styleClass="sa-empty-state__text" escape="false"
 			rendered="#{empty cadastroPedestreController.listaDocumentos}" />
 
 		<p:dataTable id="tableDocumentos"
@@ -75,16 +72,15 @@
 			</p:column>
 
 			<p:column headerText="#{msgs['alt.acao.excluir']}"
-				style="text-align: center;">
-				<h:commandButton
-					image="#{menuController.path}/tema/img/bt_remove_min.png"
+				style="width: 100px; text-align: center;">
+				<p:commandButton icon="pi pi-trash"
 					title="#{msgs['alt.acao.excluir']}"
-					action="#{cadastroPedestreController.removerDocumento(documento)}">
-					<p:ajax process="@this"
-						update="form:cadastroPedestreTab:tableDocumentos form:cadastroPedestreTab:documentos" />
-				</h:commandButton>
+					action="#{cadastroPedestreController.removerDocumento(documento)}"
+					process="@this"
+					update="form:cadastroPedestreTab:tableDocumentos form:cadastroPedestreTab:documentos"
+					styleClass="ui-button-danger ui-button-flat rounded-button" />
 			</p:column>
 		</p:dataTable>
-	</p:panelGrid>
+	</p:panel>
 
 </ui:composition>

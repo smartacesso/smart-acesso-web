@@ -59,12 +59,9 @@
 		
 		<ui:define name="conteudo">
 			
-			<h:panelGrid width="100%" columns="1" headerClass="h-grid-header">
-				<f:facet name="header">
-					<h:outputText value="#{msgs['title.uc001.consulta.clientes']}" />
-				</f:facet>
-				
-				<h:column>
+			<h2 class="sa-page-title">#{msgs['title.uc001.consulta.clientes']}</h2>
+
+			<p:outputPanel styleClass="p-col-12">
 				
 					<ui:include src="/tema/templates/vazio.xhtml">
 						<ui:param name="exibe" value="#{empty consultaClienteController.result}" />
@@ -116,9 +113,7 @@
 						
 					</p:dataTable>
 				
-				</h:column>
-				
-			</h:panelGrid>
+			</p:outputPanel>
 				
 			<p:confirmDialog id="dialogConfirmarExclusao"
 				widgetVar="confirmarExclusao"

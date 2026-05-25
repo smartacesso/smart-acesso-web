@@ -4,9 +4,10 @@
     xmlns:h="http://java.sun.com/jsf/html"
     xmlns:p="http://primefaces.org/ui">
 
-    <h:panelGroup layout="block" id="painelCadastroRelatorio" rendered="#{cadastroPedestreController.isAdminOrGerente()}">
+    <h:panelGroup layout="block" id="painelCadastroRelatorio"
+        rendered="#{cadastroPedestreController.isAdminOrGerente()}">
         <p:panel header="Cadastro de Relatório" styleClass="ui-fluid">
-            <div class="ui-g">
+            <div class="form-grid sa-cadastro-grid ui-fluid ui-g">
 
                 <div class="ui-g-12 ui-md-4">
                     <p:outputLabel for="dataHora" value="Data e Hora" />
@@ -34,22 +35,21 @@
                         value="#{cadastroPedestreController.relatorio.equipamento}" />
                 </div>
 
-                <div class="ui-g-12 ui-md-12">
+                <div class="ui-g-12">
                     <p:commandButton id="addRelatorio"
-                        value="Adicionar Relatório"
+                        value="Adicionar Relatório" icon="pi pi-plus"
                         action="#{cadastroPedestreController.adicionarRelatorio}"
                         process="@form"
                         update="form:cadastroPedestreTab:painelRelatorios form:cadastroPedestreTab:painelCadastroRelatorio"
-                        styleClass="p-mr-2"
-                        style="margin-bottom:5px" />
+                        styleClass="ui-button-success" />
 
                     <p:commandButton id="buscarRelatorio"
-                        value="Buscar Relatório"
+                        value="Buscar Relatório" icon="pi pi-search"
                         action="#{cadastroPedestreController.carregarRelatorios}"
                         process="@form"
-                        update="form:cadastroPedestreTab:painelRelatorios form:cadastroPedestreTab:painelCadastroRelatorio" />
+                        update="form:cadastroPedestreTab:painelRelatorios form:cadastroPedestreTab:painelCadastroRelatorio"
+                        styleClass="ui-button-outlined" style="margin-left: 0.5rem;" />
                 </div>
-
             </div>
         </p:panel>
     </h:panelGroup>
@@ -57,8 +57,8 @@
     <p:spacer height="10" />
 
     <p:panel id="painelRelatorios" header="Relatórios" styleClass="ui-fluid">
-
         <h:outputText value="Nenhum relatório encontrado."
+            styleClass="sa-empty-state__text"
             rendered="#{empty cadastroPedestreController.listaRelatorios}" />
 
         <p:dataTable id="tableRelatorios"
@@ -84,13 +84,14 @@
                 <h:outputText value="#{r.equipamento}" />
             </p:column>
 
-            <p:column headerText="Ações" style="text-align: center;" rendered="#{cadastroPedestreController.isAdminOrGerente()}">
+            <p:column headerText="Ações" style="width: 100px; text-align: center;"
+                rendered="#{cadastroPedestreController.isAdminOrGerente()}">
                 <p:commandButton icon="pi pi-trash"
                     title="Excluir"
                     action="#{cadastroPedestreController.removerRelatorio(r)}"
                     update="form:cadastroPedestreTab:tableRelatorios form:cadastroPedestreTab:painelRelatorios"
                     process="@this"
-                    styleClass="ui-button-danger" />
+                    styleClass="ui-button-danger ui-button-flat rounded-button" />
             </p:column>
         </p:dataTable>
     </p:panel>

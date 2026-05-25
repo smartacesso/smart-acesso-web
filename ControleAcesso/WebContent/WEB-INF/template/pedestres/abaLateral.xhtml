@@ -106,44 +106,45 @@
 
 		<!-- Campos editáveis -->
 		<div class="info-horizontal">
-			<h:panelGrid columns="2" cellpadding="5" styleClass="grid-horizontal">
+			<div class="form-grid sa-cadastro-grid ui-fluid ui-g">
+				<div class="ui-g-12 ui-md-6">
+					<p:outputLabel value="Tipo:" />
+					<h:outputText value="#{cadastroPedestreController.entidade.tipo}"
+						style="font-weight:bold;" />
+				</div>
 
-				<p:outputLabel value="Tipo:" />
-				<h:outputText value="#{cadastroPedestreController.entidade.tipo}"
-					style="font-weight:bold;" />
+				<div class="ui-g-12 ui-md-6">
+					<p:outputLabel value="Status:" for="status" />
+					<p:selectOneMenu id="status"
+						value="#{cadastroPedestreController.entidade.status}">
+						<f:selectItems value="#{cadastroPedestreController.listaStatus}" />
+					</p:selectOneMenu>
+				</div>
 
-				<p:outputLabel value="Status:" for="status" />
-				<p:selectOneMenu id="status"
-					value="#{cadastroPedestreController.entidade.status}">
-					<f:selectItems value="#{cadastroPedestreController.listaStatus}" />
-				</p:selectOneMenu>
+				<div class="ui-g-12 ui-md-6"
+					rendered="#{cadastroPedestreController.exibeCampoMatricula}">
+					<p:outputLabel value="Matrícula:" for="matricula" />
+					<p:inputText id="matricula"
+						value="#{cadastroPedestreController.entidade.matricula}"
+						disabled="#{cadastroPedestreController.desabilitaCampoMatricula}"
+						onkeyup="$(this).val($(this).val().replace(/[^0-9]/g, ''));" />
+				</div>
 
-				<p:outputLabel value="Matrícula:"
-					rendered="#{cadastroPedestreController.exibeCampoMatricula}"
-					for="matricula" />
-				<p:inputText id="matricula"
-					rendered="#{cadastroPedestreController.exibeCampoMatricula}"
-					value="#{cadastroPedestreController.entidade.matricula}"
-					disabled="#{cadastroPedestreController.desabilitaCampoMatricula}"
-					onkeyup="$(this).val($(this).val().replace(/[^0-9]/g, ''));" />
-
-				<p:outputLabel value="Cartão:" for="cartao" />
-				<h:panelGroup layout="block">
-					<p:inputText id="cartao"
-						value="#{cadastroPedestreController.codigoCartao}"
-						maxlength="#{cadastroPedestreController.qtdeDigitosCartao}"
-						required="#{cadastroPedestreController.verificaObrigatorio('cartao.acesso')}"
-						autocomplete="off" styleClass="left-zeros"
-						style="width: calc(100% - 70px); display: inline-block;" />
-
-					<p:commandButton
-						action="#{cadastroPedestreController.preencherCartaoAutomatico}"
-						value = "Gerar" update="cartao" process="@this" immediate="true"
-						styleClass="ui-button-secondary"
-						style="width: 60px;" />
-
-				</h:panelGroup>
-			</h:panelGrid>
+				<div class="ui-g-12 ui-md-6">
+					<p:outputLabel value="Cartão:" for="cartao" />
+					<div class="ui-inputgroup">
+						<p:inputText id="cartao"
+							value="#{cadastroPedestreController.codigoCartao}"
+							maxlength="#{cadastroPedestreController.qtdeDigitosCartao}"
+							required="#{cadastroPedestreController.verificaObrigatorio('cartao.acesso')}"
+							autocomplete="off" styleClass="left-zeros" />
+						<p:commandButton
+							action="#{cadastroPedestreController.preencherCartaoAutomatico}"
+							value="Gerar" update="cartao" process="@this" immediate="true"
+							icon="pi pi-refresh" styleClass="ui-button-secondary" />
+					</div>
+				</div>
+			</div>
 
 			<!-- Checkboxes em linha -->
 			<h:panelGroup layout="block" styleClass="check-horizontal">
@@ -185,19 +186,21 @@
 			header="#{msgs['label.uc008.origem.foto']}" modal="true"
 			resizable="false">
 
-			<p:panelGrid columns="1" style="text-align: center;">
+			<p:panelGrid columns="1" styleClass="ui-fluid" layout="grid">
 				<p:column>
-					<p:button id="abrirCamera" value="#{msgs['alt.acao.tirar.foto']}"
+					<p:commandButton id="abrirCamera" value="#{msgs['alt.acao.tirar.foto']}"
+						icon="pi pi-camera" type="button"
 						update="form:dialogTirarFoto"
 						onclick="PF('escolherFoto').hide(); PF('pc').attach(); PF('tirarFoto').show(); return false;"
-						style="width: 100%" />
+						styleClass="ui-button-outlined" style="width: 100%" />
 				</p:column>
 
 				<p:column>
-					<p:button id="abrirArquivo"
+					<p:commandButton id="abrirArquivo"
 						value="#{msgs['alt.acao.procurar.arquivo']}"
+						icon="pi pi-upload" type="button"
 						onclick="clicaBotaoFileUpload(); return false;"
-						style="width: 100%" />
+						styleClass="ui-button-outlined" style="width: 100%" />
 				</p:column>
 
 				<p:fileUpload id="acaoAbrirArquivo"
@@ -209,9 +212,9 @@
 				</p:fileUpload>
 
 				<p:column>
-					<p:button value="#{msgs['alt.acao.cancelar']}"
+					<p:commandButton value="#{msgs['alt.acao.cancelar']}" type="button"
 						onclick="PF('escolherFoto').hide(); return false;"
-						style="width: 100%" />
+						styleClass="ui-button-outlined" style="width: 100%" />
 				</p:column>
 			</p:panelGrid>
 
@@ -228,10 +231,11 @@
 				autoStart="false" width="320" height="240" photoWidth="640"
 				photoHeight="480" format="jpeg" jpegQuality="70" />
 			<p:commandButton value="#{msgs['label.uc008.capturar']}"
+				icon="pi pi-camera"
 				process="dialogTirarFoto" update="form:dialogCropImage"
 				onclick="PF('pc').capture();"
 				oncomplete="PF('tirarFoto').hide(); PF('cropImage').show(); PF('pc').dettach(); return false;"
-				style="margin-top: 10px" />
+				styleClass="ui-button-success" style="margin-top: 10px" />
 
 		</p:dialog>
 	</h:form>
@@ -258,12 +262,13 @@
 		<p:commandButton value="#{msgs['label.uc008.cortar']}"
 			action="#{cadastroPedestreController.crop}" process="dialogCropImage"
 			update="painelFoto" icon="pi pi-clone"
-			oncomplete="PF('cropImage').hide(); console.log('Imagem cortada com sucesso:', '#{cadastroPedestreController.croppedImage}'); return false;"
-			style="margin-top: 10px; margin-right: 10px;" styleClass="whiteIcon" />
+			oncomplete="PF('cropImage').hide(); return false;"
+			styleClass="ui-button-success" style="margin-top: 10px; margin-right: 10px;" />
 
 		<p:commandButton value="#{msgs['alt.acao.cancelar']}"
 			action="#{cadastroPedestreController.cancelaCrop}" process="@this"
-			oncomplete="PF('cropImage').hide(); PF('escolherFoto').show(); console.log('Corte cancelado'); return false;" />
+			oncomplete="PF('cropImage').hide(); PF('escolherFoto').show(); return false;"
+			styleClass="ui-button-outlined" />
 
 	</p:dialog>
 
@@ -282,9 +287,9 @@
 				value="#{cadastroPedestreController.pedestreComCartaoAcesoExistente.tipo eq 'VISITANTE' ? 'vi' : 'pe'}" />
 		</p:link>
 		<br />
-		<p:button value="Voltar"
+		<p:commandButton value="Voltar" type="button"
 			onclick="PF('cartaoAcessoExistente').hide(); return false;"
-			style="margin-left: 220px; margin-top: 20px;" />
+			styleClass="ui-button-outlined" style="margin-top: 20px;" />
 	</p:dialog>
 
 	<!-- Script -->

@@ -310,11 +310,10 @@
 						<p:column headerText="#{msgs['alt.acao.visualizar']}"
 						styleClass="col-desktop-only"
 							style="text-align: center" exportable="false">
-							<h:commandButton id="acaoVisualizar"
+							<p:commandButton id="acaoVisualizar" icon="pi pi-eye"
 								action="#{relatorioVisitantesController.redirecionaPaginaEditarPedetre(visitante.pedestre.id, 'reVisitantes')}"
 								title="#{msgs['alt.acao.visualizar']}"
-								alt="#{msgs['alt.acao.visualizar']}"
-								image="#{menuController.path}/tema/img/bt_viewer_min.png" />
+								styleClass="ui-button-info ui-button-flat rounded-button" />
 						</p:column>
 
 					</p:dataTable>
