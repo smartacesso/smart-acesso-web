@@ -25,6 +25,7 @@ import br.com.startjob.acesso.tasks.ImportaSponteTask;
 import br.com.startjob.acesso.tasks.ImportacaoSocTask;
 import br.com.startjob.acesso.tasks.ImportarSalesianoTask;
 import br.com.startjob.acesso.tasks.ImportarTotvsTask;
+import br.com.startjob.acesso.tasks.ExportarRhidTask;
 import br.com.startjob.acesso.tasks.ImportarUsuarioTask;
 
 @SuppressWarnings("serial")
@@ -49,6 +50,7 @@ public class ConfiguraRotinasServlet extends BaseServlet {
 //		registraTimerSalesiano();
 //		registraPrimeiroUsuario();
 //		registraTimersAutoAtendimento();
+//		registraTimersRhid();
 //		timerRegisterAD();
 //		timerRegiserSponte();
 
@@ -271,6 +273,20 @@ public class ConfiguraRotinasServlet extends BaseServlet {
 		log.info("Registrando rotina da AD");
 
 		ActivatedTasks.getInstancia().timers.put("importacaoAD_cliente", timer);
+	}
+
+	private void registraTimersRhid() {
+		log.info("Registra Integração RHID");
+
+		ActivatedTasks.getInstancia().limpaTimersRhid();
+
+		Long period = 60 * 60 * 1000L;
+		Timer timer = new Timer();
+		TimerTask rhidTask = new ExportarRhidTask();
+		timer.scheduleAtFixedRate(rhidTask, 0, period);
+
+		log.info("Registrando rotina de exportação RHID");
+		ActivatedTasks.getInstancia().timers.put("exportacaoRHID", timer);
 	}
 
 }

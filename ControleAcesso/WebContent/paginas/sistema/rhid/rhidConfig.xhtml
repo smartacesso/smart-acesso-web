@@ -6,73 +6,174 @@
     xmlns:p="http://primefaces.org/ui">
 
     <ui:define name="titulo">
-        #{msgs['title.sistema']} | Configuração RHID
+        #{msgs['title.sistema']} | Integração RHID
     </ui:define>
 
-   <ui:define name="conteudo">
-    <h:panelGroup id="painelRhid" layout="block">
-        
-        <!-- ADICIONE ESTA LINHA: Ela é responsável por mostrar os alertas de sucesso/erro -->
-        <p:messages id="msgs" showDetail="true" closable="true" />
-        
-        <!-- 1. CONFIGURAÇÕES GLOBAIS E DE ROTINA -->
-        <p:panel header="Configurações Globais do RHiD" styleClass="ui-fluid">
-            <div class="ui-g">
-                <div class="ui-g-12 ui-md-3">
-                    <p:outputLabel value="E-mail Padrão:" for="emailGlobal" />
-                    <p:inputText id="emailGlobal" value="#{rhidConfigController.emailGlobal}" />
-                </div>
-                <div class="ui-g-12 ui-md-3">
-                    <p:outputLabel value="Senha Padrão:" for="senhaGlobal" />
-                    <p:password id="senhaGlobal" value="#{rhidConfigController.senhaGlobal}" redisplay="true" />
-                </div>
-                <div class="ui-g-12 ui-md-3">
-                    <p:outputLabel value="Extrair de:" for="periodo" />
-                    <p:selectOneMenu id="periodo" value="#{rhidConfigController.regraPeriodo}">
-                        <f:selectItem itemLabel="Mês Anterior" itemValue="MES_ANTERIOR" />
-                        <f:selectItem itemLabel="Últimos 30 Dias" itemValue="ULTIMOS_30_DIAS" />
-                    </p:selectOneMenu>
-                </div>
-                <div class="ui-g-12 ui-md-3">
-                    <p:outputLabel value="Executar:" for="recorrencia" />
-                    <p:selectOneMenu id="recorrencia" value="#{rhidConfigController.recorrencia}">
-                        <f:selectItem itemLabel="Todo dia 01" itemValue="DIA_01" />
-                        <f:selectItem itemLabel="Semanal" itemValue="SEMANAL" />
-                    </p:selectOneMenu>
-                </div>
-            </div>
-            <f:facet name="footer">
-                <p:commandButton value="Salvar Configurações" actionListener="#{rhidConfigController.salvarConfiguracaoGlobal}" update="msgs" icon="pi pi-save"/>
-            </f:facet>
-        </p:panel>
+    <ui:define name="conteudo">
+        <h:panelGroup id="painelRhid" layout="block">
+            <p:messages id="msgs" showDetail="true" closable="true" />
 
-        <!-- 2. GESTÃO DOS DOMÍNIOS -->
-        <p:panel header="Domínios para Extração" style="margin-top: 20px;">
-            <div class="ui-g ui-fluid">
-                <div class="ui-g-12 ui-md-4">
-                    <p:inputText value="#{rhidConfigController.novoDominio}" placeholder="Nome do Domínio (ex: direcional1)" />
-                </div>
-                <div class="ui-g-12 ui-md-4">
-                    <p:inputText value="#{rhidConfigController.novoIds}" placeholder="IDs Empresa (ex: [1])" />
-                </div>
-                <div class="ui-g-12 ui-md-4">
-                    <p:commandButton value="Adicionar" actionListener="#{rhidConfigController.adicionarDominio}" update="tabelaDominios" icon="pi pi-plus" />
-                </div>
-            </div>
+            <p:panel header="Configurações RHID cadastradas" style="margin-top: 0;">
+                <p:outputLabel value="Selecione uma configuração existente para editar ou execute a importação manual diretamente pela lista."
+                    style="display:block; margin-bottom: 15px;" />
 
-            <p:dataTable id="tabelaDominios" value="#{rhidConfigController.listaDominios}" var="dom" emptyMessage="Nenhum domínio cadastrado." style="margin-top: 15px;">
-                <p:column headerText="Domínio do RHiD">
-                    <h:outputText value="#{dom.nome}" />
-                </p:column>
-                <p:column headerText="Payload (IDs)">
-                    <h:outputText value="#{dom.ids}" />
-                </p:column>
-                <p:column headerText="Ação" width="100" style="text-align: center;">
-                    <p:commandButton icon="pi pi-trash" actionListener="#{rhidConfigController.removerDominio(dom)}" update="tabelaDominios" styleClass="ui-button-danger" />
-                </p:column>
-            </p:dataTable>
-        </p:panel>
+                <p:dataTable id="tabelaConfigs" value="#{rhidConfigController.configuracoesCadastradas}" var="cfg"
+                    emptyMessage="Nenhuma configuração cadastrada. Use o formulário abaixo para criar a primeira."
+                    rowStyleClass="#{rhidConfigController.configSelecionada(cfg) ? 'ui-state-highlight' : null}"
+                    style="margin-bottom: 10px;">
+                    <p:column headerText="E-mail">
+                        <h:outputText value="#{cfg.email}" />
+                    </p:column>
+                    <p:column headerText="Domínios">
+                        <h:outputText value="#{rhidConfigController.formatarDominios(cfg)}" />
+                    </p:column>
+                    <p:column headerText="Última exportação">
+                        <h:outputText value="#{rhidConfigController.formatarUltimaExportacao(cfg.ultimaExportacao)}" />
+                    </p:column>
+                    <p:column headerText="Automática" style="text-align: center; width: 100px;">
+                        <h:outputText value="#{cfg.exportacaoAutomatica ? 'Sim' : 'Não'}" />
+                    </p:column>
+                    <p:column headerText="Ações" style="text-align: center; width: 400px;">
+                        <p:commandButton value="Editar" icon="pi pi-pencil"
+                            actionListener="#{rhidConfigController.selecionarConfiguracao(cfg.id)}"
+                            update="@form" process="@this" style="margin-right: 5px;" />
+                        <p:commandButton value="Completa" icon="pi pi-cloud-upload" styleClass="ui-button-warning"
+                            actionListener="#{rhidConfigController.executarImportacaoCompletaConfig(cfg.id)}"
+                            update="@form" process="@this"
+                            disabled="#{rhidConfigController.processando}"
+                            style="margin-right: 5px;" />
+                        <p:commandButton value="Incremental" icon="pi pi-sync"
+                            actionListener="#{rhidConfigController.executarImportacaoIncrementalConfig(cfg.id)}"
+                            update="@form" process="@this"
+                            disabled="#{rhidConfigController.processando}"
+                            style="margin-right: 5px;" />
+                        <p:commandButton value="Excluir" icon="pi pi-trash" styleClass="ui-button-danger"
+                            actionListener="#{rhidConfigController.excluirConfiguracao(cfg.id)}"
+                            update="@form" process="@this"
+                            disabled="#{rhidConfigController.processando}"
+                            onclick="return confirm('Excluir a configuração RHID #{cfg.email}?');" />
+                    </p:column>
+                </p:dataTable>
 
-    </h:panelGroup>
-</ui:define>
+                <p:commandButton value="Nova configuração" icon="pi pi-plus"
+                    actionListener="#{rhidConfigController.novaConfiguracaoAction}"
+                    update="@form" process="@this" />
+            </p:panel>
+
+            <p:panel header="Domínios RHID (obigatório)" style="margin-top: 20px;">
+                <p:outputLabel value="O login na API RHID exige o parâmetro domain. Adicione ao menos um domínio antes de salvar."
+                    style="display:block; margin-bottom: 15px;" />
+
+                <h:panelGroup id="painelAddDominio" layout="block">
+                    <div class="ui-g ui-fluid">
+                        <div class="ui-g-12 ui-md-8">
+                            <p:inputText id="novoDominio" value="#{rhidConfigController.novoDominio}"
+                                placeholder="Nome do domínio (ex: docintegracao)" />
+                        </div>
+                        <div class="ui-g-12 ui-md-4">
+                            <p:commandButton value="Adicionar" actionListener="#{rhidConfigController.adicionarDominio}"
+                                update="@form"
+                                process="@form:painelAddDominio @this"
+                                icon="pi pi-plus" />
+                        </div>
+                    </div>
+                </h:panelGroup>
+
+                <p:dataTable id="tabelaDominios" value="#{rhidConfigController.configuracao.dominios}" var="dom"
+                    emptyMessage="Nenhum domínio cadastrado. Adicione ao menos um domínio para habilitar o salvamento."
+                    style="margin-top: 15px;">
+                    <p:column headerText="Domínio">
+                        <h:outputText value="#{dom.nomeDominio}" />
+                    </p:column>
+                    <p:column headerText="Ação" width="100" style="text-align: center;">
+                        <p:commandButton icon="pi pi-trash" actionListener="#{rhidConfigController.removerDominio(dom)}"
+                            update="@form" process="@this"
+                            styleClass="ui-button-danger" />
+                    </p:column>
+                </p:dataTable>
+            </p:panel>
+
+            <p:panel header="Credenciais e Parâmetros RHID" styleClass="ui-fluid" style="margin-top: 20px;">
+                <p:outputPanel rendered="#{rhidConfigController.configuracao.id != null}" style="margin-bottom: 15px;">
+                    <h:outputText value="Editando: #{rhidConfigController.configuracao.email}" style="font-weight: bold; margin-right: 20px;" />
+                    <h:outputText value="Última exportação: #{rhidConfigController.ultimaExportacaoFormatada}" />
+                </p:outputPanel>
+                <div class="ui-g">
+                    <div class="ui-g-12 ui-md-4">
+                        <p:outputLabel value="E-mail:" for="emailGlobal" />
+                        <p:inputText id="emailGlobal" value="#{rhidConfigController.configuracao.email}" />
+                        <small style="display:block; margin-top: 4px; color: #666;">Apenas uma configuração por e-mail.</small>
+                    </div>
+                    <div class="ui-g-12 ui-md-4">
+                        <p:outputLabel value="Senha:" for="senhaGlobal" />
+                        <p:password id="senhaGlobal" value="#{rhidConfigController.configuracao.senha}"
+                            redisplay="true" />
+                    </div>
+                    <div class="ui-g-12 ui-md-4">
+                        <p:outputLabel value="URL Base:" for="urlBase" />
+                        <p:inputText id="urlBase" value="#{rhidConfigController.configuracao.urlBase}" />
+                    </div>
+                    <div class="ui-g-12 ui-md-3">
+                        <p:outputLabel value="Intervalo automático (min):" for="intervalo" />
+                        <p:inputNumber id="intervalo" value="#{rhidConfigController.configuracao.intervaloMinutos}" decimalPlaces="0" />
+                    </div>
+                    <div class="ui-g-12 ui-md-3">
+                        <p:outputLabel value="Exportação automática:" for="auto" />
+                        <p:selectBooleanCheckbox id="auto" value="#{rhidConfigController.configuracao.exportacaoAutomatica}" />
+                    </div>
+                    <div class="ui-g-12 ui-md-6">
+                        <p:outputLabel value="Funcionário sem nomeDominio:" for="semDominioAcao" />
+                        <p:selectOneMenu id="semDominioAcao" value="#{rhidConfigController.configuracao.semDominioAcao}">
+                            <f:selectItems value="#{rhidConfigController.semDominioAcaoOpcoes}"
+                                var="opcao" itemLabel="#{opcao.label}" itemValue="#{opcao}" />
+                        </p:selectOneMenu>
+                        <small style="display:block; margin-top: 4px; color: #666;">
+                            O DTO externo deve informar nomeDominio para rotear. Sem domínio: ignorar ou enviar para todos.
+                        </small>
+                    </div>
+                </div>
+            </p:panel>
+
+            <p:outputPanel id="acoesRhid" layout="block" style="margin-top: 20px;">
+                <p:commandButton id="btnSalvar" value="Salvar Configurações"
+                    actionListener="#{rhidConfigController.salvarConfiguracaoGlobal}"
+                    update="@form" icon="pi pi-save"
+                    process="@form:painelRhid"
+                    disabled="#{not rhidConfigController.podeSalvarConfig}"
+                    style="margin-right: 10px;"
+                    title="Adicione ao menos um domínio RHID para habilitar o salvamento." />
+
+                <p:commandButton value="Importação Completa" actionListener="#{rhidConfigController.executarImportacaoCompleta}"
+                    update="@form" icon="pi pi-cloud-upload" styleClass="ui-button-warning"
+                    process="@this"
+                    disabled="#{rhidConfigController.processando or rhidConfigController.configuracao.id == null}"
+                    style="margin-right: 10px;"
+                    title="Salve a configuração antes de importar, ou use os botões na lista acima." />
+
+                <p:commandButton value="Importação Incremental" actionListener="#{rhidConfigController.executarImportacaoIncremental}"
+                    update="@form" icon="pi pi-sync"
+                    process="@this"
+                    disabled="#{rhidConfigController.processando or rhidConfigController.configuracao.id == null}" />
+            </p:outputPanel>
+
+            <p:panel id="resultadoImportacao" header="Resultado da Última Importação" style="margin-top: 20px;"
+                rendered="#{rhidConfigController.ultimoResultado != null}">
+                <h:panelGrid columns="2" cellpadding="5">
+                    <h:outputText value="Modo:" />
+                    <h:outputText value="#{rhidConfigController.ultimoResultado.completa ? 'Completa' : 'Incremental'}" />
+                    <h:outputText value="Processados:" />
+                    <h:outputText value="#{rhidConfigController.ultimoResultado.totalProcessados}" />
+                    <h:outputText value="Criados:" />
+                    <h:outputText value="#{rhidConfigController.ultimoResultado.totalCriados}" />
+                    <h:outputText value="Atualizados:" />
+                    <h:outputText value="#{rhidConfigController.ultimoResultado.totalAtualizados}" />
+                    <h:outputText value="Erros:" />
+                    <h:outputText value="#{rhidConfigController.ultimoResultado.totalErros}" />
+                </h:panelGrid>
+                <p:dataList value="#{rhidConfigController.ultimoResultado.mensagens}" var="msg" type="unordered" style="margin-top: 10px;">
+                    <h:outputText value="#{msg}" />
+                </p:dataList>
+            </p:panel>
+        </h:panelGroup>
+    </ui:define>
 </ui:composition>

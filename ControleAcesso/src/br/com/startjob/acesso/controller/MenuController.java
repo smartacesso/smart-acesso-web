@@ -193,7 +193,7 @@ public class MenuController extends BaseController {
 				.label(resource.recuperaChave("menu.configuracao", getFacesContext())).build();
 		
 		DefaultMenuItem rhidConfig = DefaultMenuItem.builder()
-				.value("Rhid configuração")
+				.value("Integração RHID")
 				.styleClass("ui-simple-menu")
 				.url(BaseConstant.URL_APLICACAO + "/paginas/sistema/rhid/rhidConfig.xhtml").build();
 		configuracaoes.getElements().add(rhidConfig);
