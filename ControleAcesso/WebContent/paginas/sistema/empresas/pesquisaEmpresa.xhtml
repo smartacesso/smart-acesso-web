@@ -53,8 +53,7 @@
 						<p:inputText id="filtro-geral"
 							placeholder="Buscar por nome ou CNPJ"
 							value="#{consultaEmpresaController.paramBuscaGeral}"
-							styleClass="sa-search-input"
-							onkeypress="if(event.key === 'Enter') { event.preventDefault(); document.getElementById('form:acaoBuscar').click(); }" />
+							styleClass="sa-search-input" />
 						<p:commandButton id="acaoBuscar"
 							action="#{consultaEmpresaController.buscar}"
 							value="#{msgs['alt.acao.buscar']}"

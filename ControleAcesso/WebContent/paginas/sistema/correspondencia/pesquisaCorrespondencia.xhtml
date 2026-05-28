@@ -48,15 +48,13 @@
 					<div class="sa-toolbar-search">
 						<p:inputText id="filtro-busca-geral" placeholder="Destinatário..."
 							value="#{consultaCorrespondenciaController.parans['destinatario.nome']}"
-							styleClass="sa-search-input"
-							onkeypress="if(event.key === 'Enter') { event.preventDefault(); document.getElementById('form:acaoBuscar').click(); }" />
+							styleClass="sa-search-input" />
 						<p:commandButton id="acaoBuscar"
 							action="#{consultaCorrespondenciaController.buscar}"
 							value="#{msgs['alt.acao.buscar']}"
 							title="#{msgs['alt.acao.buscar']}"
 							icon="pi pi-search" iconPos="left"
-							process="@this filtro-busca-geral containerDeFiltro"
-							update="@form" styleClass="sa-btn-label" />
+							process="@form" update="@form" styleClass="sa-btn-label" />
 					</div>
 					<p:commandButton id="acaoFiltroAvancado"
 						value="Filtros"

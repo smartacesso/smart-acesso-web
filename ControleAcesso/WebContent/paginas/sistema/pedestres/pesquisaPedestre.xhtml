@@ -35,19 +35,6 @@
 
 		<ui:define name="conteudo">
 
-			<script>
-				jQuery(document).ready(function() {
-					try {
-						$('.filtro-nome').on('keydown', function(e) {
-							if (e.key === "Enter") {
-								sincronizarFiltro(this, 'filtro-nome-sync');
-							}
-						});
-					} catch (e) {
-					}
-				})
-			</script>
-
 			<h:panelGroup id="saPesquisaSplit" layout="block" styleClass="sa-pesquisa-split">
 
 				<div class="sa-pesquisa-split__main">
@@ -222,14 +209,7 @@
 									<p:inputText id="filtro-busca-geral" placeholder="Buscar por nome"
 										value="#{consultaPedestreController.parans['nome']}"
 										onblur="sincronizarFiltro(this, 'filtro-nome-sync');"
-										styleClass="sa-search-input"
-										onkeypress="if(event.key === 'Enter') {
-    event.preventDefault();
-    this.blur();
-    setTimeout(function() {
-        document.getElementById('form:acaoBuscar').click();
-    }, 100);
-}" />
+										styleClass="sa-search-input filtro-nome-sync" />
 									<p:selectOneMenu id="filtro-tipoPedestre" rendered="false"
 										value="#{consultaPedestreController.parans['tipo']}"
 										styleClass="filtro-select-menu filtro-tipoPedestre-sync"

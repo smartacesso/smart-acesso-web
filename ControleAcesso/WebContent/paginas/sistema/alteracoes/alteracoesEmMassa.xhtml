@@ -51,8 +51,7 @@
 						<p:inputText id="filtro-nome" placeholder="Filtrar por nome"
 							value="#{alteracoesEmMassaController.parans['nome']}"
 							styleClass="filtro-nome filtro-nome-sync sa-search-input"
-							onblur="sincronizarFiltro(this, 'filtro-nome-sync');"
-							onkeypress="if(event.key === 'Enter') { event.preventDefault(); document.getElementById('form:acaoBuscar').click(); }" />
+							onblur="sincronizarFiltro(this, 'filtro-nome-sync');" />
 						<p:commandButton id="acaoBuscar"
 							action="#{alteracoesEmMassaController.buscar}"
 							value="#{msgs['alt.acao.buscar']}"
@@ -341,19 +340,6 @@
 					</p:dataTable>
 				</p:outputPanel>
 			</p:dialog>
-
-			<script>
-				jQuery(document).ready(function() {
-					try {
-						$('.filtro-nome').on('keydown', function(e) {
-							if (e.key === "Enter") {
-								sincronizarFiltro(this, 'filtro-nome-sync');
-							}
-						});
-					} catch (e) {
-					}
-				})
-			</script>
 
 			<h:panelGroup id="containerDeFiltro" layout="block">
 

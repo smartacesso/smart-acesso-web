@@ -50,7 +50,7 @@
 				</p:toolbarGroup>
 				<p:toolbarGroup styleClass="sa-toolbar-filters">
 					<p:inputText id="filtro-nome" placeholder="Filtrar por nome"
-						styleClass="sa-search-input"
+						styleClass="filtro-nome-sync sa-search-input"
 						value="#{relatorioOcupacaoController.parans['pedestre.nome']}" />
 					<p:calendar id="filtro-data" value="#{relatorioOcupacaoController.dataSelecionada}"
 						pattern="dd/MM/yyyy" mask="99/99/9999" navigator="true"
@@ -83,7 +83,8 @@
 							<p:outputLabel for="filtro-avancado-nome"
 								value="#{msgs['label.uc010.nome']}" />
 							<p:inputText id="filtro-avancado-nome"
-								value="#{relatorioOcupacaoController.parans['pedestre.nome']}" />
+								value="#{relatorioOcupacaoController.parans['pedestre.nome']}"
+								styleClass="filtro-nome-sync" />
 						</div>
 						<div class="ui-g-12 ui-md-6">
 							<p:outputLabel for="filtro-avancado-equipamento"

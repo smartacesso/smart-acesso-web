@@ -54,6 +54,7 @@
 						rendered="#{relatorioLiberacoesManuaisController.result.size() > 0}" />
 					<p:calendar id="filtro-data-inicio"
 						value="#{relatorioLiberacoesManuaisController.parans['data_maior_data']}"
+						styleClass="filtro-data-maior-sync"
 						pattern="dd/MM/yyyy HH:mm" mask="99/99/9999 99:99" navigator="true">
 						<p:ajax event="dateSelect" update="filtro-avancado-dataInicio" />
 						<p:ajax event="change" update="filtro-avancado-dataInicio" />
@@ -62,6 +63,7 @@
 					<h:outputText value="até" />
 					<p:calendar id="filtro-data-fim"
 						value="#{relatorioLiberacoesManuaisController.parans['data_menor_data']}"
+						styleClass="filtro-data-menor-sync"
 						pattern="dd/MM/yyyy HH:mm" mask="99/99/9999 99:99" navigator="true">
 						<p:ajax event="dateSelect" update="filtro-avancado-dataFim" />
 						<p:ajax event="change" update="filtro-avancado-dataFim" />
@@ -96,6 +98,7 @@
 								value="#{msgs['title.uc012.data.acesso']}" />
 							<p:calendar id="filtro-avancado-dataInicio"
 								value="#{relatorioLiberacoesManuaisController.parans['data_maior_data']}"
+								styleClass="filtro-data-maior-sync"
 								pattern="dd/MM/yyyy HH:mm" mask="99/99/9999 99:99" navigator="true">
 								<p:ajax event="dateSelect" update="filtro-data-inicio" />
 								<p:ajax event="change" update="filtro-data-inicio" />
@@ -106,6 +109,7 @@
 							<p:outputLabel for="filtro-avancado-dataFim" value="Data final" />
 							<p:calendar id="filtro-avancado-dataFim"
 								value="#{relatorioLiberacoesManuaisController.parans['data_menor_data']}"
+								styleClass="filtro-data-menor-sync"
 								pattern="dd/MM/yyyy HH:mm" mask="99/99/9999 99:99" navigator="true">
 								<p:ajax event="dateSelect" update="filtro-data-fim" />
 								<p:ajax event="change" update="filtro-data-fim" />

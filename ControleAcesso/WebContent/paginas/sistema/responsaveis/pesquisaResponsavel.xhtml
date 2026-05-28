@@ -40,8 +40,7 @@
 					<div class="sa-toolbar-search">
 						<p:inputText id="filtro-nome" placeholder="Filtrar por nome"
 							value="#{consultaResponsavelController.parans['nome']}"
-							styleClass="sa-search-input"
-							onkeypress="if(event.key === 'Enter') { event.preventDefault(); document.getElementById('form:acaoBuscar').click(); }" />
+							styleClass="sa-search-input" />
 						<p:commandButton id="acaoBuscar"
 							action="#{consultaResponsavelController.buscar}"
 							value="#{msgs['alt.acao.buscar']}"

@@ -93,7 +93,8 @@
 							oncomplete="PF('alteraSenha').show(); return false;" />
 					</p:commandButton>
 
-					<p:commandButton id="btnAbrirDialogWhatsapp" icon="pi pi-camera"
+					<p:commandButton id="btnAbrirDialogWhatsapp"
+						title="Auto cadastro" icon="pi pi-camera"
 						rendered="#{cadastroPedestreController.entidade.id != null}"
 						action="#{cadastroPedestreController.getLinkAutoatendimento()}"
 						process="@this"

@@ -28,8 +28,7 @@
 					<p:inputText id="filtro-nome" placeholder="Filtrar por nome"
 						styleClass="filtro-nome filtro-nome-sync sa-search-input"
 						onblur="sincronizarFiltro(this, 'filtro-nome-sync');"
-						value="#{relatorioPedestresController.parans['pedestre.nome']}"
-						onkeypress="if(event.key === 'Enter') { event.preventDefault(); document.getElementById('form:acaoBuscar').click(); }" />
+						value="#{relatorioPedestresController.parans['pedestre.nome']}" />
 
 					<p:commandButton id="acaoBuscar"
 					    action="#{relatorioPedestresController.buscar()}"
@@ -68,6 +67,7 @@
 
 					<p:calendar id="filtro-data-inicio"
 						value="#{relatorioPedestresController.parans['data_maior_data']}"
+						styleClass="filtro-data-maior-sync"
 						pattern="dd/MM/yyyy HH:mm" mask="99/99/9999 99:99" size="15"
 						navigator="true"
 						valueChangeListener="#{relatorioPedestresController.alteraDataInicio}">
@@ -81,6 +81,7 @@
 
 					<p:calendar id="filtro-data-fim"
 						value="#{relatorioPedestresController.parans['data_menor_data']}"
+						styleClass="filtro-data-menor-sync"
 						pattern="dd/MM/yyyy HH:mm" mask="99/99/9999 99:99" size="15"
 						navigator="true"
 						valueChangeListener="#{relatorioPedestresController.alteraDataFim}">
@@ -103,19 +104,6 @@
 
 		<ui:define name="conteudo">
 
-			<script>
-				jQuery(document).ready(function() {
-					try {
-						$('.filtro-nome').on('keydown', function(e) {
-							if (e.key === "Enter") {
-								sincronizarFiltro(this, 'filtro-nome-sync');
-							}
-						});
-					} catch (e) {
-					}
-				})
-			</script>
-
 			<h:panelGroup layout="block"
 				styleClass="sa-pesquisa-split #{relatorioPedestresController.getFiltroFlag('relatorio-pedestres-filtroFlag') ? 'sa-pesquisa-split--filtros-abertos' : ''}">
 
@@ -136,6 +124,7 @@
 								value="#{msgs['label.uc009.data.inical']}" />
 							<p:calendar id="filtro-avancado-dataInicio"
 								value="#{relatorioPedestresController.parans['data_maior_data']}"
+								styleClass="filtro-data-maior-sync"
 								pattern="dd/MM/yyyy HH:mm" mask="99/99/9999 99:99"
 								navigator="true">
 								<p:ajax event="dateSelect" update="@this" />
@@ -149,6 +138,7 @@
 								value="#{msgs['label.uc009.data.final']}" />
 							<p:calendar id="filtro-avancado-dataFim"
 								value="#{relatorioPedestresController.parans['data_menor_data']}"
+								styleClass="filtro-data-menor-sync"
 								pattern="dd/MM/yyyy HH:mm" mask="99/99/9999 99:99"
 								navigator="true">
 								<p:ajax event="dateSelect" update="@this" />

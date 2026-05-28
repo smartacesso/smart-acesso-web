@@ -47,8 +47,7 @@
 						<p:inputText id="filtro-geral"
 							value="#{consultaUsuarioController.paramBuscaGeral}"
 							placeholder="Buscar por nome ou CPF"
-							styleClass="sa-search-input"
-							onkeypress="if(event.key === 'Enter') { event.preventDefault(); document.getElementById('form:acaoBuscar').click(); }" />
+							styleClass="sa-search-input" />
 						<p:commandButton id="acaoBuscar"
 							action="#{consultaUsuarioController.buscar()}"
 							value="#{msgs['alt.acao.buscar']}"
