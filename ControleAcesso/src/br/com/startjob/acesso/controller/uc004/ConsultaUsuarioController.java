@@ -14,7 +14,7 @@ import br.com.startjob.acesso.modelo.entity.UsuarioEntity;
 @Named("consultaUsuarioController")
 @ViewScoped
 @UseCase(classEntidade=UsuarioEntity.class, funcionalidade="Consulta usuários", logicalRemove = true,
-		urlNovoRegistro="/paginas/sistema/usuarios/cadastroUsuarios.xhtml", lazyLoad = true, quantPorPagina = 10)
+		urlNovoRegistro="/paginas/sistema/usuarios/cadastroUsuarios.xhtml", lazyLoad = true, quantPorPagina = 6)
 public class ConsultaUsuarioController extends BaseController {
 
 	private UsuarioEntity usuarioSelecionado;

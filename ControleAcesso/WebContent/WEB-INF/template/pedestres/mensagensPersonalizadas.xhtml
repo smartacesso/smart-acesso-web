@@ -53,7 +53,7 @@
 					action="#{cadastroPedestreController.adicionarMensagem}"
 					update="painelCadastroPedestreMensagens mensagens"
 					process="painelCadastroPedestreMensagens"
-					styleClass="ui-button-success" />
+					styleClass="sa-btn-label ui-button-success w-full" />
 			</div>
 		</div>
 	</p:panel>
@@ -69,6 +69,7 @@
 			value="#{cadastroPedestreController.listaMensagensEquipamento}"
 			var="mensgem" paginator="true" rows="5" paginatorPosition="bottom"
 			editable="true" paginatorAlwaysVisible="false"
+			styleClass="sa-table tabela-responsive"
 			rendered="#{not empty cadastroPedestreController.listaMensagensEquipamento}">
 
 			<p:column headerText="#{msgs['label.uc008.nome']}"

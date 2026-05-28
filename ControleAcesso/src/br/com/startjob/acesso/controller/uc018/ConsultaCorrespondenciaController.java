@@ -18,7 +18,7 @@ import br.com.startjob.acesso.utils.MailSendUtils;
 @Named("consultaCorrespondenciaController")
 @ViewScoped
 @UseCase(classEntidade=CorrespondenciaEntity.class, funcionalidade="Consulta de Correspondências",
-		urlNovoRegistro="/paginas/sistema/correspondencia/cadastroCorrespondencia.jsf")
+		urlNovoRegistro="/paginas/sistema/correspondencia/cadastroCorrespondencia.jsf", quantPorPagina = 6)
 public class ConsultaCorrespondenciaController extends BaseController implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -99,6 +99,7 @@ public class ConsultaCorrespondenciaController extends BaseController implements
 	}
 
 	public String editar(Long id) {
+		salvarUrlRetornoLista();
 		return "/paginas/sistema/correspondencia/cadastroCorrespondencia.jsf?id=" + id + "&faces-redirect=true";
 	}
 

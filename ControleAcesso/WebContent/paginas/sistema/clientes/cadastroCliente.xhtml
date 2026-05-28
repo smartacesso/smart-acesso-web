@@ -15,24 +15,23 @@
 											? msgs['title.uc001.editar.cliente'] 
 											: msgs['title.uc001.cadastro.cliente']}
 		</ui:define>
-
-		<ui:define name="breadcrumb">
-			<a target="_top"
-				href="/#{menuController.appName}/paginas/principal.xhtml"> <h:outputText
-					value="#{msgs['title.principal']}" />
-			</a> > 
-			<a target="_top"
-				href="/#{menuController.appName}/paginas/sistema/clientes/pesquisaCliente.xhtml">
-				<h:outputText value="#{msgs['title.uc001.consulta.clientes']}" />
-			</a> > <h:outputText
-				value="#{cadastroClienteController.entidade.id != null 
-										? msgs['title.uc001.editar.cliente'] 
-										: msgs['title.uc001.cadastro.cliente']}" />
+		<ui:define name="pageTitle">
+			<h:outputText
+						value="#{cadastroClienteController.entidade.id != null 
+								? msgs['title.uc001.editar.cliente'] 
+								: msgs['title.uc001.cadastro.cliente']}" />
+		</ui:define>
+		<ui:define name="pageSubtitle">
+			<h:outputText value="#{sessionScope.usuario.cliente.nome}" rendered="#{sessionScope.usuario != null}" />
 		</ui:define>
 
-		<ui:define name="tools">
+
+<ui:define name="tools">
 			<p:toolbar styleClass="sa-toolbar-wrap">
 				<p:toolbarGroup styleClass="sa-toolbar-actions">
+					<ui:include src="/WEB-INF/template/sa-voltar-lista.xhtml">
+						<ui:param name="ctrl" value="#{cadastroClienteController}" />
+					</ui:include>
 					<p:commandButton id="save"
 						action="#{cadastroClienteController.salvar}"
 						value="#{msgs['alt.acao.save']}"
@@ -58,19 +57,19 @@
 		<ui:define name="conteudo">
 
 			<p:dialog id="alteraSenhaDialog" widgetVar="alteraSenha"
-				header="#{msgs['header.alterar.dados.login']}" modal="true">
-				<p:panelGrid columns="3">
-					<p:column>
-						<h:outputText value="Login" />
-						<br />
+				header="#{msgs['header.alterar.dados.login']}" modal="true"
+				styleClass="sa-dialog">
+				<div class="sa-dialog-form">
+					<div class="sa-field">
+						<span class="sa-label">Login</span>
 						<p:inputText value="#{cadastroClienteController.usuarioLogin}">
 							<f:validateRegex pattern="[a-zA-Z0-9]+" />
 						</p:inputText>
-					</p:column>
-
-					<p:column>
-						<h:outputText value="#{msgs['label.nova.senha']}" />
-						<br />
+					</div>
+					<div class="sa-field">
+						<span class="sa-label">
+							<h:outputText value="#{msgs['label.nova.senha']}" />
+						</span>
 						<p:password id="alteraSenha"
 							value="#{cadastroClienteController.usuarioSenha}" feedback="true"
 							redisplay="true" promptLabel="Digite sua senha" weakLabel="Fraca"
@@ -79,33 +78,22 @@
 							<f:validateRegex
 								pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[@$!%*?&amp;])[A-Za-z0-9@$!%*?&amp;]{8,}$" />
 						</p:password>
-					</p:column>
-
-					<p:column>
-						<br />
-						<p:commandButton value="#{msgs['alt.acao.alterar']}"
-							action="#{cadastroClienteController.alterarSenhaUsuarioCliente()}"
-							process="@form" update="@form"
-							oncomplete="PF('alteraSenha').hide();" />
-					</p:column>
-				</p:panelGrid>
+					</div>
+				</div>
 				<h:outputText
 					value="Caso o login editado não exista será criado um novo com os dados passados."
 					styleClass="sa-hint-text" />
+				<div class="sa-dialog-actions">
+					<p:commandButton value="#{msgs['alt.acao.alterar']}"
+						action="#{cadastroClienteController.alterarSenhaUsuarioCliente()}"
+						process="@form" update="@form"
+						styleClass="sa-btn-label ui-button-success"
+						oncomplete="PF('alteraSenha').hide();" />
+				</div>
 			</p:dialog>
 
 
-			<h:panelGrid width="100%" columns="1" headerClass="h-grid-header">
-				<f:facet name="header">
-					<h:outputText
-						value="#{cadastroClienteController.entidade.id != null 
-								? msgs['title.uc001.editar.cliente'] 
-								: msgs['title.uc001.cadastro.cliente']}" />
-				</f:facet>
-
-				<h:column>
-
-					<p:tabView id="cadastroClienteTab">
+			<p:accordionPanel id="cadastroClienteTab" styleClass="sa-accordion" multiple="true" activeIndex="0">
 						<p:tab title="Cadastro de unidade">
 							<p:panel header="Cadastro de unidade" styleClass="ui-fluid">
 								<div class="form-grid sa-cadastro-grid ui-fluid ui-g" id="painelCadastroCliente">
@@ -277,97 +265,91 @@
 
 						<p:tab title="#{msgs['label.uc001.planos']}">
 
-							<p:panelGrid columns="8" id="painelPlanosCliente"
-								style="width: 100%;">
+							<h:panelGroup layout="block" id="painelPlanosCliente"
+								styleClass="form-grid sa-cadastro-grid ui-fluid ui-g">
 
-								<p:column>
+								<div class="ui-g-12 ui-md-6">
 									<p:outputLabel value="#{msgs['label.uc001.nome.plano']}"
 										for="nomePlano" indicateRequired="true" />
-									<br />
 									<p:inputText id="nomePlano"
-										value="#{cadastroClienteController.plano.nome}" size="40" />
-								</p:column>
-								<p:column>
+										value="#{cadastroClienteController.plano.nome}" />
+								</div>
+								<div class="ui-g-12 ui-md-3">
 									<p:outputLabel value="#{msgs['label.uc001.status.plano']}"
 										for="statusPlanos" indicateRequired="true" />
-									<br />
 									<p:selectOneMenu id="statusPlanos"
 										value="#{cadastroClienteController.plano.status}">
 										<f:selectItems
 											value="#{cadastroClienteController.listaStatus}" />
 									</p:selectOneMenu>
-								</p:column>
-								<p:column>
+								</div>
+								<div class="ui-g-12 ui-md-3">
 									<p:outputLabel value="#{msgs['label.uc001.data.inicio']}"
 										for="inicioPlano" indicateRequired="true" />
-									<br />
 									<p:calendar id="inicioPlano"
-										value="#{cadastroClienteController.plano.inicio}" size="10"
+										value="#{cadastroClienteController.plano.inicio}"
 										mask="99/99/9999" pattern="dd/MM/yyyy" locale="pt_BR"
 										navigator="true" />
-								</p:column>
-								<p:column>
+								</div>
+								<div class="ui-g-12 ui-md-3">
 									<p:outputLabel value="#{msgs['label.uc001.data.fim']}"
 										for="fimPlano" indicateRequired="true" />
-									<br />
 									<p:calendar id="fimPlano"
-										value="#{cadastroClienteController.plano.fim}" size="10"
+										value="#{cadastroClienteController.plano.fim}"
 										mask="99/99/9999" pattern="dd/MM/yyyy" locale="pt_BR"
 										navigator="true" />
-								</p:column>
-								<p:column>
+								</div>
+								<div class="ui-g-12 ui-md-3">
 									<p:outputLabel
 										value="#{msgs['label.uc001.periodicidade.cobranca']}"
 										for="periodicidadeCobrancaPlano" indicateRequired="true" />
-									<br />
 									<p:inputText id="periodicidadeCobrancaPlano"
 										value="#{cadastroClienteController.plano.periodicidadeCobranca}" />
-								</p:column>
-								<p:column>
+								</div>
+								<div class="ui-g-12 ui-md-2">
 									<p:outputLabel value="#{msgs['label.uc001.dia.vencimento']}"
 										for="diaVencimentoPlano" indicateRequired="true" />
-									<br />
 									<p:inputNumber id="diaVencimentoPlano"
 										value="#{cadastroClienteController.plano.diaVencimento}"
-										size="5" decimalPlaces="0" maxValue="31" minValue="1" />
-								</p:column>
-								<p:column>
+										decimalPlaces="0" maxValue="31" minValue="1" />
+								</div>
+								<div class="ui-g-12 ui-md-2">
 									<p:outputLabel value="#{msgs['label.uc001.valor.plano']}"
 										for="valorPlano" indicateRequired="true" />
-									<br />
 									<p:inputNumber id="valorPlano"
 										value="#{cadastroClienteController.plano.valor}"
 										symbol="#{menuController.currencySymbol}" decimalSeparator=","
-										thousandSeparator="." minValue="0" size="10" />
-								</p:column>
-								<p:column>
-									<br />
+										thousandSeparator="." minValue="0" />
+								</div>
+								<div class="ui-g-12 ui-md-2">
+									<p:outputLabel value="&#160;" />
 									<p:commandButton id="adicionar"
 										value="#{msgs['alt.acao.adicionar']}"
 										action="#{cadastroClienteController.adicionarPlano}"
 										update="painelPlanosCliente planos"
-										process="painelPlanosCliente">
-									</p:commandButton>
-								</p:column>
-							</p:panelGrid>
+										process="painelPlanosCliente"
+										styleClass="sa-btn-label ui-button-success w-full" />
+								</div>
+							</h:panelGroup>
 
 							<br />
 
-							<p:panelGrid columns="4" id="planos" style="width: 100%;">
+							<p:outputPanel id="planos" layout="block" styleClass="sa-card-table">
 
-								<h:outputText
-									value="#{msgs['msg.nenhum.item.encontrado.adicionar']}"
-									escape="false"
-									rendered="#{empty cadastroClienteController.listaPlanos}" />
+								<ui:include src="/tema/templates/vazio.xhtml">
+									<ui:param name="exibe" value="#{empty cadastroClienteController.listaPlanos}" />
+									<ui:param name="exibeAdicionar" value="true" />
+								</ui:include>
 
 								<p:dataTable id="tablePlanos"
 									value="#{cadastroClienteController.listaPlanos}" var="plano"
 									paginator="true" rows="5" paginatorPosition="bottom"
 									editable="true" paginatorAlwaysVisible="false"
+									styleClass="sa-table tabela-responsive"
 									rendered="#{not empty cadastroClienteController.listaPlanos}">
 
 									<p:column headerText="#{msgs['label.uc001.nome.plano']}"
-										style="text-align: center;">
+										styleClass="sa-table-col-center">
 										<p:cellEditor>
 											<f:facet name="output">
 												<h:outputText value="#{plano.nome}" />
@@ -380,14 +362,14 @@
 									</p:column>
 
 									<p:column headerText="#{msgs['label.uc001.status.plano']}"
-										style="text-align: center;">
+										styleClass="sa-table-col-center">
 										<p:cellEditor>
 											<f:facet name="output">
 												<h:outputText value="#{plano.status}" />
 											</f:facet>
 
 											<f:facet name="input">
-												<p:selectOneMenu value="#{plano.status}" style="width:100%">
+												<p:selectOneMenu value="#{plano.status}" styleClass="w-full">
 													<f:selectItems
 														value="#{cadastroClienteController.listaStatus}" />
 												</p:selectOneMenu>
@@ -396,7 +378,7 @@
 									</p:column>
 
 									<p:column headerText="#{msgs['label.uc001.data.inicio']}"
-										style="text-align: center;">
+										styleClass="sa-table-col-center">
 										<p:cellEditor>
 											<f:facet name="output">
 												<h:outputText value="#{plano.inicio}">
@@ -413,7 +395,7 @@
 									</p:column>
 
 									<p:column headerText="#{msgs['label.uc001.data.fim']}"
-										style="text-align: center;">
+										styleClass="sa-table-col-center">
 										<p:cellEditor>
 											<f:facet name="output">
 												<h:outputText value="#{plano.fim}">
@@ -431,7 +413,7 @@
 
 									<p:column
 										headerText="#{msgs['label.uc001.periodicidade.cobranca']}"
-										style="text-align: center;">
+										styleClass="sa-table-col-center">
 										<p:cellEditor>
 											<f:facet name="output">
 												<h:outputText value="#{plano.periodicidadeCobranca}" />
@@ -444,7 +426,7 @@
 									</p:column>
 
 									<p:column headerText="#{msgs['label.uc001.dia.vencimento']}"
-										style="text-align: center;">
+										styleClass="sa-table-col-center">
 										<p:cellEditor>
 											<f:facet name="output">
 												<h:outputText value="#{plano.diaVencimento}" />
@@ -458,7 +440,7 @@
 									</p:column>
 
 									<p:column headerText="#{msgs['label.uc001.valor.plano']}"
-										style="text-align: center;">
+										styleClass="sa-table-col-center">
 										<p:cellEditor>
 											<f:facet name="output">
 												<h:outputText value="#{plano.valor}">
@@ -475,12 +457,12 @@
 									</p:column>
 
 									<p:column headerText="#{msgs['alt.acao.editar']}"
-										style="width:35px; text-align: center;">
+										styleClass="sa-table-col-edit">
 										<p:rowEditor />
 									</p:column>
 
 									<p:column headerText="#{msgs['alt.acao.excluir']}"
-										style="text-align: center;">
+										styleClass="sa-table-col-actions">
 										<p:commandButton icon="pi pi-trash"
 											title="#{msgs['alt.acao.excluir']}"
 											action="#{cadastroClienteController.removePlano(plano)}"
@@ -490,7 +472,7 @@
 									</p:column>
 
 								</p:dataTable>
-							</p:panelGrid>
+							</p:outputPanel>
 
 							<br />
 
@@ -523,106 +505,69 @@
 
 						</p:tab>
 
-						<!-- requer PrimeFlex -->
 						<p:tab title="#{msgs['label.uc001.integracao.senior']}">
-							<div class="p-grid p-fluid">
+							<p:panel header="#{msgs['label.uc001.integracao.senior']}" styleClass="ui-fluid">
+								<div class="form-grid sa-cadastro-grid ui-fluid ui-g">
 
-								<!-- URL ocupa linha inteira -->
-								<div class="p-col-12">
-									<div class="p-field">
-										<label for="urlSenior">#{msgs['label.uc001.url.senior']}</label>
-										<p:inputText id="urlSenior"
-											value="#{cadastroClienteController.entidade.integracaoSenior.url}"
-											style="width:100%" />
-									</div>
+								<div class="ui-g-12">
+									<p:outputLabel value="#{msgs['label.uc001.url.senior']}" for="urlSenior" />
+									<p:inputText id="urlSenior"
+										value="#{cadastroClienteController.entidade.integracaoSenior.url}" />
 								</div>
 
-								<!-- Usuário e Senha lado a lado -->
-								<div class="p-col-12 p-md-6">
-									<div class="p-field">
-										<label for="usuarioSenior">#{msgs['label.uc001.usuario.senior']}</label>
-										<p:inputText id="usuarioSenior"
-											value="#{cadastroClienteController.entidade.integracaoSenior.usuario}"
-											style="width:100%" />
-									</div>
+								<div class="ui-g-12 ui-md-6">
+									<p:outputLabel value="#{msgs['label.uc001.usuario.senior']}" for="usuarioSenior" />
+									<p:inputText id="usuarioSenior"
+										value="#{cadastroClienteController.entidade.integracaoSenior.usuario}" />
 								</div>
-								<div class="p-col-12 p-md-6">
-									<div class="p-field">
-										<label for="senhaSenior">#{msgs['label.uc001.senha.senior']}</label>
-										<p:password id="senhaSenior"
-											value="#{cadastroClienteController.senhaIntegracaoInput}"
-											style="width:100%" />
-									</div>
-								</div>
-								<!-- CodFil e TipCol lado a lado -->
-								<div class="p-col-12 p-md-6">
-									<div class="p-field">
-										<label for="numEmp">Empresa</label>
-										<p:inputText id="numEmp"
-											value="#{cadastroClienteController.entidade.integracaoSenior.numEmp}"
-											style="width:100%" />
-									</div>
-								</div>
-								<!-- CodFil e TipCol lado a lado -->
-								<div class="p-col-12 p-md-6">
-									<div class="p-field">
-										<label for="codFilSenior">Código da Filial (codFil)</label>
-										<p:inputText id="codFilSenior"
-											value="#{cadastroClienteController.entidade.integracaoSenior.codFil}"
-											style="width:100%" />
-									</div>
-								</div>
-								<div class="p-col-12 p-md-6">
-									<div class="p-field">
-										<label for="tipColSenior">Tipo de Colaborador (tipCol)</label>
-										<p:inputText id="tipColSenior"
-											value="#{cadastroClienteController.entidade.integracaoSenior.tipCol}"
-											style="width:100%" />
-									</div>
-								</div>
-								<!-- Hora de início e quantidade de execuções lado a lado -->
-								<div class="p-col-12 p-md-6">
-									<div class="p-field">
-										<label for="horaInicioSenior">Hora de início</label>
-										<p:inputText id="horaInicioSenior"
-											value="#{cadastroClienteController.entidade.integracaoSenior.horaInicio}"
-											style="width:100%">
-											<f:validateLongRange minimum="0" maximum="23" />
-										</p:inputText>
-										<small>Informe a hora em formato 0-23</small>
-									</div>
+								<div class="ui-g-12 ui-md-6">
+									<p:outputLabel value="#{msgs['label.uc001.senha.senior']}" for="senhaSenior" />
+									<p:password id="senhaSenior"
+										value="#{cadastroClienteController.senhaIntegracaoInput}" />
 								</div>
 
-								<div class="p-col-12 p-md-6">
-									<div class="p-field">
-										<label for="qtdExecucoesSenior">Quantidade de
-											execuções por dia</label>
-										<p:inputText id="qtdExecucoesSenior"
-											value="#{cadastroClienteController.entidade.integracaoSenior.quantidadeExecucoes}"
-											style="width:100%" />
-									</div>
+								<div class="ui-g-12 ui-md-6">
+									<p:outputLabel value="Empresa" for="numEmp" />
+									<p:inputText id="numEmp"
+										value="#{cadastroClienteController.entidade.integracaoSenior.numEmp}" />
 								</div>
-								<br/>
-								<!-- Permissões e Regras na mesma linha -->
-								<div class="p-col-12 p-md-3">
-									<div class="p-field"
-										style="display: flex; align-items: center; gap: 1rem;">
-										<label for="permissaoSenior" style="margin: 0;">Habilita
-											permissões</label>
-										<p:inputSwitch id="permissaoSenior"
-											value="#{cadastroClienteController.entidade.integracaoSenior.habilitaPermissao}" />
-									</div>
+								<div class="ui-g-12 ui-md-6">
+									<p:outputLabel value="Código da Filial (codFil)" for="codFilSenior" />
+									<p:inputText id="codFilSenior"
+										value="#{cadastroClienteController.entidade.integracaoSenior.codFil}" />
 								</div>
-								<div class="p-col-12 p-md-3">
-									<div class="p-field"
-										style="display: flex; align-items: center; gap: 1rem;">
-										<label for="regraSenior" style="margin: 0; width: 118px">Habilita
-											regras</label>
-										<p:inputSwitch id="regraSenior"
-											value="#{cadastroClienteController.entidade.integracaoSenior.habilitaRegrasDeHorario}" />
-									</div>
+								<div class="ui-g-12 ui-md-6">
+									<p:outputLabel value="Tipo de Colaborador (tipCol)" for="tipColSenior" />
+									<p:inputText id="tipColSenior"
+										value="#{cadastroClienteController.entidade.integracaoSenior.tipCol}" />
 								</div>
-							</div>
+								<div class="ui-g-12 ui-md-6">
+									<p:outputLabel value="Hora de início" for="horaInicioSenior" />
+									<p:inputText id="horaInicioSenior"
+										value="#{cadastroClienteController.entidade.integracaoSenior.horaInicio}">
+										<f:validateLongRange minimum="0" maximum="23" />
+									</p:inputText>
+									<h:outputText value="Informe a hora em formato 0-23" styleClass="sa-hint-text" />
+								</div>
+								<div class="ui-g-12 ui-md-6">
+									<p:outputLabel value="Quantidade de execuções por dia" for="qtdExecucoesSenior" />
+									<p:inputText id="qtdExecucoesSenior"
+										value="#{cadastroClienteController.entidade.integracaoSenior.quantidadeExecucoes}" />
+								</div>
+
+								<div class="ui-g-12 ui-md-6 sa-field-row">
+									<p:outputLabel value="Habilita permissões" for="permissaoSenior" />
+									<p:inputSwitch id="permissaoSenior"
+										value="#{cadastroClienteController.entidade.integracaoSenior.habilitaPermissao}" />
+								</div>
+								<div class="ui-g-12 ui-md-6 sa-field-row">
+									<p:outputLabel value="Habilita regras" for="regraSenior" />
+									<p:inputSwitch id="regraSenior"
+										value="#{cadastroClienteController.entidade.integracaoSenior.habilitaRegrasDeHorario}" />
+								</div>
+
+								</div>
+							</p:panel>
 						</p:tab>
 
 						<p:tab title="#{msgs['label.uc001.integracao.ad']}">
@@ -680,49 +625,43 @@
 
 						<p:tab title="#{msgs['label.uc001.integracao.totvs']}">
 
-							<p:panelGrid columns="6" style="width: 100%;">
+							<div class="form-grid sa-cadastro-grid ui-fluid ui-g">
 
-								<p:column>
+								<div class="ui-g-12 ui-md-6">
 									<p:outputLabel value="#{msgs['label.uc001.url.base']}"
 										for="url" indicateRequired="false" />
-									<br />
 									<p:inputText id="url"
 										value="#{cadastroClienteController.entidade.integracaoTotvs.url}"
 										required="false" />
-								</p:column>
+								</div>
 
-								<p:column>
+								<div class="ui-g-12 ui-md-3">
 									<p:outputLabel value="#{msgs['label.uc001.usuario.totvs']}"
 										for="usuarioTotvs" indicateRequired="false" />
-									<br />
 									<p:inputText id="usuarioTotvs"
 										value="#{cadastroClienteController.entidade.integracaoTotvs.usuario}"
 										required="false" />
-								</p:column>
+								</div>
 
-								<p:column>
+								<div class="ui-g-12 ui-md-3">
 									<p:outputLabel value="#{msgs['label.uc001.senha.totvs']}"
 										for="senhaTovs" indicateRequired="false" />
-									<br />
 									<p:password id="senhaTovs"
 										value="#{cadastroClienteController.entidade.integracaoTotvs.senha}"
 										required="false" />
-								</p:column>
+								</div>
 
-								<p:column>
+								<div class="ui-g-12 ui-md-3">
 									<p:outputLabel value="#{msgs['label.uc001.empresa.totvs']}"
 										for="Empresa" indicateRequired="false" />
-									<br />
 									<p:inputText id="Empresa"
 										value="#{cadastroClienteController.entidade.integracaoTotvs.empresa}"
 										required="false" />
-								</p:column>
+								</div>
 
-							</p:panelGrid>
+							</div>
 						</p:tab>
-					</p:tabView>
-				</h:column>
-			</h:panelGrid>
+					</p:accordionPanel>
 
 		</ui:define>
 

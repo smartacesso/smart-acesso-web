@@ -150,7 +150,7 @@ public class MenuController extends BaseController {
 				
 				this.criaMenuAdministracao();
 				
-				this.criaMenuCameras();
+				this.criaMenuDispositivos();
 			
 				this.criaMenuAjuda();
 				
@@ -246,12 +246,6 @@ public class MenuController extends BaseController {
 				.url(BaseConstant.URL_APLICACAO + "/paginas/sistema/relatorios/ocupacao.xhtml").build();
 		relatorios.getElements().add(ocupacao);
 
-		DefaultMenuItem equipamentos = DefaultMenuItem.builder()
-				.value(resource.recuperaChave("menu.relatorio.equipamentos", getFacesContext()))
-				.styleClass("ui-simple-menu")
-				.url(BaseConstant.URL_APLICACAO + "/paginas/sistema/relatorios/equipamentosConectados.xhtml").build();
-		relatorios.getElements().add(equipamentos);
-
 		DefaultMenuItem liberacoesManuais = DefaultMenuItem.builder()
 				.value(resource.recuperaChave("menu.relatorio.liberacoes.manuais", getFacesContext()))
 				.styleClass("ui-simple-menu")
@@ -286,24 +280,6 @@ public class MenuController extends BaseController {
 				.label(resource.recuperaChave("menu.cadastro", getFacesContext()))
 				.icon("pi pi-fw pi-users").build();
 
-		if (PerfilAcesso.ADMINISTRADOR.equals(usuarioLogado.getPerfil())
-				|| PerfilAcesso.GERENTE.equals(usuarioLogado.getPerfil())) {
-			DefaultMenuItem usuarios = DefaultMenuItem.builder()
-					.value(resource.recuperaChave("menu.cadastro.usuario", getFacesContext()))
-					.url(BaseConstant.URL_APLICACAO + "/paginas/sistema/usuarios/pesquisaUsuarios.xhtml")
-					.styleClass("ui-simple-menu").build();
-			cadastros.getElements().add(usuarios);
-		}
-
-		if (!PerfilAcesso.PORTEIRO.equals(usuarioLogado.getPerfil())
-				&& !PerfilAcesso.CUIDADOR.equals(usuarioLogado.getPerfil())) {
-			DefaultMenuItem empresas = DefaultMenuItem.builder()
-					.value(resource.recuperaChave("menu.cadastro.empresa", getFacesContext()))
-					.url(BaseConstant.URL_APLICACAO + "/paginas/sistema/empresas/pesquisaEmpresa.xhtml")
-					.styleClass("ui-simple-menu").build();
-			cadastros.getElements().add(empresas);
-		}
-
 		if (!PerfilAcesso.PORTEIRO.equals(usuarioLogado.getPerfil())) {
 			DefaultMenuItem pedestres = DefaultMenuItem.builder()
 					.value(resource.recuperaChave("menu.cadastro.pedestre", getFacesContext()))
@@ -317,15 +293,6 @@ public class MenuController extends BaseController {
 				.url(BaseConstant.URL_APLICACAO + "/paginas/sistema/pedestres/pesquisaPedestre.xhtml?tipo=vi")
 				.styleClass("ui-simple-menu").build();
 		cadastros.getElements().add(visitantes);
-
-		if (!PerfilAcesso.CUIDADOR.equals(usuarioLogado.getPerfil())
-				&& !PerfilAcesso.PORTEIRO.equals(usuarioLogado.getPerfil())) {
-			DefaultMenuItem responsaveis = DefaultMenuItem.builder()
-					.value(resource.recuperaChave("menu.cadastro.responsavel", getFacesContext()))
-					.url(BaseConstant.URL_APLICACAO + "/paginas/sistema/responsaveis/pesquisaResponsavel.xhtml")
-					.styleClass("ui-simple-menu").build();
-			cadastros.getElements().add(responsaveis);
-		}
 
 		if (isModuloCorrespondenciaHabilitad()) {
 			// para admins ou gerentes
@@ -351,27 +318,53 @@ public class MenuController extends BaseController {
 					.styleClass("ui-simple-menu").build();
 			cadastros.getElements().add(alteracaoEmMassa);
 		}
+		
+
+		if (PerfilAcesso.ADMINISTRADOR.equals(usuarioLogado.getPerfil())
+				|| PerfilAcesso.GERENTE.equals(usuarioLogado.getPerfil())) {
+			DefaultMenuItem usuarios = DefaultMenuItem.builder()
+					.value(resource.recuperaChave("menu.cadastro.usuario", getFacesContext()))
+					.url(BaseConstant.URL_APLICACAO + "/paginas/sistema/usuarios/pesquisaUsuarios.xhtml")
+					.styleClass("ui-simple-menu").build();
+			cadastros.getElements().add(usuarios);
+		}
+
+		if (!PerfilAcesso.PORTEIRO.equals(usuarioLogado.getPerfil())
+				&& !PerfilAcesso.CUIDADOR.equals(usuarioLogado.getPerfil())) {
+			DefaultMenuItem empresas = DefaultMenuItem.builder()
+					.value(resource.recuperaChave("menu.cadastro.empresa", getFacesContext()))
+					.url(BaseConstant.URL_APLICACAO + "/paginas/sistema/empresas/pesquisaEmpresa.xhtml")
+					.styleClass("ui-simple-menu").build();
+			cadastros.getElements().add(empresas);
+		}
 
 		menu.getElements().add(cadastros);
 	}
 	
-	private void criaMenuCameras() {
+	private void criaMenuDispositivos() {
 		// nao cria menu cadastro para responsavel
 		if (PerfilAcesso.RESPONSAVEL.equals(usuarioLogado.getPerfil()))
 			return;
 
-		DefaultSubMenu cameras = DefaultSubMenu.builder()
-				.label(resource.recuperaChave("menu.cameras", getFacesContext()))
+		DefaultSubMenu dispositivos = DefaultSubMenu.builder()
+				.label("Dispositivos")
 				.icon("pi pi-fw pi-video").build();
+		
+		
+		DefaultMenuItem equipamentos = DefaultMenuItem.builder()
+				.value(resource.recuperaChave("menu.relatorio.equipamentos", getFacesContext()))
+				.styleClass("ui-simple-menu")
+				.url(BaseConstant.URL_APLICACAO + "/paginas/sistema/relatorios/equipamentosConectados.xhtml").build();
+		dispositivos.getElements().add(equipamentos);
 
 		DefaultMenuItem hikivision = DefaultMenuItem.builder()
 				.value(resource.recuperaChave("menu.cameras.hikivision", getFacesContext()))
 				.url(BaseConstant.URL_APLICACAO + "/paginas/sistema/cameras/cameras.xhtml")
 				.styleClass("ui-simple-menu").build();
 
-		cameras.getElements().add(hikivision);
+		dispositivos.getElements().add(hikivision);
 		
-		menu.getElements().add(cameras);
+		menu.getElements().add(dispositivos);
 	}
 
 	private void montaMenuUsuario() {
@@ -380,13 +373,6 @@ public class MenuController extends BaseController {
 
 		DefaultSubMenu usuario = DefaultSubMenu.builder().label(usuarioLogado.getNome())
 				.icon("pi pi-fw pi-user").build();
-
-//		DefaultMenuItem meusDados = DefaultMenuItem.builder()
-//      .value(resources.recuperaChave("menu.usuario.meus.dados", getFacesContext()))
-//      .url("/paginas/cadastro/pesquisaUsuarios.xhtml")
-//      .styleClass("ui-simple-menu")
-//      .build();
-//		menuUsuario.getElements().add(meusDados);
 
 		DefaultMenuItem sair = DefaultMenuItem.builder()
 				.value(resource.recuperaChave("menu.usuario.sair", getFacesContext()))

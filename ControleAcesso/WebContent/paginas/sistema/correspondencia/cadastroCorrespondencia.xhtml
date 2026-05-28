@@ -15,22 +15,22 @@
 											? 'Editar Correspondência' 
 											: 'Nova Correspondência'}
 		</ui:define>
-
-		<ui:define name="breadcrumb">
-			<a target="_top" href="/#{menuController.appName}/paginas/principal.xhtml"> 
-				<h:outputText value="#{msgs['title.principal']}" />
-			</a> > 
-			<a target="_top" href="/#{menuController.appName}/paginas/sistema/correspondencia/pesquisaCorrespondencia.xhtml">
-				<h:outputText value="Consulta de Correspondências" />
-			</a> > 
+		<ui:define name="pageTitle">
 			<h:outputText value="#{cadastroCorrespondenciaController.entidade.id != null 
-										? 'Editar Registro' 
-										: 'Novo Registro'}" />
+								? 'Editar Correspondência' 
+								: 'Registro de Correspondência'}" />
+		</ui:define>
+		<ui:define name="pageSubtitle">
+			<h:outputText value="#{sessionScope.usuario.cliente.nome}" rendered="#{sessionScope.usuario != null}" />
 		</ui:define>
 
-		<ui:define name="tools">
+
+<ui:define name="tools">
 			<p:toolbar styleClass="sa-toolbar-wrap">
 				<p:toolbarGroup styleClass="sa-toolbar-actions">
+					<ui:include src="/WEB-INF/template/sa-voltar-lista.xhtml">
+						<ui:param name="ctrl" value="#{cadastroCorrespondenciaController}" />
+					</ui:include>
 					<p:commandButton id="save"
 						action="#{cadastroCorrespondenciaController.salvar}"
 						value="#{msgs['alt.acao.save']}"
@@ -45,18 +45,13 @@
 
 		<ui:define name="conteudo">
 
-			<h:panelGrid width="100%" columns="1" headerClass="h-grid-header">
-				<f:facet name="header">
-					<h:outputText value="#{cadastroCorrespondenciaController.entidade.id != null 
-								? 'Editar Correspondência' 
-								: 'Registro de Correspondência'}" />
-				</f:facet>
+			
 
-				<p:accordionPanel id="cadastroCorrespondenciaTab">
+				<p:accordionPanel id="cadastroCorrespondenciaTab" styleClass="sa-accordion">
 					
 					<p:tab title="Dados do Volume">
 						<p:panel id="painelDados" styleClass="ui-fluid">
-							<div class="form-grid ui-fluid ui-g">
+							<div class="form-grid sa-cadastro-grid ui-fluid ui-g">
 
 								<div class="ui-g-12 ui-md-6">
 									<p:outputLabel value="Destinatário:" for="destinatario" indicateRequired="true" />
@@ -101,25 +96,26 @@
 
 					<p:tab title="Registro Fotográfico (Opcional)">
 						<p:panel styleClass="ui-fluid">
-							<div class="ui-g">
-								
-								<div class="ui-g-12 ui-md-6" style="text-align: center;">
+							<div class="form-grid sa-cadastro-grid ui-fluid ui-g sa-photo-capture">
+
+								<div class="ui-g-12 ui-md-6 sa-photo-capture__camera">
 									<p:photoCam widgetVar="pc" listener="#{cadastroCorrespondenciaController.onCapture}" update="painelFoto" />
 									<p:commandButton type="button" value="Capturar Foto" icon="pi pi-camera" 
-													 onclick="PF('pc').capture()" styleClass="ui-button-outlined mt-2" />
+													 onclick="PF('pc').capture()"
+													 styleClass="sa-btn-label ui-button-outlined" />
 								</div>
 
-								<div class="ui-g-12 ui-md-6" style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+								<div class="ui-g-12 ui-md-6 sa-photo-capture__status">
 									<p:outputPanel id="painelFoto">
 										<h:outputText value="Nenhuma foto capturada." 
 													  rendered="#{empty cadastroCorrespondenciaController.entidade.fotoVolume}" 
-													  style="color: #888;" />
+													  styleClass="sa-photo-capture__empty" />
 										
 										<h:panelGroup rendered="#{not empty cadastroCorrespondenciaController.entidade.fotoVolume}">
-											<i class="pi pi-check-circle" style="font-size: 2rem; color: #22c55e; margin-bottom: 10px;"></i>
-											<h:outputText value=" Foto do volume registrada com sucesso!" style="font-weight: bold; color: #22c55e;" />
+											<i class="pi pi-check-circle sa-photo-capture__success-icon"></i>
+											<h:outputText value=" Foto do volume registrada com sucesso!" styleClass="sa-photo-capture__success" />
 											<br/>
-											<h:outputText value="(A imagem será salva no banco ao concluir o cadastro)" style="font-size: 12px; color: #666;" />
+											<h:outputText value="(A imagem será salva no banco ao concluir o cadastro)" styleClass="sa-photo-capture__hint" />
 										</h:panelGroup>
 									</p:outputPanel>
 								</div>
@@ -130,7 +126,7 @@
 
 					<p:tab title="Baixa / Retirada" rendered="#{cadastroCorrespondenciaController.entidade.id != null}">
 						<p:panel styleClass="ui-fluid">
-							<div class="form-grid ui-fluid ui-g">
+							<div class="form-grid sa-cadastro-grid ui-fluid ui-g">
 								
 								<div class="ui-g-12 ui-md-4">
 									<p:outputLabel value="O morador já retirou o volume?" for="statusRetirada" />
@@ -140,7 +136,7 @@
 									</p:selectOneMenu>
 								</div>
 								
-								<h:panelGroup layout="block" class="ui-g-12 ui-md-4" rendered="#{cadastroCorrespondenciaController.entidade.dataRetirada != null}">
+								<h:panelGroup layout="block" styleClass="ui-g-12 ui-md-4" rendered="#{cadastroCorrespondenciaController.entidade.dataRetirada != null}">
 									<p:outputLabel value="Data e Hora da Retirada:" />
 									<p:inputText value="#{cadastroCorrespondenciaController.entidade.dataRetirada}" disabled="true">
 										<f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
@@ -152,11 +148,6 @@
 					</p:tab>
 
 				</p:accordionPanel>
-			</h:panelGrid>
-			
-			<style>
-				.mt-2 { margin-top: 10px !important; }
-			</style>
 
 		</ui:define>
 	</ui:composition>

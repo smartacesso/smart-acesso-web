@@ -12,16 +12,16 @@
 		<ui:define name="titulo">
             Relatório de Permanência dos Pedestres
         </ui:define>
-
-		<ui:define name="breadcrumb">
-			<a target="_top"
-				href="/#{menuController.appName}/paginas/principal.xhtml"> <h:outputText
-					value="#{msgs['title.principal']}" />
-			</a> > <h:outputText value="#{msgs['title.uc009.relatorio.pedestres']}" />
+		<ui:define name="pageTitle">
+			<h:outputText value="Relatório de Permanência dos Pedestres" />
+		</ui:define>
+		<ui:define name="pageSubtitle">
+			<h:outputText value="#{sessionScope.usuario.cliente.nome}" rendered="#{sessionScope.usuario != null}" />
 		</ui:define>
 
-		<ui:define name="tools">
-			<p:toolbar styleClass="sa-toolbar-wrap sa-toolbar-report flex flex-column md:flex-row justify-content-between align-items-center gap-3">
+
+<ui:define name="tools">
+			<p:toolbar styleClass="sa-toolbar-wrap sa-toolbar-report">
 				<p:toolbarGroup styleClass="sa-toolbar-actions">
 					<p:commandButton id="acaoBuscar"
 						action="#{relatorioPermanenciaController.buscar()}"
@@ -51,62 +51,152 @@
 				</p:toolbarGroup>
 				<p:toolbarGroup styleClass="sa-toolbar-filters">
 					<h:outputText styleClass="sa-toolbar-total"
-						value="Total: #{relatorioPermanenciaController.result.size()}"
-						rendered="#{relatorioPermanenciaController.result.size() > 0}" />
+						value="Total: #{relatorioPermanenciaController.listaResultados.size()}"
+						rendered="#{relatorioPermanenciaController.listaResultados.size() > 0}" />
 					<p:inputText id="filtro-nome" placeholder="Filtrar por nome"
 						onblur="sincronizarFiltro(this, 'filtro-nome-sync');"
 						styleClass="filtro-nome filtro-nome-sync sa-search-input"
 						value="#{relatorioPermanenciaController.parans['pedestre.nome']}" />
 					<p:calendar id="filtro-data-inicio"
-						value="#{relatorioPedestresController.parans['data_maior_data']}"
+						value="#{relatorioPermanenciaController.parans['data_maior_data']}"
 						pattern="dd/MM/yyyy HH:mm" mask="99/99/9999 99:99"
 						navigator="true"
 						valueChangeListener="#{relatorioPermanenciaController.alteraDataInicio}">
+						<p:ajax event="dateSelect" update="filtro-avancado-dataInicio" />
+						<p:ajax event="change" update="filtro-avancado-dataInicio" />
 						<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
 					</p:calendar>
 					<h:outputText value="até" />
 					<p:calendar id="filtro-data-fim"
-						value="#{relatorioPedestresController.parans['data_menor_data']}"
+						value="#{relatorioPermanenciaController.parans['data_menor_data']}"
 						pattern="dd/MM/yyyy HH:mm" mask="99/99/9999 99:99"
 						navigator="true"
 						valueChangeListener="#{relatorioPermanenciaController.alteraDataFim}">
+						<p:ajax event="dateSelect" update="filtro-avancado-dataFim" />
+						<p:ajax event="change" update="filtro-avancado-dataFim" />
 						<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
 					</p:calendar>
+					<p:commandButton id="acaoFiltroAvancado"
+						value="Filtros"
+						icon="pi pi-sliders-h" iconPos="left"
+						title="#{msgs['alt.acao.alternar.filtros.avancados']}"
+						process="@this" update="containerDeFiltro"
+						action="#{relatorioPermanenciaController.toggleFiltroFlag('relatorio-permanencia-filtroFlag')}"
+						styleClass="sa-btn-label ui-button-flat col-desktop-only" />
 				</p:toolbarGroup>
 			</p:toolbar>
 		</ui:define>
 
 		<ui:define name="conteudo">
-			<h:panelGrid width="100%" columns="1" headerClass="h-grid-header">
-				<f:facet name="header">
-					<h:outputText value="Relatório de Permanência dos Pedestres" />
-				</f:facet>
+
+			<script>
+				jQuery(document).ready(function() {
+					try {
+						$('.filtro-nome').on('keydown', function(e) {
+							if (e.key === "Enter") {
+								sincronizarFiltro(this, 'filtro-nome-sync');
+							}
+						});
+					} catch (e) {
+					}
+				})
+			</script>
+
+			<h:panelGroup layout="block"
+				styleClass="sa-pesquisa-split #{relatorioPermanenciaController.getFiltroFlag('relatorio-permanencia-filtroFlag') ? 'sa-pesquisa-split--filtros-abertos' : ''}">
+
+				<div class="sa-pesquisa-split__main">
+
+			<h:panelGroup id="containerDeFiltro" layout="block" styleClass="sa-pesquisa-split__filtros">
+				<h:panelGroup id="filtrosAvancadosWrapper" layout="block"
+					rendered="#{relatorioPermanenciaController.getFiltroFlag('relatorio-permanencia-filtroFlag')}"
+					styleClass="filtros-avancados">
+					<h3 class="sa-filtros-avancados__title">#{msgs['title.uc008.filtros.avancados']}</h3>
+					<div class="form-grid sa-cadastro-grid ui-fluid ui-g">
+						<div class="ui-g-12 ui-md-6">
+							<p:outputLabel for="filtro-avancado-nome" value="Nome" />
+							<p:inputText id="filtro-avancado-nome"
+								value="#{relatorioPermanenciaController.parans['pedestre.nome']}"
+								onblur="sincronizarFiltro(this, 'filtro-nome-sync');"
+								styleClass="filtro-nome-sync" />
+						</div>
+						<div class="ui-g-12 ui-md-6">
+							<p:outputLabel for="filtro-avancado-dataInicio" value="Data inicial" />
+							<p:calendar id="filtro-avancado-dataInicio"
+								value="#{relatorioPermanenciaController.parans['data_maior_data']}"
+								pattern="dd/MM/yyyy HH:mm" mask="99/99/9999 99:99" navigator="true"
+								valueChangeListener="#{relatorioPermanenciaController.alteraDataInicio}">
+								<p:ajax event="dateSelect" update="filtro-data-inicio" />
+								<p:ajax event="change" update="filtro-data-inicio" />
+								<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+							</p:calendar>
+						</div>
+						<div class="ui-g-12 ui-md-6">
+							<p:outputLabel for="filtro-avancado-dataFim" value="Data final" />
+							<p:calendar id="filtro-avancado-dataFim"
+								value="#{relatorioPermanenciaController.parans['data_menor_data']}"
+								pattern="dd/MM/yyyy HH:mm" mask="99/99/9999 99:99" navigator="true"
+								valueChangeListener="#{relatorioPermanenciaController.alteraDataFim}">
+								<p:ajax event="dateSelect" update="filtro-data-fim" />
+								<p:ajax event="change" update="filtro-data-fim" />
+								<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+							</p:calendar>
+						</div>
+					</div>
+				</h:panelGroup>
+			</h:panelGroup>
+
+			<p:outputPanel id="tabelaPainel" layout="block" styleClass="sa-pesquisa-split__tabela">
 
 				<p:dataTable id="pedestresTable" styleClass="tabela-responsive sa-table"
 					value="#{relatorioPermanenciaController.listaResultados}"
 					var="pedestre" paginator="true" rows="10"
 					paginatorPosition="bottom">
 
-					<p:column headerText="Nome" style="text-align: center">
+					<p:column headerText="Nome" styleClass="sa-table-col-center">
 						<h:outputText value="#{pedestre.nome}" />
 					</p:column>
 
-					<p:column headerText="Tempo Total no Local"
-						style="text-align: center">
+					<p:column styleClass="sa-table-col-center sa-table-col-abbr">
+						<f:facet name="header">
+							<ui:include src="/tema/templates/sa-th-abbr.xhtml">
+								<ui:param name="full" value="Tempo Total no Local" />
+								<ui:param name="short" value="Tempo total" />
+							</ui:include>
+						</f:facet>
 						<h:outputText value="#{pedestre.tempoTotalFormatado}" />
 					</p:column>
 
-					<p:column headerText="Cota Mensal" style="text-align: center">
+					<p:column styleClass="sa-table-col-center sa-table-col-abbr">
+						<f:facet name="header">
+							<ui:include src="/tema/templates/sa-th-abbr.xhtml">
+								<ui:param name="full" value="Cota Mensal" />
+								<ui:param name="short" value="Cota mens." />
+							</ui:include>
+						</f:facet>
 						<h:outputText value="#{pedestre.cotaMensalFormatada}" />
 					</p:column>
 
-					<p:column headerText="Saldo Restante" style="text-align: center">
+					<p:column styleClass="sa-table-col-center sa-table-col-abbr">
+						<f:facet name="header">
+							<ui:include src="/tema/templates/sa-th-abbr.xhtml">
+								<ui:param name="full" value="Saldo Restante" />
+								<ui:param name="short" value="Saldo" />
+							</ui:include>
+						</f:facet>
 						<h:outputText value="#{pedestre.saldoRestanteFormatado}" />
 					</p:column>
 
 				</p:dataTable>
 
-			</h:panelGrid>
+			</p:outputPanel>
+
+				</div>
+
+				<div class="sa-pesquisa-split__footer"></div>
+
+			</h:panelGroup>
+
 		</ui:define>
 	</ui:composition>
 </body>

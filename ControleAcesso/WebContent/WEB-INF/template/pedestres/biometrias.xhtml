@@ -33,6 +33,7 @@
 					value="#{cadastroPedestreController.entidade.biometrias}"
 					var="biometria" paginator="true" rows="5"
 					paginatorAlwaysVisible="false" paginatorPosition="bottom"
+					styleClass="sa-table tabela-responsive"
 					emptyMessage="#{msgs['msg.nenhum.item.encontrado.adicionar']}"
 					rendered="#{not empty cadastroPedestreController.entidade.biometrias}">
 
@@ -63,29 +64,5 @@
 			</div>
 		</div>
 	</p:panel>
-
-	<style>
-.sa-biometria-preview {
-	display: inline-block;
-	height: 200px;
-	width: 150px;
-	border: 2px solid var(--sa-accent, #39afc7);
-	border-radius: var(--sa-radius, 6px);
-	object-fit: cover;
-}
-
-.sa-biometria-preview--empty {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	height: 200px;
-	width: 150px;
-	border: 2px solid var(--sa-accent, #39afc7);
-	border-radius: var(--sa-radius, 6px);
-	color: var(--sa-text-muted, #666);
-	text-align: center;
-	padding: 0.5rem;
-}
-	</style>
 
 </ui:composition>

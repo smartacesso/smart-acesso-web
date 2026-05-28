@@ -17,7 +17,7 @@ import br.com.startjob.acesso.modelo.entity.ResponsibleEntity;
 @Named("consultaResponsavelController")
 @ViewScoped
 @UseCase(classEntidade=ResponsibleEntity.class, funcionalidade="Consulta responsavel", logicalRemove=true, 
-		urlNovoRegistro="/paginas/sistema/responsaveis/cadastroResponsavel.xhtml", lazyLoad=true, quantPorPagina=10)
+		urlNovoRegistro="/paginas/sistema/responsaveis/cadastroResponsavel.xhtml", lazyLoad=true, quantPorPagina=6)
 public class ConsultaResponsavelController  extends BaseController {
 
 	private static final long serialVersionUID = 1L;

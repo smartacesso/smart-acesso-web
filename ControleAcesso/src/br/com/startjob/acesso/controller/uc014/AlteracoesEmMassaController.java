@@ -34,7 +34,7 @@ import br.com.startjob.acesso.modelo.enumeration.TipoRegra;
 @Named("alteracoesEmMassaController")
 @ViewScoped
 @UseCase(classEntidade=PedestreEntity.class, funcionalidade="Alterações em massa", logicalRemove = true, 
-		lazyLoad = true, quantPorPagina = 10)
+		lazyLoad = true, quantPorPagina = 6)
 public class AlteracoesEmMassaController extends BaseController{
 
 	private String acao;

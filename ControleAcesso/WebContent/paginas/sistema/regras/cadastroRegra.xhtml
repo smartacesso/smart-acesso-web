@@ -14,21 +14,22 @@
 											? msgs['title.uc006.editar.regra'] 
 											: msgs['title.uc006.cadastrar.regra']}
 		</ui:define>
-		
-		<ui:define name="breadcrumb">
-			<a target="_top" href="/#{menuController.appName}/paginas/principal.xhtml"> <h:outputText
-					value="#{msgs['title.principal']}" />
-			</a> > 
-			<a target="_top" href="/#{menuController.appName}/paginas/sistema/regras/pesquisaRegra.xhtml"> <h:outputText
-					value="#{msgs['title.uc006.consulta.regras']}" />
-			</a> > <h:outputText value="#{cadastroRegraAcessoController.entidade.id != null 
+		<ui:define name="pageTitle">
+			<h:outputText value="#{cadastroRegraAcessoController.entidade.id != null 
 										? msgs['title.uc006.editar.regra'] 
-										: msgs['title.uc006.cadastrar.regra']}" />
+										: msgs['title.uc006.cadastrar.regra']}"/>
 		</ui:define>
-		
-		<ui:define name="tools">
+		<ui:define name="pageSubtitle">
+			<h:outputText value="#{sessionScope.usuario.cliente.nome}" rendered="#{sessionScope.usuario != null}" />
+		</ui:define>
+
+
+<ui:define name="tools">
 			<p:toolbar styleClass="sa-toolbar-wrap">
 				<p:toolbarGroup styleClass="sa-toolbar-actions">
+					<ui:include src="/WEB-INF/template/sa-voltar-lista.xhtml">
+						<ui:param name="ctrl" value="#{cadastroRegraAcessoController}" />
+					</ui:include>
 					<p:commandButton id="save"
 						action="#{cadastroRegraAcessoController.salvar}"
 						value="#{msgs['alt.acao.save']}"
@@ -42,15 +43,7 @@
 		</ui:define>
 		
 		<ui:define name="conteudo">
-			<h:panelGrid width="100%" columns="1" headerClass="h-grid-header">
-				<f:facet name="header">
-					<h:outputText value="#{cadastroRegraAcessoController.entidade.id != null 
-										? msgs['title.uc006.editar.regra'] 
-										: msgs['title.uc006.cadastrar.regra']}"/>
-				</f:facet>
-				
-				<h:column>
-					<p:tabView id="cadastroRegraTab" widgetVar="cadastroRegraWid">
+			<p:accordionPanel id="cadastroRegraTab" widgetVar="cadastroRegraWid" styleClass="sa-accordion" multiple="true" activeIndex="0">
 					
 						<p:tab title="#{msgs['label.uc006.dados.regra']}">
 							<p:panel header="#{msgs['label.uc006.dados.regra']}" styleClass="ui-fluid">
@@ -163,18 +156,20 @@
 							rendered="#{cadastroRegraAcessoController.tipoRegra == 'ACESSO_HORARIO' 
 									or cadastroRegraAcessoController.tipoRegra == 'ACESSO_PERIODO'}">
 							
-							<div class="flex flex-wrap justify-content-between align-items-center gap-2" style="margin-bottom: 0.75rem;">
-								<h:outputText value="#{msgs['title.uc006.lista.horarios']}" styleClass="sa-page-title" />
+							<h:panelGroup layout="block" styleClass="sa-section-header sa-form-actions">
+								<h:outputText value="#{msgs['title.uc006.lista.horarios']}" styleClass="sa-section-header__title" />
 								<p:commandButton id="addHorario" value="#{msgs['alt.acao.adicionar']}"
 									action="#{cadastroRegraAcessoController.adicionarHorario}"
 									update="horarios" icon="pi pi-plus" iconPos="left"
 									styleClass="sa-btn-label ui-button-success" />
-							</div>
+							</h:panelGroup>
 							
-							<p:panelGrid columns="7" id="horarios" styleClass="w-full">
+							<h:panelGroup layout="block" id="horarios" styleClass="sa-card-table w-full">
 							
-								<h:outputText value="#{msgs['msg.nenhum.item.encontrado.adicionar']}" escape="false"
-											  rendered="#{empty cadastroRegraAcessoController.listaHorarios}" />
+								<ui:include src="/tema/templates/vazio.xhtml">
+									<ui:param name="exibe" value="#{empty cadastroRegraAcessoController.listaHorarios}" />
+									<ui:param name="exibeAdicionar" value="true" />
+								</ui:include>
 								
 								<p:dataTable id="tableHorarios" value="#{cadastroRegraAcessoController.listaHorarios}" 
 									var="horario" paginator="true" rows="5" paginatorPosition="bottom" 
@@ -182,77 +177,77 @@
 									styleClass="tabela-responsive sa-table"
 									rendered="#{not empty cadastroRegraAcessoController.listaHorarios}">
 								
-									<p:column headerText="#{msgs['label.uc006.nome.regra']}" style="text-align: center;">
+									<p:column headerText="#{msgs['label.uc006.nome.regra']}" styleClass="sa-table-col-center">
 										<p:inputText value="#{horario.nome}"/>
 									</p:column>
 									
-									<p:column headerText="#{msgs['label.uc005.status']}" style="text-align: center;">
-										<p:selectOneMenu value="#{horario.status}"  style="width:100%" autoWidth="false" >
+									<p:column headerText="#{msgs['label.uc005.status']}" styleClass="sa-table-col-center">
+										<p:selectOneMenu value="#{horario.status}" styleClass="w-full" autoWidth="false">
 											<f:selectItems value="#{cadastroRegraAcessoController.listaStatus}"/>
 										</p:selectOneMenu>
 									</p:column>
 									
-									<p:column headerText="#{msgs['label.uc006.dias.semana']}" style="text-align: center; width: 400px;">
-										<h:panelGrid columns="3" width="auto">
-											<h:column>
-												<p:selectBooleanCheckbox value="#{horario.sunday}" style="text-align: left;">
+									<p:column headerText="#{msgs['label.uc006.dias.semana']}" styleClass="sa-table-col-center sa-weekdays-col">
+										<div class="sa-weekdays-grid">
+											<span class="sa-weekday">
+												<p:selectBooleanCheckbox value="#{horario.sunday}">
 													<p:ajax process="@this" update="@this"/>
 												</p:selectBooleanCheckbox>
-												<h:outputText value="Domingo" style="margin-left: 3px"/>
-											</h:column>
-											<h:column>
+												<h:outputText value="Domingo"/>
+											</span>
+											<span class="sa-weekday">
 												<p:selectBooleanCheckbox value="#{horario.monday}">
 													<p:ajax process="@this" update="@this"/>
 												</p:selectBooleanCheckbox>
-												<h:outputText value="Segunda-feira" style="margin-left: 3px"/>
-											</h:column>
-											<h:column>
-												<p:selectBooleanCheckbox value="#{horario.tuesday}" >
+												<h:outputText value="Segunda-feira"/>
+											</span>
+											<span class="sa-weekday">
+												<p:selectBooleanCheckbox value="#{horario.tuesday}">
 													<p:ajax process="@this" update="@this"/>
 												</p:selectBooleanCheckbox>
-												<h:outputText value="Terça-feira" style="margin-left: 3px"/>
-											</h:column>
-											<h:column>
+												<h:outputText value="Terça-feira"/>
+											</span>
+											<span class="sa-weekday">
 												<p:selectBooleanCheckbox value="#{horario.wednesday}">
 													<p:ajax process="@this" update="@this"/>
 												</p:selectBooleanCheckbox>
-												<h:outputText value="Quarta-feira" style="margin-left: 3px"/>
-											</h:column>
-											<h:column>
-												<p:selectBooleanCheckbox value="#{horario.thursday}" >
+												<h:outputText value="Quarta-feira"/>
+											</span>
+											<span class="sa-weekday">
+												<p:selectBooleanCheckbox value="#{horario.thursday}">
 													<p:ajax process="@this" update="@this"/>
 												</p:selectBooleanCheckbox>
-												<h:outputText value="Quinta-feira" style="margin-left: 3px"/>
-											</h:column>
-											<h:column>
-												<p:selectBooleanCheckbox value="#{horario.friday}" >
+												<h:outputText value="Quinta-feira"/>
+											</span>
+											<span class="sa-weekday">
+												<p:selectBooleanCheckbox value="#{horario.friday}">
 													<p:ajax process="@this" update="@this"/>
 												</p:selectBooleanCheckbox>
-												<h:outputText value="Sexta-feira" style="margin-left: 3px"/>
-											</h:column>
-											<h:column>
-												<p:selectBooleanCheckbox value="#{horario.saturday}" >
+												<h:outputText value="Sexta-feira"/>
+											</span>
+											<span class="sa-weekday">
+												<p:selectBooleanCheckbox value="#{horario.saturday}">
 													<p:ajax process="@this" update="@this"/>
 												</p:selectBooleanCheckbox>
-												<h:outputText value="Sábado" style="margin-left: 3px"/>
-											</h:column>
-										</h:panelGrid>
+												<h:outputText value="Sábado"/>
+											</span>
+										</div>
 									</p:column>
 									
-									<p:column headerText="#{msgs['label.uc006.horario.inicio']}" style="text-align: center;">
+									<p:column headerText="#{msgs['label.uc006.horario.inicio']}" styleClass="sa-table-col-center">
 										<p:calendar value="#{horario.horarioInicio}" timeOnly="true" pattern="HH:mm" mask="99:99" navigator="true"/>
 									</p:column>
 									
-									<p:column headerText="#{msgs['label.uc006.horario.fim']}" style="text-align: center;">
+									<p:column headerText="#{msgs['label.uc006.horario.fim']}" styleClass="sa-table-col-center">
 										<p:calendar value="#{horario.horarioFim}" timeOnly="true" pattern="HH:mm" mask="99:99" navigator="true"/>
 									</p:column>
 
-									<p:column headerText="#{msgs['label.uc008.qtde.creditos']}" style="text-align: center;">
+									<p:column headerText="#{msgs['label.uc008.qtde.creditos']}" styleClass="sa-table-col-center">
 											<p:inputNumber id="qtdeCreditos" value="#{horario.qtdeDeCreditos}" 
 													minValue="0" decimalPlaces="0" size="6"/>
 									</p:column>
 							        
-							        <p:column headerText="#{msgs['alt.acao.excluir']}" style="text-align: center; width: 100px;">
+							        <p:column headerText="#{msgs['alt.acao.excluir']}" styleClass="sa-table-col-actions">
 										<p:commandButton icon="pi pi-trash"
 											title="#{msgs['alt.acao.excluir']}"
 											action="#{cadastroRegraAcessoController.removeHorario(horario)}"
@@ -262,12 +257,10 @@
 									</p:column>
 									
 								</p:dataTable>
-							</p:panelGrid>
+							</h:panelGroup>
 						</p:tab>
 					
-					</p:tabView>
-				</h:column>
-			</h:panelGrid>
+					</p:accordionPanel>
 		</ui:define>
 	</ui:composition>
 </body>

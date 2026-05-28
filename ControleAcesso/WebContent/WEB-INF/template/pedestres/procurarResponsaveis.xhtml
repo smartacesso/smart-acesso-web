@@ -6,9 +6,11 @@
 
 	<p:dialog id="dialogEscolherResponsavel"
 		header="#{msgs['title.uc016.consulta.responsavel']}"
-		widgetVar="escolherResponsavel" modal="true" resizable="false" width="700">
+		widgetVar="escolherResponsavel" modal="true" resizable="false" width="700"
+		styleClass="sa-dialog">
 
-		<div class="form-grid sa-cadastro-grid ui-fluid ui-g" id="gridEscolherResponsavel">
+		<h:panelGroup layout="block" styleClass="form-grid sa-cadastro-grid ui-fluid ui-g"
+			id="gridEscolherResponsavel">
 			<div class="ui-g-12 ui-md-8">
 				<p:outputLabel value="#{msgs['label.uc016.nome']}" for="inputNomeResponsavel" />
 				<p:inputText id="inputNomeResponsavel"
@@ -22,9 +24,9 @@
 					action="#{buscarResponsavelController.findResponsiblebyName()}"
 					update="gridEscolherResponsavel responsaveis"
 					process="gridEscolherResponsavel"
-					styleClass="ui-button-success" />
+					styleClass="sa-btn-label ui-button-success w-full" />
 			</div>
-		</div>
+		</h:panelGroup>
 
 		<p:spacer height="10" />
 
@@ -38,6 +40,7 @@
 				rendered="#{not empty buscarResponsavelController.result}"
 				paginator="true" rows="#{buscarResponsavelController.quantPorPagina}"
 				paginatorPosition="bottom" paginatorAlwaysVisible="false"
+				styleClass="sa-table tabela-responsive"
 				selectionMode="single" rowKey="#{responsavel.id}"
 				selection="#{cadastroPedestreController.responsavel}">
 
@@ -45,11 +48,11 @@
 					update="form:cadastroPedestreTab:painelTabelaResponsaveis responsavelAuto"
 					oncomplete="PF('escolherResponsavel').hide(); return false;" />
 
-				<p:column headerText="#{msgs['label.uc016.nome']}" style="text-align: center">
+				<p:column headerText="#{msgs['label.uc016.nome']}" styleClass="sa-table-col-center">
 					<h:outputText value="#{responsavel.nome}" />
 				</p:column>
 
-				<p:column headerText="#{msgs['label.uc016.dataNascimento']}" style="text-align: center">
+				<p:column headerText="#{msgs['label.uc016.dataNascimento']}" styleClass="sa-table-col-center">
 					<h:outputText value="#{responsavel.dataNascimento}">
 						<f:convertDateTime dateStyle="long" pattern="dd/MM/yyyy" />
 					</h:outputText>

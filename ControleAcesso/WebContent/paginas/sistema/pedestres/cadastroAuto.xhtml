@@ -16,15 +16,15 @@
 		<ui:define name="titulo">
 			#{msgs['title.sistema']} | Autoatendimento
 		</ui:define>
-
-		<ui:define name="breadcrumb">
-			<a target="_top" href="/#{menuController.appName}/paginas/principal.xhtml"> 
-                <h:outputText value="#{msgs['title.principal']}" />
-			</a> > 
-			<h:outputText value="Autoatendimento" />
+		<ui:define name="pageTitle">
+			<h:outputText value="Bem-vindo(a) ao Autoatendimento" />
+		</ui:define>
+		<ui:define name="pageSubtitle">
+			<h:outputText value="#{sessionScope.usuario.cliente.nome}" rendered="#{sessionScope.usuario != null}" />
 		</ui:define>
 
-		<ui:define name="tools">
+
+<ui:define name="tools">
 			<p:toolbar id="painelTools" styleClass="sa-toolbar-wrap">
 				<p:toolbarGroup styleClass="sa-toolbar-actions">
 					<h:outputText value="Terminal de Autoatendimento SmartAcesso"
@@ -101,13 +101,7 @@
 				.toast-success { background: #2ecc71 !important; }
 			</style>
 
-			<h:panelGrid width="100%" columns="1" headerClass="h-grid-header">
-				<f:facet name="header">
-					<h:outputText value="Bem-vindo(a) ao Autoatendimento" />
-				</f:facet>
-				
-				<h:column>
-					<div id="totem-toast"></div>
+			<div id="totem-toast"></div>
 				
 					<div class="totem-wrapper">
 						<div class="totem-container">
@@ -215,9 +209,7 @@
 							</div>
 							
 						</div>
-					</div>
-				</h:column>
-			</h:panelGrid>
+					</div>
 
 			<script type="text/javascript">
 			//<![CDATA[

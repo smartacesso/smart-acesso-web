@@ -12,6 +12,13 @@
 		<ui:define name="titulo">
 			#{msgs['title.sistema']} | Consulta de Correspondências
 		</ui:define>
+		<ui:define name="pageTitle">
+			<h:outputText value="Lista de Correspondências" />
+		</ui:define>
+		<ui:define name="pageSubtitle">
+			<h:outputText value="#{sessionScope.usuario.cliente.nome}" rendered="#{sessionScope.usuario != null}" />
+		</ui:define>
+
 
 		<ui:define name="tools">
 			<p:toolbar styleClass="sa-toolbar-wrap">
@@ -66,69 +73,76 @@
 
 			<h:panelGroup id="containerDeFiltro" layout="block">
 				<h:panelGroup id="filtrosAvancadosWrapper" layout="block"
-					rendered="#{consultaCorrespondenciaController.getFiltroFlag('filtroCorrespondencia-flag')}">
+					rendered="#{consultaCorrespondenciaController.getFiltroFlag('filtroCorrespondencia-flag')}"
+					styleClass="filtros-avancados">
 
-					<p:panelGrid columns="4" layout="grid"
-						styleClass="ui-fluid filtros-avancados">
+					<h3 class="sa-filtros-avancados__title">Filtros avançados</h3>
 
-						<p:outputLabel for="f-rastreio" value="Cód. Rastreio:" />
-						<p:inputText id="f-rastreio"
-							value="#{consultaCorrespondenciaController.parans['codigoRastreio']}" />
+					<div class="form-grid sa-cadastro-grid ui-fluid ui-g">
 
-						<p:outputLabel for="f-tipo" value="Tipo:" />
-						<p:selectOneMenu id="f-tipo"
-							value="#{consultaCorrespondenciaController.parans['tipo']}">
-							<f:selectItem itemLabel="Todos" itemValue="" />
-							<f:selectItem itemLabel="Carta" itemValue="CARTA" />
-							<f:selectItem itemLabel="Pacote" itemValue="PACOTE" />
-							<f:selectItem itemLabel="Documento" itemValue="DOCUMENTO" />
-						</p:selectOneMenu>
+						<div class="ui-g-12 ui-md-3">
+							<p:outputLabel for="f-rastreio" value="Cód. Rastreio:" />
+							<p:inputText id="f-rastreio"
+								value="#{consultaCorrespondenciaController.parans['codigoRastreio']}" />
+						</div>
 
-						<p:outputLabel for="f-retirado" value="Já Retirado?" />
+						<div class="ui-g-12 ui-md-3">
+							<p:outputLabel for="f-tipo" value="Tipo:" />
+							<p:selectOneMenu id="f-tipo"
+								value="#{consultaCorrespondenciaController.parans['tipo']}">
+								<f:selectItem itemLabel="Todos" itemValue="" />
+								<f:selectItem itemLabel="Carta" itemValue="CARTA" />
+								<f:selectItem itemLabel="Pacote" itemValue="PACOTE" />
+								<f:selectItem itemLabel="Documento" itemValue="DOCUMENTO" />
+							</p:selectOneMenu>
+						</div>
 
-						<p:selectOneMenu id="f-retirado"
-							value="#{consultaCorrespondenciaController.filtroRetirado}">
-							<f:selectItem itemLabel="Todos" itemValue="" />
-							<f:selectItem itemLabel="Sim" itemValue="S" />
-							<f:selectItem itemLabel="Não" itemValue="N" />
-						</p:selectOneMenu>
+						<div class="ui-g-12 ui-md-3">
+							<p:outputLabel for="f-retirado" value="Já Retirado?" />
+							<p:selectOneMenu id="f-retirado"
+								value="#{consultaCorrespondenciaController.filtroRetirado}">
+								<f:selectItem itemLabel="Todos" itemValue="" />
+								<f:selectItem itemLabel="Sim" itemValue="S" />
+								<f:selectItem itemLabel="Não" itemValue="N" />
+							</p:selectOneMenu>
+						</div>
 
-						<p:outputLabel for="f-data" value="Data Recebimento:" />
-						<p:calendar id="f-data"
-							value="#{consultaCorrespondenciaController.dataPesquisa}"
-							pattern="dd/MM/yyyy" navigator="true" />
+						<div class="ui-g-12 ui-md-3">
+							<p:outputLabel for="f-data" value="Data Recebimento:" />
+							<p:calendar id="f-data"
+								value="#{consultaCorrespondenciaController.dataPesquisa}"
+								pattern="dd/MM/yyyy" navigator="true" />
+						</div>
 
-					</p:panelGrid>
-					<p:separator />
+					</div>
 				</h:panelGroup>
 			</h:panelGroup>
 
-			<h2 class="sa-page-title">Lista de Correspondências</h2>
-
-			<p:outputPanel styleClass="p-col-12">
+<p:outputPanel styleClass="p-col-12">
 				<h:panelGroup layout="block"
 					rendered="#{not empty consultaCorrespondenciaController.result}">
 					<p:dataTable id="correspondenciaTable"
 						value="#{consultaCorrespondenciaController.result}" var="item"
-						lazy="true" paginator="true" rows="10" paginatorPosition="bottom"
-						scrollable="true" scrollHeight="flex"
-						styleClass="tabela-moderna tabela-responsive">
+						lazy="true" paginator="true"
+						rows="#{consultaCorrespondenciaController.quantPorPagina}"
+						paginatorPosition="bottom"
+						styleClass="tabela-responsive sa-table">
 
 						<p:column headerText="Foto"
 							style="width: 80px; text-align: center;">
-							<div class="info-group" style="justify-content: center;">
+							<div class="sa-cell-group sa-cell-group--center">
 								<div style="text-align: center;">
 
 									<h:panelGroup rendered="#{not empty item.fotoVolume}">
 										<img
 											src="data:image/png;base64,#{consultaCorrespondenciaController.getFotoBase64(item.fotoVolume)}"
-											style="width: 40px; height: 40px; object-fit: cover; border-radius: 6px; border: 1px solid #ccc; cursor: pointer;"
+											class="sa-cell-thumb"
 											alt="Pacote" title="Clique para ampliar"
 											onclick="ampliarFoto(this.src);" />
 									</h:panelGroup>
 
 									<h:panelGroup rendered="#{empty item.fotoVolume}">
-										<div class="avatar-icon">
+										<div class="sa-cell-avatar">
 											<i class="pi pi-box"></i>
 										</div>
 									</h:panelGroup>
@@ -146,28 +160,28 @@
 								<br />
 
 								<h:outputText value="#{item.destinatario.nome}"
-									styleClass="primary-text" />
+									styleClass="sa-cell-primary" />
 
 								<br />
 
 								<h:outputText value="ID: #{item.destinatario.id}"
-									styleClass="secondary-text" />
+									styleClass="sa-cell-secondary" />
 
 							</h:panelGroup>
 						</p:column>
 
 						<p:column headerText="Volume">
 							<div style="text-align: center;">
-								<span class="primary-text">#{item.tipo != null ?
-									item.tipo : 'Pacote'}</span> <span class="secondary-text">Rastreio:
+								<span class="sa-cell-primary">#{item.tipo != null ?
+									item.tipo : 'Pacote'}</span> <span class="sa-cell-secondary">Rastreio:
 									#{item.codigoRastreio != null ? item.codigoRastreio : 'S/N'}</span> <span
-									class="secondary-text">#{item.observacao}</span>
+									class="sa-cell-secondary">#{item.observacao}</span>
 							</div>
 						</p:column>
 
 						<p:column headerText="Recebimento" style="text-align: center;">
 							<h:panelGroup layout="block" style="text-align: center;">
-								<span class="primary-text"> <h:outputText
+								<span class="sa-cell-primary"> <h:outputText
 										value="#{item.dataRecebimento}">
 										<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
 									</h:outputText>
@@ -175,7 +189,7 @@
 
 								<br />
 
-								<span class="secondary-text"> Portaria Principal </span>
+								<span class="sa-cell-secondary"> Portaria Principal </span>
 							</h:panelGroup>
 						</p:column>
 
@@ -183,11 +197,11 @@
 							style="width: 150px; text-align: center;">
 							<h:outputText
 								value="#{item.confirmaRetirada == 'S' ? 'Retirada' : 'Não Retirada'}"
-								styleClass="#{item.confirmaRetirada == 'S' ? 'status-retirado' : 'status-pendente'}" />
+								styleClass="#{item.confirmaRetirada == 'S' ? 'sa-status-retirado' : 'sa-status-pendente'}" />
 						</p:column>
 
 						<p:column headerText="" style="text-align: right; width: 180px;">
-							<div class="botoes-acao">
+							<div class="sa-table-actions sa-table-actions--end">
 
 								<p:commandButton icon="pi pi-check" title="Confirmar Retirada"
 									rendered="#{item.confirmaRetirada == 'N'}" process="@this"
@@ -218,200 +232,75 @@
 			</p:outputPanel>
 
 			<p:confirmDialog widgetVar="confirmarExclusao" header="Confirmar"
-				message="Deseja excluir este registro?">
+				message="Deseja excluir este registro?" styleClass="sa-dialog">
 				<p:button value="Não"
-					onclick="PF('confirmarExclusao').hide(); return false;" />
+					onclick="PF('confirmarExclusao').hide(); return false;"
+					styleClass="sa-btn-label ui-button-flat" />
 				<p:commandButton value="Sim"
 					oncomplete="PF('confirmarExclusao').hide();"
 					action="#{consultaCorrespondenciaController.excluirCorrespondencia()}"
-					process="@this" update="@form" />
+					process="@this" update="@form"
+					styleClass="sa-btn-label ui-button-success" />
 			</p:confirmDialog>
 
 			<p:dialog id="dialogAmpliarFoto" widgetVar="dialogFotoWidget"
 				modal="true" resizable="false" draggable="false" showHeader="true"
 				header="Foto do Volume" closeOnEscape="true" dismissableMask="true"
-				styleClass="dialog-foto-moderno">
+				styleClass="sa-dialog sa-dialog-photo">
 
-				<div style="text-align: center; padding: 10px;">
-					<img id="imagemAmpliada" src=""
-						style="max-width: 90vw; max-height: 80vh; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);" />
+				<div class="sa-dialog-photo__body">
+					<img id="imagemAmpliada" src="" class="sa-dialog-photo__img" />
 				</div>
 			</p:dialog>
 
 			<p:dialog id="dialogConfirmarRetirada"
 				widgetVar="widgetConfirmarRetirada" header="Confirmar Retirada"
 				modal="true" resizable="false" width="400" closeOnEscape="true"
-				showEffect="fade" hideEffect="fade">
+				showEffect="fade" hideEffect="fade" styleClass="sa-dialog">
 
-				<h:panelGroup id="painelRetirada" layout="block"
-					styleClass="ui-fluid">
-					<h:outputText
-						value="Pacote de: #{consultaCorrespondenciaController.correspondenciaSelecionada.destinatario.nome}"
-						style="font-weight: bold; color: #555; display: block; margin-bottom: 15px;" />
+				<h:panelGroup id="painelRetirada" layout="block">
+					<p class="sa-hint-text" style="font-weight: 600; margin-bottom: 1rem;">
+						Pacote de: #{consultaCorrespondenciaController.correspondenciaSelecionada.destinatario.nome}
+					</p>
 
 					<p:messages id="msgRetirada" showDetail="false" closable="true" />
 
-					<p:panelGrid columns="1" layout="grid"
-						styleClass="ui-panelgrid-blank ui-fluid" style="padding: 0;">
+					<div class="sa-form-grid" style="grid-template-columns: 1fr;">
+						<div class="sa-field">
+							<span class="sa-label">Nome de quem está retirando</span>
+							<p:inputText id="nomeRetirada"
+								value="#{consultaCorrespondenciaController.nomeRetirada}"
+								required="true" requiredMessage="Informe o nome."
+								placeholder="Ex: João da Silva" />
+						</div>
+						<div class="sa-field">
+							<span class="sa-label">Documento (RG/CPF)</span>
+							<p:inputText id="docRetirada"
+								value="#{consultaCorrespondenciaController.documentoRetirada}"
+								required="true" requiredMessage="Informe o documento."
+								placeholder="Apenas números ou formato padrão" />
+						</div>
+					</div>
 
-						<p:outputLabel for="nomeRetirada"
-							value="Nome de quem está retirando:" />
-						<p:inputText id="nomeRetirada"
-							value="#{consultaCorrespondenciaController.nomeRetirada}"
-							required="true" requiredMessage="Informe o nome."
-							placeholder="Ex: João da Silva" />
-
-						<p:outputLabel for="docRetirada" value="Documento (RG/CPF):" />
-						<p:inputText id="docRetirada"
-							value="#{consultaCorrespondenciaController.documentoRetirada}"
-							required="true" requiredMessage="Informe o documento."
-							placeholder="Apenas números ou formato padrão" />
-
-					</p:panelGrid>
-
-					<p:separator style="margin-top: 15px; margin-bottom: 15px;" />
-
-					<div
-						style="text-align: right; display: flex; justify-content: flex-end; gap: 10px;">
+					<div class="sa-dialog-actions">
 						<p:commandButton value="Cancelar" icon="pi pi-times"
 							onclick="PF('widgetConfirmarRetirada').hide(); return false;"
-							styleClass="ui-button-secondary ui-button-flat" />
-
+							styleClass="sa-btn-label ui-button-flat" />
 						<p:commandButton value="Confirmar" icon="pi pi-check"
 							action="#{consultaCorrespondenciaController.confirmarRetiradaComDados}"
 							process="painelRetirada" update="@form"
-							oncomplete="if (args &amp;&amp; !args.validationFailed) PF('widgetConfirmarRetirada').hide();"
-							styleClass="ui-button-success" />
+							styleClass="sa-btn-label ui-button-success"
+							oncomplete="if (args &amp;&amp; !args.validationFailed) PF('widgetConfirmarRetirada').hide();" />
 					</div>
 				</h:panelGroup>
 			</p:dialog>
 
 			<script type="text/javascript">
 				function ampliarFoto(srcBase64) {
-					// 1. Troca a fonte da imagem gigante pela fonte da miniatura clicada
 					document.getElementById('imagemAmpliada').src = srcBase64;
-
-					// 2. Manda o PrimeFaces abrir o modal
 					PF('dialogFotoWidget').show();
 				}
 			</script>
-
-			<style>
-.filtros-avancados {
-	margin-bottom: 15px;
-	background: #f9f9f9;
-	padding: 10px;
-	border-radius: 4px;
-}
-
-@media ( max-width : 768px) {
-	.col-desktop-only {
-		display: none !important;
-	}
-}
-
-.align-mobile {
-	padding-top: 15px;
-}
-
-/* Estilos para deixar a tabela com visual de cards horizontais (Imagem de referência) */
-.tabela-moderna .ui-datatable-data>tr>td {
-	border-width: 0 0 1px 0 !important;
-	/* Remove bordas verticais, deixa só a linha de baixo */
-	border-color: #e0e0e0 !important;
-	padding: 15px 10px !important;
-	vertical-align: middle;
-	background-color: transparent !important;
-}
-
-.tabela-moderna .ui-datatable-header, .tabela-moderna th {
-	background: transparent !important;
-	border-width: 0 0 2px 0 !important;
-	border-color: #d0d0d0 !important;
-	color: #555 !important;
-	font-weight: 600 !important;
-}
-
-/* Agrupamento de textos */
-.info-group {
-	display: flex;
-	align-items: center;
-	gap: 15px;
-}
-
-.avatar-icon {
-	background-color: #f4f4f4;
-	border-radius: 50%;
-	width: 40px;
-	height: 40px;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	color: #666;
-	font-size: 1.2rem;
-}
-
-.primary-text {
-	display: block;
-	font-weight: 600;
-	color: #333;
-	font-size: 14px;
-	margin-bottom: 3px;
-}
-
-.secondary-text {
-	display: block;
-	font-size: 12px;
-	color: #888;
-	line-height: 1.3;
-}
-
-/* Cores de Status */
-.status-pendente {
-	color: #d97706; /* Laranja da imagem de referência */
-	font-weight: bold;
-}
-
-.status-retirado {
-	color: #22c55e; /* Verde padrão */
-	font-weight: bold;
-}
-
-/* Espaçamento dos botões de ação */
-.botoes-acao {
-	display: flex;
-	justify-content: flex-end;
-	gap: 8px;
-}
-
-/* Ajustes nos botões outlined para ficarem mais parecidos com a referência */
-.botoes-acao .ui-button.ui-button-outlined {
-	border-color: #ddd !important;
-	color: #555 !important;
-}
-
-.botoes-acao .ui-button.ui-button-outlined:hover {
-	background-color: #f8f9fa !important;
-	border-color: #ccc !important;
-}
-
-/* Manter responsividade */
-@media ( max-width : 768px ) {
-	.col-desktop-only {
-		display: none !important;
-	}
-	.botoes-acao {
-		flex-wrap: wrap;
-		justify-content: flex-start;
-		margin-top: 10px;
-	}
-	.tabela-moderna .ui-datatable-data>tr>td {
-		display: block;
-		width: 100%;
-		text-align: left !important;
-	}
-}
-</style>
 		</ui:define>
 	</ui:composition>
 </body>

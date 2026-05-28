@@ -4,37 +4,29 @@
 	xmlns:ui="http://java.sun.com/jsf/facelets"
 	xmlns:f="http://java.sun.com/jsf/core"
 	xmlns:h="http://java.sun.com/jsf/html"
-	xmlns:p="http://primefaces.org/ui"
-	xmlns:jsf="http://xmlns.jcp.org/jsf">
+	xmlns:p="http://primefaces.org/ui">
 
 <body>
 
 	<ui:composition template="tema/templates/template_externo.xhtml">
-		
+
 		<ui:define name="titulo">
 			#{msgs['title.sistema']} | #{msgs['title.cadastro.face.concluido']}
 		</ui:define>
-		
+
 		<ui:define name="conteudo">
-			
-			<div class="text-center">
-			
-				<h1>Cadastro de Face Concluído</h1>
-				
-				<br/>
-				<br/>
-				<br/>
-				<h1>Obrigado!</h1>
-				<br/>
-				<br/>
-				<br/>
-				<br/>
-				
+
+			<div class="sa-success-page">
+				<div class="sa-success-page__icon">
+					<i class="pi pi-check-circle" aria-hidden="true"></i>
+				</div>
+				<h2>Cadastro de Face Concluído</h2>
+				<p>Obrigado!</p>
 			</div>
+
 		</ui:define>
-	
+
 	</ui:composition>
 
 </body>
-
 </html>

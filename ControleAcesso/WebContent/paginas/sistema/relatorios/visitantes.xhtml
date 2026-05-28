@@ -12,17 +12,16 @@
 		<ui:define name="titulo">
 			#{msgs['title.sistema']} | #{msgs['title.uc011.relatorio.visitantes']}
 		</ui:define>
-
-		<ui:define name="breadcrumb">
-			<a target="_top"
-				href="/#{menuController.appName}/paginas/principal.xhtml"> <h:outputText
-					value="#{msgs['title.principal']}" />
-			</a> > <h:outputText value="#{msgs['title.uc011.relatorio.visitantes']}" />
+		<ui:define name="pageTitle">
+			<h:outputText value="#{msgs['title.uc011.relatorio.visitantes']}" />
+		</ui:define>
+		<ui:define name="pageSubtitle">
+			<h:outputText value="#{sessionScope.usuario.cliente.nome}" rendered="#{sessionScope.usuario != null}" />
 		</ui:define>
 
-		<ui:define name="tools">
-			<p:toolbar
-				styleClass="sa-toolbar-wrap flex flex-column md:flex-row justify-content-between align-items-center gap-3">
+
+<ui:define name="tools">
+			<p:toolbar styleClass="sa-toolbar-wrap sa-toolbar-report">
 
 				<p:toolbarGroup styleClass="sa-toolbar-actions">
 					<p:inputText id="filtro-nome" placeholder="Filtrar por nome"
@@ -89,11 +88,13 @@
 						<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
 					</p:calendar>
 
-					<p:commandButton id="acaoFiltroAvancado" icon="pi pi-sliders-h"
+					<p:commandButton id="acaoFiltroAvancado"
+						value="Filtros"
+						icon="pi pi-sliders-h" iconPos="left"
 						title="#{msgs['alt.acao.alternar.filtros.avancados']}"
 						process="@this" update="containerDeFiltro"
 						action="#{relatorioVisitantesController.toggleFiltroFlag('relatorio-visitantes-filtroFlag')}"
-						styleClass="col-desktop-only" />
+						styleClass="sa-btn-label ui-button-flat col-desktop-only" />
 						
 				</p:toolbarGroup>
 			</p:toolbar>
@@ -113,14 +114,23 @@
 					}
 				})
 			</script>
-			<h:panelGroup id="containerDeFiltro" layout="block">
+
+			<h:panelGroup layout="block"
+				styleClass="sa-pesquisa-split #{relatorioVisitantesController.getFiltroFlag('relatorio-visitantes-filtroFlag') ? 'sa-pesquisa-split--filtros-abertos' : ''}">
+
+				<div class="sa-pesquisa-split__main">
+
+			<h:panelGroup id="containerDeFiltro" layout="block" styleClass="sa-pesquisa-split__filtros">
 
 				<h:panelGroup id="filtrosAvancadosWrapper" layout="block"
-					rendered="#{relatorioVisitantesController.getFiltroFlag('relatorio-visitantes-filtroFlag')}">
-					<p:panelGrid columns="2" layout="grid"
-						styleClass="ui-fluid filtros-avancados"
-						columnClasses="col-label,col-input">
+					rendered="#{relatorioVisitantesController.getFiltroFlag('relatorio-visitantes-filtroFlag')}"
+					styleClass="filtros-avancados">
 
+					<h3 class="sa-filtros-avancados__title">#{msgs['title.uc008.filtros.avancados']}</h3>
+
+					<div class="form-grid sa-cadastro-grid ui-fluid ui-g">
+
+						<div class="ui-g-12 ui-md-6">
 							<p:outputLabel value="#{msgs['label.uc011.data.inical']}"
 								for="filtro-avancado-dataInicio" />
 							<p:calendar id="filtro-avancado-dataInicio"
@@ -128,12 +138,13 @@
 								pattern="dd/MM/yyyy HH:mm" mask="99/99/9999 99:99"
 								navigator="true"
 								valueChangeListener="#{relatorioVisitantesController.alteraDataInicio}">
-
 								<p:ajax event="dateSelect" update="filtro-data-inicio" />
 								<p:ajax event="change" update="filtro-data-inicio" />
 								<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
 							</p:calendar>
-							
+						</div>
+
+						<div class="ui-g-12 ui-md-6">
 							<p:outputLabel value="#{msgs['label.uc011.data.final']}"
 								for="filtro-avancado-dataFim" />
 							<p:calendar id="filtro-avancado-dataFim"
@@ -141,19 +152,22 @@
 								pattern="dd/MM/yyyy HH:mm" mask="99/99/9999 99:99"
 								navigator="true"
 								valueChangeListener="#{relatorioVisitantesController.alteraDataFim}">
-
 								<p:ajax event="dateSelect" update="filtro-data-fim" />
 								<p:ajax event="change" update="filtro-data-fim" />
 								<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
 							</p:calendar>
-							
+						</div>
+
+						<div class="ui-g-12 ui-md-6">
 							<p:outputLabel value="#{msgs['label.uc011.nome']}"
 								for="filtro-avancado-nome" />
 							<p:inputText id="filtro-avancado-nome"
 								value="#{relatorioVisitantesController.parans['pedestre.nome']}"
-								size="50" onblur="sincronizarFiltro(this, 'filtro-nome-sync');"
+								onblur="sincronizarFiltro(this, 'filtro-nome-sync');"
 								styleClass="filtro-nome-sync" />
+						</div>
 
+						<div class="ui-g-12 ui-md-6">
 							<p:outputLabel value="#{msgs['label.uc011.equipamento']}"
 								for="filtro-avancado-equipamento" />
 							<p:selectOneMenu id="filtro-avancado-equipamento"
@@ -161,7 +175,9 @@
 								<f:selectItems
 									value="#{relatorioVisitantesController.listaEquipamentos}" />
 							</p:selectOneMenu>
+						</div>
 
+						<div class="ui-g-12 ui-md-6">
 							<p:outputLabel value="#{msgs['label.uc011.empresa']}"
 								for="filtro-avancado-empresa" />
 							<p:selectOneMenu id="filtro-avancado-empresa"
@@ -174,7 +190,9 @@
 									event="valueChange" />
 								<f:converter converterId="javax.faces.Long" />
 							</p:selectOneMenu>
+						</div>
 
+						<div class="ui-g-12 ui-md-6">
 							<p:outputLabel value="#{msgs['label.uc011.departamento']}"
 								for="filtro-avancado-departamento" />
 							<p:selectOneMenu id="filtro-avancado-departamento"
@@ -183,7 +201,9 @@
 									value="#{relatorioVisitantesController.listaDepartamentos}" />
 								<f:converter converterId="javax.faces.Long" />
 							</p:selectOneMenu>
-							
+						</div>
+
+						<div class="ui-g-12 ui-md-6">
 							<p:outputLabel value="#{msgs['label.uc011.cargo']}"
 								for="filtro-avancado-cargo" />
 							<p:selectOneMenu id="filtro-avancado-cargo"
@@ -192,7 +212,9 @@
 									value="#{relatorioVisitantesController.listaCargos}" />
 								<f:converter converterId="javax.faces.Long" />
 							</p:selectOneMenu>
+						</div>
 
+						<div class="ui-g-12 ui-md-6">
 							<p:outputLabel value="#{msgs['label.uc011.centro.custo']}"
 								for="filtro-avancado-centroCusto" />
 							<p:selectOneMenu id="filtro-avancado-centroCusto"
@@ -201,19 +223,15 @@
 									value="#{relatorioVisitantesController.listaCentrosDeCusto}" />
 								<f:converter converterId="javax.faces.Long" />
 							</p:selectOneMenu>
-					</p:panelGrid>
+						</div>
 
+					</div>
 				</h:panelGroup>
 			</h:panelGroup>
 
-			<h:panelGrid width="100%" columns="1" headerClass="h-grid-header">
-				<f:facet name="header">
-					<h:outputText value="#{msgs['title.uc011.relatorio.visitantes']}" />
-				</f:facet>
+			<p:outputPanel id="tabelaPainel" layout="block" styleClass="sa-pesquisa-split__tabela">
 
-				<h:column>
-
-					<ui:include src="/tema/templates/vazio.xhtml">
+			<ui:include src="/tema/templates/vazio.xhtml">
 						<ui:param name="exibe"
 							value="#{empty relatorioVisitantesController.result}" />
 						<ui:param name="exibeAdicionar" value="true" />
@@ -228,8 +246,7 @@
 						styleClass="tabela-responsive sa-table">
 
 						<p:column headerText="#{msgs['label.uc009.foto']}"
-						styleClass="col-desktop-only"
-							style="text-align: center; width: 60px">
+						styleClass="col-desktop-only sa-table-col-center" style="width: 60px">
 							<p:graphicImage
 								value="#{visitante.pedestre.foto != null 
 									? relatorioVisitantesController.getStreamedContent(visitante.pedestre.foto)
@@ -240,76 +257,108 @@
 								style="height: 50px;width: 50px; padding: 0px; margin: 0px; cursor: pointer; border-radius: 50%;" />
 						</p:column>
 
-						<p:column headerText="#{msgs['label.uc011.numero.cartao.acesso']}"
-						styleClass="col-desktop-only"
-							style="text-align: center">
+						<p:column styleClass="col-desktop-only sa-table-col-center sa-table-col-abbr">
+							<f:facet name="header">
+								<ui:include src="/tema/templates/sa-th-abbr.xhtml">
+									<ui:param name="full" value="#{msgs['label.uc011.numero.cartao.acesso']}" />
+									<ui:param name="short" value="Nº cartão" />
+								</ui:include>
+							</f:facet>
 							<h:outputText
 								value="#{visitante.pedestre.codigoCartaoAcesso != null ? visitante.pedestre.codigoCartaoAcesso : '--'}" />
 						</p:column>
 
 						<p:column headerText="#{msgs['label.uc011.nome']}"
-							style="text-align: center">
+							styleClass="sa-table-col-center">
 							<h:outputText value="#{visitante.pedestre.nome}" />
 						</p:column>
 
 						<p:column headerText="#{msgs['label.uc011.empresa']}"
-						styleClass="col-desktop-only"
-							style="text-align: center">
+						styleClass="col-desktop-only sa-table-col-center">
 							<h:outputText value="#{visitante.pedestre.empresa.nome}" />
 						</p:column>
 
-						<p:column headerText="#{msgs['label.uc011.data.nascimento']}"
-						styleClass="col-desktop-only"
-							style="text-align: center">
+						<p:column styleClass="col-desktop-only sa-table-col-center sa-table-col-abbr">
+							<f:facet name="header">
+								<ui:include src="/tema/templates/sa-th-abbr.xhtml">
+									<ui:param name="full" value="#{msgs['label.uc011.data.nascimento']}" />
+									<ui:param name="short" value="Dt. nasc." />
+								</ui:include>
+							</f:facet>
 							<h:outputText value="#{visitante.pedestre.dataNascimento}">
 								<f:convertDateTime pattern="dd/MM/yyyy" />
 							</h:outputText>
 						</p:column>
 
 						<p:column headerText="#{msgs['label.uc011.cpf']}"
-						styleClass="col-desktop-only"
-							style="text-align: center">
+						styleClass="col-desktop-only sa-table-col-center">
 							<h:outputText value="#{visitante.pedestre.cpf}">
 								<f:convertDateTime pattern="dd/MM/yyyy" />
 							</h:outputText>
 						</p:column>
 
-						<p:column headerText="#{msgs['label.uc011.observacao']}"
-						styleClass="col-desktop-only"
-							style="text-align: center">
+						<p:column styleClass="col-desktop-only sa-table-col-center sa-table-col-abbr">
+							<f:facet name="header">
+								<ui:include src="/tema/templates/sa-th-abbr.xhtml">
+									<ui:param name="full" value="#{msgs['label.uc011.observacao']}" />
+									<ui:param name="short" value="Obs." />
+								</ui:include>
+							</f:facet>
 							<h:outputText value="#{visitante.pedestre.observacoes}">
 								<f:convertDateTime pattern="dd/MM/yyyy" />
 							</h:outputText>
 						</p:column>
 
-						<p:column headerText="#{msgs['label.uc011.data.acesso']}"
-							style="text-align: center">
+						<p:column styleClass="sa-table-col-center sa-table-col-abbr">
+							<f:facet name="header">
+								<ui:include src="/tema/templates/sa-th-abbr.xhtml">
+									<ui:param name="full" value="#{msgs['label.uc011.data.acesso']}" />
+									<ui:param name="short" value="Dt. acesso" />
+								</ui:include>
+							</f:facet>
 							<h:outputText value="#{visitante.data}">
 								<f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
 							</h:outputText>
 						</p:column>
 
-						<p:column headerText="#{msgs['label.uc011.equipamento']}"
-						styleClass="col-desktop-only"
-							style="text-align: center">
+						<p:column styleClass="col-desktop-only sa-table-col-center sa-table-col-abbr">
+							<f:facet name="header">
+								<ui:include src="/tema/templates/sa-th-abbr.xhtml">
+									<ui:param name="full" value="#{msgs['label.uc011.equipamento']}" />
+									<ui:param name="short" value="Equip." />
+								</ui:include>
+							</f:facet>
 							<h:outputText value="#{visitante.equipamento}" />
 						</p:column>
 
-						<p:column headerText="#{msgs['label.uc011.tipo.acesso']}"
-						styleClass="col-desktop-only"
-							style="text-align: center">
+						<p:column styleClass="col-desktop-only sa-table-col-center sa-table-col-abbr">
+							<f:facet name="header">
+								<ui:include src="/tema/templates/sa-th-abbr.xhtml">
+									<ui:param name="full" value="#{msgs['label.uc011.tipo.acesso']}" />
+									<ui:param name="short" value="Tp. acesso" />
+								</ui:include>
+							</f:facet>
 							<h:outputText value="#{msgs[visitante.tipo]}" />
 						</p:column>
 
-						<p:column headerText="#{msgs['label.uc011.sentido']}"
-							style="text-align: center">
+						<p:column styleClass="sa-table-col-center sa-table-col-abbr">
+							<f:facet name="header">
+								<ui:include src="/tema/templates/sa-th-abbr.xhtml">
+									<ui:param name="full" value="#{msgs['label.uc011.sentido']}" />
+									<ui:param name="short" value="Sent." />
+								</ui:include>
+							</f:facet>
 							<h:outputFormat
 								value="#{visitante.tipo == 'ATIVO' ? visitante.sentido : '---'}" />
 						</p:column>
 
-						<p:column headerText="#{msgs['alt.acao.visualizar']}"
-						styleClass="col-desktop-only"
-							style="text-align: center" exportable="false">
+						<p:column styleClass="col-desktop-only sa-table-col-actions sa-table-col-abbr" exportable="false">
+							<f:facet name="header">
+								<ui:include src="/tema/templates/sa-th-abbr.xhtml">
+									<ui:param name="full" value="#{msgs['alt.acao.visualizar']}" />
+									<ui:param name="short" value="Ver" />
+								</ui:include>
+							</f:facet>
 							<p:commandButton id="acaoVisualizar" icon="pi pi-eye"
 								action="#{relatorioVisitantesController.redirecionaPaginaEditarPedetre(visitante.pedestre.id, 'reVisitantes')}"
 								title="#{msgs['alt.acao.visualizar']}"
@@ -318,8 +367,14 @@
 
 					</p:dataTable>
 
-				</h:column>
-			</h:panelGrid>
+			</p:outputPanel>
+
+				</div>
+
+				<div class="sa-pesquisa-split__footer"></div>
+
+			</h:panelGroup>
+
 		</ui:define>
 
 	</ui:composition>

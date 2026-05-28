@@ -20,7 +20,7 @@
 
 		<ui:define name="conteudo">
 
-			<div class="sa-login">
+			<div class="sa-login sa-login--auth">
 
 				<div class="sa-login__intro">
 					<h2>Bem vindo de volta!</h2>
@@ -62,15 +62,15 @@
 								label="#{msgs['login.senha']}" maxlength="30" required="true" />
 						</div>
 
-						<div class="sa-field sa-field--full">
+						<div class="sa-field sa-field--full sa-login__actions-row">
 							<div class="sa-login__actions">
 								<p:commandButton id="btLogin"
 									value="#{msgs['login.botao']}"
-									styleClass="ui-button-success"
+									styleClass="sa-btn-label ui-button-success sa-login__submit"
 									action="#{loginController.login()}">
 									<p:ajax execute="@all" render="@all" />
 								</p:commandButton>
-								<a class="sa-link-muted" href="javascript:void(PF('esqueciSenha').show());">
+								<a class="sa-link-muted sa-login__forgot" href="javascript:void(PF('esqueciSenha').show());">
 									#{msgs['login.esqueci.senha']}
 								</a>
 							</div>
@@ -95,7 +95,7 @@
 					</div>
 					<p:commandButton id="btSenha"
 						value="#{msgs['label.ok']}"
-						styleClass="ui-button-success"
+						styleClass="sa-btn-label ui-button-success w-full"
 						action="#{loginController.alterarSenha()}">
 						<p:ajax execute="@all" render="@all" />
 					</p:commandButton>

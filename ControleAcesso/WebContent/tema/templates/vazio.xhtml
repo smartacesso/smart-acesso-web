@@ -1,23 +1,19 @@
 
-<h:panelGrid xmlns:h="http://java.sun.com/jsf/html"
+<h:panelGroup xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:f="http://java.sun.com/jsf/core"
 	xmlns:ui="http://java.sun.com/jsf/facelets"
-	xmlns:c="http://java.sun.com/jsp/jstl/core" rendered="#{exibe}"
-	width="100%" columns="1" styleClass="sa-empty-state">
-	<h:column>
-		<img class="sa-empty-state__icon"
-			src="/#{menuController.appName}/#{menuController.path}/tema/img/ic_empty.png"
-			alt="" />
-	</h:column>
-	<h:column>
-		<h:outputText value="#{msgs['msg.nenhum.item.encontrado']}"
-			styleClass="sa-empty-state__text" escape="false"
-			rendered="#{empty msgEspecifica}" />
-		<h:outputText value="#{msgs['msg.nenhum.item.encontrado.adicionar']}"
-			styleClass="sa-empty-state__text" escape="false"
-			rendered="#{not empty exibeAdicionar}" />
-		<h:outputText value="#{msgEspecifica}"
-			styleClass="sa-empty-state__text" escape="false"
-			rendered="#{not empty msgEspecifica}" />
-	</h:column>
-</h:panelGrid>
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	layout="block" styleClass="sa-empty-state" rendered="#{exibe}">
+	<img class="sa-empty-state__icon"
+		src="/#{menuController.appName}/#{menuController.path}/tema/img/ic_empty.png"
+		alt="" />
+	<h:outputText value="#{msgs['msg.nenhum.item.encontrado']}"
+		styleClass="sa-empty-state__text" escape="false"
+		rendered="#{empty msgEspecifica}" />
+	<h:outputText value="#{msgs['msg.nenhum.item.encontrado.adicionar']}"
+		styleClass="sa-empty-state__text" escape="false"
+		rendered="#{not empty exibeAdicionar}" />
+	<h:outputText value="#{msgEspecifica}"
+		styleClass="sa-empty-state__text" escape="false"
+		rendered="#{not empty msgEspecifica}" />
+</h:panelGroup>

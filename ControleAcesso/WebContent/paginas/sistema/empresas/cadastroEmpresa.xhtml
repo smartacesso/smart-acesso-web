@@ -14,24 +14,23 @@
 											? msgs['title.uc005.editar.empresa'] 
 											: msgs['title.uc005.cadastrar.empresa']}
 		</ui:define>
-
-		<ui:define name="breadcrumb">
-			<a target="_top"
-				href="/#{menuController.appName}/paginas/principal.xhtml"> <h:outputText
-					value="#{msgs['title.principal']}" />
-			</a> > 
-			<a target="_top"
-				href="/#{menuController.appName}/paginas/sistema/empresas/pesquisaEmpresa.xhtml">
-				<h:outputText value="#{msgs['title.uc005.consulta.empresas']}" />
-			</a> > <h:outputText
-				value="#{cadastroEmpresaController.entidade.id != null 
+		<ui:define name="pageTitle">
+			<h:outputText
+						value="#{cadastroEmpresaController.entidade.id != null 
 										? msgs['title.uc005.editar.empresa'] 
 										: msgs['title.uc005.cadastrar.empresa']}" />
 		</ui:define>
+		<ui:define name="pageSubtitle">
+			<h:outputText value="#{sessionScope.usuario.cliente.nome}" rendered="#{sessionScope.usuario != null}" />
+		</ui:define>
 
-		<ui:define name="tools">
+
+<ui:define name="tools">
 			<p:toolbar styleClass="sa-toolbar-wrap">
 				<p:toolbarGroup styleClass="sa-toolbar-actions">
+					<ui:include src="/WEB-INF/template/sa-voltar-lista.xhtml">
+						<ui:param name="ctrl" value="#{cadastroEmpresaController}" />
+					</ui:include>
 					<p:commandButton id="save"
 						action="#{cadastroEmpresaController.salvar}"
 						value="#{msgs['alt.acao.save']}"
@@ -45,16 +44,7 @@
 		</ui:define>
 
 		<ui:define name="conteudo">
-			<h:panelGrid width="100%" columns="1" headerClass="h-grid-header">
-				<f:facet name="header">
-					<h:outputText
-						value="#{cadastroEmpresaController.entidade.id != null 
-										? msgs['title.uc005.editar.empresa'] 
-										: msgs['title.uc005.cadastrar.empresa']}" />
-				</f:facet>
-
-				<h:column>
-					<p:accordionPanel id="cadastroEmpresaTab">
+			<p:accordionPanel id="cadastroEmpresaTab" styleClass="sa-accordion">
 						<p:tab title="#{msgs['label.uc001.dados.empresa']}">
 							<p:panel id="painelCadastroEmpresa"
 								header="Cadastro de empresa" styleClass="ui-fluid">
@@ -123,7 +113,7 @@
 						<p:tab title="#{msgs['label.uc001.endereco']}">
 							<p:panel id="painelCadastroEndereco"
 								header="Cadastro de endereço" styleClass="ui-fluid">
-								<div class="form-grid ui-fluid ui-g">
+								<div class="form-grid sa-cadastro-grid ui-fluid ui-g">
 									<div class="ui-g-12 ui-md-4">
 										<p:outputLabel value="#{msgs['label.uc001.cep']}" for="cep" />
 										<p:inputMask id="cep"
@@ -180,7 +170,7 @@
 						<p:tab title="#{msgs['title.uc005.departamentos']}">
 							<p:panel id="painelCadastroDepartamento"
 								header="Cadastro de Departamento" styleClass="ui-fluid">
-								<div class="ui-g">
+								<div class="form-grid sa-cadastro-grid ui-fluid ui-g">
 
 									<div class="ui-g-12 ui-md-4">
 										<p:outputLabel value="#{msgs['label.uc005.nome.empresa']}"
@@ -200,12 +190,13 @@
 									</div>
 
 									<div class="ui-g-12 ui-md-4">
+										<p:outputLabel value="&#160;" />
 										<p:commandButton id="addDepartamento"
-											value="#{msgs['alt.acao.adicionar']}"
+											value="#{msgs['alt.acao.adicionar']}" icon="pi pi-plus"
 											action="#{cadastroEmpresaController.adicionarDepartamento}"
 											update="painelCadastroDepartamento departamentos"
 											process="painelCadastroDepartamento"
-											style="margin-top: 20px;" />
+											styleClass="sa-btn-label ui-button-success w-full" />
 									</div>
 
 								</div>
@@ -213,22 +204,23 @@
 
 							<br />
 
-							<p:panelGrid columns="4" id="departamentos" style="width: 100%;">
+							<p:outputPanel id="departamentos" layout="block" styleClass="sa-card-table">
 
-								<h:outputText
-									value="#{msgs['msg.nenhum.item.encontrado.adicionar']}"
-									escape="false"
-									rendered="#{empty cadastroEmpresaController.listaDepartamentos}" />
+								<ui:include src="/tema/templates/vazio.xhtml">
+									<ui:param name="exibe" value="#{empty cadastroEmpresaController.listaDepartamentos}" />
+									<ui:param name="exibeAdicionar" value="true" />
+								</ui:include>
 
 								<p:dataTable id="tableDepartamentos"
 									value="#{cadastroEmpresaController.listaDepartamentos}"
 									var="departamento" paginator="true" rows="5"
 									paginatorPosition="bottom" editable="true"
 									paginatorAlwaysVisible="false"
+									styleClass="sa-table tabela-responsive"
 									rendered="#{not empty cadastroEmpresaController.listaDepartamentos}">
 
 									<p:column headerText="#{msgs['label.uc005.nome.empresa']}"
-										style="text-align: center;">
+										styleClass="sa-table-col-center">
 										<p:cellEditor>
 											<f:facet name="output">
 												<h:outputText value="#{departamento.nome}" />
@@ -241,7 +233,7 @@
 									</p:column>
 
 									<p:column headerText="#{msgs['label.uc001.status']}"
-										style="text-align: center;">
+										styleClass="sa-table-col-center">
 										<p:cellEditor>
 											<f:facet name="output">
 												<h:outputText value="#{departamento.status}" />
@@ -249,7 +241,7 @@
 
 											<f:facet name="input">
 												<p:selectOneMenu value="#{departamento.status}"
-													style="width:100%">
+													styleClass="w-full">
 													<f:selectItems
 														value="#{cadastroEmpresaController.listaStatus}" />
 												</p:selectOneMenu>
@@ -258,12 +250,12 @@
 									</p:column>
 
 									<p:column headerText="#{msgs['alt.acao.editar']}"
-										style="width:35px; text-align: center;">
+										styleClass="sa-table-col-edit">
 										<p:rowEditor />
 									</p:column>
 
 									<p:column headerText="#{msgs['alt.acao.excluir']}"
-										style="text-align: center;">
+										styleClass="sa-table-col-actions">
 										<p:commandButton icon="pi pi-trash"
 											title="#{msgs['alt.acao.excluir']}"
 											action="#{cadastroEmpresaController.removeDepartamento(departamento)}"
@@ -273,13 +265,13 @@
 									</p:column>
 
 								</p:dataTable>
-							</p:panelGrid>
+							</p:outputPanel>
 						</p:tab>
 
 						<p:tab title="#{msgs['title.uc005.centro.custo']}">
 							<p:panel id="painelCadastroCentroDeCusto"
 								header="Cadastro de Centro de Custo" styleClass="ui-fluid">
-								<div class="ui-g">
+								<div class="form-grid sa-cadastro-grid ui-fluid ui-g">
 
 									<div class="ui-g-12 ui-md-4">
 										<p:outputLabel value="#{msgs['label.uc005.nome.empresa']}"
@@ -299,12 +291,13 @@
 									</div>
 
 									<div class="ui-g-12 ui-md-4">
+										<p:outputLabel value="&#160;" />
 										<p:commandButton id="addCentroDeCusto"
-											value="#{msgs['alt.acao.adicionar']}"
+											value="#{msgs['alt.acao.adicionar']}" icon="pi pi-plus"
 											action="#{cadastroEmpresaController.adicionarCentroDeCusto}"
 											update="painelCadastroCentroDeCusto centrosDeCusto"
 											process="painelCadastroCentroDeCusto"
-											style="margin-top: 20px;" />
+											styleClass="sa-btn-label ui-button-success w-full" />
 									</div>
 
 								</div>
@@ -313,22 +306,23 @@
 
 							<br />
 
-							<p:panelGrid columns="4" id="centrosDeCusto" style="width: 100%;">
+							<p:outputPanel id="centrosDeCusto" layout="block" styleClass="sa-card-table">
 
-								<h:outputText
-									value="#{msgs['msg.nenhum.item.encontrado.adicionar']}"
-									escape="false"
-									rendered="#{empty cadastroEmpresaController.listaCentroCustos}" />
+								<ui:include src="/tema/templates/vazio.xhtml">
+									<ui:param name="exibe" value="#{empty cadastroEmpresaController.listaCentroCustos}" />
+									<ui:param name="exibeAdicionar" value="true" />
+								</ui:include>
 
 								<p:dataTable id="tableCentrosDeCusto"
 									value="#{cadastroEmpresaController.listaCentroCustos}"
 									var="centro" paginator="true" rows="5"
 									paginatorPosition="bottom" editable="true"
 									paginatorAlwaysVisible="false"
+									styleClass="sa-table tabela-responsive"
 									rendered="#{not empty cadastroEmpresaController.listaCentroCustos}">
 
 									<p:column headerText="#{msgs['label.uc005.nome.empresa']}"
-										style="text-align: center;">
+										styleClass="sa-table-col-center">
 										<p:cellEditor>
 											<f:facet name="output">
 												<h:outputText value="#{centro.nome}" />
@@ -341,14 +335,14 @@
 									</p:column>
 
 									<p:column headerText="#{msgs['label.uc001.status']}"
-										style="text-align: center;">
+										styleClass="sa-table-col-center">
 										<p:cellEditor>
 											<f:facet name="output">
 												<h:outputText value="#{centro.status}" />
 											</f:facet>
 
 											<f:facet name="input">
-												<p:selectOneMenu value="#{centro.status}" style="width:100%">
+												<p:selectOneMenu value="#{centro.status}" styleClass="w-full">
 													<f:selectItems
 														value="#{cadastroEmpresaController.listaStatus}" />
 												</p:selectOneMenu>
@@ -357,12 +351,12 @@
 									</p:column>
 
 									<p:column headerText="#{msgs['alt.acao.editar']}"
-										style="width:35px; text-align: center;">
+										styleClass="sa-table-col-edit">
 										<p:rowEditor />
 									</p:column>
 
 									<p:column headerText="#{msgs['alt.acao.excluir']}"
-										style="text-align: center;">
+										styleClass="sa-table-col-actions">
 										<p:commandButton icon="pi pi-trash"
 											title="#{msgs['alt.acao.excluir']}"
 											action="#{cadastroEmpresaController.removeCentroDeCusto(centro)}"
@@ -372,13 +366,13 @@
 									</p:column>
 
 								</p:dataTable>
-							</p:panelGrid>
+							</p:outputPanel>
 						</p:tab>
 
 						<p:tab title="#{msgs['title.uc005.cargos']}">
 							<p:panel header="Cadastro de Cargo" styleClass="ui-fluid"
 								columns="3" id="painelCadastroCargos">
-								<div class="ui-g">
+								<div class="form-grid sa-cadastro-grid ui-fluid ui-g">
 
 									<div class="ui-g-12 ui-md-4">
 										<p:outputLabel value="#{msgs['label.uc005.nome.empresa']}"
@@ -397,13 +391,14 @@
 										</p:selectOneMenu>
 									</div>
 
-									<div class="ui-g-12 ui-md-4"
-										style="display: flex; align-items: flex-end;">
+									<div class="ui-g-12 ui-md-4">
+										<p:outputLabel value="&#160;" />
 										<p:commandButton id="addCargo"
-											value="#{msgs['alt.acao.adicionar']}"
+											value="#{msgs['alt.acao.adicionar']}" icon="pi pi-plus"
 											action="#{cadastroEmpresaController.adicionarCargo}"
 											update="painelCadastroCargos cargos"
-											process="painelCadastroCargos" style="width: 100%;" />
+											process="painelCadastroCargos"
+											styleClass="sa-btn-label ui-button-success w-full" />
 									</div>
 
 								</div>
@@ -412,21 +407,22 @@
 
 							<br />
 
-							<p:panelGrid columns="4" id="cargos" style="width: 100%;">
+							<p:outputPanel id="cargos" layout="block" styleClass="sa-card-table">
 
-								<h:outputText
-									value="#{msgs['msg.nenhum.item.encontrado.adicionar']}"
-									escape="false"
-									rendered="#{empty cadastroEmpresaController.listaCargos}" />
+								<ui:include src="/tema/templates/vazio.xhtml">
+									<ui:param name="exibe" value="#{empty cadastroEmpresaController.listaCargos}" />
+									<ui:param name="exibeAdicionar" value="true" />
+								</ui:include>
 
 								<p:dataTable id="tableCargos"
 									value="#{cadastroEmpresaController.listaCargos}" var="cargo"
 									paginator="true" rows="5" paginatorPosition="bottom"
 									editable="true" paginatorAlwaysVisible="false"
+									styleClass="sa-table tabela-responsive"
 									rendered="#{not empty cadastroEmpresaController.listaCargos}">
 
 									<p:column headerText="#{msgs['label.uc005.nome.empresa']}"
-										style="text-align: center;">
+										styleClass="sa-table-col-center">
 										<p:cellEditor>
 											<f:facet name="output">
 												<h:outputText value="#{cargo.nome}" />
@@ -439,14 +435,14 @@
 									</p:column>
 
 									<p:column headerText="#{msgs['label.uc001.status']}"
-										style="text-align: center;">
+										styleClass="sa-table-col-center">
 										<p:cellEditor>
 											<f:facet name="output">
 												<h:outputText value="#{cargo.status}" />
 											</f:facet>
 
 											<f:facet name="input">
-												<p:selectOneMenu value="#{cargo.status}" style="width:100%">
+												<p:selectOneMenu value="#{cargo.status}" styleClass="w-full">
 													<f:selectItems
 														value="#{cadastroEmpresaController.listaStatus}" />
 												</p:selectOneMenu>
@@ -455,12 +451,12 @@
 									</p:column>
 
 									<p:column headerText="#{msgs['alt.acao.editar']}"
-										style="width:35px; text-align: center;">
+										styleClass="sa-table-col-edit">
 										<p:rowEditor />
 									</p:column>
 
 									<p:column headerText="#{msgs['alt.acao.excluir']}"
-										style="text-align: center;">
+										styleClass="sa-table-col-actions">
 										<p:commandButton icon="pi pi-trash"
 											title="#{msgs['alt.acao.excluir']}"
 											action="#{cadastroEmpresaController.removeCargo(cargo)}"
@@ -470,11 +466,9 @@
 									</p:column>
 
 								</p:dataTable>
-							</p:panelGrid>
+							</p:outputPanel>
 						</p:tab>
 					</p:accordionPanel>
-				</h:column>
-			</h:panelGrid>
 		</ui:define>
 
 	</ui:composition>

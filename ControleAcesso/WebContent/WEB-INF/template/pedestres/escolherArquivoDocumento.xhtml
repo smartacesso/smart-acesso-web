@@ -3,94 +3,92 @@
 	xmlns:f="http://java.sun.com/jsf/core"
 	xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:p="http://primefaces.org/ui">
-	
+
 	<h:form enctype="multipart/form-data" prependId="false">
-		<p:dialog id="dialogEscolherFotoDoc" widgetVar="escolherFotoDoc" header="#{msgs['label.uc008.origem.foto']}" modal="true">
+		<p:dialog id="dialogEscolherFotoDoc" widgetVar="escolherFotoDoc"
+			header="#{msgs['label.uc008.origem.foto']}" modal="true"
+			styleClass="sa-dialog">
 
-			<p:panelGrid columns="1" styleClass="ui-fluid" layout="grid">
-				<p:column>
-					<p:commandButton id="abrirCameraDoc"
-						value="#{msgs['alt.acao.tirar.foto']}" icon="pi pi-camera"
-						update="dialogTirarFotoDoc"
-						onclick="PF('escolherFotoDoc').hide(); PF('pcDoc').attach(); PF('tirarFotoDoc').show(); return false;"
-						styleClass="ui-button-outlined" style="width: 100%" />
-				</p:column>
+			<div class="sa-dialog-form">
+				<p:commandButton id="abrirCameraDoc"
+					value="#{msgs['alt.acao.tirar.foto']}" icon="pi pi-camera"
+					update="dialogTirarFotoDoc"
+					onclick="PF('escolherFotoDoc').hide(); PF('pcDoc').attach(); PF('tirarFotoDoc').show(); return false;"
+					styleClass="sa-btn-label ui-button-outlined w-full" />
 
-				<p:column>
-					<p:commandButton value="#{msgs['alt.acao.procurar.arquivo']}"
-						icon="pi pi-upload" type="button"
-						onclick="clicaBotaoDocumentUpload(); return false;"
-						styleClass="ui-button-outlined" style="width: 100%" />
-				</p:column>
-						
-				<p:fileUpload id="acaoAbrirArquivoDoc" listener="#{cadastroPedestreController.uploadDocumento}" multiple="false"
-						sizeLimit="3145728" allowTypes="/(\.|\/)(jpe?g|png|pdf)$/" auto="true" style="display: none;" 
-						update="form:cadastroPedestreTab:painelCadastroPedestreDocumentos" onstart="PF('statusDialogEnviandoFile').show(); return true;"
-						oncomplete="PF('statusDialogEnviandoFile').hide(); PF('escolherFotoDoc').hide(); return false;">
-				</p:fileUpload>
-				
-				<p:column>
-					<p:commandButton value="#{msgs['alt.acao.cancelar']}" type="button"
-						onclick="PF('escolherFotoDoc').hide(); return false;"
-						styleClass="ui-button-outlined" style="width: 100%" />
-				</p:column>
-			</p:panelGrid>
-			
+				<p:commandButton value="#{msgs['alt.acao.procurar.arquivo']}"
+					icon="pi pi-upload" type="button"
+					onclick="clicaBotaoDocumentUpload(); return false;"
+					styleClass="sa-btn-label ui-button-outlined w-full" />
+
+				<p:fileUpload id="acaoAbrirArquivoDoc"
+					listener="#{cadastroPedestreController.uploadDocumento}" multiple="false"
+					sizeLimit="3145728" allowTypes="/(\.|\/)(jpe?g|png|pdf)$/" auto="true"
+					style="display: none;"
+					update="form:cadastroPedestreTab:painelCadastroPedestreDocumentos"
+					onstart="PF('statusDialogEnviandoFile').show(); return true;"
+					oncomplete="PF('statusDialogEnviandoFile').hide(); PF('escolherFotoDoc').hide(); return false;" />
+
+				<p:commandButton value="#{msgs['alt.acao.cancelar']}" type="button"
+					onclick="PF('escolherFotoDoc').hide(); return false;"
+					styleClass="sa-btn-label ui-button-flat w-full" />
+			</div>
+
 		</p:dialog>
-		
-		<p:dialog id="dialogTirarFotoDoc" widgetVar="tirarFotoDoc" header="#{msgs['label.uc008.tirar.foto']}" 
-					modal="true" onShow="PF('pcDoc').attach()" onHide="PF('pcDoc').dettach()">
-				
-			<p:panelGrid columns="1">
-				<p:photoCam id="idPcDoc" widgetVar="pcDoc" listener="#{cadastroPedestreController.capturarFotoDocumento}" autoStart="false" 
-					update="dialogConfirmarFoto"/>
-			
+
+		<p:dialog id="dialogTirarFotoDoc" widgetVar="tirarFotoDoc"
+			header="#{msgs['label.uc008.tirar.foto']}" modal="true"
+			onShow="PF('pcDoc').attach()" onHide="PF('pcDoc').dettach()"
+			styleClass="sa-dialog">
+
+			<div class="sa-dialog-form">
+				<p:photoCam id="idPcDoc" widgetVar="pcDoc"
+					listener="#{cadastroPedestreController.capturarFotoDocumento}"
+					autoStart="false" update="dialogConfirmarFoto" />
+
 				<p:commandButton value="#{msgs['label.uc008.capturar']}"
-					icon="pi pi-camera"
-					process="@this"
+					icon="pi pi-camera" process="@this"
 					onclick="PF('pcDoc').capture();"
 					oncomplete="PF('tirarFotoDoc').hide(); PF('confirmarFoto').show(); return false;"
-					styleClass="ui-button-success" />
-			
-			</p:panelGrid>
-				
+					styleClass="sa-btn-label ui-button-success w-full" />
+			</div>
+
 		</p:dialog>
-		
-		<p:dialog id="dialogConfirmarFoto" widgetVar="confirmarFoto" header="#{msgs['alt.acao.confirmar']}"
-				modal="true">
-			
-			<p:panelGrid columns="1">
-				<h:graphicImage id="photoDoc" value="#{menuController.urlMain}/resources/upload/#{cadastroPedestreController.documento.nome}" />
-				
-				<p:column>
+
+		<p:dialog id="dialogConfirmarFoto" widgetVar="confirmarFoto"
+			header="#{msgs['alt.acao.confirmar']}" modal="true"
+			styleClass="sa-dialog">
+
+			<div class="sa-dialog-form">
+				<h:graphicImage id="photoDoc"
+					value="#{menuController.urlMain}/resources/upload/#{cadastroPedestreController.documento.nome}" />
+
+				<div class="sa-login__actions">
 					<p:commandButton id="confirmarFotoDoc"
 						value="#{msgs['alt.acao.confirmar']}" icon="pi pi-check"
 						update="form:cadastroPedestreTab:painelCadastroPedestreDocumentos"
 						process="@this"
 						actionListener="#{cadastroPedestreController.removerFotoDocumento}"
 						oncomplete="PF('confirmarFoto').hide(); return false;"
-						styleClass="ui-button-success" />
+						styleClass="sa-btn-label ui-button-success" />
 
 					<p:commandButton id="cancelarFotoDoc"
 						value="#{msgs['alt.acao.cancelar']}" type="button"
 						process="@this"
 						actionListener="#{cadastroPedestreController.removerFotoDocumento}"
 						oncomplete="PF('confirmarFoto').hide(); PF('tirarFotoDoc').show(); return false;"
-						styleClass="ui-button-outlined" style="margin-left: 0.5rem;" />
-				</p:column>	
-
-			</p:panelGrid>
+						styleClass="sa-btn-label ui-button-flat" />
+				</div>
+			</div>
 
 		</p:dialog>
-		
+
 	</h:form>
-	
-	
-	
+
 	<script>
 		function clicaBotaoDocumentUpload() {
 			document.getElementById("form:acaoAbrirArquivoDoc_label").click();
 		}
 	</script>
-	
+
 </ui:composition>

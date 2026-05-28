@@ -13,7 +13,7 @@ import br.com.startjob.acesso.modelo.entity.EmpresaEntity;
 @Named("consultaEmpresaController")
 @ViewScoped
 @UseCase(classEntidade=EmpresaEntity.class, funcionalidade="Consulta empresas", logicalRemove = true, 
-		urlNovoRegistro="/paginas/sistema/empresas/cadastroEmpresa.xhtml", lazyLoad = true, quantPorPagina = 10)
+		urlNovoRegistro="/paginas/sistema/empresas/cadastroEmpresa.xhtml", lazyLoad = true, quantPorPagina = 6)
 public class ConsultaEmpresaController extends BaseController{
 
 	private static final long serialVersionUID = 1L;

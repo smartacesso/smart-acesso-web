@@ -5,9 +5,11 @@
 	xmlns:p="http://primefaces.org/ui">
 
 	<p:dialog id="dialogEscolherRegra" header="#{msgs['label.uc014.consultar.regras']}"
-		widgetVar="escolherRegra" modal="true" resizable="false" width="800">
+		widgetVar="escolherRegra" modal="true" resizable="false" width="800"
+		styleClass="sa-dialog">
 
-		<div class="form-grid sa-cadastro-grid ui-fluid ui-g" id="gridEscolherRegra">
+		<h:panelGroup layout="block" styleClass="form-grid sa-cadastro-grid ui-fluid ui-g"
+			id="gridEscolherRegra">
 			<div class="ui-g-12 ui-md-4">
 				<p:outputLabel value="#{msgs['label.uc008.nome']}" for="inputNomeRegra" />
 				<p:inputText id="inputNomeRegra" value="#{buscarRegrasController.parans['nome']}" />
@@ -31,9 +33,9 @@
 					icon="pi pi-search"
 					action="#{buscarRegrasController.buscarRegrasPedestreOuVisitante(cadastroPedestreController.entidade)}"
 					update="gridEscolherRegra regras" process="gridEscolherRegra"
-					styleClass="ui-button-success" />
+					styleClass="sa-btn-label ui-button-success w-full" />
 			</div>
-		</div>
+		</h:panelGroup>
 
 		<p:spacer height="10" />
 
@@ -46,6 +48,7 @@
 				var="regra" rendered="#{not empty buscarRegrasController.result}"
 				paginator="true" rows="#{buscarRegrasController.quantPorPagina}"
 				paginatorPosition="bottom" paginatorAlwaysVisible="false"
+				styleClass="sa-table tabela-responsive"
 				selectionMode="single" rowKey="#{regra.id}"
 				selection="#{cadastroPedestreController.pedestreRegra.regra}">
 
@@ -53,19 +56,19 @@
 					update="form:cadastroPedestreTab:painelCadastroPedestreRegras"
 					oncomplete="PF('escolherRegra').hide(); return false;" />
 
-				<p:column headerText="#{msgs['label.uc008.codigo']}" style="text-align: center">
+				<p:column headerText="#{msgs['label.uc008.codigo']}" styleClass="sa-table-col-center">
 					<h:outputText value="#{regra.id}" />
 				</p:column>
 
-				<p:column headerText="#{msgs['label.uc008.nome']}" style="text-align: center">
+				<p:column headerText="#{msgs['label.uc008.nome']}" styleClass="sa-table-col-center">
 					<h:outputText value="#{regra.nome}" />
 				</p:column>
 
-				<p:column headerText="#{msgs['label.uc008.empresa']}" style="text-align: center">
+				<p:column headerText="#{msgs['label.uc008.empresa']}" styleClass="sa-table-col-center">
 					<h:outputText value="#{regra.empresa.nome}" />
 				</p:column>
 
-				<p:column headerText="#{msgs['label.uc008.tipo.regra']}" style="text-align: center">
+				<p:column headerText="#{msgs['label.uc008.tipo.regra']}" styleClass="sa-table-col-center">
 					<h:outputText value="#{regra.tipo.descricao}" />
 				</p:column>
 			</p:dataTable>

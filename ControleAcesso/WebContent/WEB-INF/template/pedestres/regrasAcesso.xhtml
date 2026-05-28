@@ -36,7 +36,7 @@
 					icon="pi pi-search" title="#{msgs['alt.acao.buscar']}"
 					update="form:dialogEscolherRegra"
 					oncomplete="PF('escolherRegra').show(); return false;"
-					process="@this" styleClass="ui-button-outlined" />
+					process="@this" styleClass="sa-btn-label ui-button-flat w-full" />
 			</div>
 
 			<h:panelGroup
@@ -90,7 +90,7 @@
 					icon="pi pi-plus" process="painelCadastroPedestreRegras"
 					value="#{msgs['alt.acao.adicionar']}"
 					update="painelCadastroPedestreRegras regras form:dialogEscolherRegra"
-					styleClass="ui-button-success" />
+					styleClass="sa-btn-label ui-button-success w-full" />
 			</div>
 		</div>
 	</p:panel>
@@ -106,6 +106,7 @@
 			value="#{cadastroPedestreController.listaPedestreRegra}"
 			var="pedestreRegra" paginator="true" rows="5"
 			paginatorPosition="bottom" paginatorAlwaysVisible="false"
+			styleClass="sa-table tabela-responsive"
 			rendered="#{not empty cadastroPedestreController.listaPedestreRegra}">
 
 			<p:column headerText="#{msgs['label.uc008.nome']}"
@@ -204,12 +205,5 @@
 		</p:dataTable>
 	</p:panel>
 
-	<style>
-@media ( max-width : 768px) {
-	.col-desktop-only {
-		display: none !important;
-	}
-}
-	</style>
 
 </ui:composition>

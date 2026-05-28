@@ -12,15 +12,16 @@
 		<ui:define name="titulo">
 			#{msgs['title.sistema']} | #{msgs['title.uc015.equipamentos.conectados']}
 		</ui:define>
-		
-		<ui:define name="breadcrumb">
-			<a target="_top" href="/#{menuController.appName}/paginas/principal.xhtml"> <h:outputText
-					value="#{msgs['title.principal']}" />
-			</a> > <h:outputText value="#{msgs['title.uc015.equipamentos.conectados']}" />
+		<ui:define name="pageTitle">
+			<h:outputText value="#{msgs['title.uc015.equipamentos.conectados']}" />
 		</ui:define>
-		
-		<ui:define name="tools">
-			<p:toolbar styleClass="sa-toolbar-wrap sa-toolbar-report flex flex-column md:flex-row justify-content-between align-items-center gap-3">
+		<ui:define name="pageSubtitle">
+			<h:outputText value="#{sessionScope.usuario.cliente.nome}" rendered="#{sessionScope.usuario != null}" />
+		</ui:define>
+
+
+<ui:define name="tools">
+			<p:toolbar styleClass="sa-toolbar-wrap sa-toolbar-report">
 				<p:toolbarGroup styleClass="sa-toolbar-actions">
 					<p:commandButton id="acaoBuscar"
 						action="#{equipamentosConectadosController.buscar()}"
@@ -51,26 +52,49 @@
 					<h:outputText styleClass="sa-toolbar-total"
 						value="Total: #{equipamentosConectadosController.result.size()}"
 						rendered="#{equipamentosConectadosController.result.size() > 0}" />
-					<p:inputText id="filtro-nome" placeholder="Filtrar por nome"
-						styleClass="sa-search-input"
-						value="#{equipamentosConectadosController.parans['nome']}" />
-					<p:inputText id="filtro-modelo" placeholder="Filtrar por modelo"
-						styleClass="sa-search-input"
-						value="#{equipamentosConectadosController.parans['modelo']}" />
+					<p:commandButton id="acaoFiltroAvancado"
+						value="Filtros"
+						icon="pi pi-sliders-h" iconPos="left"
+						title="#{msgs['alt.acao.alternar.filtros.avancados']}"
+						process="@this" update="containerDeFiltro"
+						action="#{equipamentosConectadosController.toggleFiltroFlag('relatorio-equipamentos-filtroFlag')}"
+						styleClass="sa-btn-label ui-button-flat col-desktop-only" />
 				</p:toolbarGroup>
 			</p:toolbar>
 		</ui:define>
 		
 		<ui:define name="conteudo">
+
+			<h:panelGroup layout="block"
+				styleClass="sa-pesquisa-split #{equipamentosConectadosController.getFiltroFlag('relatorio-equipamentos-filtroFlag') ? 'sa-pesquisa-split--filtros-abertos' : ''}">
+
+				<div class="sa-pesquisa-split__main">
+
+			<h:panelGroup id="containerDeFiltro" layout="block" styleClass="sa-pesquisa-split__filtros">
+				<h:panelGroup id="filtrosAvancadosWrapper" layout="block"
+					rendered="#{equipamentosConectadosController.getFiltroFlag('relatorio-equipamentos-filtroFlag')}"
+					styleClass="filtros-avancados">
+					<h3 class="sa-filtros-avancados__title">#{msgs['title.uc008.filtros.avancados']}</h3>
+					<div class="form-grid sa-cadastro-grid ui-fluid ui-g">
+						<div class="ui-g-12 ui-md-6">
+							<p:outputLabel for="filtro-avancado-nome"
+								value="#{msgs['label.uc015.nome']}" />
+							<p:inputText id="filtro-avancado-nome"
+								value="#{equipamentosConectadosController.parans['nome']}" />
+						</div>
+						<div class="ui-g-12 ui-md-6">
+							<p:outputLabel for="filtro-avancado-modelo"
+								value="#{msgs['label.uc015.modelo']}" />
+							<p:inputText id="filtro-avancado-modelo"
+								value="#{equipamentosConectadosController.parans['modelo']}" />
+						</div>
+					</div>
+				</h:panelGroup>
+			</h:panelGroup>
 			
-			<h:panelGrid width="100%" columns="1" headerClass="h-grid-header">
-				<f:facet name="header">
-					<h:outputText value="#{msgs['title.uc015.equipamentos.conectados']}" />
-				</f:facet>
-				
-				<h:column>
-				
-					<ui:include src="/tema/templates/vazio.xhtml">
+			<p:outputPanel id="tabelaPainel" layout="block" styleClass="sa-pesquisa-split__tabela">
+
+			<ui:include src="/tema/templates/vazio.xhtml">
 						<ui:param name="exibe" value="#{empty equipamentosConectadosController.result}" />
 						<ui:param name="exibeAdicionar" value="true" />
 					</ui:include>
@@ -80,40 +104,57 @@
 						rows="#{equipamentosConectadosController.quantPorPagina}" paginatorPosition="bottom"
 						paginatorAlwaysVisible="false" styleClass="tabela-responsive sa-table">
 						
-						<p:column headerText="#{msgs['label.uc015.codigo']}" style="text-align: center">
+						<p:column headerText="#{msgs['label.uc015.codigo']}" styleClass="sa-table-col-center">
 							<h:outputText value="#{equipamento.id}" />
 						</p:column>
 						
-						<p:column headerText="#{msgs['label.uc015.data.criacao']}" style="text-align: center">
+						<p:column styleClass="sa-table-col-center sa-table-col-abbr">
+							<f:facet name="header">
+								<ui:include src="/tema/templates/sa-th-abbr.xhtml">
+									<ui:param name="full" value="#{msgs['label.uc015.data.criacao']}" />
+									<ui:param name="short" value="Dt. criação" />
+								</ui:include>
+							</f:facet>
 							<h:outputText value="#{equipamento.dataCriacao}">
 								<f:convertDateTime pattern="dd/MM/yyyy"/>
 							</h:outputText>
 						</p:column>
 						
-						<p:column headerText="#{msgs['label.uc015.identificador']}" style="text-align: center">
+						<p:column styleClass="sa-table-col-center sa-table-col-abbr">
+							<f:facet name="header">
+								<ui:include src="/tema/templates/sa-th-abbr.xhtml">
+									<ui:param name="full" value="#{msgs['label.uc015.identificador']}" />
+									<ui:param name="short" value="Ident." />
+								</ui:include>
+							</f:facet>
 							<h:outputText value="#{equipamento.identificador}" />
 						</p:column>
 						
-						<p:column headerText="#{msgs['label.uc015.ip']}" style="text-align: center">
+						<p:column headerText="#{msgs['label.uc015.ip']}" styleClass="sa-table-col-center">
 							<h:outputText value="#{equipamento.ip}" />
 						</p:column>
 						
-						<p:column headerText="#{msgs['label.uc015.marca']}" style="text-align: center">
+						<p:column headerText="#{msgs['label.uc015.marca']}" styleClass="sa-table-col-center">
 							<h:outputText value="#{equipamento.marca}" />
 						</p:column>
 						
-						<p:column headerText="#{msgs['label.uc015.modelo']}" style="text-align: center">
+						<p:column headerText="#{msgs['label.uc015.modelo']}" styleClass="sa-table-col-center">
 							<h:outputText value="#{equipamento.modelo}" />
 						</p:column>
 						
-						<p:column headerText="#{msgs['label.uc015.nome']}" style="text-align: center">
+						<p:column headerText="#{msgs['label.uc015.nome']}" styleClass="sa-table-col-center">
 							<h:outputText value="#{equipamento.nome}" />
 						</p:column>
 						
 					</p:dataTable>
-					
-				</h:column>
-			</h:panelGrid>
+
+			</p:outputPanel>
+
+				</div>
+
+				<div class="sa-pesquisa-split__footer"></div>
+
+			</h:panelGroup>
 		</ui:define>
 	</ui:composition>
 </body>

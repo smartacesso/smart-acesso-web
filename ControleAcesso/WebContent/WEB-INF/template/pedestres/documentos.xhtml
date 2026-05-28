@@ -27,7 +27,7 @@
 				<p:commandButton id="escolherArquivoDocumento"
 					value="Escolher arquivo" icon="pi pi-upload"
 					onclick="PF('escolherFotoDoc').show(); return false;"
-					type="button" styleClass="ui-button-outlined" />
+					type="button" styleClass="sa-btn-label ui-button-outlined w-full" />
 			</div>
 
 			<div class="ui-g-12 ui-md-4">
@@ -37,7 +37,7 @@
 					value="#{msgs['alt.acao.adicionar']}" icon="pi pi-plus"
 					update="painelCadastroPedestreDocumentos documentos form:dialogTirarFotoDoc"
 					process="painelCadastroPedestreDocumentos"
-					styleClass="ui-button-success" />
+					styleClass="sa-btn-label ui-button-success w-full" />
 			</div>
 		</div>
 	</p:panel>
@@ -53,10 +53,11 @@
 			value="#{cadastroPedestreController.listaDocumentos}" var="documento"
 			paginator="true" rows="5" paginatorPosition="bottom" editable="true"
 			paginatorAlwaysVisible="false"
+			styleClass="sa-table tabela-responsive"
 			rendered="#{not empty cadastroPedestreController.listaDocumentos}">
 
 			<p:column headerText="#{msgs['label.uc008.nome']}"
-				style="text-align: center">
+				styleClass="sa-table-col-center">
 				<h:commandLink
 					action="#{cadastroPedestreController.downloadDocumentoPedestre(documento)}"
 					value="#{documento.nome}">
@@ -65,14 +66,14 @@
 			</p:column>
 
 			<p:column headerText="#{msgs['label.uc008.vencimento']}"
-				style="text-align: center">
+				styleClass="sa-table-col-center">
 				<h:outputText value="#{documento.validade}">
 					<f:convertDateTime pattern="dd/MM/yyyy" />
 				</h:outputText>
 			</p:column>
 
 			<p:column headerText="#{msgs['alt.acao.excluir']}"
-				style="width: 100px; text-align: center;">
+				styleClass="sa-table-col-edit" style="width: 100px;">
 				<p:commandButton icon="pi pi-trash"
 					title="#{msgs['alt.acao.excluir']}"
 					action="#{cadastroPedestreController.removerDocumento(documento)}"

@@ -17,6 +17,13 @@
 		<ui:define name="titulo">
 			#{msgs['title.sistema']} | #{msgs['title.uc014.alteracao.em.massa']}
 		</ui:define>
+		<ui:define name="pageTitle">
+			<h:outputText value="#{msgs['title.uc014.alteracao.em.massa']}" />
+		</ui:define>
+		<ui:define name="pageSubtitle">
+			<h:outputText value="#{sessionScope.usuario.cliente.nome}" rendered="#{sessionScope.usuario != null}" />
+		</ui:define>
+
 
 		<ui:define name="tools">
 			<p:toolbar styleClass="sa-toolbar-wrap">
@@ -43,7 +50,8 @@
 					<div class="sa-toolbar-search">
 						<p:inputText id="filtro-nome" placeholder="Filtrar por nome"
 							value="#{alteracoesEmMassaController.parans['nome']}"
-							styleClass="sa-search-input"
+							styleClass="filtro-nome filtro-nome-sync sa-search-input"
+							onblur="sincronizarFiltro(this, 'filtro-nome-sync');"
 							onkeypress="if(event.key === 'Enter') { event.preventDefault(); document.getElementById('form:acaoBuscar').click(); }" />
 						<p:commandButton id="acaoBuscar"
 							action="#{alteracoesEmMassaController.buscar}"
@@ -53,9 +61,11 @@
 							styleClass="sa-btn-label"
 							title="#{msgs['alt.acao.buscar']}" />
 					</div>
-					<p:selectOneMenu id="filtro-empresa" styleClass="select-filtro"
+					<p:selectOneMenu id="filtro-empresa"
+						styleClass="select-filtro filtro-empresa-sync"
 						value="#{alteracoesEmMassaController.parans['empresa.id']}"
-						valueChangeListener="#{alteracoesEmMassaController.eventoEmpresaSelecionada}">
+						valueChangeListener="#{alteracoesEmMassaController.eventoEmpresaSelecionada}"
+						onchange="sincronizarFiltro(this, 'filtro-empresa-sync');">
 						<f:selectItems
 							value="#{alteracoesEmMassaController.listaEmpresas}" />
 						<f:converter converterId="javax.faces.Long" />
@@ -64,11 +74,9 @@
 						value="Filtros"
 						icon="pi pi-sliders-h" iconPos="left"
 						title="#{msgs['alt.acao.alternar.filtros.avancados']}"
+						process="@this" update="containerDeFiltro"
 						action="#{alteracoesEmMassaController.toggleFiltroFlag('procurarPedestre-filtroFlag')}"
-						styleClass="sa-btn-label col-desktop-only">
-						<p:ajax process="@this" update="@this"
-							oncomplete="alternarFiltrosAvançados();" />
-					</p:commandButton>
+						styleClass="sa-btn-label col-desktop-only" />
 				</p:toolbarGroup>
 			</p:toolbar>
 		</ui:define>
@@ -78,193 +86,174 @@
 
 			<p:dialog id="dialogAlteracaoEmMassa" widgetVar="alteracaoEmMassa"
 				header="#{msgs['title.uc014.dados.para.alteracao.em.massa']}"
-				modal="true" width="70%" resizable="false" positionType="absolute">
+				modal="true" width="70%" resizable="false" positionType="absolute"
+				styleClass="sa-dialog">
 
-				<p:panelGrid id="alteracaoEmpresa" columns="4">
+				<div class="sa-dialog-section">
+					<h4 class="sa-dialog-section__title">Organização</h4>
+					<h:panelGroup layout="block" id="alteracaoEmpresa"
+						styleClass="form-grid sa-cadastro-grid ui-fluid ui-g">
+						<div class="ui-g-12 ui-md-3">
+							<p:outputLabel value="#{msgs['label.uc008.empresa']}"
+								for="empresa-alterar" />
+							<p:selectOneMenu id="empresa-alterar"
+								value="#{alteracoesEmMassaController.idEmpresaAlteracao}"
+								valueChangeListener="#{alteracoesEmMassaController.eventoEmpresaSelecionada}">
+								<f:selectItems
+									value="#{alteracoesEmMassaController.listaEmpresas}" />
+								<p:ajax process="@this"
+									update="@this departamento-alterar centro-alterar cargo-alterar"
+									event="valueChange" />
+								<f:converter converterId="javax.faces.Long" />
+							</p:selectOneMenu>
+						</div>
+						<div class="ui-g-12 ui-md-3">
+							<p:outputLabel value="#{msgs['label.uc008.departamento']}"
+								for="departamento-alterar" />
+							<p:selectOneMenu id="departamento-alterar"
+								value="#{alteracoesEmMassaController.idDepartamentoAlteracao}">
+								<f:selectItems
+									value="#{alteracoesEmMassaController.listaDepartamentos}" />
+								<f:converter converterId="javax.faces.Long" />
+							</p:selectOneMenu>
+						</div>
+						<div class="ui-g-12 ui-md-3">
+							<p:outputLabel value="#{msgs['label.uc008.centro.custo']}"
+								for="centro-alterar" />
+							<p:selectOneMenu id="centro-alterar"
+								value="#{alteracoesEmMassaController.idCentroCustoAlteracao}">
+								<f:selectItems
+									value="#{alteracoesEmMassaController.listaCentrosDeCusto}" />
+								<f:converter converterId="javax.faces.Long" />
+							</p:selectOneMenu>
+						</div>
+						<div class="ui-g-12 ui-md-3">
+							<p:outputLabel value="#{msgs['label.uc008.cargo']}"
+								for="cargo-alterar" />
+							<p:selectOneMenu id="cargo-alterar"
+								value="#{alteracoesEmMassaController.idCargoAlteracao}">
+								<f:selectItems value="#{alteracoesEmMassaController.listaCargos}" />
+								<f:converter converterId="javax.faces.Long" />
+							</p:selectOneMenu>
+						</div>
+					</h:panelGroup>
+				</div>
 
-					<p:column>
-						<p:outputLabel value="#{msgs['label.uc008.empresa']}"
-							for="empresa-alterar" />
-						<br />
-						<p:selectOneMenu id="empresa-alterar"
-							value="#{alteracoesEmMassaController.idEmpresaAlteracao}"
-							valueChangeListener="#{alteracoesEmMassaController.eventoEmpresaSelecionada}">
-							<f:selectItems
-								value="#{alteracoesEmMassaController.listaEmpresas}" />
-							<p:ajax process="@this"
-								update="@this departamento-alterar centro-alterar cargo-alterar"
-								event="valueChange" />
-							<f:converter converterId="javax.faces.Long" />
-						</p:selectOneMenu>
-					</p:column>
+				<div class="sa-dialog-section">
+					<h4 class="sa-dialog-section__title">Regra de acesso</h4>
+					<h:panelGroup layout="block" id="alteracaoRegras"
+						styleClass="form-grid sa-cadastro-grid ui-fluid ui-g">
+						<div class="ui-g-12 ui-md-6">
+							<p:outputLabel value="#{msgs['label.uc008.regra']}"
+								for="buscarRegraAutoComplete" />
+							<div class="sa-field-row">
+								<p:autoComplete id="buscarRegraAutoComplete"
+									value="#{alteracoesEmMassaController.regraAlteracao}" var="regra"
+									itemLabel="#{regra.nome}" itemValue="#{regra}"
+									forceSelection="true" queryDelay="800" cache="true"
+									minQueryLength="2" maxResults="10"
+									completeMethod="#{alteracoesEmMassaController.buscarRegraAutoComplete}">
+									<p:ajax event="itemSelect" update="alteracaoRegras" />
+								</p:autoComplete>
+								<p:commandButton id="buscarRegras"
+									actionListener="#{alteracoesEmMassaController.montaListaTipoRegra}"
+									icon="pi pi-search" update="dialogEscolherRegra"
+									oncomplete="PF('escolherRegra').show(); return false;"
+									styleClass="sa-btn-label ui-button-flat" process="@this" />
+							</div>
+						</div>
+						<div class="ui-g-12 ui-md-3">
+							<p:outputLabel value="#{msgs['label.uc008.validade']}"
+								for="validadeRegra" />
+							<p:calendar id="validadeRegra"
+								value="#{alteracoesEmMassaController.pedestreRegraAlteracao.validade}"
+								pattern="dd/MM/yyyy" mask="99/99/9999" navigator="true" />
+						</div>
+						<h:panelGroup layout="block" styleClass="ui-g-12 ui-md-3"
+							rendered="#{alteracoesEmMassaController.regraAlteracao.tipo == 'ACESSO_CREDITO'}">
+							<p:outputLabel value="#{msgs['label.uc008.qtde.creditos']}" />
+							<p:inputNumber id="qtdeCreditos"
+								value="#{alteracoesEmMassaController.pedestreRegraAlteracao.qtdeDeCreditos}"
+								minValue="0" decimalPlaces="0" />
+						</h:panelGroup>
+						<h:panelGroup layout="block" styleClass="ui-g-12 ui-md-3"
+							rendered="#{alteracoesEmMassaController.regraAlteracao.tipo == 'ACESSO_CREDITO'}">
+							<p:outputLabel
+								value="#{msgs['label.uc008.validade.creditos.dias']}" />
+							<p:inputNumber id="validadeCreditos"
+								value="#{alteracoesEmMassaController.pedestreRegraAlteracao.diasValidadeCredito}"
+								minValue="0" decimalPlaces="0" />
+						</h:panelGroup>
+						<h:panelGroup layout="block" styleClass="ui-g-12 ui-md-3"
+							rendered="#{alteracoesEmMassaController.regraAlteracao.tipo == 'ACESSO_PERIODO'}">
+							<p:outputLabel value="#{msgs['label.uc006.data.inicio']}"
+								indicateRequired="true" />
+							<p:calendar id="dataInicio"
+								value="#{alteracoesEmMassaController.pedestreRegraAlteracao.dataInicioPeriodo}"
+								pattern="dd/MM/yyyy" mask="99/99/9999" navigator="true" />
+						</h:panelGroup>
+						<h:panelGroup layout="block" styleClass="ui-g-12 ui-md-3"
+							rendered="#{alteracoesEmMassaController.regraAlteracao.tipo == 'ACESSO_PERIODO'}">
+							<p:outputLabel value="#{msgs['label.uc006.data.fim']}"
+								indicateRequired="true" />
+							<p:calendar id="dataFim"
+								value="#{alteracoesEmMassaController.pedestreRegraAlteracao.dataFimPeriodo}"
+								pattern="dd/MM/yyyy" mask="99/99/9999" navigator="true" />
+						</h:panelGroup>
+					</h:panelGroup>
+				</div>
 
-					<p:column>
-						<p:outputLabel value="#{msgs['label.uc008.departamento']}"
-							for="departamento-alterar" />
-						<br />
-						<p:selectOneMenu id="departamento-alterar"
-							value="#{alteracoesEmMassaController.idDepartamentoAlteracao}">
-							<f:selectItems
-								value="#{alteracoesEmMassaController.listaDepartamentos}" />
-							<f:converter converterId="javax.faces.Long" />
-						</p:selectOneMenu>
-					</p:column>
-
-					<p:column>
-						<p:outputLabel value="#{msgs['label.uc008.centro.custo']}"
-							for="centro-alterar" />
-						<br />
-						<p:selectOneMenu id="centro-alterar"
-							value="#{alteracoesEmMassaController.idCentroCustoAlteracao}">
-							<f:selectItems
-								value="#{alteracoesEmMassaController.listaCentrosDeCusto}" />
-							<f:converter converterId="javax.faces.Long" />
-						</p:selectOneMenu>
-					</p:column>
-
-					<p:column>
-						<p:outputLabel value="#{msgs['label.uc008.cargo']}"
-							for="cargo-alterar" />
-						<br />
-						<p:selectOneMenu id="cargo-alterar"
-							value="#{alteracoesEmMassaController.idCargoAlteracao}">
-							<f:selectItems value="#{alteracoesEmMassaController.listaCargos}" />
-							<f:converter converterId="javax.faces.Long" />
-						</p:selectOneMenu>
-					</p:column>
-				</p:panelGrid>
-
-				<p:panelGrid id="alteracaoRegras" columns="4">
-
-					<p:column>
-						<p:outputLabel value="#{msgs['label.uc008.regra']}"
-							for="buscarRegraAutoComplete" />
-						<br />
-						<p:autoComplete id="buscarRegraAutoComplete"
-							value="#{alteracoesEmMassaController.regraAlteracao}" var="regra"
-							itemLabel="#{regra.nome}" itemValue="#{regra}"
-							forceSelection="true" queryDelay="800" cache="true"
-							minQueryLength="2" maxResults="10"
-							completeMethod="#{alteracoesEmMassaController.buscarRegraAutoComplete}">
-
-							<p:ajax event="itemSelect" update="alteracaoRegras" />
-						</p:autoComplete>
-
-						<p:commandButton id="buscarRegras"
-							actionListener="#{alteracoesEmMassaController.montaListaTipoRegra}"
-							icon="pi pi-search" update="dialogEscolherRegra"
-							oncomplete="PF('escolherRegra').show(); return false;"
-							styleClass="whiteIcon" process="@this" />
-
-					</p:column>
-
-					<p:column>
-						<p:outputLabel value="#{msgs['label.uc008.validade']}"
-							for="validadeRegra" />
-						<br />
-						<p:calendar id="validadeRegra"
-							value="#{alteracoesEmMassaController.pedestreRegraAlteracao.validade}"
-							pattern="dd/MM/yyyy" mask="99/99/9999" navigator="true" />
-					</p:column>
-
-					<p:column
-						rendered="#{alteracoesEmMassaController.regraAlteracao.tipo == 'ACESSO_CREDITO'}">
-						<p:outputLabel value="#{msgs['label.uc008.qtde.creditos']}" />
-						<br />
-						<p:inputNumber id="qtdeCreditos"
-							value="#{alteracoesEmMassaController.pedestreRegraAlteracao.qtdeDeCreditos}"
-							minValue="0" decimalPlaces="0" size="6" />
-					</p:column>
-
-					<p:column
-						rendered="#{alteracoesEmMassaController.regraAlteracao.tipo == 'ACESSO_CREDITO'}">
-						<p:outputLabel
-							value="#{msgs['label.uc008.validade.creditos.dias']}" />
-						<br />
-						<p:inputNumber id="validadeCreditos"
-							value="#{alteracoesEmMassaController.pedestreRegraAlteracao.diasValidadeCredito}"
-							minValue="0" decimalPlaces="0" size="6" />
-					</p:column>
-
-					<p:column
-						rendered="#{alteracoesEmMassaController.regraAlteracao.tipo == 'ACESSO_PERIODO'}">
-						<p:outputLabel value="#{msgs['label.uc006.data.inicio']}"
-							indicateRequired="true" />
-						<br />
-						<p:calendar id="dataInicio"
-							value="#{alteracoesEmMassaController.pedestreRegraAlteracao.dataInicioPeriodo}"
-							pattern="dd/MM/yyyy" mask="99/99/9999" size="10" navigator="true" />
-					</p:column>
-
-					<p:column
-						rendered="#{alteracoesEmMassaController.regraAlteracao.tipo == 'ACESSO_PERIODO'}">
-						<p:outputLabel value="#{msgs['label.uc006.data.fim']}"
-							indicateRequired="true" />
-						<br />
-						<p:calendar id="dataFim"
-							value="#{alteracoesEmMassaController.pedestreRegraAlteracao.dataFimPeriodo}"
-							pattern="dd/MM/yyyy" mask="99/99/9999" size="10" navigator="true" />
-					</p:column>
-
-				</p:panelGrid>
-
-				<p:panelGrid id="confirmarAlteracao" columns="2"
-					style="margin-left: 79%;">
-					<p:column>
-						<p:commandButton id="aplicarJustificativa" value="Salvar"
-							action="#{alteracoesEmMassaController.iniciarAlteracaoEmMassa}"
-							process="@form" update="@form"
-							oncomplete="PF('dialogJustificativa').hide();" />
-
-					</p:column>
-
-					<p:column>
-						<p:commandButton id="cancelarAlteracao"
-							value="#{msgs['alt.acao.cancelar']}"
-							onclick="PF('alteracaoEmMassa').hide(); return false;" />
-
-					</p:column>
-				</p:panelGrid>
+				<h:panelGroup layout="block" id="confirmarAlteracao"
+					styleClass="sa-dialog-actions">
+					<p:commandButton id="aplicarJustificativa" value="Salvar"
+						action="#{alteracoesEmMassaController.iniciarAlteracaoEmMassa}"
+						process="@form" update="@form"
+						styleClass="sa-btn-label ui-button-success"
+						oncomplete="PF('dialogJustificativa').hide();" />
+					<p:commandButton id="cancelarAlteracao"
+						value="#{msgs['alt.acao.cancelar']}"
+						styleClass="sa-btn-label ui-button-flat"
+						onclick="PF('alteracaoEmMassa').hide(); return false;" />
+				</h:panelGroup>
 
 			</p:dialog>
 
 			<p:dialog id="dialogJustificativa" widgetVar="dialogJustificativa"
 				header="Definir Período e Justificativa" modal="true"
-				resizable="false" width="40%">
+				resizable="false" width="40%" styleClass="sa-dialog">
 
+				<div class="sa-form-grid" style="grid-template-columns: 1fr;">
+					<div class="sa-field">
+						<span class="sa-label">Data Início</span>
+						<p:calendar id="dataInicioJustificativa"
+							value="#{alteracoesEmMassaController.dataInicioJustificativa}"
+							pattern="dd/MM/yyyy HH:mm" mask="99/99/9999 00:00"
+							navigator="true" />
+					</div>
+					<div class="sa-field">
+						<span class="sa-label">Data Fim</span>
+						<p:calendar id="dataFimJustificativa"
+							value="#{alteracoesEmMassaController.dataFimJustificativa}"
+							pattern="dd/MM/yyyy HH:mm" mask="99/99/9999 00:00"
+							navigator="true" />
+					</div>
+					<div class="sa-field sa-field--full">
+						<span class="sa-label">Justificativa</span>
+						<p:inputTextarea id="justificativa" rows="4"
+							value="#{alteracoesEmMassaController.justificativa}"
+							autoResize="true" style="width: 100%;" />
+					</div>
+				</div>
 
-				<p:panelGrid columns="2" columnClasses="label,value"
-					style="width:100%">
-
-					<p:outputLabel value="Data Início:" for="dataInicioJustificativa" />
-					<p:calendar id="dataInicioJustificativa"
-						value="#{alteracoesEmMassaController.dataInicioJustificativa}"
-						pattern="dd/MM/yyyy HH:mm" mask="99/99/9999 00:00"
-						navigator="true" />
-
-					<p:outputLabel value="Data Fim:" for="dataFimJustificativa" />
-					<p:calendar id="dataFimJustificativa"
-						value="#{alteracoesEmMassaController.dataFimJustificativa}"
-						pattern="dd/MM/yyyy HH:mm" mask="99/99/9999 00:00"
-						navigator="true" />
-
-					<p:outputLabel value="Justificativa:" for="justificativa" />
-					<p:inputTextarea id="justificativa" rows="4" cols="30"
-						value="#{alteracoesEmMassaController.justificativa}"
-						autoResize="true" />
-
-				</p:panelGrid>
-
-				<p:separator />
-
-				<p:panelGrid columns="2" style="float:right; margin-top:10px;">
+				<div class="sa-dialog-actions">
 					<p:commandButton value="Salvar"
 						action="#{alteracoesEmMassaController.salvarJustificativa}"
-						update="@form" oncomplete="PF('dialogJustificativa').hide();" />
-
+						update="@form" styleClass="sa-btn-label ui-button-success"
+						oncomplete="PF('dialogJustificativa').hide();" />
 					<p:commandButton value="Cancelar"
+						styleClass="sa-btn-label ui-button-flat"
 						onclick="PF('dialogJustificativa').hide(); return false;" />
-				</p:panelGrid>
+				</div>
 
 			</p:dialog>
 
@@ -272,57 +261,56 @@
 			<p:dialog id="dialogEscolherRegra"
 				header="#{msgs['label.uc014.consultar.regras']}"
 				widgetVar="escolherRegra" modal="true" resizable="false"
+				styleClass="sa-dialog" width="800"
 				onHide="PF('alteracaoEmMassa').show(); return false;">
 
-				<p:panelGrid id="gridEscolherRegra" columns="4">
-					<p:column>
+				<h:panelGroup layout="block" styleClass="form-grid sa-cadastro-grid ui-fluid ui-g"
+					id="gridEscolherRegra">
+					<div class="ui-g-12 ui-md-4">
 						<p:outputLabel value="#{msgs['label.uc008.nome']}"
 							for="inputNomeRegra" />
-						<br />
 						<p:inputText id="inputNomeRegra"
 							value="#{buscarRegrasController.parans['nome']}" />
-					</p:column>
-
-					<p:column>
+					</div>
+					<div class="ui-g-12 ui-md-3">
 						<p:outputLabel value="#{msgs['label.uc008.empresa']}"
 							for="inputEmpresaRegra" />
-						<br />
 						<p:inputText id="inputEmpresaRegra"
 							value="#{buscarRegrasController.parans['empresa.nome']}" />
-					</p:column>
-
-					<p:column>
-						<p:outputLabel value="#{msgs['label.uc008.tipo.regra']}" />
-						<br />
+					</div>
+					<div class="ui-g-12 ui-md-3">
+						<p:outputLabel value="#{msgs['label.uc008.tipo.regra']}"
+							for="selectTipoRegra" />
 						<p:selectOneMenu id="selectTipoRegra"
 							value="#{buscarRegrasController.parans['tipo']}">
 							<f:selectItems
 								value="#{alteracoesEmMassaController.listaTipoRegra}" />
 						</p:selectOneMenu>
-					</p:column>
-
-					<p:column>
-						<br />
+					</div>
+					<div class="ui-g-12 ui-md-2">
+						<p:outputLabel value="&#160;" />
 						<p:commandButton id="buscarRegra"
 							value="#{msgs['alt.acao.buscar']}"
+							icon="pi pi-search"
 							action="#{buscarRegrasController.buscarRegraPedestre}"
-							update="gridEscolherRegra regras" process="gridEscolherRegra" />
-					</p:column>
+							update="gridEscolherRegra regras" process="gridEscolherRegra"
+							styleClass="sa-btn-label ui-button-success w-full" />
+					</div>
+				</h:panelGroup>
 
-				</p:panelGrid>
+				<p:spacer height="10" />
 
-				<br />
-
-				<p:panelGrid columns="4" id="regras" style="width: 700px">
-
+				<p:outputPanel id="regras">
 					<h:outputText value="#{msgs['msg.nenhum.item.encontrado.buscar']}"
-						escape="false" rendered="#{empty buscarRegrasController.result}" />
+						styleClass="sa-empty-state__text" escape="false"
+						rendered="#{empty buscarRegrasController.result}" />
 
 					<p:dataTable id="tableEscolherRegra"
 						value="#{buscarRegrasController.result}" var="regra"
 						rendered="#{not empty buscarRegrasController.result}"
 						paginator="true" rows="#{buscarRegrasController.quantPorPagina}"
 						paginatorPosition="bottom" paginatorAlwaysVisible="false"
+						styleClass="tabela-responsive sa-table"
 						selectionMode="single" rowKey="#{regra.id}"
 						selection="#{alteracoesEmMassaController.regraAlteracao}">
 
@@ -331,28 +319,27 @@
 							oncomplete="PF('escolherRegra').hide(); return false;" />
 
 						<p:column headerText="#{msgs['label.uc008.codigo']}"
-							style="text-align: center">
+							styleClass="sa-table-col-center">
 							<h:outputText value="#{regra.id}" />
 						</p:column>
 
 						<p:column headerText="#{msgs['label.uc008.nome']}"
-							style="text-align: center">
+							styleClass="sa-table-col-center">
 							<h:outputText value="#{regra.nome}" />
 						</p:column>
 
 						<p:column headerText="#{msgs['label.uc008.empresa']}"
-							style="text-align: center">
+							styleClass="sa-table-col-center">
 							<h:outputText value="#{regra.empresa.nome}" />
 						</p:column>
 
 						<p:column headerText="#{msgs['label.uc008.tipo.regra']}"
-							style="text-align: center">
+							styleClass="sa-table-col-center">
 							<h:outputText value="#{regra.tipo.descricao}" />
 						</p:column>
 
 					</p:dataTable>
-
-				</p:panelGrid>
+				</p:outputPanel>
 			</p:dialog>
 
 			<script>
@@ -368,96 +355,80 @@
 				})
 			</script>
 
-			<div class="filtros-avancados"
-				style="width: 100%; display: #{alteracoesEmMassaController.getFiltroFlag('procurarPedestre-filtroFlag') ? 'inline-block' : 'none'}">
+			<h:panelGroup id="containerDeFiltro" layout="block">
 
-				<h:panelGrid id="parameters" width="100%" columns="1"
-					headerClass="h-grid-header">
-					<f:facet name="header">
-						#{msgs['title.uc008.filtros.avancados']}				
-					</f:facet>
+				<h:panelGroup id="filtrosAvancadosWrapper" layout="block"
+					rendered="#{alteracoesEmMassaController.getFiltroFlag('procurarPedestre-filtroFlag')}"
+					styleClass="filtros-avancados">
 
-					<h:panelGrid columns="#{menuController.mobile == true ? 1 : 2}"
-						width="100%">
+				<h3 class="sa-filtros-avancados__title">#{msgs['title.uc008.filtros.avancados']}</h3>
 
-						<p:column>
-							<p:outputLabel value="#{msgs['label.uc008.nome']}"
-								for="filtro-avancado-nome" />
-							<br />
-							<p:inputText id="filtro-avancado-nome"
-								value="#{alteracoesEmMassaController.parans['nome']}" size="40"
-								onblur="sincronizarFiltro(this, 'filtro-nome-sync');"
-								styleClass="filtro-nome-sync" />
-						</p:column>
+				<div class="form-grid sa-cadastro-grid ui-fluid ui-g">
 
-						<p:column>
-							<p:outputLabel value="#{msgs['label.uc008.empresa']}"
-								for="filtro-avancado-emepresa" />
-							<br />
-							<p:selectOneMenu id="filtro-avancado-emepresa"
-								value="#{alteracoesEmMassaController.parans['empresa.id']}"
-								valueChangeListener="#{alteracoesEmMassaController.eventoEmpresaSelecionada}"
-								onchange="sincronizarFiltro(this, 'filtro-empresa-sync');"
-								styleClass="filtro-empresa-sync">
-								<f:selectItems
-									value="#{alteracoesEmMassaController.listaEmpresas}" />
-								<p:ajax process="@this"
-									update="@this filtro-avancado-departamento filtro-avancado-centro filtro-avancado-cargo"
-									event="valueChange" />
-								<f:converter converterId="javax.faces.Long" />
-							</p:selectOneMenu>
-						</p:column>
+					<div class="ui-g-12 ui-md-6">
+						<p:outputLabel value="#{msgs['label.uc008.nome']}"
+							for="filtro-avancado-nome" />
+						<p:inputText id="filtro-avancado-nome"
+							value="#{alteracoesEmMassaController.parans['nome']}"
+							onblur="sincronizarFiltro(this, 'filtro-nome-sync');"
+							styleClass="filtro-nome-sync" />
+					</div>
 
-						<p:column>
-							<p:outputLabel value="#{msgs['label.uc008.departamento']}"
-								for="filtro-avancado-departamento" />
-							<br />
-							<p:selectOneMenu id="filtro-avancado-departamento"
-								value="#{alteracoesEmMassaController.parans['departamento.id']}">
-								<f:selectItems
-									value="#{alteracoesEmMassaController.listaDepartamentos}" />
-								<f:converter converterId="javax.faces.Long" />
-							</p:selectOneMenu>
-						</p:column>
+					<div class="ui-g-12 ui-md-6">
+						<p:outputLabel value="#{msgs['label.uc008.empresa']}"
+							for="filtro-avancado-emepresa" />
+						<p:selectOneMenu id="filtro-avancado-emepresa"
+							value="#{alteracoesEmMassaController.parans['empresa.id']}"
+							valueChangeListener="#{alteracoesEmMassaController.eventoEmpresaSelecionada}"
+							onchange="sincronizarFiltro(this, 'filtro-empresa-sync');"
+							styleClass="filtro-empresa-sync">
+							<f:selectItems
+								value="#{alteracoesEmMassaController.listaEmpresas}" />
+							<p:ajax process="@this"
+								update="@this filtro-avancado-departamento filtro-avancado-centro filtro-avancado-cargo"
+								event="valueChange" />
+							<f:converter converterId="javax.faces.Long" />
+						</p:selectOneMenu>
+					</div>
 
-						<p:column>
-							<p:outputLabel value="#{msgs['label.uc008.centro.custo']}"
-								for="filtro-avancado-centro" />
-							<br />
-							<p:selectOneMenu id="filtro-avancado-centro"
-								value="#{alteracoesEmMassaController.parans['centroCusto.id']}">
-								<f:selectItems
-									value="#{alteracoesEmMassaController.listaCentrosDeCusto}" />
-								<f:converter converterId="javax.faces.Long" />
-							</p:selectOneMenu>
-						</p:column>
+					<div class="ui-g-12 ui-md-4">
+						<p:outputLabel value="#{msgs['label.uc008.departamento']}"
+							for="filtro-avancado-departamento" />
+						<p:selectOneMenu id="filtro-avancado-departamento"
+							value="#{alteracoesEmMassaController.parans['departamento.id']}">
+							<f:selectItems
+								value="#{alteracoesEmMassaController.listaDepartamentos}" />
+							<f:converter converterId="javax.faces.Long" />
+						</p:selectOneMenu>
+					</div>
 
-						<p:column>
-							<p:outputLabel value="#{msgs['label.uc008.cargo']}"
-								for="filtro-avancado-cargo" />
-							<br />
-							<p:selectOneMenu id="filtro-avancado-cargo"
-								value="#{alteracoesEmMassaController.parans['cargo.id']}">
-								<f:selectItems
-									value="#{alteracoesEmMassaController.listaCargos}" />
-								<f:converter converterId="javax.faces.Long" />
-							</p:selectOneMenu>
-						</p:column>
+					<div class="ui-g-12 ui-md-4">
+						<p:outputLabel value="#{msgs['label.uc008.centro.custo']}"
+							for="filtro-avancado-centro" />
+						<p:selectOneMenu id="filtro-avancado-centro"
+							value="#{alteracoesEmMassaController.parans['centroCusto.id']}">
+							<f:selectItems
+								value="#{alteracoesEmMassaController.listaCentrosDeCusto}" />
+							<f:converter converterId="javax.faces.Long" />
+						</p:selectOneMenu>
+					</div>
 
-					</h:panelGrid>
-				</h:panelGrid>
+					<div class="ui-g-12 ui-md-4">
+						<p:outputLabel value="#{msgs['label.uc008.cargo']}"
+							for="filtro-avancado-cargo" />
+						<p:selectOneMenu id="filtro-avancado-cargo"
+							value="#{alteracoesEmMassaController.parans['cargo.id']}">
+							<f:selectItems
+								value="#{alteracoesEmMassaController.listaCargos}" />
+							<f:converter converterId="javax.faces.Long" />
+						</p:selectOneMenu>
+					</div>
 
-				<br />
-			</div>
+				</div>
+				</h:panelGroup>
+			</h:panelGroup>
 
-			<h:panelGrid width="100%" columns="1" headerClass="h-grid-header">
-				<f:facet name="header">
-					<h:outputText value="#{msgs['title.uc014.alteracao.em.massa']}" />
-				</f:facet>
-
-				<h:column>
-
-					<ui:include src="/tema/templates/vazio.xhtml"
+			<ui:include src="/tema/templates/vazio.xhtml"
 						style="margin-top: 1000px;">
 						<ui:param name="exibe"
 							value="#{empty alteracoesEmMassaController.result}" />
@@ -470,18 +441,27 @@
 						paginator="true"
 						rows="#{alteracoesEmMassaController.quantPorPagina}"
 						paginatorPosition="bottom" paginatorAlwaysVisible="false"
-						scrollable="true" scrollHeight="flex"
-						styleClass="tabela-responsive">
+						styleClass="tabela-responsive sa-table">
 
-						<p:column headerText="#{msgs['label.uc008.matricula']}"
-							styleClass="align-left col-desktop-only"
+						<p:column styleClass="align-left col-desktop-only sa-table-col-abbr"
 							rendered="#{alteracoesEmMassaController.permiteCampoAdicionalCrachaMatricula}">
+							<f:facet name="header">
+								<ui:include src="/tema/templates/sa-th-abbr.xhtml">
+									<ui:param name="full" value="#{msgs['label.uc008.matricula']}" />
+									<ui:param name="short" value="Mat." />
+								</ui:include>
+							</f:facet>
 							<h:outputText
 								value="#{pedestre.matricula != null ? pedestre.matricula : '--'}" />
 						</p:column>
 
-						<p:column headerText="#{msgs['label.uc008.cartao.acesso']}"
-							styleClass="align-left">
+						<p:column styleClass="align-left sa-table-col-abbr">
+							<f:facet name="header">
+								<ui:include src="/tema/templates/sa-th-abbr.xhtml">
+									<ui:param name="full" value="#{msgs['label.uc008.cartao.acesso']}" />
+									<ui:param name="short" value="Nº cartão" />
+								</ui:include>
+							</f:facet>
 							<h:outputText value="#{pedestre.codigoCartaoAcesso}" />
 						</p:column>
 
@@ -490,21 +470,11 @@
 							<h:outputText value="#{pedestre.nome}" />
 						</p:column>
 
-						<p:column headerText="#{msgs['label.uc008.contato']}"
-							styleClass="align-left col-desktop-only">
-							<h:outputText value="#{pedestre.allPhonesFormatted}" />
-						</p:column>
-
 						<p:column headerText="#{msgs['label.uc008.cpf']}"
 							styleClass="align-left col-desktop-only">
 							<h:outputText value="#{pedestre.cpf}">
 								<f:converter converterId="cpfConverter" />
 							</h:outputText>
-						</p:column>
-
-						<p:column headerText="#{msgs['label.uc008.rg']}"
-							styleClass="align-left col-desktop-only">
-							<h:outputText value="#{pedestre.rg}" />
 						</p:column>
 
 						<p:column headerText="#{msgs['label.uc008.tipo']}"
@@ -517,28 +487,43 @@
 							<h:outputText value="#{pedestre.empresa.nome}" />
 						</p:column>
 
-						<p:column headerText="departamento"
-							styleClass="align-left col-desktop-only">
+						<p:column styleClass="align-left col-desktop-only sa-table-col-abbr">
+							<f:facet name="header">
+								<ui:include src="/tema/templates/sa-th-abbr.xhtml">
+									<ui:param name="full" value="#{msgs['label.uc008.departamento']}" />
+									<ui:param name="short" value="Dept." />
+								</ui:include>
+							</f:facet>
 							<h:outputText value="#{pedestre.departamento.nome}" />
 						</p:column>
 
-						<p:column headerText="centro de custo"
-							styleClass="align-left col-desktop-only">
+						<p:column styleClass="align-left col-desktop-only sa-table-col-abbr">
+							<f:facet name="header">
+								<ui:include src="/tema/templates/sa-th-abbr.xhtml">
+									<ui:param name="full" value="#{msgs['label.uc008.centro.custo']}" />
+									<ui:param name="short" value="C. custo" />
+								</ui:include>
+							</f:facet>
 							<h:outputText value="#{pedestre.centroCusto.nome}" />
 						</p:column>
 
-						<p:column headerText="cargo"
+						<p:column headerText="#{msgs['label.uc008.cargo']}"
 							styleClass="align-left col-desktop-only">
 							<h:outputText value="#{pedestre.cargo.nome}" />
 						</p:column>
 
-						<p:column headerText="regra ativa"
-							styleClass="align-left col-desktop-only">
+						<p:column styleClass="align-left col-desktop-only sa-table-col-abbr">
+							<f:facet name="header">
+								<ui:include src="/tema/templates/sa-th-abbr.xhtml">
+									<ui:param name="full" value="Regra ativa" />
+									<ui:param name="short" value="Regra" />
+								</ui:include>
+							</f:facet>
 							<h:outputText
 								value="#{alteracoesEmMassaController.buscaRegra(pedestre)}" />
 						</p:column>
 
-						<p:column style="text-align: center; width: 40px">
+						<p:column styleClass="sa-table-col-actions" style="width: 40px">
 
 							<!-- HEADER: marcar / desmarcar todos -->
 							<f:facet name="header">
@@ -559,8 +544,7 @@
 						</p:column>
 
 					</p:dataTable>
-				</h:column>
-			</h:panelGrid>
+
 
 		</ui:define>
 	</ui:composition>

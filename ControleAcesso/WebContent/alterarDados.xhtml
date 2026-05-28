@@ -68,12 +68,14 @@
 						</div>
 
 						<div class="sa-field">
-							<p:commandButton id="btAlterarSenha"
-								value="#{msgs['label.alterar.senha.agora']}"
-								styleClass="ui-button-success"
-								action="#{alteraDadosController.salvar}">
-								<f:ajax render="@form" execute="@form" />
-							</p:commandButton>
+							<div class="sa-login__actions">
+								<p:commandButton id="btAlterarSenha"
+									value="#{msgs['label.alterar.senha.agora']}"
+									styleClass="sa-btn-label ui-button-success"
+									action="#{alteraDadosController.salvar}">
+									<f:ajax render="@form" execute="@form" />
+								</p:commandButton>
+							</div>
 						</div>
 
 					</div>

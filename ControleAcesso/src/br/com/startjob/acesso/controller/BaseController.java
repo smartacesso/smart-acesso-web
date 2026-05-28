@@ -66,6 +66,9 @@ public abstract class BaseController implements Serializable {
 	 * Sufixo das telas de operações
 	 */
 	protected static final String SUFIXO_TELAS_OPERACAO = "Oper";
+
+	/** URL da listagem/pesquisa — preenchida ao abrir cadastro a partir da consulta */
+	protected static final String SESSION_URL_RETORNO_LISTA = "sa_url_retorno_lista";
 	
 	/**
 	 * Nome do caso de uso que o Controller se refere
@@ -1127,7 +1130,8 @@ public abstract class BaseController implements Serializable {
 		
 		if(urlNovoRegistro != null 
 				&& !"".equals(urlNovoRegistro)){
-			
+
+			salvarUrlRetornoLista();
 
 		    UsuarioEntity usuario = getUsuarioLogado();
 
@@ -1170,6 +1174,8 @@ public abstract class BaseController implements Serializable {
 		if(urlNovoRegistro != null 
 				&& !"".equals(urlNovoRegistro)
 				&& id != null){
+
+			salvarUrlRetornoLista();
 			
 			if(urlNovoRegistro.contains("?")) {
 				redirect(urlNovoRegistro+"&id="+id);
@@ -1179,6 +1185,61 @@ public abstract class BaseController implements Serializable {
 			
 		}
 		
+	}
+
+	/**
+	 * Grava a URL atual (pesquisa) para retorno a partir do cadastro.
+	 */
+	protected void salvarUrlRetornoLista() {
+		try {
+			HttpServletRequest request = getRequest();
+			if (request == null) {
+				return;
+			}
+
+			String uri = request.getRequestURI();
+			String appName = "/" + AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_NOME_APP);
+			String path = uri;
+
+			if (path.startsWith(appName)) {
+				path = path.substring(appName.length());
+			}
+
+			String query = request.getQueryString();
+			if (query != null && !query.isEmpty()) {
+				path = path + "?" + query;
+			}
+
+			if (path != null && !path.isEmpty()) {
+				setSessioAtrribute(SESSION_URL_RETORNO_LISTA, path);
+			}
+		} catch (Exception e) {
+			// ignora — botão voltar simplesmente não aparece
+		}
+	}
+
+	public boolean exibeBotaoVoltarLista() {
+		return getUrlRetornoListaAbsoluta() != null;
+	}
+
+	public String getUrlRetornoListaAbsoluta() {
+		Object url = getSessionAtrribute(SESSION_URL_RETORNO_LISTA);
+		if (!(url instanceof String) || ((String) url).isEmpty()) {
+			return null;
+		}
+		try {
+			String appName = "/" + AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_NOME_APP);
+			return appName + url;
+		} catch (Exception e) {
+			return null;
+		}
+	}
+
+	public void voltarParaLista() {
+		Object url = getSessionAtrribute(SESSION_URL_RETORNO_LISTA);
+		if (url instanceof String && !((String) url).isEmpty()) {
+			redirect((String) url);
+		}
 	}
 	
 	/**

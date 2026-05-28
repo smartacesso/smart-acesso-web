@@ -20,7 +20,7 @@ import br.com.startjob.acesso.modelo.enumeration.TipoRegra;
 @Named("consultaRegraAcessoController")
 @ViewScoped
 @UseCase(classEntidade=RegraEntity.class, funcionalidade="Consulta regras", logicalRemove=true, 
-		urlNovoRegistro="/paginas/sistema/regras/cadastroRegra.xhtml", lazyLoad=true, quantPorPagina=10)
+		urlNovoRegistro="/paginas/sistema/regras/cadastroRegra.xhtml", lazyLoad=true, quantPorPagina=6)
 public class ConsultaRegraAcessoController extends BaseController {
 	
 	private static final long serialVersionUID = 1L;

@@ -1,0 +1,14 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+
+	<!-- Link GET: não submete o form nem dispara validação de campos obrigatórios -->
+	<p:link id="acaoVoltarLista"
+		rendered="#{ctrl.exibeBotaoVoltarLista()}"
+		value="Voltar"
+		href="#{ctrl.urlRetornoListaAbsoluta}"
+		title="Voltar para a pesquisa"
+		icon="pi pi-arrow-left"
+		styleClass="sa-btn-label ui-button ui-button-flat ui-widget ui-state-default" />
+
+</ui:composition>

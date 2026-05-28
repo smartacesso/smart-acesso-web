@@ -31,17 +31,19 @@
 						update="form:dialogEscolherResponsavel"
 						oncomplete="PF('escolherResponsavel').show(); return false;"
 						process="@this"
-						title="Buscar Responsável Avançado" />
+						title="Buscar Responsável Avançado"
+						styleClass="sa-btn-label ui-button-flat" />
 				</div>
 			</div>
 
 			<div class="ui-g-12 ui-md-4 ui-lg-3">
+				<p:outputLabel value="&#160;" />
 				<p:commandButton id="bindDependencies"
 					action="#{cadastroPedestreController.bindDependencies()}"
 					value="#{msgs['alt.acao.vincular']}" icon="pi pi-link"
 					process="@this, responsavelAuto"
 					update="painelTabelaResponsaveis responsavelAuto form:dialogEscolherResponsavel"
-					styleClass="ui-button-success" />
+					styleClass="sa-btn-label ui-button-success w-full" />
 			</div>
 		</div>
 	</p:panel>
@@ -54,6 +56,7 @@
 				value="#{cadastroPedestreController.responsaveis}" var="responsavel"
 				paginator="true" rows="3" paginatorPosition="bottom"
 				paginatorAlwaysVisible="false"
+				styleClass="sa-table tabela-responsive"
 				emptyMessage="#{msgs['msg.nenhum.item.encontrado.adicionar']}">
 
 				<p:column headerText="#{msgs['label.uc008.nome']}">
@@ -66,14 +69,14 @@
 
 					<p:tooltip id="dicaMostraDadosResponsavel"
 						for="nomeResponsavel ajudaResponsavel" position="bottom">
-						<h:panelGrid columns="2" cellpadding="3">
-							<h:outputText value="#{msgs['label.uc008.nome']}:" style="font-weight: bold; color: #fff" />
-							<h:outputText value="#{responsavel.nome}" style="color: #fff" />
-							<h:outputText value="#{msgs['label.uc008.dataNascimento']}:" style="font-weight: bold; color: #fff" />
-							<h:outputText value="#{responsavel.dataNascimento}" style="color: #fff">
+						<div class="sa-tooltip-grid">
+							<span class="sa-tooltip-grid__label">#{msgs['label.uc008.nome']}:</span>
+							<span class="sa-tooltip-grid__value">#{responsavel.nome}</span>
+							<span class="sa-tooltip-grid__label">#{msgs['label.uc008.dataNascimento']}:</span>
+							<h:outputText value="#{responsavel.dataNascimento}" styleClass="sa-tooltip-grid__value">
 								<f:convertDateTime pattern="dd/MM/yyyy" />
 							</h:outputText>
-						</h:panelGrid>
+						</div>
 					</p:tooltip>
 				</p:column>
 

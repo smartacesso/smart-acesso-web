@@ -42,7 +42,7 @@ import br.com.startjob.acesso.modelo.enumeration.TipoPedestre;
 @Named("consultaPedestreController")
 @ViewScoped
 @UseCase(classEntidade=PedestreEntity.class, funcionalidade="Consulta pedestres", logicalRemove = true, 
-		urlNovoRegistro="/paginas/sistema/pedestres/cadastroPedestre.xhtml", lazyLoad = true, quantPorPagina = 10)
+		urlNovoRegistro="/paginas/sistema/pedestres/cadastroPedestre.xhtml", lazyLoad = true, quantPorPagina = 6)
 public class ConsultaPedestreController extends BaseController {
 
 	private static final long serialVersionUID = 1L;

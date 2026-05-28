@@ -15,24 +15,23 @@
 											? msgs['title.uc004.editar.usuario'] 
 											: msgs['title.uc004.cadastro.usuario']}
 		</ui:define>
-
-		<ui:define name="breadcrumb">
-			<a target="_top"
-				href="/#{menuController.appName}/paginas/principal.xhtml"> <h:outputText
-					value="#{msgs['title.principal']}" />
-			</a> > 
-			<a target="_top"
-				href="/#{menuController.appName}/paginas/sistema/usuarios/pesquisaUsuarios.xhtml">
-				<h:outputText value="#{msgs['title.uc001.consulta.usuarios']}" />
-			</a> > <h:outputText
-				value="#{cadastroUsuarioController.entidade.id != null 
-										? msgs['title.uc004.editar.usuario'] 
-										: msgs['title.uc004.cadastro.usuario']}" />
+		<ui:define name="pageTitle">
+			<h:outputText
+						value="#{cadastroUsuarioController.entidade.id != null 
+								? msgs['title.uc004.editar.usuario'] 
+								: msgs['title.uc004.cadastro.usuario']}" />
+		</ui:define>
+		<ui:define name="pageSubtitle">
+			<h:outputText value="#{sessionScope.usuario.cliente.nome}" rendered="#{sessionScope.usuario != null}" />
 		</ui:define>
 
-		<ui:define name="tools">
+
+<ui:define name="tools">
 			<p:toolbar styleClass="sa-toolbar-wrap">
 				<p:toolbarGroup styleClass="sa-toolbar-actions">
+					<ui:include src="/WEB-INF/template/sa-voltar-lista.xhtml">
+						<ui:param name="ctrl" value="#{cadastroUsuarioController}" />
+					</ui:include>
 					<p:commandButton id="save"
 						action="#{cadastroUsuarioController.salvar}"
 						value="#{msgs['alt.acao.save']}"
@@ -58,17 +57,21 @@
 		<ui:define name="conteudo">
 
 			<p:dialog id="alteraSenhaDialog" widgetVar="alteraSenha"
-				header="#{msgs['header.alterar.dados.login']}" modal="true">
-				<p:panelGrid columns="3">
-					<p:column>
-						<h:outputText value="#{msgs['label.novo.login']}" />
+				header="#{msgs['header.alterar.dados.login']}" modal="true"
+				styleClass="sa-dialog">
+				<div class="sa-dialog-form">
+					<div class="sa-field">
+						<span class="sa-label">
+							<h:outputText value="#{msgs['label.novo.login']}" />
+						</span>
 						<p:inputText value="#{cadastroUsuarioController.usuarioLogin}">
 							<f:validateRegex pattern="[a-zA-Z0-9]+" />
 						</p:inputText>
-					</p:column>
-
-					<p:column>
-						<h:outputText value="#{msgs['label.nova.senha']}" />
+					</div>
+					<div class="sa-field">
+						<span class="sa-label">
+							<h:outputText value="#{msgs['label.nova.senha']}" />
+						</span>
 						<p:password id="alteraSenha"
 							value="#{cadastroUsuarioController.usuarioSenha}" feedback="true"
 							redisplay="true" promptLabel="Digite sua senha" weakLabel="Fraca"
@@ -77,31 +80,25 @@
 							<f:validateRegex
 								pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[@$!%*?&amp;])[A-Za-z0-9@$!%*?&amp;]{8,}$" />
 						</p:password>
-					</p:column>
-
-					<p:column>
-						<p:commandButton value="#{msgs['alt.acao.alterar']}"
-							action="#{cadastroUsuarioController.alterarLoginSenhaUsuarioUsuario()}"
-							process="@form" update="@form"
-							oncomplete="PF('alteraSenha').hide();" />
-					</p:column>
-				</p:panelGrid>
+					</div>
+				</div>
+				<div class="sa-dialog-actions">
+					<p:commandButton value="#{msgs['alt.acao.alterar']}"
+						action="#{cadastroUsuarioController.alterarLoginSenhaUsuarioUsuario()}"
+						process="@form" update="@form"
+						styleClass="sa-btn-label ui-button-success"
+						oncomplete="PF('alteraSenha').hide();" />
+				</div>
 			</p:dialog>
 
 
-			<h:panelGrid width="100%" columns="1" headerClass="h-grid-header">
-				<f:facet name="header">
-					<h:outputText
-						value="#{cadastroUsuarioController.entidade.id != null 
-								? msgs['title.uc004.editar.usuario'] 
-								: msgs['title.uc004.cadastro.usuario']}" />
-				</f:facet>
-				<p:accordionPanel id="cadastroUsuarioTab">
+			
+				<p:accordionPanel id="cadastroUsuarioTab" styleClass="sa-accordion">
 					<!-- Dados do Usuário -->
 					<p:tab title="#{msgs['label.uc004.dados.usuario']}">
 						<p:panel id="painelCadastroUsuario" header="Cadastro de usuario"
 							styleClass="ui-fluid">
-							<div class="form-grid ui-fluid ui-g">
+							<div class="form-grid sa-cadastro-grid ui-fluid ui-g">
 
 
 								<div class="ui-g-12 ui-md-6">
@@ -258,7 +255,7 @@
 					<p:tab title="#{msgs['label.uc001.endereco']}">
 						<p:panel id="painelCadastroEndereço" header="Cadastro de endereço"
 							styleClass="ui-fluid">
-							<div class="form-grid ui-fluid ui-g">
+							<div class="form-grid sa-cadastro-grid ui-fluid ui-g">
 
 								<div class="ui-g-12 ui-md-4">
 									<p:outputLabel value="#{msgs['label.uc001.cep']}" for="cep" />
@@ -314,7 +311,6 @@
 						</p:panel>
 					</p:tab>
 				</p:accordionPanel>
-			</h:panelGrid>
 		</ui:define>
 	</ui:composition>
 

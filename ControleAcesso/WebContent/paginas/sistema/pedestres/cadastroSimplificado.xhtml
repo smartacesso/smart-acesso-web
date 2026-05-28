@@ -15,210 +15,332 @@
 	<ui:composition template="/tema/templates/template.xhtml">
 
 		<ui:define name="titulo">
-			#{msgs['title.sistema']} | Cadastro Simplificado
+			#{msgs['title.sistema']} | #{msgs[cadastroPedestreController.tituloPagina]}
 		</ui:define>
-
-		<ui:define name="breadcrumb">
-			<a target="_top"
-				href="/#{menuController.appName}/paginas/principal.xhtml">
-				<h:outputText value="#{msgs['title.principal']}" />
-			</a> &gt;
-			<h:outputText value="Cadastro Simplificado" />
+		<ui:define name="pageTitle">
+			<h:outputText value="#{msgs[cadastroPedestreController.tituloPagina]}" />
+		</ui:define>
+		<ui:define name="pageSubtitle">
+			<h:outputText value="Cadastro rápido · 4 etapas" />
 		</ui:define>
 
 		<ui:define name="tools">
 			<p:toolbar styleClass="sa-toolbar-wrap">
 				<p:toolbarGroup styleClass="sa-toolbar-actions">
-					<p:commandButton id="save"
+					<ui:include src="/WEB-INF/template/sa-voltar-lista.xhtml">
+						<ui:param name="ctrl" value="#{cadastroPedestreController}" />
+					</ui:include>
+					<p:commandButton id="saveToolbar"
 						rendered="#{cadastroPedestreController.step eq 3}"
 						action="#{cadastroPedestreController.salvar}"
-						value="Concluir Cadastro"
+						value="Concluir cadastro"
 						title="#{msgs['alt.acao.save']}"
 						icon="pi pi-check" iconPos="left"
-						styleClass="sa-btn-label ui-button-success">
-						<p:ajax process="@form" update="@form" />
-					</p:commandButton>
+						process="@form" update="@form"
+						styleClass="sa-btn-label ui-button-success" />
 				</p:toolbarGroup>
 			</p:toolbar>
 		</ui:define>
 
 		<ui:define name="conteudo">
 
-			<h:panelGrid width="100%" columns="1" headerClass="h-grid-header">
-				<f:facet name="header">
-					<h:outputText value="Cadastro Facial Simplificado" />
-				</f:facet>
+			<h:panelGroup id="cadastroSimplesPainel" layout="block" styleClass="sa-cadastro-simples sa-cadastro-simples--fill">
 
-				<h:column>
-					<p:panel styleClass="ui-fluid sa-form-card">
-						<p:steps activeIndex="#{cadastroPedestreController.step}">
-							<p:menuitem value="CPF" />
-							<p:menuitem value="Dados" />
-							<p:menuitem value="Foto" />
-							<p:menuitem value="Confirmação" />
-						</p:steps>
+				<div class="sa-cadastro-simples__shell">
 
-						<p:spacer height="20" />
+					<div class="sa-cadastro-simples__hero">
+						<h2 class="sa-cadastro-simples__hero-title">
+							<h:outputText value="#{msgs[cadastroPedestreController.tituloPagina]}" />
+						</h2>
+						<p class="sa-cadastro-simples__hero-sub">
+							<h:outputText
+								value="#{cadastroPedestreController.step eq 0 ? 'Informe o CPF para localizar ou iniciar um novo cadastro.'
+									: cadastroPedestreController.step eq 1 ? 'Preencha os dados essenciais e avance.'
+									: cadastroPedestreController.step eq 2 ? 'Capture uma foto nítida do rosto para liberação facial.'
+									: 'Revise as informações antes de concluir.'}" />
+						</p>
+					</div>
 
-						<!-- STEP 0 - CPF -->
-						<h:panelGroup rendered="#{cadastroPedestreController.step eq 0}">
-							<div class="form-grid sa-cadastro-grid ui-fluid ui-g">
-								<div class="ui-g-12 ui-md-6">
-									<p:outputLabel value="CPF" for="cpf" indicateRequired="true" />
-									<p:inputMask id="cpf" mask="999.999.999-99"
-										value="#{cadastroPedestreController.cpf}"
-										onclick="this.setSelectionRange(0,0);" />
+					<!-- Indicador de etapas -->
+					<div class="sa-cadastro-simples__progress" aria-label="Progresso do cadastro">
+						<div class="sa-cadastro-simples__step #{cadastroPedestreController.step eq 0 ? 'is-active' : ''} #{cadastroPedestreController.step gt 0 ? 'is-done' : ''}">
+							<span class="sa-cadastro-simples__step-num">1</span>
+							<span class="sa-cadastro-simples__step-label">CPF</span>
+						</div>
+						<span class="sa-cadastro-simples__progress-line #{cadastroPedestreController.step gt 0 ? 'is-done' : ''}" aria-hidden="true"></span>
+						<div class="sa-cadastro-simples__step #{cadastroPedestreController.step eq 1 ? 'is-active' : ''} #{cadastroPedestreController.step gt 1 ? 'is-done' : ''}">
+							<span class="sa-cadastro-simples__step-num">2</span>
+							<span class="sa-cadastro-simples__step-label">Dados</span>
+						</div>
+						<span class="sa-cadastro-simples__progress-line #{cadastroPedestreController.step gt 1 ? 'is-done' : ''}" aria-hidden="true"></span>
+						<div class="sa-cadastro-simples__step #{cadastroPedestreController.step eq 2 ? 'is-active' : ''} #{cadastroPedestreController.step gt 2 ? 'is-done' : ''}">
+							<span class="sa-cadastro-simples__step-num">3</span>
+							<span class="sa-cadastro-simples__step-label">Foto</span>
+						</div>
+						<span class="sa-cadastro-simples__progress-line #{cadastroPedestreController.step gt 2 ? 'is-done' : ''}" aria-hidden="true"></span>
+						<div class="sa-cadastro-simples__step #{cadastroPedestreController.step eq 3 ? 'is-active' : ''}">
+							<span class="sa-cadastro-simples__step-num">4</span>
+							<span class="sa-cadastro-simples__step-label">Confirmar</span>
+						</div>
+					</div>
+
+					<div class="sa-cadastro-simples__body">
+
+						<!-- STEP 0 — CPF -->
+						<h:panelGroup layout="block" styleClass="sa-cadastro-simples__step-wrap"
+							rendered="#{cadastroPedestreController.step eq 0}">
+							<div class="sa-cadastro-simples__step-inner sa-cadastro-simples__step-inner--cpf">
+								<div class="sa-cadastro-simples__step-head">
+									<h3 class="sa-cadastro-simples__step-title">Identificação por CPF</h3>
+									<p class="sa-cadastro-simples__step-desc">
+										Digite o CPF da pessoa. Se já existir cadastro, os dados serão carregados automaticamente.
+									</p>
 								</div>
-								<div class="ui-g-12">
-									<p:commandButton value="Buscar" icon="pi pi-search"
+								<div class="sa-cadastro-simples__cpf-row">
+									<div class="sa-cadastro-simples__cpf-field">
+										<p:outputLabel value="CPF" for="cpf" indicateRequired="true" />
+										<p:inputMask id="cpf" mask="999.999.999-99"
+											value="#{cadastroPedestreController.cpf}"
+											placeholder="000.000.000-00"
+											onclick="this.setSelectionRange(0,0);" />
+									</div>
+									<p:commandButton value="Continuar" icon="pi pi-arrow-right" iconPos="right"
 										action="#{cadastroPedestreController.buscarPorCpf}"
-										process="@form" update="@form"
-										styleClass="ui-button-success" />
+										process="@form" update="cadastroSimplesPainel growl"
+										styleClass="sa-btn-label ui-button-success" />
 								</div>
 							</div>
 						</h:panelGroup>
 
-						<!-- STEP 1 - DADOS -->
-						<h:panelGroup rendered="#{cadastroPedestreController.step eq 1}">
-							<div class="form-grid sa-cadastro-grid ui-fluid ui-g">
-								<div class="ui-g-12 ui-md-6">
-									<p:outputLabel value="Nome completo" for="nome"
-										indicateRequired="true" />
+						<!-- STEP 1 — DADOS -->
+						<h:panelGroup layout="block" styleClass="sa-cadastro-simples__step-wrap"
+							rendered="#{cadastroPedestreController.step eq 1}">
+							<div class="sa-cadastro-simples__step-inner sa-cadastro-simples__step-inner--dados">
+								<div class="sa-cadastro-simples__step-head">
+									<h3 class="sa-cadastro-simples__step-title">Dados básicos</h3>
+									<p class="sa-cadastro-simples__step-desc">
+										Informe o nome e, se necessário, vincule a uma empresa.
+									</p>
+								</div>
+								<div class="sa-cadastro-simples__fields sa-cadastro-simples__fields--grid">
+								<h:panelGroup layout="block"
+									rendered="#{not empty cadastroPedestreController.entidade.cpf}">
+									<p:outputLabel value="CPF" />
+									<h:outputText styleClass="sa-cadastro-simples__field-readonly"
+										value="#{cadastroPedestreController.entidade.cpf}" />
+								</h:panelGroup>
+								<div>
+									<p:outputLabel value="Nome completo" for="nome" indicateRequired="true" />
 									<p:inputText id="nome"
 										value="#{cadastroPedestreController.entidade.nome}"
+										placeholder="Nome e sobrenome"
 										required="true" />
 								</div>
-								<div class="ui-g-12 ui-md-6">
-									<p:outputLabel value="#{msgs['label.uc008.empresa']}"
-										for="empresa" />
+								<div>
+									<p:outputLabel value="#{msgs['label.uc008.empresa']}" for="empresa" />
 									<p:selectOneMenu id="empresa"
 										value="#{cadastroPedestreController.entidade.empresa.id}"
 										valueChangeListener="#{cadastroPedestreController.eventoEmpresaSelecionada}"
-										required="#{cadastroPedestreController.verificaObrigatorio('empresa')}">
-										<f:selectItems
-											value="#{cadastroPedestreController.listaEmpresas}" />
+										required="#{cadastroPedestreController.verificaObrigatorio('empresa')}"
+										filter="true" filterMatchMode="contains">
+										<f:selectItems value="#{cadastroPedestreController.listaEmpresas}" />
 									</p:selectOneMenu>
 								</div>
-								<div class="ui-g-12">
-									<p:commandButton value="Avançar" icon="pi pi-arrow-right"
-										action="#{cadastroPedestreController.proximo}"
-										process="@form" update="@form"
-										styleClass="ui-button-success" />
-									<p:commandButton value="Voltar" icon="pi pi-arrow-left"
-										action="#{cadastroPedestreController.voltar}"
-										process="@form" update="@form"
-										styleClass="ui-button-outlined" style="margin-left: 0.5rem;" />
+								</div>
+								<div class="sa-cadastro-simples__footer">
+									<span class="sa-cadastro-simples__footer-hint">Etapa 2 de 4</span>
+									<div class="sa-form-actions sa-form-actions--end">
+										<p:commandButton value="Voltar" icon="pi pi-arrow-left"
+											action="#{cadastroPedestreController.voltar}"
+											immediate="true" process="@this" update="cadastroSimplesPainel growl"
+											styleClass="sa-btn-label ui-button-flat" />
+										<p:commandButton value="Avançar" icon="pi pi-arrow-right" iconPos="right"
+											action="#{cadastroPedestreController.proximo}"
+											process="@form" update="cadastroSimplesPainel growl"
+											styleClass="sa-btn-label ui-button-success" />
+									</div>
 								</div>
 							</div>
 						</h:panelGroup>
 
-						<!-- STEP 2 - FOTO -->
-						<h:panelGroup id="fotoPreview"
+						<!-- STEP 2 — FOTO -->
+						<h:panelGroup id="fotoPreview" layout="block" styleClass="sa-cadastro-simples__step-wrap"
 							rendered="#{cadastroPedestreController.step eq 2}">
-							<div class="form-grid sa-cadastro-grid ui-fluid ui-g"
-								style="text-align:center">
-								<div class="ui-g-12">
+							<div class="sa-cadastro-simples__step-inner sa-cadastro-simples__step-inner--foto">
+								<div class="sa-cadastro-simples__step-head">
+								<h3 class="sa-cadastro-simples__step-title">Foto facial</h3>
+								<p class="sa-cadastro-simples__step-desc">
+									A foto é usada nos equipamentos de reconhecimento facial.
+								</p>
+							</div>
+							<div class="sa-cadastro-simples__photo-layout">
+								<div class="sa-cadastro-simples__photo">
+									<p:graphicImage styleClass="sa-cadastro-simples__avatar"
+										value="#{cadastroPedestreController.getSreamedContent(cadastroPedestreController.entidade.foto)}"
+										rendered="#{not empty cadastroPedestreController.entidade.foto}"
+										stream="false" cache="false" alt="Foto capturada" />
+									<h:panelGroup layout="block" styleClass="sa-cadastro-simples__avatar--empty"
+										rendered="#{empty cadastroPedestreController.entidade.foto}">
+										<i class="pi pi-user" aria-hidden="true"></i>
+									</h:panelGroup>
+									<p:commandButton value="Tirar foto" type="button"
+										onclick="PF('pc').attach(); PF('tirarFoto').show();"
+										icon="pi pi-camera"
+										styleClass="sa-btn-label ui-button-outlined" />
+								</div>
+								<div class="sa-cadastro-simples__photo-side">
+									<ul class="sa-cadastro-simples__tips">
+										<li><i class="pi pi-check" aria-hidden="true"></i> Use um ambiente bem iluminado</li>
+										<li><i class="pi pi-check" aria-hidden="true"></i> Centralize o rosto na câmera</li>
+										<li><i class="pi pi-check" aria-hidden="true"></i> Evite boné, óculos escuros ou máscara</li>
+									</ul>
+									<p:commandButton value="Tirar nova foto" type="button"
+										rendered="#{not empty cadastroPedestreController.entidade.foto}"
+										onclick="PF('pc').attach(); PF('tirarFoto').show();"
+										icon="pi pi-refresh"
+										styleClass="sa-btn-label ui-button-flat" />
+								</div>
+								</div>
+								<div class="sa-cadastro-simples__footer">
+									<span class="sa-cadastro-simples__footer-hint">
+										<h:outputText value="Foto obrigatória para continuar"
+											rendered="#{empty cadastroPedestreController.entidade.foto}" />
+										<h:outputText value="Foto capturada — pode avançar"
+											rendered="#{not empty cadastroPedestreController.entidade.foto}" />
+									</span>
+									<div class="sa-form-actions sa-form-actions--end">
+										<p:commandButton value="Voltar" icon="pi pi-arrow-left"
+											action="#{cadastroPedestreController.voltar}"
+											immediate="true" process="@this" update="cadastroSimplesPainel growl"
+											styleClass="sa-btn-label ui-button-flat" />
+										<p:commandButton value="Avançar" icon="pi pi-arrow-right" iconPos="right"
+											action="#{cadastroPedestreController.proximo}"
+											process="@this" update="cadastroSimplesPainel growl"
+											disabled="#{empty cadastroPedestreController.entidade.foto}"
+											styleClass="sa-btn-label ui-button-success" />
+									</div>
+								</div>
+							</div>
+						</h:panelGroup>
+
+						<!-- STEP 3 — CONFIRMAÇÃO -->
+						<h:panelGroup layout="block" styleClass="sa-cadastro-simples__step-wrap"
+							rendered="#{cadastroPedestreController.step eq 3}">
+							<div class="sa-cadastro-simples__step-inner sa-cadastro-simples__step-inner--confirm">
+								<div class="sa-cadastro-simples__step-head">
+								<h3 class="sa-cadastro-simples__step-title">Confirmação</h3>
+								<p class="sa-cadastro-simples__step-desc">
+									Verifique se os dados estão corretos antes de salvar.
+								</p>
+							</div>
+							<div class="sa-cadastro-simples__summary">
+								<div class="sa-cadastro-simples__summary-photo">
 									<p:graphicImage
 										value="#{cadastroPedestreController.getSreamedContent(cadastroPedestreController.entidade.foto)}"
 										rendered="#{not empty cadastroPedestreController.entidade.foto}"
-										stream="false" cache="false"
-										style="height:160px;width:160px;border-radius:50%; border: 5px solid var(--sa-accent, #005e9f);" />
+										stream="false" cache="false" alt="Foto" />
 									<p:graphicImage
 										value="#{menuController.path}/tema/img/ic_photo_male.png"
 										rendered="#{empty cadastroPedestreController.entidade.foto}"
-										style="height:160px;width:160px;border-radius:50%; border: 5px solid var(--sa-accent, #005e9f);" />
+										style="width:7.5rem;height:7.5rem;border-radius:50%;object-fit:cover;" alt="" />
 								</div>
-								<div class="ui-g-12">
-									<p:commandButton value="Tirar Foto" type="button"
-										onclick="PF('pc').attach(); PF('tirarFoto').show();"
-										icon="pi pi-camera" styleClass="ui-button-outlined" />
+								<div class="sa-cadastro-simples__summary-list">
+									<div class="sa-cadastro-simples__summary-item">
+										<span class="sa-cadastro-simples__summary-label">Nome</span>
+										<span class="sa-cadastro-simples__summary-value">
+											<h:outputText value="#{cadastroPedestreController.entidade.nome}" />
+										</span>
+									</div>
+									<div class="sa-cadastro-simples__summary-item">
+										<span class="sa-cadastro-simples__summary-label">CPF</span>
+										<span class="sa-cadastro-simples__summary-value">
+											<h:outputText value="#{cadastroPedestreController.entidade.cpf}" />
+										</span>
+									</div>
+									<div class="sa-cadastro-simples__summary-item"
+										rendered="#{not empty cadastroPedestreController.entidade.empresa}">
+										<span class="sa-cadastro-simples__summary-label">Empresa</span>
+										<span class="sa-cadastro-simples__summary-value">
+											<h:outputText value="#{cadastroPedestreController.entidade.empresa.nome}" />
+										</span>
+									</div>
+									<div class="sa-cadastro-simples__summary-item">
+										<span class="sa-cadastro-simples__summary-label">Tipo</span>
+										<span class="sa-cadastro-simples__summary-value">
+											<h:outputText value="#{cadastroPedestreController.isPedestre() ? 'Pedestre' : 'Visitante'}" />
+										</span>
+									</div>
 								</div>
-								<div class="ui-g-12">
-									<p:commandButton value="Avançar" icon="pi pi-arrow-right"
-										action="#{cadastroPedestreController.proximo}"
-										process="@this" update="@form"
-										disabled="#{empty cadastroPedestreController.entidade.foto}"
-										styleClass="ui-button-success" />
-									<p:commandButton value="Voltar" icon="pi pi-arrow-left"
-										action="#{cadastroPedestreController.voltar}"
-										process="@form" update="@form"
-										styleClass="ui-button-outlined" style="margin-left: 0.5rem;" />
+							</div>
+							<h:panelGroup layout="block" styleClass="sa-cadastro-simples__options"
+								rendered="#{cadastroPedestreController.exibeCampoSempreLiberado()}">
+								<p:selectBooleanCheckbox id="sempreLiberado"
+									itemLabel="Sempre liberado"
+									value="#{cadastroPedestreController.entidade.sempreLiberado}" />
+							</h:panelGroup>
+								<div class="sa-cadastro-simples__footer">
+									<span class="sa-cadastro-simples__footer-hint">Etapa 4 de 4</span>
+									<div class="sa-form-actions sa-form-actions--end">
+										<p:commandButton value="Voltar" icon="pi pi-arrow-left"
+											action="#{cadastroPedestreController.voltar}"
+											immediate="true" process="@this" update="cadastroSimplesPainel growl"
+											styleClass="sa-btn-label ui-button-flat" />
+										<p:commandButton id="save" value="Concluir cadastro" icon="pi pi-check"
+											action="#{cadastroPedestreController.salvar}"
+											process="@form" update="@form"
+											styleClass="sa-btn-label ui-button-success" />
+									</div>
 								</div>
 							</div>
 						</h:panelGroup>
 
-						<!-- STEP 3 - CONFIRMAÇÃO -->
-						<h:panelGroup rendered="#{cadastroPedestreController.step eq 3}">
-							<div class="form-grid sa-cadastro-grid ui-fluid ui-g">
-								<div class="ui-g-12">
-									<h:outputText value="Confirme seus dados"
-										style="font-weight:bold; font-size: 1.1rem;" />
-								</div>
-								<div class="ui-g-12 ui-md-6">
-									<p:outputLabel value="Nome" />
-									<h:outputText
-										value="#{cadastroPedestreController.entidade.nome}" />
-								</div>
-								<div class="ui-g-12 ui-md-6">
-									<p:outputLabel value="CPF" />
-									<h:outputText
-										value="#{cadastroPedestreController.entidade.cpf}" />
-								</div>
-								<div class="ui-g-12"
-									rendered="#{not empty cadastroPedestreController.entidade and cadastroPedestreController.isPedestre()}">
-									<p:selectBooleanCheckbox id="sempreLiberado"
-										itemLabel="Sempre liberado"
-										value="#{cadastroPedestreController.entidade.sempreLiberado}" />
-								</div>
-								<div class="ui-g-12">
-									<p:commandButton value="Concluir Cadastro" icon="pi pi-check"
-										action="#{cadastroPedestreController.salvar}"
-										process="@form" update="@form"
-										styleClass="sa-btn-label ui-button-success" />
-									<p:commandButton value="Voltar" icon="pi pi-arrow-left"
-										action="#{cadastroPedestreController.voltar}"
-										process="@form" update="@form"
-										styleClass="ui-button-outlined" style="margin-left: 0.5rem;" />
-								</div>
-							</div>
-						</h:panelGroup>
-					</p:panel>
-				</h:column>
-			</h:panelGrid>
+					</div>
+				</div>
+			</h:panelGroup>
 
 			<p:dialog id="dialogTirarFoto" widgetVar="tirarFoto"
 				header="#{msgs['label.uc008.tirar.foto']}" modal="true"
-				onHide="PF('pc').dettach()">
-				<p:photoCam id="idPc" widgetVar="pc"
-					listener="#{cadastroPedestreController.capturarFoto}"
-					autoStart="false" width="320" height="240" photoWidth="640"
-					photoHeight="480" format="jpeg" jpegQuality="70" />
-				<p:commandButton value="#{msgs['label.uc008.capturar']}"
-					process="dialogTirarFoto" update="form:dialogCropImage"
-					onclick="PF('pc').capture();"
-					oncomplete="PF('tirarFoto').hide(); PF('cropImage').show(); PF('pc').dettach(); return false;"
-					icon="pi pi-camera" styleClass="ui-button-success"
-					style="margin-top: 10px" />
+				onHide="PF('pc').dettach()" styleClass="sa-dialog sa-dialog--photo">
+
+				<div class="sa-dialog-form">
+					<p:photoCam id="idPc" widgetVar="pc"
+						listener="#{cadastroPedestreController.capturarFoto}"
+						autoStart="false" width="320" height="240" photoWidth="640"
+						photoHeight="480" format="jpeg" jpegQuality="70" />
+					<p:commandButton value="#{msgs['label.uc008.capturar']}"
+						process="dialogTirarFoto" update="form:dialogCropImage"
+						onclick="PF('pc').capture();"
+						oncomplete="PF('tirarFoto').hide(); PF('cropImage').show(); PF('pc').dettach(); return false;"
+						icon="pi pi-camera"
+						styleClass="sa-btn-label ui-button-success w-full" />
+				</div>
 			</p:dialog>
 
 			<p:dialog id="dialogCropImage" widgetVar="cropImage"
 				header="#{msgs['label.uc008.cortar.imagem']}" modal="true"
 				closable="false" width="340" position="center" resizable="true"
-				positionType="absolute">
-				<p:imageCropper id="imageCroppedTemp"
-					value="#{cadastroPedestreController.croppedImage}"
-					image="/resources/upload/#{cadastroPedestreController.fileNameTemp}"
-					initialCoords="120,40,400,400" aspectRatio="1.0" guides="true"
-					minSize="300,300" cache="false" />
-				<p:commandButton value="#{msgs['label.uc008.cortar']}"
-					action="#{cadastroPedestreController.crop}"
-					process="dialogCropImage" update="fotoPreview" icon="pi pi-clone"
-					oncomplete="PF('cropImage').hide(); return false;"
-					styleClass="ui-button-success" style="margin-top: 10px; margin-right: 10px;" />
-				<p:commandButton value="#{msgs['alt.acao.cancelar']}"
-					action="#{cadastroPedestreController.cancelaCrop}" process="@form"
-					oncomplete="PF('cropImage').hide(); return false;"
-					styleClass="ui-button-outlined" />
+				positionType="absolute" styleClass="sa-dialog">
+
+				<div class="sa-dialog-form">
+					<p:imageCropper id="imageCroppedTemp"
+						value="#{cadastroPedestreController.croppedImage}"
+						image="/resources/upload/#{cadastroPedestreController.fileNameTemp}"
+						initialCoords="120,40,400,400" aspectRatio="1.0" guides="true"
+						minSize="300,300" cache="false" />
+					<div class="sa-dialog-actions">
+						<p:commandButton value="#{msgs['label.uc008.cortar']}"
+							action="#{cadastroPedestreController.crop}"
+							process="dialogCropImage" update="cadastroSimplesPainel growl"
+							icon="pi pi-clone"
+							oncomplete="PF('cropImage').hide(); return false;"
+							styleClass="sa-btn-label ui-button-success" />
+						<p:commandButton value="#{msgs['alt.acao.cancelar']}"
+							action="#{cadastroPedestreController.cancelaCrop}"
+							immediate="true" process="@this"
+							oncomplete="PF('cropImage').hide(); return false;"
+							styleClass="sa-btn-label ui-button-flat" />
+					</div>
+				</div>
 			</p:dialog>
 		</ui:define>
 	</ui:composition>

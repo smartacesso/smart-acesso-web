@@ -13,16 +13,16 @@
 		<ui:define name="titulo">
 			#{msgs['title.sistema']} | #{msgs['title.gerenciar.parametros.sistema']}
 		</ui:define>
-
-		<ui:define name="breadcrumb">
-			<a target="_top"
-				href="/#{menuController.appName}/paginas/principal.xhtml"> <h:outputText
-					value="#{msgs['title.principal']}" />
-			</a> > <h:outputText
-				value="#{msgs['title.gerenciar.parametros.sistema']}" />
+		<ui:define name="pageTitle">
+			<h:outputText
+						value="#{msgs['title.configuracoes.parametros.sistema']}" />
+		</ui:define>
+		<ui:define name="pageSubtitle">
+			<h:outputText value="#{sessionScope.usuario.cliente.nome}" rendered="#{sessionScope.usuario != null}" />
 		</ui:define>
 
-		<ui:define name="tools">
+
+<ui:define name="tools">
 			<p:toolbar styleClass="sa-toolbar-wrap">
 				<p:toolbarGroup styleClass="sa-toolbar-actions">
 					<p:commandButton id="save"
@@ -39,11 +39,7 @@
 
 		<ui:define name="conteudo">
 
-			<h:panelGrid width="100%" columns="1" headerClass="h-grid-header">
-				<f:facet name="header">
-					<h:outputText
-						value="#{msgs['title.configuracoes.parametros.sistema']}" />
-				</f:facet>
+			
 
 				<p:dataTable id="gerenciarParametrosTable"
 					value="#{gerenciarParametrosController.parametrosGerais}"
@@ -145,27 +141,26 @@
 						<p:tooltip for="btnDoc"
 							value="#{msgs['msg.uc007.ver.documentacao']}" />
 
-						<p:selectOneMenu
-							value="#{gerenciarParametrosController.campoObrigatorio}"
-							rendered="#{item.nome.startsWith('Campos')}"
-							style="margin-right: 10px; display: inline-flex; margin-bottom: 5px;">
-							<f:selectItems
-								value="#{gerenciarParametrosController.listaCamposObrigatorios}" />
-							<p:ajax process="@this" />
-						</p:selectOneMenu>
+						<h:panelGroup rendered="#{item.nome.startsWith('Campos')}" layout="block"
+							styleClass="sa-field-row" style="margin-top: 0.5rem;">
+							<p:selectOneMenu
+								value="#{gerenciarParametrosController.campoObrigatorio}">
+								<f:selectItems
+									value="#{gerenciarParametrosController.listaCamposObrigatorios}" />
+								<p:ajax process="@this" />
+							</p:selectOneMenu>
 
-						<p:commandButton id="addCampoObrigatorio"
-							value="#{msgs['alt.acao.adicionar']}"
-							rendered="#{item.nome.startsWith('Campos')}"
-							action="#{gerenciarParametrosController.adicionaCampoObrigatorio}"
-							process="@this" update="@form">
-						</p:commandButton>
+							<p:commandButton id="addCampoObrigatorio"
+								value="#{msgs['alt.acao.adicionar']}"
+								action="#{gerenciarParametrosController.adicionaCampoObrigatorio}"
+								process="@this" update="@form"
+								styleClass="sa-btn-label ui-button-success" />
+						</h:panelGroup>
 
-						<br />
 						<p:dataTable id="tableCamposObrigatorios"
 							value="#{gerenciarParametrosController.camposObrigatorios}"
 							rendered="#{not empty gerenciarParametrosController.camposObrigatorios and item.nome.startsWith('Campos')}"
-							var="campo" style="width: 300px;">
+							var="campo" styleClass="sa-table tabela-responsive" style="margin-top: 0.75rem; max-width: 300px;">
 
 							<p:column headerText="#{msgs['label.uc008.campo']}">
 								<h:outputText value="#{msgs['label.uc008.'.concat(campo)]}" />
@@ -184,7 +179,6 @@
 					</p:column>
 
 				</p:dataTable>
-			</h:panelGrid>
 
 		</ui:define>
 

@@ -36,19 +36,21 @@
                 </div>
 
                 <div class="ui-g-12">
-                    <p:commandButton id="addRelatorio"
-                        value="Adicionar Relatório" icon="pi pi-plus"
-                        action="#{cadastroPedestreController.adicionarRelatorio}"
-                        process="@form"
-                        update="form:cadastroPedestreTab:painelRelatorios form:cadastroPedestreTab:painelCadastroRelatorio"
-                        styleClass="ui-button-success" />
+                    <div class="sa-form-actions">
+                        <p:commandButton id="addRelatorio"
+                            value="Adicionar Relatório" icon="pi pi-plus"
+                            action="#{cadastroPedestreController.adicionarRelatorio}"
+                            process="@form"
+                            update="form:cadastroPedestreTab:painelRelatorios form:cadastroPedestreTab:painelCadastroRelatorio"
+                            styleClass="sa-btn-label ui-button-success" />
 
-                    <p:commandButton id="buscarRelatorio"
-                        value="Buscar Relatório" icon="pi pi-search"
-                        action="#{cadastroPedestreController.carregarRelatorios}"
-                        process="@form"
-                        update="form:cadastroPedestreTab:painelRelatorios form:cadastroPedestreTab:painelCadastroRelatorio"
-                        styleClass="ui-button-outlined" style="margin-left: 0.5rem;" />
+                        <p:commandButton id="buscarRelatorio"
+                            value="Buscar Relatório" icon="pi pi-search"
+                            action="#{cadastroPedestreController.carregarRelatorios}"
+                            process="@form"
+                            update="form:cadastroPedestreTab:painelRelatorios form:cadastroPedestreTab:painelCadastroRelatorio"
+                            styleClass="sa-btn-label ui-button-flat" />
+                    </div>
                 </div>
             </div>
         </p:panel>
@@ -68,6 +70,7 @@
             rows="5"
             paginatorPosition="bottom"
             paginatorAlwaysVisible="false"
+            styleClass="sa-table tabela-responsive"
             rendered="#{not empty cadastroPedestreController.listaRelatorios}">
 
             <p:column headerText="Data e Hora" style="text-align: center;">

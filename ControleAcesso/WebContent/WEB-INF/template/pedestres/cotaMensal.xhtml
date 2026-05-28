@@ -39,11 +39,13 @@
 			</div>
 
 			<div class="ui-g-12">
-				<p:commandButton id="addCota" value="Adicionar Cota" icon="pi pi-plus"
-					action="#{cadastroPedestreController.cadastrarCota}"
-					update="form:cadastroPedestreTab:painelCadastroCotaPedestre form:cadastroPedestreTab:painelCotas"
-					process="form:cadastroPedestreTab:painelCadastroCotaPedestre"
-					styleClass="ui-button-success" />
+				<div class="sa-form-actions">
+					<p:commandButton id="addCota" value="Adicionar Cota" icon="pi pi-plus"
+						action="#{cadastroPedestreController.cadastrarCota}"
+						update="form:cadastroPedestreTab:painelCadastroCotaPedestre form:cadastroPedestreTab:painelCotas"
+						process="form:cadastroPedestreTab:painelCadastroCotaPedestre"
+						styleClass="sa-btn-label ui-button-success" />
+				</div>
 			</div>
 		</div>
 	</p:panel>
@@ -59,6 +61,7 @@
 			value="#{cadastroPedestreController.listaCotas}" var="cota"
 			paginator="true" rows="5" paginatorPosition="bottom"
 			paginatorAlwaysVisible="false"
+			styleClass="sa-table tabela-responsive"
 			rendered="#{not empty cadastroPedestreController.listaCotas}">
 
 			<p:column headerText="Mês de Referência" style="text-align: center;">

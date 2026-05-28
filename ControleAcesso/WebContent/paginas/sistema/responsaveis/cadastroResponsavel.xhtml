@@ -14,24 +14,23 @@
 											? msgs['title.uc016.editar.responsavel'] 
 											: msgs['title.uc016.cadastrar.responsavel']}
 		</ui:define>
-
-		<ui:define name="breadcrumb">
-			<a target="_top"
-				href="/#{menuController.appName}/paginas/principal.xhtml"> <h:outputText
-					value="#{msgs['title.principal']}" />
-			</a> > 
-			<a target="_top"
-				href="/#{menuController.appName}/paginas/sistema/responsaveis/pesquisaResponsavel.xhtml">
-				<h:outputText value="#{msgs['title.uc016.consulta.responsavel']}" />
-			</a> > <h:outputText
-				value="#{cadastroResponsavelController.entidade.id != null 
+		<ui:define name="pageTitle">
+			<h:outputText
+						value="#{cadastroResponsavelController.entidade.id != null 
 										? msgs['title.uc016.editar.responsavel'] 
 										: msgs['title.uc016.cadastrar.responsavel']}" />
 		</ui:define>
+		<ui:define name="pageSubtitle">
+			<h:outputText value="#{sessionScope.usuario.cliente.nome}" rendered="#{sessionScope.usuario != null}" />
+		</ui:define>
 
-		<ui:define name="tools">
+
+<ui:define name="tools">
 			<p:toolbar styleClass="sa-toolbar-wrap">
 				<p:toolbarGroup styleClass="sa-toolbar-actions">
+					<ui:include src="/WEB-INF/template/sa-voltar-lista.xhtml">
+						<ui:param name="ctrl" value="#{cadastroResponsavelController}" />
+					</ui:include>
 					<p:commandButton id="save"
 						action="#{cadastroResponsavelController.salvar}"
 						value="#{msgs['alt.acao.save']}"
@@ -45,16 +44,7 @@
 		</ui:define>
 
 		<ui:define name="conteudo">
-			<h:panelGrid width="100%" columns="1" headerClass="h-grid-header">
-				<f:facet name="header">
-					<h:outputText
-						value="#{cadastroResponsavelController.entidade.id != null 
-										? msgs['title.uc016.editar.responsavel'] 
-										: msgs['title.uc016.cadastrar.responsavel']}" />
-				</f:facet>
-
-				<h:column>
-					<p:accordionPanel id="cadastroTab" widgetVar="cadastroWid">
+			<p:accordionPanel id="cadastroTab" widgetVar="cadastroWid" styleClass="sa-accordion">
 						<p:tab title="#{msgs['label.uc016.dados.responsavel']}">
 							<p:panel header="Cadastro Responsável" styleClass="ui-fluid">
 								<div class="form-grid sa-cadastro-grid ui-fluid ui-g">
@@ -149,8 +139,6 @@
 							</p:panel>
 						</p:tab>
 					</p:accordionPanel>
-				</h:column>
-			</h:panelGrid>
 		</ui:define>
 	</ui:composition>
 </body>

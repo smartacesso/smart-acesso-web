@@ -13,14 +13,15 @@
 		<ui:define name="titulo">
 			#{msgs['title.sistema']} | #{msgs['title.uc001.consulta.clientes']}
 		</ui:define>
-		
-		<ui:define name="breadcrumb">
-			<a target="_top" href="/#{menuController.appName}/paginas/principal.xhtml"> <h:outputText
-					value="#{msgs['title.principal']}" />
-			</a> > <h:outputText value="#{msgs['title.uc001.consulta.clientes']}" />
+		<ui:define name="pageTitle">
+			<h:outputText value="#{msgs['title.uc001.consulta.clientes']}" />
 		</ui:define>
-		
-		<ui:define name="tools">
+		<ui:define name="pageSubtitle">
+			<h:outputText value="#{sessionScope.usuario.cliente.nome}" rendered="#{sessionScope.usuario != null}" />
+		</ui:define>
+
+
+<ui:define name="tools">
 			<p:toolbar styleClass="sa-toolbar-wrap">
 				<p:toolbarGroup styleClass="sa-toolbar-actions">
 					<p:commandButton id="acaoNovo"
@@ -58,10 +59,8 @@
 		</ui:define>
 		
 		<ui:define name="conteudo">
-			
-			<h2 class="sa-page-title">#{msgs['title.uc001.consulta.clientes']}</h2>
 
-			<p:outputPanel styleClass="p-col-12">
+<p:outputPanel styleClass="p-col-12">
 				
 					<ui:include src="/tema/templates/vazio.xhtml">
 						<ui:param name="exibe" value="#{empty consultaClienteController.result}" />
@@ -71,23 +70,24 @@
 					<p:dataTable id="clientesTable" value="#{consultaClienteController.result}" var="cliente" 
 						rendered="#{not empty consultaClienteController.result}" paginator="true" 
 						rows="#{consultaClienteController.quantPorPagina}" paginatorPosition="bottom"
-						paginatorAlwaysVisible="false" styleClass="tabela-responsive sa-table">
+						paginatorAlwaysVisible="false"
+						styleClass="tabela-responsive sa-table">
 						
-						<p:column headerText="#{msgs['label.uc001.nome']}" style="text-align: center">
+						<p:column headerText="#{msgs['label.uc001.nome']}" styleClass="sa-table-col-center">
 							<h:outputText value="#{cliente.nome}" />
 						</p:column>
 	
-						<p:column headerText="#{msgs['label.uc001.email']}" style="text-align: center">
+						<p:column headerText="#{msgs['label.uc001.email']}" styleClass="sa-table-col-center">
 							<h:outputText value="#{cliente.email}" />
 						</p:column>
 	
-						<p:column headerText="#{msgs['label.uc001.cnpj']}" style="text-align: center">
+						<p:column headerText="#{msgs['label.uc001.cnpj']}" styleClass="sa-table-col-center">
 							<h:outputText value="#{cliente.cnpj}">
 								<f:converter converterId="cnpjConverter"/>
 							</h:outputText>
 						</p:column>
 	
-						<p:column headerText="#{msgs['label.uc001.status']}" style="text-align: center">
+						<p:column headerText="#{msgs['label.uc001.status']}" styleClass="sa-table-col-center">
 							<h:outputText value="#{cliente.status}" />
 						</p:column>
 						
@@ -118,11 +118,14 @@
 			<p:confirmDialog id="dialogConfirmarExclusao"
 				widgetVar="confirmarExclusao"
 					header="Confirmar"
-					message="Tem certeza que deseja excluir este cliente?">
+					message="Tem certeza que deseja excluir este cliente?"
+				styleClass="sa-dialog">
 				
-				<p:button value="Não" onclick="PF('confirmarExclusao').hide(); return false;"/>
+				<p:button value="Não" onclick="PF('confirmarExclusao').hide(); return false;"
+					styleClass="sa-btn-label ui-button-flat"/>
 				<p:commandButton value="Sim" oncomplete="PF('confirmarExclusao').hide();"  
-					action="#{consultaClienteController.excluirCliente()}" process="@this" update="@form"/>
+					action="#{consultaClienteController.excluirCliente()}" process="@this" update="@form"
+					styleClass="sa-btn-label ui-button-success"/>
 			</p:confirmDialog>
 				
 		</ui:define>

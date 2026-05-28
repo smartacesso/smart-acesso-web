@@ -6,65 +6,47 @@
 	xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:p="http://primefaces.org/ui">
 
-<ui:composition template="/tema/templates/template.xhtml">
+<body>
 
-	<!-- Título -->
-	<ui:define name="titulo">
-        Cameras hikivision
-    </ui:define>
+	<ui:composition template="/tema/templates/template.xhtml">
 
-	<!-- Breadcrumb -->
-	<ui:define name="breadcrumb">
-		<a target="_top"
-			href="/#{menuController.appName}/paginas/principal.xhtml"> <h:outputText
-				value="#{msgs['title.principal']}" />
-		</a> > <h:outputText value="#{msgs['title.uc008.cameras']}" />
-	</ui:define>
+		<ui:define name="titulo">
+			#{msgs['title.sistema']} | #{msgs['title.uc008.cameras']}
+		</ui:define>
 
-	<!-- Conteúdo -->
-	<ui:define name="conteudo">
+		<ui:define name="pageTitle">
+			<h:outputText value="#{msgs['title.uc008.cameras']}" />
+		</ui:define>
 
-		<h2 class="sa-page-title">#{msgs['title.uc008.cameras']}</h2>
+		<ui:define name="pageSubtitle">
+			<h:outputText value="#{sessionScope.usuario.cliente.nome}"
+				rendered="#{sessionScope.usuario != null}" />
+		</ui:define>
 
-		<div class="sa-camera-grid">
-			<ui:repeat value="#{cameraController.listaCameras}" var="camera">
-				<p:panel header="#{camera.devName}" styleClass="sa-camera-card">
-					<div style="text-align: center;">
-						<img src="/#{menuController.appName}/#{menuController.path}/tema/img/facial.png"
-							alt="#{camera.devName}" style="max-width: 100%; height: auto;" />
-					</div>
-					<p:commandButton value="Liberar"
-						action="#{cameraController.liberarCamera(camera)}"
-						styleClass="ui-button-success rounded-button w-full"
-						style="width: 100%; margin-top: 0.75rem;" />
-				</p:panel>
-			</ui:repeat>
-		</div>
+		<ui:define name="conteudo">
 
-		<!-- Mensagem quando não há câmeras -->
-		<h:outputText value="#{msgs['msg.nenhum.item.encontrado']}"
-			escape="false" rendered="#{empty cameraController.listaCameras}"
-			style="text-align: center; margin-top: 2rem;" />
+			<div class="sa-camera-grid">
+				<ui:repeat value="#{cameraController.listaCameras}" var="camera">
+					<p:panel header="#{camera.devName}" styleClass="sa-camera-card">
+						<div class="sa-camera-card__preview">
+							<img src="/#{menuController.appName}/#{menuController.path}/tema/img/facial.png"
+								alt="#{camera.devName}" />
+						</div>
+						<p:commandButton value="Liberar"
+							action="#{cameraController.liberarCamera(camera)}"
+							styleClass="ui-button-success sa-btn-label w-full sa-camera-card__action" />
+					</p:panel>
+				</ui:repeat>
+			</div>
 
-	</ui:define>
+			<h:outputText value="#{msgs['msg.nenhum.item.encontrado']}"
+				escape="false" rendered="#{empty cameraController.listaCameras}"
+				styleClass="sa-empty-state__text"
+				style="display: block; text-align: center; margin-top: 2rem;" />
 
-	<!-- Estilos para responsividade -->
-	<style>
-@media screen and (max-width: 768px) {
-	.ui-g-12.ui-md-3 {
-		max-width: 100% !important;
-	}
-}
+		</ui:define>
 
-.rounded-button {
-	border-radius: 5px !important;
-}
+	</ui:composition>
 
-/* Cards mais próximos */
-.ui-panel {
-	margin-bottom: 0.5rem !important;
-}
-</style>
-
-</ui:composition>
+</body>
 </html>

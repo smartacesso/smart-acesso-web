@@ -24,32 +24,24 @@
 	<link type="text/css" rel="stylesheet" href="/#{menuController.appName}/#{menuController.path}/tema/css/sb-admin-2.css" />
 	<link type="text/css" rel="stylesheet" href="/#{menuController.appName}/#{menuController.path}/tema/css/ui-theme.css" />
 	<link type="text/css" rel="stylesheet" href="/#{menuController.appName}/#{menuController.path}/tema/css/base.css" />
-	<link type="text/css" rel="stylesheet" href="/#{menuController.appName}/#{menuController.path}/tema/css/smart-design.css?v=10" />
+	<link type="text/css" rel="stylesheet" href="/#{menuController.appName}/#{menuController.path}/tema/css/smart-design.css?v=55" />
 	<script type="text/javascript">
 		// Evita flash do sidebar antes do CSS/JS carregar
 		(function () {
 			try {
-				if (window.localStorage &amp;&amp; localStorage.getItem('sa-sidebar-collapsed') === '1') {
+				if (window.localStorage &amp;&amp; localStorage.getItem('sa-sidebar-collapsed-v26') === '1') {
 					document.documentElement.classList.add('sa-sidebar-collapsed');
 				}
 			} catch (e) { /* ignore */ }
 		})();
 	</script>
-	<style type="text/css">
-		@media (min-width: 992px) {
-			html.sa-sidebar-collapsed #saSidebar,
-			html.sa-sidebar-collapsed .sa-sidebar-nav {
-				display: none !important;
-			}
-		}
-	</style>
 	
 	<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Open+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet" type="text/css" />
 	<link href="/#{menuController.appName}/#{menuController.path}/tema/fonts/awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
 	
 	<script type="text/javascript" src="/#{menuController.appName}/tema/js/bootstrap.min.js"></script>
 	<script type="text/javascript" src="/#{menuController.appName}/tema/js/base.js"></script>
-	<script type="text/javascript" src="/#{menuController.appName}/#{menuController.path}/tema/js/sa-layout.js"></script>
+	<script type="text/javascript" src="/#{menuController.appName}/#{menuController.path}/tema/js/sa-layout.js?v=40"></script>
 	
 	<ui:insert name="scripts"></ui:insert>
 </h:head>
@@ -139,63 +131,48 @@
 					</footer>
 
 					<p:dialog header="#{msgs['header.download.app']}"
-						widgetVar="downloads" modal="true" width="400px">
-						<br />
-						<h:panelGrid columns="1">
-							<h:column>
+						widgetVar="downloads" modal="true" width="400px"
+						styleClass="sa-dialog" resizable="false" draggable="false">
+						<div class="sa-dialog-download">
+							<div class="sa-dialog-download__section">
 								<h:outputText value="#{msgs['label.antes.instalar']}" />
-								<br />
 								<a href="#{menuController.urlMain}/downloads/jre-8u201-windows-i586.exe" target="_blank">jre-8u201-windows-i586.exe</a>
-								<br /><br />
-							</h:column>
-							<h:column>
+							</div>
+							<div class="sa-dialog-download__section">
 								<h:outputText value="#{msgs['label.instalar']}" />
-								<br />
 								<a href="#{menuController.urlMain}/downloads/SmartAcessoInstaller.exe" target="_blank">SmartAcessoInstaller.exe</a>
-								<br /><br />
-							</h:column>
-							<h:column>
+							</div>
+							<div class="sa-dialog-download__section">
 								<h:outputText value="#{msgs['label.instalar.depois']}" />
-								<br /><br />
-							</h:column>
-							<h:column>
+							</div>
+							<div class="sa-dialog-download__section">
 								<h:outputText value="#{msgs['label.instalar.depois.2']}" />
-								<br /><br />
-							</h:column>
-						</h:panelGrid>
+							</div>
+						</div>
 					</p:dialog>
 
 					<p:dialog header="#{msgs['header.download.smart.faces.app']}"
-						widgetVar="downloadSmartFaces" modal="true" width="400px">
-						<br />
-						<h:panelGrid columns="1">
-							<h:column>
+						widgetVar="downloadSmartFaces" modal="true" width="400px"
+						styleClass="sa-dialog" resizable="false" draggable="false">
+						<div class="sa-dialog-download">
+							<div class="sa-dialog-download__section">
 								<h:outputText value="#{msgs['label.antes.instalar']}" />
-								<br />
 								<a href="#{menuController.urlMain}/downloads/jre-8u201-windows-i586.exe" target="_blank">jre-8u201-windows-i586.exe</a>
-								<br /><br />
-							</h:column>
-							<h:column>
+							</div>
+							<div class="sa-dialog-download__section">
 								<h:outputText value="#{msgs['label.instalar.smart.faces']}" />
-								<br />
 								<a href="#{menuController.urlMain}/downloads/SmartFacesInstaller.exe" target="_blank">SmartFacesInstaller.exe</a>
-								<br />
 								<a href="#{menuController.urlMain}/downloads/SmartFacesInstaller-x86.exe" target="_blank">SmartFacesInstaller-x86.exe</a>
-								<br /><br />
-							</h:column>
-							<h:column>
+							</div>
+							<div class="sa-dialog-download__section">
 								<h:outputText value="#{msgs['label.instalar.depois']}" />
-								<br /><br />
-							</h:column>
-							<h:column>
+							</div>
+							<div class="sa-dialog-download__section">
 								<h:outputText value="#{msgs['label.instalar.app.android']}" />
-								<br />
 								<a href="https://play.google.com/store/apps/details?id=br.com.smartacesso&amp;hl=pt_BR&amp;gl=US" target="_blank">SmartAcesso App - Google Play</a>
-								<br />
 								<a href="http://smartacesso.com.br/downloads/smartfaces/smartacesso-app-release.apk" target="_blank">SmartAcesso App - Apk</a>
-								<br /><br />
-							</h:column>
-						</h:panelGrid>
+							</div>
+						</div>
 					</p:dialog>
 
 					<ui:insert name="modal"></ui:insert>
