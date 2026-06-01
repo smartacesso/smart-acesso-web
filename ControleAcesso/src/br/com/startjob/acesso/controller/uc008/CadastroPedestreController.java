@@ -1622,13 +1622,18 @@ public class CadastroPedestreController extends CadastroBaseController {
 	    exibeCrop = false;
 
 	    removerArquivo(caminhoCompleto);
+	    croppedImage = null;
+	    fileNameTemp = null;
+	    caminhoCompleto = null;
 	}
 
 	public void cancelaCrop() {
 		croppedImage = null;
+		fileNameTemp = null;
 
 		exibeCrop = false;
 		removerArquivo(caminhoCompleto);
+		caminhoCompleto = null;
 	}
 
 	public void removerArquivo(String caminho) {
@@ -1858,6 +1863,23 @@ public class CadastroPedestreController extends CadastroBaseController {
 		}
 	}
 
+	/**
+	 * Rótulo do p:autoComplete de empresa visitada: o valor bound é {@link String}, mas as
+	 * sugestões são {@link EmpresaEntity}; o PrimeFaces avalia itemLabel também sobre o valor
+	 * já selecionado (String).
+	 */
+	public String labelEmpresaVisitadaAutocomplete(Object item) {
+		if (item == null) {
+			return "";
+		}
+		if (item instanceof EmpresaEntity) {
+			String nome = ((EmpresaEntity) item).getNome();
+			return nome != null ? nome.trim() : "";
+		}
+		String texto = item.toString().trim();
+		return "null".equalsIgnoreCase(texto) ? "" : texto;
+	}
+
 	public List<EmpresaEntity> completeEmpresaVisitada(String query) {
 		String q = query != null ? query.trim().toLowerCase() : "";
 		if (getUsuarioLogado() == null || getUsuarioLogado().getCliente() == null) {
@@ -1878,16 +1900,16 @@ public class CadastroPedestreController extends CadastroBaseController {
 			pedestre.aplicarEmpresaVisitadaInformada(null, null);
 			return;
 		}
-		EmpresaEntity ref = pedestre.getEmpresaVisitadaRef();
-		if (ref != null && ref.getId() != null && ref.getNome() != null
-				&& texto.equalsIgnoreCase(ref.getNome().trim())) {
-			EmpresaEntity valida = buscaEmpresaPorIdCliente(ref.getId(), pedestre.getCliente().getId());
-			pedestre.aplicarEmpresaVisitadaInformada(texto, valida != null ? valida : ref);
-			return;
-		}
 		Long idCli = pedestre.getCliente() != null ? pedestre.getCliente().getId()
 				: (getUsuarioLogado() != null && getUsuarioLogado().getCliente() != null
 						? getUsuarioLogado().getCliente().getId() : null);
+		EmpresaEntity ref = pedestre.getEmpresaVisitadaRef();
+		if (ref != null && ref.getId() != null && ref.getNome() != null
+				&& texto.equalsIgnoreCase(ref.getNome().trim())) {
+			EmpresaEntity valida = buscaEmpresaPorIdCliente(ref.getId(), idCli);
+			pedestre.aplicarEmpresaVisitadaInformada(texto, valida != null ? valida : ref);
+			return;
+		}
 		if (idCli == null) {
 			pedestre.aplicarEmpresaVisitadaInformada(texto, null);
 			return;

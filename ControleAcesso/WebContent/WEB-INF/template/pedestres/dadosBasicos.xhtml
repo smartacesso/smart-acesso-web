@@ -115,7 +115,7 @@
 					value="#{cadastroPedestreController.empresaVisitadaUi}"
 					completeMethod="#{cadastroPedestreController.completeEmpresaVisitada}"
 					var="empV"
-					itemLabel="#{empV.nome}"
+					itemLabel="#{cadastroPedestreController.labelEmpresaVisitadaAutocomplete(empV)}"
 					itemValue="#{empV.nome}"
 					forceSelection="false" placeholder="Digite ou selecione a empresa visitada"
 					minQueryLength="0" maxResults="20" scrollHeight="250"
