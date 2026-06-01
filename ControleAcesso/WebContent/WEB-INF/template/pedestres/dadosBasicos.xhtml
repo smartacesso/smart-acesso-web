@@ -107,11 +107,38 @@
 					rows="4" maxlength="300" autoResize="false" />
 			</div>
 
-			<div class="ui-g-12 ui-md-6">
+			<h:panelGroup layout="block" styleClass="ui-g-12 ui-md-6"
+				rendered="#{cadastroPedestreController.cadastroVisitante}">
+				<p:outputLabel value="#{msgs['label.uc008.empresa.visitada']}"
+					for="empresaVisitada" />
+				<p:autoComplete id="empresaVisitada"
+					value="#{cadastroPedestreController.empresaVisitadaUi}"
+					completeMethod="#{cadastroPedestreController.completeEmpresaVisitada}"
+					var="empV"
+					itemLabel="#{empV.nome}"
+					itemValue="#{empV.nome}"
+					forceSelection="false" placeholder="Digite ou selecione a empresa visitada"
+					minQueryLength="0" maxResults="20" scrollHeight="250"
+					emptyMessage="Nenhuma empresa encontrada."
+					required="#{cadastroPedestreController.verificaObrigatorio('empresa')}"
+					widgetVar="saEmpresaVisitada">
+					<p:ajax event="itemSelect"
+						listener="#{cadastroPedestreController.onEmpresaVisitadaItemSelect}"
+						process="@this" update="@none"
+						oncomplete="saEmpresaVisitadaAposSelect(xhr, status, args);" />
+					<p:column>
+						<h:outputText value="#{empV.nome}" />
+					</p:column>
+				</p:autoComplete>
+			</h:panelGroup>
+
+			<h:panelGroup layout="block" styleClass="ui-g-12 ui-md-6"
+				rendered="#{not cadastroPedestreController.cadastroVisitante}">
 				<p:outputLabel value="#{msgs['label.uc008.empresa']}"
 					for="empresa" />
 				<p:selectOneMenu id="empresa"
 					value="#{cadastroPedestreController.entidade.empresa.id}"
+					disabled="#{cadastroPedestreController.cadastroVisitante}"
 					valueChangeListener="#{cadastroPedestreController.eventoEmpresaSelecionada}"
 					required="#{cadastroPedestreController.verificaObrigatorio('empresa')}">
 					<f:selectItems
@@ -120,38 +147,44 @@
 						update="@this departamento centroCusto cargo"
 						event="valueChange" />
 				</p:selectOneMenu>
-			</div>
+			</h:panelGroup>
 
-			<div class="ui-g-12 ui-md-6">
+			<h:panelGroup layout="block" styleClass="ui-g-12 ui-md-6"
+				rendered="#{not cadastroPedestreController.cadastroVisitante}">
 				<p:outputLabel value="#{msgs['label.uc008.departamento']}"
 					for="departamento" />
 				<p:selectOneMenu id="departamento"
 					value="#{cadastroPedestreController.entidade.departamento.id}"
+					disabled="#{cadastroPedestreController.cadastroVisitante}"
 					required="#{cadastroPedestreController.verificaObrigatorio('departamento')}">
 					<f:selectItems
 						value="#{cadastroPedestreController.listaDepartamentos}" />
 				</p:selectOneMenu>
-			</div>
+			</h:panelGroup>
 
-			<div class="ui-g-12 ui-md-6">
+			<h:panelGroup layout="block" styleClass="ui-g-12 ui-md-6"
+				rendered="#{not cadastroPedestreController.cadastroVisitante}">
 				<p:outputLabel value="#{msgs['label.uc008.centro.custo']}"
 					for="centroCusto" />
 				<p:selectOneMenu id="centroCusto"
 					value="#{cadastroPedestreController.entidade.centroCusto.id}"
+					disabled="#{cadastroPedestreController.cadastroVisitante}"
 					required="#{cadastroPedestreController.verificaObrigatorio('centro.custo')}">
 					<f:selectItems
 						value="#{cadastroPedestreController.listaCentrosDeCusto}" />
 				</p:selectOneMenu>
-			</div>
+			</h:panelGroup>
 
-			<div class="ui-g-12 ui-md-6">
+			<h:panelGroup layout="block" styleClass="ui-g-12 ui-md-6"
+				rendered="#{not cadastroPedestreController.cadastroVisitante}">
 				<p:outputLabel value="#{msgs['label.uc008.cargo']}" for="cargo" />
 				<p:selectOneMenu id="cargo"
 					value="#{cadastroPedestreController.entidade.cargo.id}"
+					disabled="#{cadastroPedestreController.cadastroVisitante}"
 					required="#{cadastroPedestreController.verificaObrigatorio('cargo')}">
 					<f:selectItems value="#{cadastroPedestreController.listaCargos}" />
 				</p:selectOneMenu>
-			</div>
+			</h:panelGroup>
 
 			<div class="ui-g-12">
 				<p:outputLabel value="Local" for="local" />

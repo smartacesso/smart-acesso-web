@@ -1,108 +1,14 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml"
-	xmlns:ui="http://java.sun.com/jsf/facelets"
 	xmlns:f="http://java.sun.com/jsf/core"
-	xmlns:h="http://java.sun.com/jsf/html"
-	xmlns:p="http://primefaces.org/ui">
+	xmlns:h="http://java.sun.com/jsf/html">
 
-<body>
+<f:metadata>
+	<f:viewAction action="#{cadastroFacialLinkRedirectController.redirecionarParaCadastroFacialPorLink}" />
+</f:metadata>
 
-	<ui:composition template="tema/templates/template_externo.xhtml">
-
-		<ui:define name="titulo">
-			Autoatendimento - Cadastro
-		</ui:define>
-
-		<ui:define name="modalOutForm">
-
-			<h:form id="formAutoCadastro" enctype="multipart/form-data"
-				styleClass="sa-autoatendimento">
-
-				<div class="sa-autoatendimento__card">
-					<h3>Cadastro facial</h3>
-
-					<p:messages id="msgs" showDetail="true" autoUpdate="true" />
-
-					<div class="sa-form-grid" style="grid-template-columns: 1fr;">
-
-						<div class="sa-field">
-							<span class="sa-label">Nome Completo</span>
-							<p:inputText id="nome"
-								value="#{cadastroFacialHikivisionController.pedestre.nome}"
-								disabled="#{not empty cadastroFacialHikivisionController.pedestre.nome}" />
-						</div>
-
-						<div class="sa-field">
-							<span class="sa-label">CPF</span>
-							<p:inputMask id="cpf"
-								value="#{cadastroFacialHikivisionController.pedestre.cpf}"
-								mask="999.999.999-99"
-								disabled="#{not empty cadastroFacialHikivisionController.pedestre.cpf}" />
-						</div>
-
-						<div class="sa-field sa-field--full">
-							<span class="sa-label">Foto</span>
-							<h:panelGroup id="fotoPreview" layout="block"
-								styleClass="sa-autoatendimento__photo">
-								<p:graphicImage
-									value="#{cadastroFacialHikivisionController.getStreamedContent(cadastroFacialHikivisionController.pedestre.foto)}"
-									rendered="#{cadastroFacialHikivisionController.pedestre.foto != null}"
-									stream="false" />
-								<p:graphicImage
-									value="#{menuController.path}/tema/img/ic_photo_male.png"
-									rendered="#{cadastroFacialHikivisionController.pedestre.foto == null}" />
-							</h:panelGroup>
-						</div>
-
-						<div class="sa-field sa-field--full">
-							<p:commandButton value="Tirar Foto" icon="pi pi-camera" type="button"
-								onclick="PF('dlgCamera').show();"
-								styleClass="sa-btn-label ui-button-flat w-full" />
-						</div>
-
-						<div class="sa-field sa-field--full">
-							<p:commandButton value="Concluir Cadastro"
-								action="#{cadastroFacialHikivisionController.salvar}"
-								process="@form" icon="pi pi-check"
-								styleClass="sa-btn-label ui-button-success w-full" />
-						</div>
-
-					</div>
-				</div>
-
-				<p:dialog widgetVar="dlgCamera" header="Capturar Foto" modal="true"
-					closable="true" width="400" id="dialogCamera"
-					onShow="PF('webcamWidget').attach()"
-					onHide="PF('webcamWidget').detach()"
-					styleClass="sa-dialog">
-
-					<p:photoCam id="webcam" widgetVar="webcamWidget"
-						listener="#{cadastroFacialHikivisionController.onCapture}"
-						update="formAutoCadastro:fotoPreview" autoStart="false" width="320"
-						height="240" photoWidth="640" photoHeight="480" format="jpeg"
-						jpegQuality="70" style="margin-bottom: 10px;" />
-
-					<h:outputScript>
-						function capturarEFecharCamera() {
-							PF('webcamWidget').capture();
-							setTimeout(function () {
-								PF('dlgCamera').hide();
-							}, 800);
-						}
-					</h:outputScript>
-
-					<p:commandButton value="Capturar" type="button" icon="pi pi-camera"
-						styleClass="sa-btn-label ui-button-success w-full"
-						onclick="capturarEFecharCamera();" />
-
-				</p:dialog>
-
-			</h:form>
-
-		</ui:define>
-
-	</ui:composition>
-
-</body>
+<h:body>
+	<h:outputText value="Redirecionando..." />
+</h:body>
 </html>

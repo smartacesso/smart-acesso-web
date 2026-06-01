@@ -1937,8 +1937,18 @@ public class BaseEJB implements BaseEJBRemote {
 			args.put("NOME", parameterName);
 			List<ParametroEntity> list = (List<ParametroEntity>) pesquisaArgFixosLimitado(ParametroEntity.class,
 					"findByClienteIdNome", args, 0, 1);
-			if (list != null && !list.isEmpty())
+			if (list != null && !list.isEmpty()) {
 				return list.get(0);
+			}
+
+			if (BaseConstant.PARAMETERS_NAME.VALIDAR_MATRICULAS_DUPLICADAS.equals(parameterName)) {
+				args.put("NOME", BaseConstant.PARAMETERS_NAME.LEGACY_VALIDAR_MATRICULAS_DUPLICADAS);
+				list = (List<ParametroEntity>) pesquisaArgFixosLimitado(ParametroEntity.class,
+						"findByClienteIdNome", args, 0, 1);
+				if (list != null && !list.isEmpty()) {
+					return list.get(0);
+				}
+			}
 
 		} catch (Exception e) {
 			e.printStackTrace();

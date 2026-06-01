@@ -383,3 +383,40 @@ function printSimpleDiv(divID) {
     mywindow.print();
     mywindow.close();
 }
+
+/**
+ * Mantém o texto visível no p:autoComplete de empresa visitada após itemSelect
+ * (value String + lista de entidades; update do componente costuma apagar o input).
+ */
+function saSetEmpresaVisitadaInput(nome) {
+	if (nome == null || nome === undefined) {
+		return;
+	}
+	var texto = String(nome).trim();
+	if (!texto || texto.toLowerCase() === 'null' || texto.toLowerCase() === 'undefined') {
+		return;
+	}
+	var sufixos = ['empresaVisitada', 'empresaVisitadaSimples', 'empresaConvite'];
+	var i;
+	for (i = 0; i < sufixos.length; i++) {
+		var el = document.querySelector('[id$="' + sufixos[i] + '_input"]');
+		if (el) {
+			el.value = texto;
+		}
+	}
+	if (window.jQuery) {
+		sufixos.forEach(function (suffix) {
+			jQuery('[id$="' + suffix + '_input"]').val(texto).trigger('change');
+		});
+	}
+}
+
+function saEmpresaVisitadaAposSelect(xhr, status, args) {
+	var nome = args && args.empresaVisitadaNome;
+	if (!nome && xhr && xhr.pfArgs) {
+		nome = xhr.pfArgs.empresaVisitadaNome;
+	}
+	if (nome) {
+		saSetEmpresaVisitadaInput(nome);
+	}
+}

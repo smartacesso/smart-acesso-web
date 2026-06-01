@@ -46,7 +46,13 @@ public class WebSocketPedestrianAccessTO {
 
 		object.setIdLocal(Objects.nonNull(pedestre.getIdLocal()) ? pedestre.getIdLocal() : null);
 		object.setUuidLocal(Objects.nonNull(pedestre.getUuidLocal()) ? pedestre.getUuidLocal() : null);
-		object.setIdEmpresa(Objects.nonNull(pedestre.getEmpresa()) ? pedestre.getEmpresa().getId() : null);
+		Long idEmpresaEnvio = null;
+		if (pedestre.getEmpresaVisitadaRef() != null && pedestre.getEmpresaVisitadaRef().getId() != null) {
+			idEmpresaEnvio = pedestre.getEmpresaVisitadaRef().getId();
+		} else if (pedestre.getEmpresa() != null) {
+			idEmpresaEnvio = pedestre.getEmpresa().getId();
+		}
+		object.setIdEmpresa(idEmpresaEnvio);
 
 		if (Objects.nonNull(pedestre.getRegras())) {
 			List<PedestreRegraTO> pedestreRegraTO = pedestre.getRegras()

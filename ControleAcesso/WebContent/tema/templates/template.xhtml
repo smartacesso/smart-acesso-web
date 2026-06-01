@@ -40,8 +40,8 @@
 	<link href="/#{menuController.appName}/#{menuController.path}/tema/fonts/awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
 	
 	<script type="text/javascript" src="/#{menuController.appName}/tema/js/bootstrap.min.js"></script>
-	<script type="text/javascript" src="/#{menuController.appName}/tema/js/base.js?v=5"></script>
-	<script type="text/javascript" src="/#{menuController.appName}/#{menuController.path}/tema/js/sa-layout.js?v=40"></script>
+	<script type="text/javascript" src="/#{menuController.appName}/tema/js/base.js?v=7"></script>
+	<script type="text/javascript" src="/#{menuController.appName}/#{menuController.path}/tema/js/sa-layout.js?v=46"></script>
 	
 	<ui:insert name="scripts"></ui:insert>
 </h:head>
@@ -110,13 +110,14 @@
 					    </div>
 					</p:dialog>
 
-					<div class="tools_content">
+					<h:panelGroup id="saToolsContent" layout="block" styleClass="tools_content">
 						<ui:insert name="tools">
 							<ui:include src="./tools.xhtml" />
 						</ui:insert>
-					</div>
+					</h:panelGroup>
 
-					<main class="conteudo_internal total sa-content">
+					<h:panelGroup id="saMainContent" layout="block"
+						styleClass="conteudo_internal total sa-content">
 
 						<p:growl id="growl" showDetail="true" showSummary="false" sticky="true" severity="info,warn,error,fatal" >
 							<p:autoUpdate />
@@ -124,11 +125,7 @@
 
 						<ui:insert name="conteudo"></ui:insert>
 
-					</main>
-
-					<footer class="sa-app-footer">
-						<ui:include src="./footer_external.xhtml" />
-					</footer>
+					</h:panelGroup>
 
 					<p:dialog header="#{msgs['header.download.app']}"
 						widgetVar="downloads" modal="true" width="400px"
@@ -178,6 +175,10 @@
 					<ui:insert name="modal"></ui:insert>
 
 				</h:form>
+
+				<footer class="sa-app-footer">
+					<ui:include src="./footer_external.xhtml" />
+				</footer>
 
 				<ui:insert name="modalOutForm"></ui:insert>
 

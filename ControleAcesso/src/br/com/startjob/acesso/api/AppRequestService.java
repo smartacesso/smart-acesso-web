@@ -12,6 +12,7 @@ import javax.ejb.EJB;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
@@ -33,6 +34,11 @@ import br.com.startjob.acesso.modelo.utils.EncryptionUtils;
 import br.com.startjob.acesso.to.app.AcessosRequest;
 import br.com.startjob.acesso.to.app.CadastroRequest;
 import br.com.startjob.acesso.to.app.EncomendaRequest;
+import br.com.startjob.acesso.modelo.ejb.PedestreEJBRemote;
+import br.com.startjob.acesso.modelo.entity.EmpresaEntity;
+import br.com.startjob.acesso.service.CadastroFacialLinkService;
+import br.com.startjob.acesso.to.app.LinkConviteVisitanteRequest;
+import br.com.startjob.acesso.to.app.LinkConviteVisitanteResponse;
 import br.com.startjob.acesso.to.app.LoginRequest;
 import br.com.startjob.acesso.to.app.LoginResponse;
 import br.com.startjob.acesso.to.app.UsuarioDTO;
@@ -362,5 +368,114 @@ public class AppRequestService extends BaseService {
 		}
 
 		return cpf.replaceAll("\\D", "");
+	}
+
+	/**
+	 * Lista empresas do cliente para o gerencial escolher ao gerar link de convite.
+	 */
+	@GET
+	@Path("/empresas")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response listarEmpresas(@Context HttpHeaders headers) {
+
+		String authHeader = headers.getHeaderString(HttpHeaders.AUTHORIZATION);
+		if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+			return Response.status(Status.UNAUTHORIZED).entity("Token não fornecido").build();
+		}
+
+		try {
+			Claims claims = JwtUtil.validarToken(authHeader.substring(7));
+			String perfil = (String) claims.get("perfil");
+			if (!PerfilAcessoApp.GERENCIAL.name().equals(perfil)) {
+				return Response.status(Status.FORBIDDEN).entity("Perfil não autorizado").build();
+			}
+
+			String clienteNome = (String) claims.get("cliente");
+			ClienteEntity clienteEntity = appEjb.buscaClientesPorUnidadeOrganizacional(clienteNome);
+			PedestreEJBRemote pedestreEJB = (PedestreEJBRemote) getEjb("PedestreEJB");
+
+			java.util.Map<String, Object> args = new java.util.HashMap<>();
+			args.put("ID_CLIENTE", clienteEntity.getId());
+			@SuppressWarnings("unchecked")
+			java.util.List<EmpresaEntity> empresas = (java.util.List<EmpresaEntity>) pedestreEJB
+					.pesquisaArgFixos(EmpresaEntity.class, "findAllByIdCliente2", args);
+
+			return Response.ok(empresas != null ? empresas : new ArrayList<>()).build();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Erro ao listar empresas").build();
+		}
+	}
+
+	/**
+	 * Gera link de convite para cadastro facial de visitante (sem pré-cadastro).
+	 * Requer perfil app {@link PerfilAcessoApp#GERENCIAL}.
+	 */
+	@POST
+	@Path("/visitante/link-convite")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response gerarLinkConviteVisitante(@Context HttpHeaders headers, LinkConviteVisitanteRequest body) {
+
+		String authHeader = headers.getHeaderString(HttpHeaders.AUTHORIZATION);
+		if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+			return Response.status(Status.UNAUTHORIZED).entity("Token não fornecido").build();
+		}
+
+		try {
+			Claims claims = JwtUtil.validarToken(authHeader.substring(7));
+			Long userId = Long.parseLong(claims.getSubject());
+			String perfil = (String) claims.get("perfil");
+			String clienteNome = (String) claims.get("cliente");
+
+			if (!PerfilAcessoApp.GERENCIAL.name().equals(perfil)) {
+				return Response.status(Status.FORBIDDEN).entity("Perfil não autorizado a gerar link de visitante")
+						.build();
+			}
+
+			if (body == null || body.getIdEmpresa() == null) {
+				return Response.status(Status.BAD_REQUEST).entity("idEmpresa é obrigatório").build();
+			}
+
+			ClienteEntity clienteEntity = appEjb.buscaClientesPorUnidadeOrganizacional(clienteNome);
+			PedestreEJBRemote pedestreEJB = (PedestreEJBRemote) getEjb("PedestreEJB");
+			CadastroFacialLinkService linkService = new CadastroFacialLinkService(pedestreEJB);
+
+			EmpresaEntity empresa = linkService.buscaEmpresaPorId(body.getIdEmpresa(), clienteEntity.getId());
+			if (empresa == null) {
+				return Response.status(Status.BAD_REQUEST).entity("Empresa inválida para este cliente").build();
+			}
+
+			PedestreEntity gerador = buscaPedestrePorId(userId, clienteEntity.getId(), pedestreEJB);
+			if (gerador == null) {
+				return Response.status(Status.UNAUTHORIZED).entity("Pedestre gerador não encontrado").build();
+			}
+
+			long token = linkService.calcularTokenValidade(clienteEntity.getId());
+			linkService.gravarCadastroExternoConvite(clienteEntity, empresa, token, gerador);
+
+			String link = linkService.montarUrlConvite(clienteEntity.getId(), empresa.getId(), token);
+			return Response.ok(new LinkConviteVisitanteResponse(link, token, empresa.getId())).build();
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("Erro ao gerar link: " + e.getMessage())
+					.build();
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private PedestreEntity buscaPedestrePorId(Long id, Long idCliente, PedestreEJBRemote pedestreEJB)
+			throws Exception {
+		java.util.Map<String, Object> args = new java.util.HashMap<>();
+		args.put("ID", id);
+		args.put("ID_CLIENTE", idCliente);
+		java.util.List<PedestreEntity> lista = (java.util.List<PedestreEntity>) pedestreEJB
+				.pesquisaArgFixos(PedestreEntity.class, "findByIdPedestreAndIdCliente", args);
+		if (lista != null && !lista.isEmpty()) {
+			return lista.get(0);
+		}
+		return null;
 	}
 }

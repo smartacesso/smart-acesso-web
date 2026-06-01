@@ -31,13 +31,28 @@
 						<ui:param name="ctrl" value="#{cadastroPedestreController}" />
 					</ui:include>
 					<p:commandButton id="saveToolbar"
-						rendered="#{cadastroPedestreController.step eq 3}"
+						rendered="#{cadastroPedestreController.step eq 3 and not cadastroPedestreController.cadastroEmLote}"
 						action="#{cadastroPedestreController.salvar}"
 						value="Concluir cadastro"
 						title="#{msgs['alt.acao.save']}"
 						icon="pi pi-check" iconPos="left"
-						process="@form" update="@form"
-						styleClass="sa-btn-label ui-button-success" />
+						styleClass="sa-btn-label ui-button-success"
+						ajax="false"
+						process="@form"
+						partialSubmit="true"
+						onclick="return saPrepareSalvarAjax();" />
+					<p:commandButton id="saveToolbarLote"
+						rendered="#{cadastroPedestreController.step eq 3 and cadastroPedestreController.cadastroEmLote}"
+						action="#{cadastroPedestreController.salvar}"
+						value="Concluir cadastro"
+						title="#{msgs['alt.acao.save']}"
+						icon="pi pi-check" iconPos="left"
+						styleClass="sa-btn-label ui-button-success"
+						process="@form" update="growl cadastroSimplesPainel saToolsContent"
+						partialSubmit="true"
+						onclick="return saPrepareSalvarAjax();"
+						oncomplete="saOnSalvarComplete(xhr, status, args);"
+						disableOnAjax="true" />
 				</p:toolbarGroup>
 			</p:toolbar>
 		</ui:define>
@@ -119,7 +134,10 @@
 								<div class="sa-cadastro-simples__step-head">
 									<h3 class="sa-cadastro-simples__step-title">Dados básicos</h3>
 									<p class="sa-cadastro-simples__step-desc">
-										Informe o nome e, se necessário, vincule a uma empresa.
+										<h:outputText
+											value="#{cadastroPedestreController.cadastroVisitante
+												? 'Informe o nome e a empresa visitada (selecione no cadastro ou digite o nome).'
+												: 'Informe o nome e, se necessário, vincule a uma empresa.'}" />
 									</p>
 								</div>
 								<div class="sa-cadastro-simples__fields sa-cadastro-simples__fields--grid">
@@ -136,7 +154,31 @@
 										placeholder="Nome e sobrenome"
 										required="true" />
 								</div>
-								<div>
+								<h:panelGroup layout="block"
+									rendered="#{cadastroPedestreController.cadastroVisitante}">
+									<p:outputLabel value="#{msgs['label.uc008.empresa.visitada']}" for="empresaVisitadaSimples" />
+									<p:autoComplete id="empresaVisitadaSimples"
+										value="#{cadastroPedestreController.empresaVisitadaUi}"
+										completeMethod="#{cadastroPedestreController.completeEmpresaVisitada}"
+										var="empVs"
+										itemLabel="#{empVs.nome}"
+										itemValue="#{empVs.nome}"
+										forceSelection="false" minQueryLength="0" maxResults="20"
+										placeholder="Digite ou selecione a empresa visitada"
+										emptyMessage="Nenhuma empresa encontrada."
+										required="#{cadastroPedestreController.verificaObrigatorio('empresa')}"
+										widgetVar="saEmpresaVisitadaSimples">
+										<p:ajax event="itemSelect"
+											listener="#{cadastroPedestreController.onEmpresaVisitadaItemSelect}"
+											process="@this" update="@none"
+											oncomplete="saEmpresaVisitadaAposSelect(xhr, status, args);" />
+										<p:column>
+											<h:outputText value="#{empVs.nome}" />
+										</p:column>
+									</p:autoComplete>
+								</h:panelGroup>
+								<h:panelGroup layout="block"
+									rendered="#{not cadastroPedestreController.cadastroVisitante}">
 									<p:outputLabel value="#{msgs['label.uc008.empresa']}" for="empresa" />
 									<p:selectOneMenu id="empresa"
 										value="#{cadastroPedestreController.entidade.empresa.id}"
@@ -145,7 +187,7 @@
 										filter="true" filterMatchMode="contains">
 										<f:selectItems value="#{cadastroPedestreController.listaEmpresas}" />
 									</p:selectOneMenu>
-								</div>
+								</h:panelGroup>
 								</div>
 								<div class="sa-cadastro-simples__footer">
 									<span class="sa-cadastro-simples__footer-hint">Etapa 2 de 4</span>
@@ -258,10 +300,12 @@
 										</span>
 									</div>
 									<div class="sa-cadastro-simples__summary-item"
-										rendered="#{not empty cadastroPedestreController.entidade.empresa}">
-										<span class="sa-cadastro-simples__summary-label">Empresa</span>
+										rendered="#{cadastroPedestreController.cadastroVisitante ? not empty cadastroPedestreController.entidade.empresaVisitadaExibicao : not empty cadastroPedestreController.entidade.empresa.nome}">
+										<span class="sa-cadastro-simples__summary-label">
+											<h:outputText value="#{cadastroPedestreController.cadastroVisitante ? msgs['label.uc008.empresa.visitada'] : msgs['label.uc008.empresa']}" />
+										</span>
 										<span class="sa-cadastro-simples__summary-value">
-											<h:outputText value="#{cadastroPedestreController.entidade.empresa.nome}" />
+											<h:outputText value="#{cadastroPedestreController.cadastroVisitante ? cadastroPedestreController.entidade.empresaVisitadaExibicao : cadastroPedestreController.entidade.empresa.nome}" />
 										</span>
 									</div>
 									<div class="sa-cadastro-simples__summary-item">
@@ -286,9 +330,22 @@
 											immediate="true" process="@this" update="cadastroSimplesPainel growl"
 											styleClass="sa-btn-label ui-button-flat" />
 										<p:commandButton id="save" value="Concluir cadastro" icon="pi pi-check"
+											rendered="#{not cadastroPedestreController.cadastroEmLote}"
 											action="#{cadastroPedestreController.salvar}"
-											process="@form" update="@form"
-											styleClass="sa-btn-label ui-button-success" />
+											styleClass="sa-btn-label ui-button-success"
+											ajax="false"
+											process="@form"
+											partialSubmit="true"
+											onclick="return saPrepareSalvarAjax();" />
+										<p:commandButton id="saveLote" value="Concluir cadastro" icon="pi pi-check"
+											rendered="#{cadastroPedestreController.cadastroEmLote}"
+											action="#{cadastroPedestreController.salvar}"
+											styleClass="sa-btn-label ui-button-success"
+											process="@form" update="growl cadastroSimplesPainel saToolsContent"
+											partialSubmit="true"
+											onclick="return saPrepareSalvarAjax();"
+											oncomplete="saOnSalvarComplete(xhr, status, args);"
+											disableOnAjax="true" />
 									</div>
 								</div>
 							</div>
@@ -342,6 +399,39 @@
 					</div>
 				</div>
 			</p:dialog>
+		</ui:define>
+
+		<ui:define name="scripts">
+			<script type="text/javascript">
+				window.saPrepareSalvarAjax = function () {
+					if (window.saEmpresaVisitadaBlurTimer) {
+						clearTimeout(window.saEmpresaVisitadaBlurTimer);
+						window.saEmpresaVisitadaBlurTimer = null;
+					}
+					var el = document.activeElement;
+					if (el &amp;&amp; typeof el.blur === 'function') {
+						el.blur();
+					}
+					return true;
+				};
+
+				window.saOnSalvarComplete = function (xhr, status, args) {
+					var pfArgs = args;
+					if ((!pfArgs || pfArgs.saRedirect === undefined) &amp;&amp; xhr &amp;&amp; xhr.pfArgs) {
+						pfArgs = xhr.pfArgs;
+					}
+					if (pfArgs &amp;&amp; pfArgs.validationFailed) {
+						return;
+					}
+					if (pfArgs &amp;&amp; pfArgs.saRedirect) {
+						window.location.href = pfArgs.saRedirect;
+						return;
+					}
+					if (pfArgs &amp;&amp; pfArgs.saCadastroEmLoteLimpo) {
+						window.scrollTo(0, 0);
+					}
+				};
+			</script>
 		</ui:define>
 	</ui:composition>
 </body>

@@ -77,6 +77,7 @@ import br.com.startjob.acesso.modelo.utils.EncryptionUtils;
 		@NamedQuery(name = "PedestreEntity.findByIdComplete", 
 			query = "select obj from PedestreEntity obj "
 				+ " left join fetch obj.endereco en " + " left join fetch obj.empresa emp "
+				+ " left join fetch obj.empresaVisitadaRef ev "
 				+ " left join fetch obj.departamento dep " + " left join fetch obj.centroCusto cec "
 				+ " left join fetch obj.cargo ca " + " left join fetch obj.cliente cli " + " left join obj.regras re "
 				+ " left join obj.equipamentos eq " + " left join obj.documentos doc "
@@ -154,6 +155,7 @@ import br.com.startjob.acesso.modelo.utils.EncryptionUtils;
 		@NamedQuery(name = "PedestreEntity.findByIdWithEmpRegrasAndHorarios", 
 			query = "select distinct obj from PedestreEntity obj "
 				+ "left join fetch obj.cliente c " + "left join fetch obj.empresa emp "
+				+ "left join fetch obj.empresaVisitadaRef ev "
 				+ "left join fetch obj.regras r " + "where obj.id = :ID " + "and obj.cliente.id = :ID_CLIENTE "
 				+ "and (obj.removido = false or obj.removido is null) "
 				+ "and (r.removido = false or r.removido is null) " + "order by obj.id asc"),
@@ -193,9 +195,11 @@ import br.com.startjob.acesso.modelo.utils.EncryptionUtils;
 		@NamedQuery(name = "PedestreEntity.findAllComEmpresaOtimizado", 
 			query = "select new br.com.startjob.acesso.modelo.entity.PedestreEntity("
 				+ "obj.id, obj.matricula, obj.codigoCartaoAcesso, obj.nome, obj.telefone, obj.celular, "
-				+ "obj.cpf, obj.rg, obj.tipo, e.nome, d.nome, cc.nome, c.nome) "
+				+ "obj.cpf, obj.rg, obj.tipo, "
+				+ "COALESCE(ev.nome, obj.empresaVisitada, e.nome), d.nome, cc.nome, c.nome) "
 				+ "from PedestreEntity obj "
-				+ " left join  obj.empresa e " 
+				+ " left join  obj.empresa e "
+				+ " left join  obj.empresaVisitadaRef ev "
 				+ " left join  obj.departamento d "
 				+ " left join  obj.centroCusto cc " 
 				+ " left join  obj.cargo c "
@@ -214,7 +218,19 @@ import br.com.startjob.acesso.modelo.utils.EncryptionUtils;
 			            "where obj.removido = null " +
 			            "and c.nomeUnidadeOrganizacional = :UNIDADE_ORGANIZACIONAL " +
 			            "and obj.login = :LOGIN"
-			)
+			),
+		@NamedQuery(name = "PedestreEntity.findDistinctEmpresaVisitadaRefIdByCliente",
+				query = "select distinct p.empresaVisitadaRef.id from PedestreEntity p "
+						+ "where p.cliente.id = :ID_CLIENTE and p.tipo = :TIPO "
+						+ "and p.empresaVisitadaRef.id is not null "
+						+ "and (p.removido = false or p.removido is null)"),
+		@NamedQuery(name = "PedestreEntity.findDistinctEmpresaVisitadaTextoByCliente",
+				query = "select distinct p.empresaVisitada from PedestreEntity p "
+						+ "where p.cliente.id = :ID_CLIENTE and p.tipo = :TIPO "
+						+ "and p.empresaVisitadaRef is null "
+						+ "and p.empresaVisitada is not null and p.empresaVisitada <> '' "
+						+ "and (p.removido = false or p.removido is null) "
+						+ "order by p.empresaVisitada asc")
 })
 
 @SuppressWarnings("serial")
@@ -336,6 +352,15 @@ public class PedestreEntity extends ClienteBaseEntity {
 	@ManyToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
 	@JoinColumn(name = "ID_CARGO", nullable = true)
 	private CargoEntity cargo;
+
+	/** Nome da empresa/destino visitado (somente {@link TipoPedestre#VISITANTE}). */
+	@Column(name = "EMPRESA_VISITADA", nullable = true, length = 200)
+	private String empresaVisitada;
+
+	/** Empresa cadastrada visitada, quando informada no catálogo do cliente. */
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "ID_EMPRESA_VISITADA", nullable = true)
+	private EmpresaEntity empresaVisitadaRef;
 
 	@Column(name = "LUXAND_IDENTIFIER", nullable = true)
 	private String luxandIdentifier;
@@ -609,6 +634,88 @@ public class PedestreEntity extends ClienteBaseEntity {
 		return false;
 	}
 	
+	public String getEmpresaVisitada() {
+		return empresaVisitada;
+	}
+
+	public void setEmpresaVisitada(String empresaVisitada) {
+		this.empresaVisitada = empresaVisitada;
+	}
+
+	public EmpresaEntity getEmpresaVisitadaRef() {
+		return empresaVisitadaRef;
+	}
+
+	public void setEmpresaVisitadaRef(EmpresaEntity empresaVisitadaRef) {
+		this.empresaVisitadaRef = empresaVisitadaRef;
+	}
+
+	/** Texto para exibição: empresa visitada ou legado em {@link #empresa}. */
+	public String getEmpresaVisitadaExibicao() {
+		if (empresaVisitada != null && !empresaVisitada.trim().isEmpty()) {
+			return empresaVisitada.trim();
+		}
+		if (empresaVisitadaRef != null && empresaVisitadaRef.getNome() != null) {
+			return empresaVisitadaRef.getNome();
+		}
+		if (isVisitante() && empresa != null && empresa.getNome() != null) {
+			return empresa.getNome();
+		}
+		return "";
+	}
+
+	/**
+	 * Copia {@link #empresa} vinculada legada para campos de visita (após migration ou ao abrir cadastro).
+	 */
+	public void migrarLegadoEmpresaVisitadaSeNecessario() {
+		if (!isVisitante()) {
+			return;
+		}
+		boolean semVisitada = (empresaVisitada == null || empresaVisitada.trim().isEmpty())
+				&& empresaVisitadaRef == null;
+		if (semVisitada && empresa != null && empresa.getId() != null) {
+			empresaVisitadaRef = empresa;
+			empresaVisitada = empresa.getNome();
+			empresa = null;
+			departamento = null;
+			cargo = null;
+			centroCusto = null;
+		}
+	}
+
+	/**
+	 * Grava empresa visitada e remove vínculo organizacional indevido em visitantes.
+	 */
+	public void aplicarEmpresaVisitadaInformada(String texto, EmpresaEntity refCatalogo) {
+		if (!isVisitante()) {
+			return;
+		}
+		empresa = null;
+		departamento = null;
+		cargo = null;
+		centroCusto = null;
+		if (refCatalogo != null && refCatalogo.getId() != null) {
+			empresaVisitadaRef = refCatalogo;
+			empresaVisitada = refCatalogo.getNome() != null ? refCatalogo.getNome().trim() : texto;
+			if (empresaVisitada != null) {
+				empresaVisitada = empresaVisitada.trim();
+			}
+			return;
+		}
+		empresaVisitadaRef = null;
+		if (texto != null && !texto.trim().isEmpty()) {
+			empresaVisitada = texto.trim();
+		} else {
+			empresaVisitada = null;
+		}
+	}
+
+	/** Limpa campos de empresa visitada (uso em colaborador). */
+	public void limparEmpresaVisitada() {
+		empresaVisitada = null;
+		empresaVisitadaRef = null;
+	}
+
 	public boolean isVisitante() {
 		return TipoPedestre.VISITANTE.equals(this.tipo);
 	}

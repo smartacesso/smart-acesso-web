@@ -304,7 +304,7 @@ public class MenuController extends BaseController {
 		}
 		
 		DefaultMenuItem caadastroAuto = DefaultMenuItem.builder()
-				.value("Cadastro autoatendimento")
+				.value("Totem de visitantes")
 				.url(BaseConstant.URL_APLICACAO + "/paginas/sistema/pedestres/cadastroAuto.xhtml")
 				.styleClass("ui-simple-menu").build();
 		cadastros.getElements().add(caadastroAuto);

@@ -113,7 +113,10 @@ public interface BaseConstant {
 		
 		public static final String CAMPOS_OBRIGATORIOS_CADASTRO_PEDESTRE = "Campos obrigatórios para cadastro de pedestres";
 		
-		public static final String VALIDAR_MATRICULAS_DUPLICADAS = " ";
+		public static final String VALIDAR_MATRICULAS_DUPLICADAS = "Validar matriculas duplicadas";
+
+		/** Nome legado gravado por versões antigas; usar apenas para migração/leitura. */
+		public static final String LEGACY_VALIDAR_MATRICULAS_DUPLICADAS = " ";
 		
 		public static final String VALIDAR_CPF_DUPLICADO = "Validar CPF duplicado";
 		

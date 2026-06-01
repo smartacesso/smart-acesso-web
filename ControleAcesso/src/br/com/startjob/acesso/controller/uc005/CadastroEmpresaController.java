@@ -1,8 +1,11 @@
 package br.com.startjob.acesso.controller.uc005;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
@@ -10,10 +13,18 @@ import javax.faces.model.SelectItem;
 import javax.faces.view.ViewScoped;
 import javax.inject.Named;
 
+import org.primefaces.PrimeFaces;
+
 import br.com.startjob.acesso.annotations.UseCase;
 import br.com.startjob.acesso.controller.CadastroBaseController;
+import br.com.startjob.acesso.modelo.BaseConstant;
 import br.com.startjob.acesso.modelo.ejb.EmpresaEJBRemote;
+import br.com.startjob.acesso.modelo.entity.CadastroExternoEntity;
 import br.com.startjob.acesso.modelo.entity.CargoEntity;
+import br.com.startjob.acesso.modelo.entity.ParametroEntity;
+import br.com.startjob.acesso.modelo.enumeration.StatusCadastroExterno;
+import br.com.startjob.acesso.modelo.enumeration.TipoCadastroExterno;
+import br.com.startjob.acesso.modelo.utils.AppAmbienteUtils;
 import br.com.startjob.acesso.modelo.entity.CentroCustoEntity;
 import br.com.startjob.acesso.modelo.entity.DepartamentoEntity;
 import br.com.startjob.acesso.modelo.entity.EmpresaEntity;
@@ -44,6 +55,9 @@ public class CadastroEmpresaController extends CadastroBaseController {
 	
 	@EJB
 	protected EmpresaEJBRemote empresaEJB;
+
+	private String linkGeradoConvite;
+	private Long tokenConvite;
 
 	public List<SelectItem> getListaStatus() {
 		return listaStatus;
@@ -384,5 +398,86 @@ public class CadastroEmpresaController extends CadastroBaseController {
 	public void setListaCargosExcluidos(List<CargoEntity> listaCargosExcluidos) {
 		this.listaCargosExcluidos = listaCargosExcluidos;
 	}
-	
+
+	/**
+	 * Gera link público para novos visitantes (sem cadastro prévio) desta empresa.
+	 */
+	public void gerarLinkCadastroFacialConvite() {
+		EmpresaEntity empresa = (EmpresaEntity) getEntidade();
+
+		if (empresa == null || empresa.getId() == null) {
+			mensagemFatal("", "msg.link.cadastro.facial.empresa.salvar.primeiro");
+			return;
+		}
+
+		if (!Boolean.TRUE.equals(empresa.getAutoAtendimentoLiberado())) {
+			mensagemFatal("", "msg.link.cadastro.facial.empresa.nao.liberada");
+			return;
+		}
+
+		ParametroEntity param = baseEJB.getParametroSistema(
+				BaseConstant.PARAMETERS_NAME.DIAS_VALIDADE_LINK_CADASTRO_FACIAL_EXTERNO,
+				getUsuarioLogado().getCliente().getId());
+
+		int diasValidade = param != null ? Integer.parseInt(param.getValor()) : 1;
+
+		Calendar calendar = Calendar.getInstance();
+		calendar.add(Calendar.DAY_OF_YEAR, diasValidade);
+		tokenConvite = calendar.getTimeInMillis();
+
+		gravarCadastroExternoConvite(empresa, tokenConvite);
+
+		String baseUrl = AppAmbienteUtils.isProdution()
+				? AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_MAIN_SITE)
+						+ AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_NOME_APP) + "/"
+				: "http://localhost:8081/";
+
+		linkGeradoConvite = baseUrl + "cadastroFacialPorLink.xhtml" + "?cliente="
+				+ getUsuarioLogado().getCliente().getId() + "&idEmpresa=" + empresa.getId() + "&token=" + tokenConvite;
+
+		PrimeFaces.current().executeScript("PF('dlgLinkConviteVisitante').show();");
+	}
+
+	@SuppressWarnings("unchecked")
+	private void gravarCadastroExternoConvite(EmpresaEntity empresa, Long tokenLink) {
+		Map<String, Object> args = new HashMap<>();
+		args.put("ID_CLIENTE", getUsuarioLogado().getCliente().getId());
+		args.put("ID_EMPRESA", empresa.getId());
+		args.put("STATUS", StatusCadastroExterno.AGUARDANDO_CADASTRO);
+		args.put("TIPO", TipoCadastroExterno.FACIAL_LINK_CONVITE);
+		args.put("TOKEN", System.currentTimeMillis());
+
+		try {
+			List<CadastroExternoEntity> ativos = (List<CadastroExternoEntity>) baseEJB.pesquisaArgFixos(
+					CadastroExternoEntity.class, "findConviteTokenAtivoByEmpresa", args);
+
+			if (ativos != null && !ativos.isEmpty()) {
+				CadastroExternoEntity existente = ativos.get(0);
+				existente.setToken(tokenLink);
+				baseEJB.alteraObjeto(existente);
+				return;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		try {
+			CadastroExternoEntity cadastroExterno = new CadastroExternoEntity();
+			cadastroExterno.setCliente(getUsuarioLogado().getCliente());
+			cadastroExterno.setEmpresa(empresa);
+			cadastroExterno.setPedestre(null);
+			cadastroExterno.setToken(tokenLink);
+			cadastroExterno.setTipo(TipoCadastroExterno.FACIAL_LINK_CONVITE);
+			cadastroExterno.setStatusCadastroExterno(StatusCadastroExterno.AGUARDANDO_CADASTRO);
+			baseEJB.gravaObjeto(cadastroExterno);
+		} catch (Exception e) {
+			e.printStackTrace();
+			mensagemFatal("", "msg.link.cadastro.facial.erro.gravar.token");
+		}
+	}
+
+	public String getLinkGeradoConvite() {
+		return linkGeradoConvite;
+	}
+
 }

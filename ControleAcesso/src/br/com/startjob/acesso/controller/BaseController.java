@@ -8,6 +8,7 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -38,10 +39,12 @@ import br.com.startjob.acesso.modelo.BaseConstant;
 import br.com.startjob.acesso.modelo.collections.LazyLoadingList;
 import br.com.startjob.acesso.modelo.collections.LazyLoadingList.LazyLoadingItemListener;
 import br.com.startjob.acesso.modelo.ejb.BaseEJBRemote;
+import br.com.startjob.acesso.modelo.entity.EmpresaEntity;
 import br.com.startjob.acesso.modelo.entity.HistoricoCotaEntity;
 import br.com.startjob.acesso.modelo.entity.ParametroEntity;
 import br.com.startjob.acesso.modelo.entity.UsuarioEntity;
 import br.com.startjob.acesso.modelo.entity.base.BaseEntity;
+import br.com.startjob.acesso.modelo.enumeration.PerfilAcesso;
 import br.com.startjob.acesso.modelo.utils.AppAmbienteUtils;
 import br.com.startjob.acesso.utils.CookieUtils;
 import br.com.startjob.acesso.utils.ResourceBundleUtils;
@@ -1255,6 +1258,61 @@ public abstract class BaseController implements Serializable {
 			return user;
 		
 		return new UsuarioEntity();
+	}
+
+	/** Administrador ou gerente (usuário logado no sistema web). */
+	public boolean isAdminOrGerente() {
+		PerfilAcesso perfil = getUsuarioLogado().getPerfil();
+		return PerfilAcesso.ADMINISTRADOR.equals(perfil) || PerfilAcesso.GERENTE.equals(perfil);
+	}
+
+	/**
+	 * Geração/envio de link de cadastro facial: somente administrador ou gerente.
+	 * @return false se não autorizado (mensagem exibida)
+	 */
+	protected boolean validarPermissaoGerarLinkCadastroFacial() {
+		if (!isAdminOrGerente()) {
+			mensagemFatal("", "msg.link.cadastro.facial.sem.permissao");
+			return false;
+		}
+		return true;
+	}
+
+	@SuppressWarnings("unchecked")
+	protected List<EmpresaEntity> listarEmpresasDoCliente(Long idCliente) {
+		if (idCliente == null || baseEJB == null) {
+			return Collections.emptyList();
+		}
+		try {
+			Map<String, Object> args = new HashMap<>();
+			args.put("ID_CLIENTE", idCliente);
+			List<EmpresaEntity> empresas = (List<EmpresaEntity>) baseEJB.pesquisaArgFixos(EmpresaEntity.class,
+					"findAllByIdCliente2", args);
+			return empresas != null ? empresas : Collections.emptyList();
+		} catch (Exception e) {
+			return Collections.emptyList();
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	protected EmpresaEntity buscaEmpresaPorIdCliente(Long idEmpresa, Long idCliente) {
+		if (idEmpresa == null || idCliente == null || baseEJB == null) {
+			return null;
+		}
+		Map<String, Object> args = new HashMap<>();
+		args.put("ID", idEmpresa);
+		try {
+			List<EmpresaEntity> lista = (List<EmpresaEntity>) baseEJB.pesquisaArgFixos(EmpresaEntity.class,
+					"findById", args);
+			if (lista != null) {
+				return lista.stream()
+						.filter(e -> e.getCliente() != null && idCliente.equals(e.getCliente().getId()))
+						.findFirst().orElse(null);
+			}
+		} catch (Exception e) {
+			// ignorado
+		}
+		return null;
 	}
 
 	/**

@@ -1530,10 +1530,20 @@ public class DesktopApiService extends BaseService {
 		}
 		
 		
-		// Dados da empresa
-		if (jsonObject.getString("idEmpresa") != null && !jsonObject.getString("idEmpresa").isEmpty())
-			visitante.setEmpresa(
-					(EmpresaEntity) buscaPeloId(EmpresaEntity.class, Long.valueOf(jsonObject.getString("idEmpresa"))));
+		// Empresa visitada (visitante) ou vinculada (legado)
+		if (jsonObject.has("idEmpresaVisitada") && jsonObject.getString("idEmpresaVisitada") != null
+				&& !jsonObject.getString("idEmpresaVisitada").isEmpty()) {
+			EmpresaEntity empVisitada = (EmpresaEntity) buscaPeloId(EmpresaEntity.class,
+					Long.valueOf(jsonObject.getString("idEmpresaVisitada")));
+			visitante.aplicarEmpresaVisitadaInformada(empVisitada != null ? empVisitada.getNome() : null, empVisitada);
+		} else if (jsonObject.has("empresaVisitada") && jsonObject.getString("empresaVisitada") != null
+				&& !jsonObject.getString("empresaVisitada").trim().isEmpty()) {
+			visitante.aplicarEmpresaVisitadaInformada(jsonObject.getString("empresaVisitada").trim(), null);
+		} else if (jsonObject.getString("idEmpresa") != null && !jsonObject.getString("idEmpresa").isEmpty()) {
+			EmpresaEntity emp = (EmpresaEntity) buscaPeloId(EmpresaEntity.class,
+					Long.valueOf(jsonObject.getString("idEmpresa")));
+			visitante.aplicarEmpresaVisitadaInformada(emp != null ? emp.getNome() : null, emp);
+		}
 
 		if (jsonObject.getString("idDepartamento") != null && !jsonObject.getString("idDepartamento").isEmpty())
 			visitante.setDepartamento((DepartamentoEntity) buscaPeloId(DepartamentoEntity.class,

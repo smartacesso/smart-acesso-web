@@ -57,6 +57,11 @@ public class CadastroFacialExternoController extends BaseController {
 		if(pedestre == null)
 			return;
 		
+		if (token == null || token < System.currentTimeMillis()) {
+			mensagemFatal("", "msg.link.cadastro.facial.invalido");
+			return;
+		}
+
 		cadastroExterno = buscaCadastroExternoAtivo(idPedestre, idCliente, token);
 		
 		if(cadastroExterno == null)

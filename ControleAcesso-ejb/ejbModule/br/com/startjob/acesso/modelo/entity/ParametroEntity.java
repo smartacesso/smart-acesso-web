@@ -63,6 +63,9 @@ public class ParametroEntity extends ClienteBaseEntity {
 	
 	@Transient
 	private String nomeAux;
+
+	@Transient
+	private TipoEditorParametro tipoEditor;
 	
 	public Long getId() {
 		return id;
@@ -75,6 +78,7 @@ public class ParametroEntity extends ClienteBaseEntity {
 	}
 	public void setNome(String nome) {
 		this.nome = nome;
+		invalidarTipoEditor();
 	}
 	public String getValor() {
 		return valor;
@@ -92,11 +96,105 @@ public class ParametroEntity extends ClienteBaseEntity {
 	}
 	
 	public String getNomeAux() {
+		if (nomeAux != null && !nomeAux.isEmpty()) {
+			return nomeAux;
+		}
 		return nome;
 	}
-	
+
 	public void setNomeAux(String nomeAux) {
 		this.nomeAux = nomeAux;
+	}
+
+	public TipoEditorParametro getTipoEditor() {
+		if (tipoEditor == null) {
+			tipoEditor = TipoEditorParametroResolver.resolver(nome);
+		}
+		return tipoEditor;
+	}
+
+	public void setTipoEditor(TipoEditorParametro tipoEditor) {
+		this.tipoEditor = tipoEditor;
+	}
+
+	public void invalidarTipoEditor() {
+		this.tipoEditor = null;
+	}
+
+	public boolean isEditorBooleano() {
+		return getTipoEditor() == TipoEditorParametro.BOOLEAN;
+	}
+
+	public boolean isEditorHorarioSoc() {
+		return getTipoEditor() == TipoEditorParametro.HORARIO_SOC;
+	}
+
+	public boolean isEditorQtdeDigitosCartao() {
+		return getTipoEditor() == TipoEditorParametro.QTDE_DIGITOS_CARTAO;
+	}
+
+	public boolean isEditorDiasValidadeLinkFacial() {
+		return getTipoEditor() == TipoEditorParametro.DIAS_VALIDADE_LINK_FACIAL;
+	}
+
+	public boolean isEditorMinutosQrCodeDinamico() {
+		return getTipoEditor() == TipoEditorParametro.MINUTOS_QR_CODE_DINAMICO;
+	}
+
+	public boolean isEditorHorasCadastroFacialRemoto() {
+		return getTipoEditor() == TipoEditorParametro.HORAS_CADASTRO_FACIAL_REMOTO;
+	}
+
+	public boolean isEditorToleranciaEntradaSaida() {
+		return getTipoEditor() == TipoEditorParametro.TOLERANCIA_ENTRADA_SAIDA;
+	}
+
+	public boolean isEditorTextoFormato() {
+		return getTipoEditor() == TipoEditorParametro.TEXTO_FORMATO;
+	}
+
+	public boolean isEditorTextoLocalPadrao() {
+		return getTipoEditor() == TipoEditorParametro.TEXTO_LOCAL_PADRAO;
+	}
+
+	public boolean isEditorTextoLargo() {
+		return getTipoEditor() == TipoEditorParametro.TEXTO_LARGO;
+	}
+
+	public boolean isEditorSelectLimiteDigitais() {
+		return getTipoEditor() == TipoEditorParametro.SELECT_LIMITE_DIGITAIS;
+	}
+
+	public boolean isEditorSelectTipoQrPadrao() {
+		return getTipoEditor() == TipoEditorParametro.SELECT_TIPO_QR_PADRAO;
+	}
+
+	public boolean isEditorCamposObrigatorios() {
+		return getTipoEditor() == TipoEditorParametro.CAMPOS_OBRIGATORIOS;
+	}
+
+	/** Valor booleano para checkbox (parâmetros sim/não). */
+	public boolean isValorAtivo() {
+		return "true".equalsIgnoreCase(valor);
+	}
+
+	public void setValorAtivo(boolean ativo) {
+		this.valor = ativo ? "true" : "false";
+	}
+
+	public Integer getValorComoInteiro() {
+		if (valor == null || valor.trim().isEmpty()) {
+			return null;
+		}
+		try {
+			return Integer.valueOf(valor.trim());
+		} catch (NumberFormatException e) {
+			return null;
+		}
+	}
+
+	public void setValorComoInteiro(Integer inteiro) {
+		this.valor = inteiro == null ? "" : String.valueOf(inteiro);
 	}
 
 }

@@ -1,9 +1,14 @@
 package br.com.startjob.acesso.controller.uc011;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 import javax.faces.event.ValueChangeEvent;
@@ -15,6 +20,7 @@ import br.com.startjob.acesso.annotations.UseCase;
 import br.com.startjob.acesso.controller.RelatorioController;
 import br.com.startjob.acesso.modelo.entity.AcessoEntity;
 import br.com.startjob.acesso.modelo.entity.EmpresaEntity;
+import br.com.startjob.acesso.modelo.entity.PedestreEntity;
 import br.com.startjob.acesso.modelo.enumeration.TipoPedestre;
 import br.com.startjob.acesso.modelo.utils.DateUtils;
 
@@ -48,9 +54,9 @@ public class RelatorioVisitantesController extends RelatorioController {
 		getParans().put("data_maior_data", formatarDataInicioDia(new Date()));
 		getParans().put("data_menor_data", formatarDataFimDia(new Date()));
 		
-		buscar();
-		listaEmpresas = montaListaEmpresas();
+		listaEmpresas = montaListaEmpresasVisitadas();
 		listaEquipamentos = montaListaEquipamentos();
+		buscar();
 	}
 	
 
@@ -134,10 +140,59 @@ public class RelatorioVisitantesController extends RelatorioController {
 		}
 
 		// Combos (IDs): Garante que IDs não válidos (0, vazio ou null) virem Null
-		limparIdZerado("pedestre.empresa.id");
+		limparIdZerado("pedestre.empresaVisitadaRef.id");
+		Object legadoEmp = getParans().remove("pedestre.empresa.id");
+		if (legadoEmp != null && getParans().get("pedestre.empresaVisitadaRef.id") == null) {
+			getParans().put("pedestre.empresaVisitadaRef.id", legadoEmp);
+		}
 		limparIdZerado("pedestre.departamento.id");
 		limparIdZerado("pedestre.cargo.id");
 		limparIdZerado("pedestre.centroCusto.id");
+
+		Object empresaVisitadaTexto = getParans().get("pedestre.empresaVisitada");
+		if (empresaVisitadaTexto != null && empresaVisitadaTexto.toString().trim().isEmpty()) {
+			getParans().put("pedestre.empresaVisitada", null);
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private List<SelectItem> montaListaEmpresasVisitadas() {
+		List<SelectItem> lista = new ArrayList<>();
+		lista.add(new SelectItem(null, "Filtrar por empresa visitada"));
+		Set<Long> idsIncluidos = new LinkedHashSet<>();
+
+		Long idCliente = getUsuarioLogado().getCliente().getId();
+		Map<String, Object> args = new HashMap<>();
+		args.put("ID_CLIENTE", idCliente);
+		args.put("TIPO", TipoPedestre.VISITANTE);
+
+		try {
+			List<Long> idsVisitados = (List<Long>) baseEJB.pesquisaArgFixos(PedestreEntity.class,
+					"findDistinctEmpresaVisitadaRefIdByCliente", args);
+			if (idsVisitados != null) {
+				for (Long id : idsVisitados) {
+					if (id != null && idsIncluidos.add(id)) {
+						EmpresaEntity empresa = buscaEmpresaPeloId(id);
+						if (empresa != null && empresa.getNome() != null) {
+							lista.add(new SelectItem(id, empresa.getNome()));
+						}
+					}
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		for (SelectItem item : montaListaEmpresas()) {
+			if (item.getValue() instanceof Long) {
+				Long id = (Long) item.getValue();
+				if (idsIncluidos.add(id)) {
+					lista.add(item);
+				}
+			}
+		}
+
+		return lista;
 	}
 
 	private void limparIdZerado(String chave) {

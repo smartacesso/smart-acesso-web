@@ -223,6 +223,87 @@
 		return null;
 	}
 
+	function saFindPrimaryDataTableInSplit(split, tabela) {
+		if (tabela) {
+			var grid = tabela.querySelector('.sa-pesquisa-split__grid');
+			if (grid) {
+				var inGrid = grid.querySelector('.ui-datatable.sa-table');
+				if (inGrid) {
+					return inGrid;
+				}
+			}
+			var inTabela = tabela.querySelector('.ui-datatable.sa-table');
+			if (inTabela) {
+				return inTabela;
+			}
+		}
+		if (split) {
+			return split.querySelector('.sa-pesquisa-split__grid .ui-datatable.sa-table')
+				|| split.querySelector('.ui-datatable.sa-table');
+		}
+		return null;
+	}
+
+	/** Mantém um único rodapé de paginação na split (evita triplicação após vários AJAX). */
+	function saDedupePesquisaSplitFooters(split) {
+		if (!split) {
+			return null;
+		}
+		var footers = split.querySelectorAll(':scope > .sa-pesquisa-split__footer');
+		if (footers.length <= 1) {
+			return footers[0] || null;
+		}
+		var keep = footers[footers.length - 1];
+		for (var i = 0; i < footers.length - 1; i++) {
+			var orphan = footers[i];
+			while (orphan.firstChild) {
+				keep.appendChild(orphan.firstChild);
+			}
+			orphan.parentNode.removeChild(orphan);
+		}
+		return keep;
+	}
+
+	/**
+	 * Move o paginator da dataTable para o rodapé da split, removendo cópias órfãs
+	 * (evita duplicação após AJAX parcial em pesquisaPedestre e telas similares).
+	 */
+	function saRelocatePaginatorToSplitFooter(table, splitFooter) {
+		if (!table || !splitFooter) {
+			return;
+		}
+
+		var paginator = table.querySelector(':scope > .ui-paginator.ui-paginator-bottom')
+			|| table.querySelector(':scope > .ui-paginator');
+
+		if (!paginator) {
+			return;
+		}
+
+		splitFooter.querySelectorAll('.ui-paginator').forEach(function (oldPg) {
+			oldPg.parentNode.removeChild(oldPg);
+		});
+
+		splitFooter.appendChild(paginator);
+
+		table.querySelectorAll(':scope > .ui-paginator').forEach(function (pg) {
+			if (pg.parentNode === table) {
+				pg.parentNode.removeChild(pg);
+			}
+		});
+	}
+
+	function saCleanupOrphanPaginatorsInSplit(split, splitFooter) {
+		if (!split || !splitFooter) {
+			return;
+		}
+		split.querySelectorAll('.ui-paginator').forEach(function (pg) {
+			if (!splitFooter.contains(pg)) {
+				pg.parentNode.removeChild(pg);
+			}
+		});
+	}
+
 	function saInitPesquisaSplitLayout() {
 		var content = document.querySelector('.sa-content.conteudo_internal');
 		if (!content) {
@@ -261,7 +342,10 @@
 			split.appendChild(splitFooter);
 		} else {
 			main = split.querySelector('.sa-pesquisa-split__main');
-			splitFooter = split.querySelector('.sa-pesquisa-split__footer');
+			splitFooter = saDedupePesquisaSplitFooters(split);
+			if (!splitFooter) {
+				splitFooter = split.querySelector('.sa-pesquisa-split__footer');
+			}
 			if (!main) {
 				main = document.createElement('div');
 				main.className = 'sa-pesquisa-split__main';
@@ -290,14 +374,10 @@
 		var filtrosPanel = filtro.querySelector('.filtros-avancados');
 		split.classList.toggle('sa-pesquisa-split--filtros-abertos', !!filtrosPanel);
 
-		var table = tabela.querySelector('.ui-datatable.sa-table') || content.querySelector('.ui-datatable.sa-table');
-		if (table && splitFooter) {
-			var paginator = table.querySelector(':scope > .ui-paginator')
-				|| splitFooter.querySelector('.ui-paginator')
-				|| table.querySelector('.ui-paginator');
-			if (paginator && paginator.parentNode !== splitFooter) {
-				splitFooter.appendChild(paginator);
-			}
+		var primaryTable = saFindPrimaryDataTableInSplit(split, tabela);
+		if (primaryTable && splitFooter) {
+			saRelocatePaginatorToSplitFooter(primaryTable, splitFooter);
+			saCleanupOrphanPaginatorsInSplit(split, splitFooter);
 		}
 
 		saObserveFilterPanel();
@@ -610,8 +690,6 @@
 		if (window.jQuery) {
 			jQuery(document).on('pfAjaxComplete', function () {
 				saScheduleFitDataTables();
-				setTimeout(saScheduleFitDataTables, 200);
-				setTimeout(saScheduleFitDataTables, 500);
 			});
 		}
 	}

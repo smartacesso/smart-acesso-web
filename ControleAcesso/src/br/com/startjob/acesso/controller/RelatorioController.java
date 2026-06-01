@@ -211,8 +211,15 @@ public abstract class RelatorioController extends BaseController {
 	            String matricula = acesso.getPedestre() != null ? safe(acesso.getPedestre().getMatricula()) : "";
 	            String nome = acesso.getPedestre() != null ? safe(acesso.getPedestre().getNome()) : "";
 	            
-	            String empresa = (acesso.getPedestre() != null && acesso.getPedestre().getEmpresa() != null) 
-	                             ? safe(acesso.getPedestre().getEmpresa().getNome()) : "";
+	            String empresa = "";
+	            if (acesso.getPedestre() != null) {
+	            	String visitada = acesso.getPedestre().getEmpresaVisitadaExibicao();
+	            	if (visitada != null && !visitada.isEmpty()) {
+	            		empresa = safe(visitada);
+	            	} else if (acesso.getPedestre().getEmpresa() != null) {
+	            		empresa = safe(acesso.getPedestre().getEmpresa().getNome());
+	            	}
+	            }
 	                             
 	            String cargo = (acesso.getPedestre() != null && acesso.getPedestre().getCargo() != null) 
 	                           ? safe(acesso.getPedestre().getCargo().getNome()) : "";

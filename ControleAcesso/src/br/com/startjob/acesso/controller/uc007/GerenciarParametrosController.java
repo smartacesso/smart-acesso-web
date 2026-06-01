@@ -4,8 +4,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 import javax.faces.model.SelectItem;
@@ -75,6 +77,38 @@ public class GerenciarParametrosController extends BaseController {
 		}
 	}
 
+	private void normalizarNomeParametroLegado(ParametroEntity item) {
+		if (item.getNome() == null) {
+			return;
+		}
+		String nome = item.getNome();
+		if (nome.trim().isEmpty()
+				|| BaseConstant.PARAMETERS_NAME.LEGACY_VALIDAR_MATRICULAS_DUPLICADAS.equals(nome)) {
+			item.setNome(BaseConstant.PARAMETERS_NAME.VALIDAR_MATRICULAS_DUPLICADAS);
+		}
+	}
+
+	private void normalizarValorParametro(ParametroEntity item) {
+		if (item.getNome() == null) {
+			return;
+		}
+		if (BaseConstant.PARAMETERS_NAME.LIMITE_DIGITAIS_PEDESTRE.equals(item.getNome())) {
+			if ("Sem limites".equalsIgnoreCase(item.getValor())) {
+				item.setValor("Sem limite");
+			}
+			return;
+		}
+		if (BaseConstant.PARAMETERS_NAME.ESCOLHER_QTDE_DIGITOS_CARTAO.equals(item.getNome())) {
+			item.setNomeAux("Escolher quantidade de dígitos do cartão (1 a 16)");
+			Integer qtde = item.getValorComoInteiro();
+			if (qtde == null || qtde < 1) {
+				item.setValor("1");
+			} else if (qtde > 16) {
+				item.setValor("16");
+			}
+		}
+	}
+
 	private void atualizaListas(List<? extends BaseEntity> all) {
 
 		parametrosGerais = new ArrayList<ParametroEntity>();
@@ -113,9 +147,16 @@ public class GerenciarParametrosController extends BaseController {
 			boolean localPadraoPedestre = false;
 			boolean localPadraoVisitante = false;
 			boolean modoCorrespodencia = false;
+			Set<String> nomesJaIncluidos = new HashSet<>();
 
 			for (BaseEntity baseEntity : all) {
 				ParametroEntity item = (ParametroEntity) baseEntity;
+				normalizarNomeParametroLegado(item);
+				normalizarValorParametro(item);
+				item.invalidarTipoEditor();
+				if (!nomesJaIncluidos.add(item.getNome())) {
+					continue;
+				}
 
 				parametrosGerais.add(item);
 				if (item.getNome().equals(BaseConstant.PARAMETERS_NAME.PREENCHER_CARTAO_COM_MATRICULA)) {
@@ -140,7 +181,7 @@ public class GerenciarParametrosController extends BaseController {
 				if (item.getNome().equals(BaseConstant.PARAMETERS_NAME.ESCOLHER_QTDE_DIGITOS_CARTAO)) {
 					escolherDigitos = true;
 				}
-				if (item.getNome().equals(BaseConstant.PARAMETERS_NAME.GERAR_MATRICULA_SEQUENCIAL)) {
+				if (item.getNome().equals(BaseConstant.PARAMETERS_NAME.PERMITIR_CAMPO_ADICIONAL_CRACHA)) {
 					permitirCampoAdicionalMatricula = true;
 				}
 				if (item.getNome().equals(BaseConstant.PARAMETERS_NAME.FORMATO_DATA_PARA_IMPORTACAO)) {
@@ -337,7 +378,7 @@ public class GerenciarParametrosController extends BaseController {
 			}
 			if (!limiteDigitaisPorPedestre) {
 				ParametroEntity p = new ParametroEntity(BaseConstant.PARAMETERS_NAME.LIMITE_DIGITAIS_PEDESTRE,
-						"Sem limites", getUsuarioLogado().getCliente());
+						"Sem limite", getUsuarioLogado().getCliente());
 				parametrosGerais.add(p);
 			}
 
@@ -425,6 +466,7 @@ public class GerenciarParametrosController extends BaseController {
 		all.addAll(parametrosGerais);
 
 		for (ParametroEntity baseEntity : parametrosGerais) {
+			normalizarValorParametro(baseEntity);
 			if (baseEntity.getNome().startsWith("Campos")) {
 				StringBuilder value = new StringBuilder();
 

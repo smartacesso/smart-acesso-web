@@ -33,7 +33,8 @@
 						action="#{relatorioVisitantesController.buscar()}"
 						value="#{msgs['alt.acao.buscar']}"
 						process="@form"
-						update="@form" 
+						update="@form"
+						oncomplete="if(window.saScheduleFitDataTables){saScheduleFitDataTables();}"
 						title="#{msgs['alt.acao.buscar']}"
 						icon="pi pi-search" iconPos="left"
 						styleClass="sa-btn-label" />
@@ -168,10 +169,10 @@
 						</div>
 
 						<div class="ui-g-12 ui-md-6">
-							<p:outputLabel value="#{msgs['label.uc011.empresa']}"
+							<p:outputLabel value="#{msgs['label.uc008.empresa.visitada']}"
 								for="filtro-avancado-empresa" />
 							<p:selectOneMenu id="filtro-avancado-empresa"
-								value="#{relatorioVisitantesController.parans['pedestre.empresa.id']}"
+								value="#{relatorioVisitantesController.parans['pedestre.empresaVisitadaRef.id']}"
 								valueChangeListener="#{relatorioVisitantesController.eventoEmpresaSelecionada}">
 								<f:selectItems
 									value="#{relatorioVisitantesController.listaEmpresas}" />
@@ -263,9 +264,9 @@
 							<h:outputText value="#{visitante.pedestre.nome}" />
 						</p:column>
 
-						<p:column headerText="#{msgs['label.uc011.empresa']}"
+						<p:column headerText="#{msgs['label.uc008.empresa.visitada']}"
 						styleClass="col-desktop-only sa-table-col-center">
-							<h:outputText value="#{visitante.pedestre.empresa.nome}" />
+							<h:outputText value="#{visitante.pedestre.empresaVisitadaExibicao}" />
 						</p:column>
 
 						<p:column styleClass="col-desktop-only sa-table-col-center sa-table-col-abbr">

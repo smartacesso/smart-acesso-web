@@ -14,10 +14,10 @@
 	<ui:composition template="/tema/templates/template.xhtml">
 
 		<ui:define name="titulo">
-			#{msgs['title.sistema']} | Autoatendimento
+			#{msgs['title.sistema']} | Totem de visitantes
 		</ui:define>
 		<ui:define name="pageTitle">
-			<h:outputText value="Bem-vindo(a) ao Autoatendimento" />
+			<h:outputText value="Bem-vindo(a) ao totem de visitantes" />
 		</ui:define>
 		<ui:define name="pageSubtitle">
 			<h:outputText value="#{sessionScope.usuario.cliente.nome}" rendered="#{sessionScope.usuario != null}" />
@@ -27,7 +27,7 @@
 <ui:define name="tools">
 			<p:toolbar id="painelTools" styleClass="sa-toolbar-wrap">
 				<p:toolbarGroup styleClass="sa-toolbar-actions">
-					<h:outputText value="Terminal de Autoatendimento SmartAcesso"
+					<h:outputText value="Terminal de visitantes SmartAcesso"
 						style="font-weight:600; color: var(--sa-text, #2c3e50); font-size: 1.1rem;" />
 				</p:toolbarGroup>
 			</p:toolbar>
@@ -209,7 +209,7 @@
 							</div>
 							
 						</div>
-					</div>
+					</div>
 
 			<script type="text/javascript">
 			//<![CDATA[

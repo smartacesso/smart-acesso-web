@@ -1,5 +1,7 @@
 package br.com.startjob.acesso.controller.uc008;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -19,6 +21,7 @@ import javax.faces.model.SelectItem;
 import javax.faces.view.ViewScoped;
 import javax.inject.Named;
 
+import org.primefaces.PrimeFaces;
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.model.file.UploadedFile;
 
@@ -29,6 +32,7 @@ import br.com.startjob.acesso.controller.BaseController;
 import br.com.startjob.acesso.modelo.BaseConstant;
 import br.com.startjob.acesso.modelo.ejb.EmpresaEJBRemote;
 import br.com.startjob.acesso.modelo.ejb.PedestreEJBRemote;
+import br.com.startjob.acesso.modelo.entity.ClienteEntity;
 import br.com.startjob.acesso.modelo.entity.EmpresaEntity;
 import br.com.startjob.acesso.modelo.entity.ImportacaoEntity;
 import br.com.startjob.acesso.modelo.entity.LocalEntity;
@@ -38,6 +42,7 @@ import br.com.startjob.acesso.modelo.entity.PedestreRegraEntity;
 import br.com.startjob.acesso.modelo.enumeration.Status;
 import br.com.startjob.acesso.modelo.enumeration.TipoArquivo;
 import br.com.startjob.acesso.modelo.enumeration.TipoPedestre;
+import br.com.startjob.acesso.service.CadastroFacialLinkService;
 
 @Named("consultaPedestreController")
 @ViewScoped
@@ -82,6 +87,9 @@ public class ConsultaPedestreController extends BaseController {
 	
 	private boolean permiteCampoAdicionalCrachaMatricula = true;
 	private boolean habilitaAppPedestre = false;
+
+	private String linkGeradoFacial;
+	private Long idEmpresaLinkConvite;
 
 	@PostConstruct
 	@Override
@@ -703,6 +711,185 @@ public class ConsultaPedestreController extends BaseController {
 
 	public void setListaLocais(List<SelectItem> listaLocais) {
 		this.listaLocais = listaLocais;
+	}
+
+	public boolean isTelaVisitantes() {
+		Object t = getParans().get("tipo");
+		return TipoPedestre.VISITANTE.equals(t) || "vi".equals(tipo);
+	}
+
+	public Long getFiltroEmpresaId() {
+		String chave = isTelaVisitantes() ? "empresaVisitadaRef.id" : "empresa.id";
+		Object v = getParans().get(chave);
+		if (v instanceof Long) {
+			return (Long) v;
+		}
+		if (v != null && !v.toString().trim().isEmpty()) {
+			try {
+				return Long.valueOf(v.toString());
+			} catch (NumberFormatException e) {
+				return null;
+			}
+		}
+		return null;
+	}
+
+	public void setFiltroEmpresaId(Long id) {
+		if (isTelaVisitantes()) {
+			getParans().put("empresaVisitadaRef.id", id);
+			getParans().remove("empresa.id");
+		} else {
+			getParans().put("empresa.id", id);
+			getParans().remove("empresaVisitadaRef.id");
+		}
+	}
+
+	public void abrirDialogLinkConviteVisitante() {
+		if (!validarPermissaoGerarLinkCadastroFacial()) {
+			return;
+		}
+		linkGeradoFacial = null;
+	}
+
+	public boolean isLinkConviteGerado() {
+		return linkGeradoFacial != null && !linkGeradoFacial.trim().isEmpty();
+	}
+
+	public List<SelectItem> getListaEmpresasConvite() {
+		List<SelectItem> convite = new ArrayList<>();
+		if (listaEmpresas == null) {
+			return convite;
+		}
+		for (SelectItem item : listaEmpresas) {
+			if (item.getValue() != null) {
+				convite.add(item);
+			}
+		}
+		return convite;
+	}
+
+	/**
+	 * Link para visitante sem cadastro prévio (convite). Empresa escolhida pelo operador web.
+	 */
+	public void gerarLinkConviteVisitante() {
+		if (!validarPermissaoGerarLinkCadastroFacial()) {
+			return;
+		}
+
+		if (idEmpresaLinkConvite == null) {
+			mensagemFatal("", "msg.link.cadastro.facial.empresa.obrigatoria");
+			return;
+		}
+
+		try {
+			CadastroFacialLinkService linkService = new CadastroFacialLinkService(pedestreEJB);
+			Long idCliente = getUsuarioLogado().getCliente().getId();
+			EmpresaEntity empresa = linkService.buscaEmpresaPorId(idEmpresaLinkConvite, idCliente);
+			if (empresa == null) {
+				mensagemFatal("", "msg.link.cadastro.facial.empresa.invalida");
+				return;
+			}
+
+			long token = linkService.calcularTokenValidade(idCliente);
+			ClienteEntity cliente = getUsuarioLogado().getCliente();
+			linkService.gravarCadastroExternoConvite(cliente, empresa, token, null);
+
+			linkGeradoFacial = linkService.montarUrlConvite(idCliente, empresa.getId(), token);
+			mensagemInfo("", "msg.link.cadastro.facial.gerado.sucesso");
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			mensagemFatal("", "msg.link.cadastro.facial.erro.gravar.token");
+		}
+	}
+
+	/**
+	 * Link para visitante já cadastrado (completar facial). Exige autoAtendimento e celular.
+	 */
+	public void gerarLinkFacialVisitanteExistente() {
+		if (!validarPermissaoGerarLinkCadastroFacial()) {
+			return;
+		}
+
+		PedestreEntity p = pedestreSelecionado;
+		if (p == null || p.getId() == null) {
+			mensagemFatal("", "msg.link.cadastro.facial.pedestre.nao.selecionado");
+			return;
+		}
+
+		if (!TipoPedestre.VISITANTE.equals(p.getTipo())) {
+			mensagemFatal("", "msg.link.cadastro.facial.apenas.visitante");
+			return;
+		}
+
+		if (!Boolean.TRUE.equals(p.getAutoAtendimento())) {
+			mensagemFatal("", "msg.link.cadastro.facial.gerar.sem.liberacao");
+			return;
+		}
+
+		if (p.getCelular() == null || p.getCelular().trim().isEmpty()) {
+			mensagemFatal("", "msg.celular.nulo");
+			return;
+		}
+
+		try {
+			CadastroFacialLinkService linkService = new CadastroFacialLinkService(pedestreEJB);
+			Long idCliente = getUsuarioLogado().getCliente().getId();
+			long token = linkService.calcularTokenValidade(idCliente);
+
+			PedestreEntity completo = buscaPedestreParaLink(p.getId(), idCliente);
+			if (completo == null) {
+				mensagemFatal("", "msg.link.cadastro.facial.invalido");
+				return;
+			}
+
+			completo.setAutoAtendimentoAt(new Date());
+			pedestreEJB.alteraObjeto(completo);
+
+			linkService.gravarCadastroExternoPrecadastro(completo, getUsuarioLogado().getCliente(), token);
+			linkGeradoFacial = linkService.montarUrlPrecadastro(idCliente, completo.getId(), token);
+
+			String celphone = p.getCelular().replace("-", "").replace("(", "").replace(")", "").replace(" ", "");
+			String msg = "Olá! Acesse o link para concluir seu cadastro facial:\n" + linkGeradoFacial;
+			String encodedMsg = URLEncoder.encode(msg, "UTF-8");
+			PrimeFaces.current().executeScript("window.open('" + BaseConstant.URL_WHATSAPP + "55" + celphone + "&text="
+					+ encodedMsg + "','whatsAppTab');");
+
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+			mensagemFatal("", "msg.link.cadastro.facial.erro.gravar.token");
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private PedestreEntity buscaPedestreParaLink(Long id, Long idCliente) {
+		Map<String, Object> args = new HashMap<>();
+		args.put("ID", id);
+		args.put("ID_CLIENTE", idCliente);
+		try {
+			List<PedestreEntity> lista = (List<PedestreEntity>) pedestreEJB.pesquisaArgFixos(PedestreEntity.class,
+					"findByIdPedestreAndIdCliente", args);
+			if (lista != null && !lista.isEmpty()) {
+				return lista.get(0);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+
+	public String getLinkGeradoFacial() {
+		return linkGeradoFacial;
+	}
+
+	public Long getIdEmpresaLinkConvite() {
+		return idEmpresaLinkConvite;
+	}
+
+	public void setIdEmpresaLinkConvite(Long idEmpresaLinkConvite) {
+		this.idEmpresaLinkConvite = idEmpresaLinkConvite;
 	}
 }
 

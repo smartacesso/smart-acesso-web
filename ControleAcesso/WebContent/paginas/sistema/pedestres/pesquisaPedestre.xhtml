@@ -110,9 +110,9 @@
 
 						<div class="ui-g-12 ui-md-6">
 							<p:outputLabel for="filtro-avancado-emepresa"
-								value="#{msgs['label.uc008.empresa']}" />
+								value="#{consultaPedestreController.telaVisitantes ? msgs['label.uc008.empresa.visitada'] : msgs['label.uc008.empresa']}" />
 							<p:selectOneMenu id="filtro-avancado-emepresa"
-								value="#{consultaPedestreController.parans['empresa.id']}"
+								value="#{consultaPedestreController.filtroEmpresaId}"
 								valueChangeListener="#{consultaPedestreController.eventoEmpresaSelecionada}">
 								<f:selectItems
 									value="#{consultaPedestreController.listaEmpresas}" />
@@ -123,7 +123,8 @@
 							</p:selectOneMenu>
 						</div>
 
-						<div class="ui-g-12 ui-md-4">
+						<div class="ui-g-12 ui-md-4"
+							rendered="#{not consultaPedestreController.telaVisitantes}">
 							<p:outputLabel for="filtro-avancado-departamento"
 								value="#{msgs['label.uc008.departamento']}" />
 							<p:selectOneMenu id="filtro-avancado-departamento"
@@ -177,8 +178,18 @@
 									action="#{consultaPedestreController.novo}"
 									value="#{msgs['alt.acao.novo']}"
 									icon="pi pi-plus" iconPos="left"
-									process="@this" update="@form" title="#{msgs['alt.acao.novo']}"
+									ajax="false" title="#{msgs['alt.acao.novo']}"
 									styleClass="sa-btn-label ui-button-success" />
+								<p:commandButton id="btnLinkConviteVisitante"
+									rendered="#{consultaPedestreController.telaVisitantes and consultaPedestreController.adminOrGerente}"
+									value="Link novo visitante"
+									icon="pi pi-link" iconPos="left"
+									action="#{consultaPedestreController.abrirDialogLinkConviteVisitante}"
+									process="@this"
+									update="form:painelLinkConviteDialog"
+									oncomplete="PF('dlgLinkConviteVisitante').show();"
+									styleClass="sa-btn-label ui-button-flat"
+									title="Gerar link de cadastro facial para visitante sem cadastro prévio" />
 								<p:commandButton id="acaoExportar"
 									value="#{msgs['label.uc008.exportar.dados']}"
 									icon="pi pi-file-excel" iconPos="left"
@@ -203,7 +214,8 @@
 									value="#{msgs['alt.acao.limpar']}"
 									title="#{msgs['alt.acao.limpar']}"
 									icon="pi pi-filter" iconPos="left"
-									process="@this" update="@form"
+									process="@form" update="form:saPesquisaSplit form:growl"
+									oncomplete="if(window.saScheduleFitDataTables){saScheduleFitDataTables();}"
 									styleClass="sa-btn-label ui-button-flat" />
 								<div class="sa-toolbar-search">
 									<p:inputText id="filtro-busca-geral" placeholder="Buscar por nome"
@@ -223,7 +235,8 @@
 										value="#{msgs['alt.acao.buscar']}"
 										title="#{msgs['alt.acao.buscar']}"
 										icon="pi pi-search" iconPos="left"
-										process="@form" update="form:tabelaPainel"
+										process="@form" update="form:saPesquisaSplit form:growl"
+										oncomplete="if(window.saScheduleFitDataTables){saScheduleFitDataTables();}"
 										styleClass="sa-btn-label" />
 								</div>
 								<p:commandButton id="acaoFiltroAvancado"
@@ -255,6 +268,9 @@
 							paginatorPosition="bottom" paginatorAlwaysVisible="false"
 							styleClass="tabela-responsive sa-table">
 
+							<p:ajax event="page"
+								oncomplete="if(window.saScheduleFitDataTables){saScheduleFitDataTables();}" />
+
 							<p:column styleClass="align-left col-desktop-only sa-table-col-abbr"
 								rendered="#{consultaPedestreController.permiteCampoAdicionalCrachaMatricula and consultaPedestreController.parans['tipo'] == 'PEDESTRE'}">
 								<f:facet name="header">
@@ -277,9 +293,9 @@
 									<h:outputText value="#{pedestre.nome}" />
 								</span>
 								<h:panelGroup layout="block" styleClass="col-mobile-only"
-									rendered="#{pedestre.empresa != null}">
+									rendered="#{pedestre.empresa != null or not empty pedestre.empresaVisitadaExibicao}">
 									<span class="sa-cell-secondary">
-										<h:outputText value="#{pedestre.empresa.nome}" />
+										<h:outputText value="#{not empty pedestre.empresaVisitadaExibicao ? pedestre.empresaVisitadaExibicao : pedestre.empresa.nome}" />
 									</span>
 									<span class="sa-cell-secondary">
 										<h:outputText value="#{pedestre.cpf}">
@@ -301,12 +317,13 @@
 								<h:outputText value="#{pedestre.tipo}" />
 							</p:column>
 
-							<p:column headerText="#{msgs['label.uc008.empresa']}"
+							<p:column headerText="#{consultaPedestreController.telaVisitantes ? msgs['label.uc008.empresa.visitada'] : msgs['label.uc008.empresa']}"
 								styleClass="align-left col-desktop-only">
-								<h:outputText value="#{pedestre.empresa.nome}" />
+								<h:outputText value="#{not empty pedestre.empresaVisitadaExibicao ? pedestre.empresaVisitadaExibicao : pedestre.empresa.nome}" />
 							</p:column>
 
-							<p:column styleClass="align-left col-desktop-only sa-table-col-abbr">
+							<p:column styleClass="align-left col-desktop-only sa-table-col-abbr"
+								rendered="#{not consultaPedestreController.telaVisitantes}">
 								<f:facet name="header">
 									<ui:include src="/tema/templates/sa-th-abbr.xhtml">
 										<ui:param name="full" value="#{msgs['label.uc008.departamento']}" />
@@ -345,9 +362,19 @@
 							<p:column headerText="" exportable="false"
 								styleClass="sa-table-col-actions">
 								<div class="sa-table-actions">
+									<p:commandButton icon="pi pi-link"
+										rendered="#{consultaPedestreController.telaVisitantes and consultaPedestreController.adminOrGerente}"
+										title="Enviar link cadastro facial"
+										action="#{consultaPedestreController.gerarLinkFacialVisitanteExistente}"
+										process="@this"
+										styleClass="rounded-button ui-button-help ui-button-flat">
+										<f:setPropertyActionListener value="#{pedestre}"
+											target="#{consultaPedestreController.pedestreSelecionado}" />
+									</p:commandButton>
 									<p:commandButton icon="pi pi-pencil"
 										title="#{msgs['alt.acao.editar']}"
 										action="#{consultaPedestreController.editar(pedestre.id)}"
+										ajax="false"
 										styleClass="rounded-button ui-button-info ui-button-flat" />
 									<p:commandButton icon="pi pi-trash"
 										title="#{msgs['alt.acao.excluir']}"
@@ -380,11 +407,101 @@
 					onclick="PF('confirmarExclusao').hide(); return false;"
 					styleClass="sa-btn-label ui-button-flat" />
 				<p:commandButton value="Sim"
-					oncomplete="PF('confirmarExclusao').hide();"
 					action="#{consultaPedestreController.excluirPedestre()}"
-					process="@this" update="@form"
+					process="@this" update="form:saPesquisaSplit form:growl"
+					oncomplete="PF('confirmarExclusao').hide(); if(window.saScheduleFitDataTables){saScheduleFitDataTables();}"
 					styleClass="sa-btn-label ui-button-success" />
 			</p:confirmDialog>
+
+			<p:dialog id="dlgLinkConviteVisitante" widgetVar="dlgLinkConviteVisitante"
+				header="Link para novo visitante" modal="true" resizable="false" width="560"
+				styleClass="sa-dialog">
+
+				<h:panelGroup id="painelLinkConviteDialog" layout="block">
+					<p class="sa-text-muted">Selecione a empresa de destino e clique em Gerar link. O link aparecerá abaixo para copiar.</p>
+					<div class="sa-form-grid" style="grid-template-columns: 1fr; margin-top: 1rem;">
+						<div class="sa-field">
+							<span class="sa-label">Empresa / destino</span>
+							<p:selectOneMenu id="empresaLinkConvite"
+								value="#{consultaPedestreController.idEmpresaLinkConvite}"
+								styleClass="w-full">
+								<f:selectItem itemLabel="Selecione a empresa..." itemValue="#{null}" />
+								<f:selectItems value="#{consultaPedestreController.listaEmpresasConvite}" />
+							</p:selectOneMenu>
+						</div>
+					</div>
+
+					<h:panelGroup id="painelLinkConviteResultado" layout="block"
+						rendered="#{consultaPedestreController.linkConviteGerado}"
+						style="margin-top: 1rem;">
+						<div class="sa-field">
+							<span class="sa-label">Link gerado</span>
+							<p:inputTextarea id="linkConviteTexto"
+								value="#{consultaPedestreController.linkGeradoFacial}"
+								readonly="true" rows="3" style="width: 100%;" autoResize="false" />
+						</div>
+						<p:commandButton value="Copiar link" icon="pi pi-copy" type="button"
+							styleClass="sa-btn-label ui-button-flat w-full"
+							style="margin-top: 0.5rem;"
+							onclick="saCopiarLinkConvite(); return false;" />
+					</h:panelGroup>
+
+					<div class="sa-dialog-actions" style="margin-top: 1rem;">
+						<p:commandButton value="Gerar link" icon="pi pi-check"
+							action="#{consultaPedestreController.gerarLinkConviteVisitante}"
+							process="form:empresaLinkConvite"
+							update="form:painelLinkConviteDialog form:growl"
+							styleClass="sa-btn-label ui-button-success" />
+						<p:commandButton value="Fechar" type="button"
+							onclick="PF('dlgLinkConviteVisitante').hide();"
+							styleClass="sa-btn-label ui-button-flat" />
+					</div>
+				</h:panelGroup>
+
+				<h:outputScript>
+					function saCopiarLinkConvite() {
+						var campo = document.querySelector('[id$="linkConviteTexto"]');
+						if (!campo) {
+							return;
+						}
+						var texto = campo.value || '';
+						if (!texto) {
+							return;
+						}
+						var copiarOk = function () {
+							if (typeof PF === 'function') {
+								try {
+									PF('growl').renderMessage({
+										summary: 'Link copiado',
+										detail: 'Cole no WhatsApp ou e-mail do visitante.',
+										severity: 'info',
+										life: 4000
+									});
+									return;
+								} catch (e) { /* growl indisponível */ }
+							}
+							alert('Link copiado para a área de transferência.');
+						};
+						if (navigator.clipboard &amp;&amp; navigator.clipboard.writeText) {
+							navigator.clipboard.writeText(texto).then(copiarOk).catch(function () {
+								campo.focus();
+								campo.select();
+								try {
+									document.execCommand('copy');
+									copiarOk();
+								} catch (e) { /* ignore */ }
+							});
+						} else {
+							campo.focus();
+							campo.select();
+							try {
+								document.execCommand('copy');
+								copiarOk();
+							} catch (e) { /* ignore */ }
+						}
+					}
+				</h:outputScript>
+			</p:dialog>
 
 			<p:dialog id="dialogCpfNovoPedestre" widgetVar="cpfNovoPedestre"
 				modal="true" header="#{msgs['title.uc008.digite.cpf']}"
@@ -481,8 +598,8 @@
 					<div class="sa-dialog-actions">
 						<p:commandButton value="Executar Integração" icon="pi pi-play"
 							action="#{consultaPedestreController.executarIntegracaoPedestre}"
-							process="@form" update="@form"
-							oncomplete="PF('dialogFiltroPedestre').hide();"
+							process="@form" update="form:saPesquisaSplit form:growl"
+							oncomplete="PF('dialogFiltroPedestre').hide(); if(window.saScheduleFitDataTables){saScheduleFitDataTables();}"
 							styleClass="sa-btn-label ui-button-success" />
 					</div>
 				</h:form>

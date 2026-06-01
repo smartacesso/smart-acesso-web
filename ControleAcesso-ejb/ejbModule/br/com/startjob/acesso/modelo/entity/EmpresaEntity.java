@@ -72,7 +72,13 @@ import br.com.startjob.acesso.modelo.enumeration.Status;
 					  + "left join fetch obj.cliente c "
 					  + "where obj.codEmpresaSenior = :COD_EMPRESA_SENIOR "
 					  + "and obj.cliente.id = :ID_CLIENTE "
-					  + "order by obj.id asc")
+					  + "order by obj.id asc"),
+	@NamedQuery(name = "EmpresaEntity.findAllAutoAtendimentoByIdCliente",
+				query = "select obj from EmpresaEntity obj "
+					  + "where obj.cliente.id = :ID_CLIENTE "
+					  + "and obj.autoAtendimentoLiberado = true "
+					  + "and (obj.removido = false or obj.removido is null) "
+					  + "order by obj.nome asc")
 })
 @SuppressWarnings("serial")
 public class EmpresaEntity extends ClienteBaseEntity {

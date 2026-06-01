@@ -21,6 +21,7 @@ import javax.persistence.TemporalType;
 
 import br.com.startjob.acesso.modelo.entity.base.ClienteBaseEntity;
 import br.com.startjob.acesso.modelo.enumeration.StatusCadastroExterno;
+import br.com.startjob.acesso.modelo.enumeration.TipoCadastroExterno;
 
 @SuppressWarnings("serial")
 @Entity
@@ -52,6 +53,13 @@ import br.com.startjob.acesso.modelo.enumeration.StatusCadastroExterno;
 					  + "and obj.statusCadastroExterno = :STATUS "
 					  + "and obj.token > :TOKEN "
 					  + "order by obj.id asc"),
+	@NamedQuery(name  = "CadastroExternoEntity.findAllTokensActiveByTipo",
+				query = "select obj from CadastroExternoEntity obj "
+					  + "where obj.pedestre.id = :ID_PEDESTRE "
+					  + "and obj.statusCadastroExterno = :STATUS "
+					  + "and obj.token > :TOKEN "
+					  + "and (obj.tipo = :TIPO or obj.tipo is null) "
+					  + "order by obj.id asc"),
 	@NamedQuery(name  = "CadastroExternoEntity.findByTokenAndIdPedestreAndIdCliente",
 				query = "select obj from CadastroExternoEntity obj "
 					  + "where obj.pedestre.id = :ID_PEDESTRE "
@@ -71,7 +79,26 @@ import br.com.startjob.acesso.modelo.enumeration.StatusCadastroExterno;
 				query = "select obj from CadastroExternoEntity obj "
 					  + "where obj.pedestre.id = :ID_PEDESTRE "
 					  + "and (obj.removido = false or obj.removido is null) "
-					  + "order by obj.dataCriacao desc")
+					  + "order by obj.dataCriacao desc"),
+	@NamedQuery(name = "CadastroExternoEntity.findByTokenConviteAndIdCliente",
+				query = "select obj from CadastroExternoEntity obj "
+					  + "     left join fetch obj.empresa e "
+					  + "     left join fetch obj.pedestreGerador g "
+					  + "where obj.pedestre is null "
+					  + "and obj.cliente.id = :ID_CLIENTE "
+					  + "and obj.statusCadastroExterno = :STATUS "
+					  + "and obj.token = :TOKEN "
+					  + "and obj.tipo = :TIPO "
+					  + "order by obj.id asc"),
+	@NamedQuery(name = "CadastroExternoEntity.findConviteTokenAtivoByEmpresa",
+				query = "select obj from CadastroExternoEntity obj "
+					  + "where obj.pedestre is null "
+					  + "and obj.cliente.id = :ID_CLIENTE "
+					  + "and obj.empresa.id = :ID_EMPRESA "
+					  + "and obj.statusCadastroExterno = :STATUS "
+					  + "and obj.tipo = :TIPO "
+					  + "and obj.token > :TOKEN "
+					  + "order by obj.id asc")
 })
 public class CadastroExternoEntity extends ClienteBaseEntity {
 	
@@ -83,6 +110,19 @@ public class CadastroExternoEntity extends ClienteBaseEntity {
 	@ManyToOne(cascade={}, fetch=FetchType.LAZY)
 	@JoinColumn(name="ID_PEDESTRE", nullable=true)
 	private PedestreEntity pedestre;
+
+	@ManyToOne(cascade={}, fetch=FetchType.LAZY)
+	@JoinColumn(name="ID_EMPRESA", nullable=true)
+	private EmpresaEntity empresa;
+
+	/** Pedestre gerencial (app) ou null quando gerado por operador web. */
+	@ManyToOne(cascade={}, fetch=FetchType.LAZY)
+	@JoinColumn(name="ID_PEDESTRE_GERADOR", nullable=true)
+	private PedestreEntity pedestreGerador;
+
+	@Enumerated(EnumType.STRING)
+	@Column(name="TIPO_CADASTRO_EXTERNO", nullable=true, length=40)
+	private TipoCadastroExterno tipo;
 	
 	@Column(name="TOKEN", nullable=true, length=40)
 	private Long token;
@@ -133,6 +173,30 @@ public class CadastroExternoEntity extends ClienteBaseEntity {
 
 	public void setPedestre(PedestreEntity pedestre) {
 		this.pedestre = pedestre;
+	}
+
+	public EmpresaEntity getEmpresa() {
+		return empresa;
+	}
+
+	public void setEmpresa(EmpresaEntity empresa) {
+		this.empresa = empresa;
+	}
+
+	public PedestreEntity getPedestreGerador() {
+		return pedestreGerador;
+	}
+
+	public void setPedestreGerador(PedestreEntity pedestreGerador) {
+		this.pedestreGerador = pedestreGerador;
+	}
+
+	public TipoCadastroExterno getTipo() {
+		return tipo;
+	}
+
+	public void setTipo(TipoCadastroExterno tipo) {
+		this.tipo = tipo;
 	}
 
 	public Long getToken() {

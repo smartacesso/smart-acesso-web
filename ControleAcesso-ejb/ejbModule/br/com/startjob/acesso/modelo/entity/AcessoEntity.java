@@ -47,7 +47,8 @@ import br.com.startjob.acesso.modelo.entity.base.ClienteBaseEntity;
 		@NamedQuery(name = "AcessoEntity.findAllComPedestreEmpresaECargo", 
 				query = "select obj "
 						+ "from AcessoEntity obj " + "join fetch obj.pedestre p " + "left join fetch p.empresa "
-						+ "left join fetch p.cargo " + "where (obj.removido = false or obj.removido is null) "
+						+ "left join fetch p.empresaVisitadaRef " + "left join fetch p.cargo "
+						+ "where (obj.removido = false or obj.removido is null) "
 						+ "order by obj.data desc"),
 		@NamedQuery(name = "AcessoEntity.findAllComPedestreNulo", 
 				query = "select obj " + "from AcessoEntity obj "
@@ -94,10 +95,11 @@ import br.com.startjob.acesso.modelo.entity.base.ClienteBaseEntity;
 						+ "order by obj.data desc"),
 		@NamedQuery(name = "AcessoEntity.findAllComPedestreEmpresaECargoOtimizado", 
 				query = "select new br.com.startjob.acesso.modelo.entity.AcessoEntity("
-						+ "p.id, p.matricula, obj.cartaoAcessoRecebido, p.nome, e.nome, c.nome, "
+						+ "p.id, p.matricula, obj.cartaoAcessoRecebido, p.nome, "
+						+ "COALESCE(ev.nome, p.empresaVisitada, e.nome), c.nome, "
 						+ "obj.data, obj.equipamento, obj.tipo, obj.sentido) " + "from AcessoEntity obj "
-						+ "join obj.pedestre p " + "left join p.empresa e " + "left join p.cargo c "
-						+ "left join p.departamento d " + "left join p.centroCusto cc "
+						+ "join obj.pedestre p " + "left join p.empresa e " + "left join p.empresaVisitadaRef ev "
+						+ "left join p.cargo c " + "left join p.departamento d " + "left join p.centroCusto cc "
 						+ "where (obj.removido = false or obj.removido is null) "
 						+ "order by obj.data desc"),
 		@NamedQuery(name = "AcessoEntity.findAcessosHoje",

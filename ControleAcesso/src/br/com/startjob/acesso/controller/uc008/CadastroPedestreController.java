@@ -75,6 +75,7 @@ import br.com.startjob.acesso.modelo.enumeration.Genero;
 import br.com.startjob.acesso.modelo.enumeration.PerfilAcesso;
 import br.com.startjob.acesso.modelo.enumeration.Status;
 import br.com.startjob.acesso.modelo.enumeration.StatusCadastroExterno;
+import br.com.startjob.acesso.modelo.enumeration.TipoCadastroExterno;
 import br.com.startjob.acesso.modelo.enumeration.TipoPedestre;
 import br.com.startjob.acesso.modelo.enumeration.TipoQRCode;
 import br.com.startjob.acesso.modelo.enumeration.TipoRegra;
@@ -115,6 +116,12 @@ public class CadastroPedestreController extends CadastroBaseController {
 	private List<SelectItem> listaLocais;
 
 	private Long idEmpresaSelecionada;
+
+	/** UI: empresa visitada (texto livre ou nome da empresa selecionada no autocomplete). */
+	private String empresaVisitadaUi;
+
+	/** Evita blur do autocomplete logo após itemSelect (duplo AJAX / valor sumindo). */
+	private transient boolean empresaVisitadaIgnorarBlur;
 
 	private DocumentoEntity documento;
 	private List<DocumentoEntity> listaDocumentos;
@@ -223,19 +230,15 @@ public class CadastroPedestreController extends CadastroBaseController {
 		acao = getRequest().getParameter("acao");
 		origem = getRequest().getParameter("origem");
 		tipo = getRequest().getParameter("tipo");
-		
 
-		
-		if(tipo == null) {
-			HttpServletRequest request = (HttpServletRequest)
-			        FacesContext.getCurrentInstance()
-			        .getExternalContext()
-			        .getRequest();
-			
-			String url = request.getRequestURL().toString();
-			
-			if(url.contains("cadastroAuto")) {
-				tipo = "VISITANTE";
+		HttpServletRequest requestInit = (HttpServletRequest) FacesContext.getCurrentInstance()
+				.getExternalContext().getRequest();
+		String urlInit = requestInit.getRequestURL().toString();
+		cadastroSimplificado = urlInit.contains("cadastroSimplificado");
+
+		if (tipo == null) {
+			if (urlInit.contains("cadastroAuto")) {
+				tipo = "vi";
 			}
 		}
 
@@ -243,15 +246,19 @@ public class CadastroPedestreController extends CadastroBaseController {
 
 		buscaConfiguracoes();
 
-		if (pedestre.getId() == null) {		
+		String idParam = getRequest().getParameter("id");
+		if (cadastroEmLote && idParam == null && acao != null
+				&& ("OK".equalsIgnoreCase(acao) || "ok".equalsIgnoreCase(acao))) {
+			reiniciarTelaCadastroEmLote();
+		} else if (pedestre.getId() == null) {
 			iniciaVariaveisNovoPedestre(pedestre);
 			setStep(0);
-		}
-
-		if (pedestre.getId() != null) {
+		} else if (pedestre.getId() != null) {
 			iniciaVariaveisEditarPedestre(pedestre);
 			setStep(1);
 		}
+
+		carregarEmpresaVisitadaUi();
 
 		if (habilitaTiposQRCode)
 			montaTipoQRCode();
@@ -278,6 +285,7 @@ public class CadastroPedestreController extends CadastroBaseController {
 
 	@Override
 	public void exibeMensagens(ComponentSystemEvent evt) throws AbortProcessingException {
+		tratarReinicioCadastroEmLoteNoPreRender();
 		super.exibeMensagens(evt);
 
 		if ("EQC".equalsIgnoreCase(acao)) {
@@ -291,10 +299,14 @@ public class CadastroPedestreController extends CadastroBaseController {
 		else if ("QCA".equalsIgnoreCase(acao))
 			mensagemInfo("", "msg.qrcode.apagado.sucesso");
 
-		
-		//definir melhor as açoes preenchidas
-//		else if (acao != null)
-//			mensagemInfo("", "msg.pedestre.cadastrado.sucesso");
+		else if (acao != null && ("OK".equalsIgnoreCase(acao) || "ok".equalsIgnoreCase(acao))) {
+			PedestreEntity p = getPedestreAtual();
+			if (p != null && TipoPedestre.VISITANTE.equals(p.getTipo())) {
+				mensagemInfo("", "msg.visitante.cadastrado.sucesso");
+			} else {
+				mensagemInfo("", "msg.pedestre.cadastrado.sucesso");
+			}
+		}
 
 		acao = null;
 	}
@@ -345,10 +357,7 @@ public class CadastroPedestreController extends CadastroBaseController {
 		if (param != null)
 			validarCartaoAcessoDuplicado = Boolean.valueOf(param.getValor());
 
-		param = baseEJB.getParametroSistema(BaseConstant.PARAMETERS_NAME.CADASTRO_EM_LOTE,
-				getUsuarioLogado().getCliente().getId());
-		if (param != null)
-			cadastroEmLote = Boolean.valueOf(param.getValor());
+		carregarFlagCadastroEmLote();
 
 		param = baseEJB.getParametroSistema(BaseConstant.PARAMETERS_NAME.PERMITIR_ACESSO_QR_CODE,
 				getUsuarioLogado().getCliente().getId());
@@ -426,6 +435,112 @@ public class CadastroPedestreController extends CadastroBaseController {
 		listaCotas = new ArrayList<HistoricoCotaEntity>(); 
 	}
 
+	private void carregarFlagCadastroEmLote() {
+		ParametroEntity param = baseEJB.getParametroSistema(BaseConstant.PARAMETERS_NAME.CADASTRO_EM_LOTE,
+				getUsuarioLogado().getCliente().getId());
+		cadastroEmLote = param != null && isValorParametroTrue(param.getValor());
+	}
+
+	private static boolean isValorParametroTrue(String valor) {
+		return valor != null && "true".equalsIgnoreCase(valor.trim());
+	}
+
+	/**
+	 * ViewScoped: ao voltar com ?acao=OK na mesma tela o @PostConstruct não roda de novo;
+	 * o preRenderView limpa o formulário se ainda houver pedestre salvo na sessão da view.
+	 */
+	private void tratarReinicioCadastroEmLoteNoPreRender() {
+		String acaoReq = getRequest().getParameter("acao");
+		String idReq = getRequest().getParameter("id");
+		if (idReq != null || acaoReq == null) {
+			return;
+		}
+		if (!"OK".equalsIgnoreCase(acaoReq) && !"ok".equalsIgnoreCase(acaoReq)) {
+			return;
+		}
+		carregarFlagCadastroEmLote();
+		if (!cadastroEmLote) {
+			return;
+		}
+		PedestreEntity atual = getPedestreAtual();
+		if (atual == null || atual.getId() == null) {
+			return;
+		}
+		String tipoReq = getRequest().getParameter("tipo");
+		if (tipoReq != null && !tipoReq.trim().isEmpty()) {
+			tipo = tipoReq.trim();
+		} else if (atual.getTipo() != null) {
+			tipo = TipoPedestre.VISITANTE.equals(atual.getTipo()) ? "vi" : "pe";
+		}
+		reiniciarTelaCadastroEmLote();
+	}
+
+	private String finalizarCadastroEmLoteAposSalvar(PedestreEntity pedestreSalvo) {
+		if (pedestreSalvo != null && pedestreSalvo.getTipo() != null) {
+			tipo = TipoPedestre.VISITANTE.equals(pedestreSalvo.getTipo()) ? "vi" : "pe";
+		}
+		boolean visitante = pedestreSalvo != null && TipoPedestre.VISITANTE.equals(pedestreSalvo.getTipo());
+		reiniciarTelaCadastroEmLote();
+		mensagemInfo("", visitante ? "msg.visitante.cadastrado.sucesso" : "msg.pedestre.cadastrado.sucesso");
+
+		FacesContext fc = FacesContext.getCurrentInstance();
+		fc.getExternalContext().getFlash().setKeepMessages(true);
+		if (fc.getPartialViewContext().isAjaxRequest()) {
+			PrimeFaces.current().ajax().update("growl", "saMainContent", "saToolsContent");
+			PrimeFaces.current().ajax().addCallbackParam("saCadastroEmLoteLimpo", true);
+		}
+		return "";
+	}
+
+	private String montarUrlRetornoCadastroEmLote(PedestreEntity pedestreSalvo, String url, UsuarioEntity usuario) {
+		String tipoParam = pedestreSalvo != null && TipoPedestre.VISITANTE.equals(pedestreSalvo.getTipo()) ? "vi" : "pe";
+		boolean simplificado = usuario != null && Boolean.TRUE.equals(usuario.getCadastroSimples())
+				&& (url.contains("cadastroPedestre") || url.contains("cadastroSimplificado"));
+		if (simplificado) {
+			return "/paginas/sistema/pedestres/cadastroSimplificado.xhtml?acao=OK&tipo=" + tipoParam;
+		}
+		return "/paginas/sistema/pedestres/cadastroPedestre.xhtml?acao=OK&tipo=" + tipoParam;
+	}
+
+	/**
+	 * Limpa o formulário para o próximo cadastro (parâmetro "Realiza cadastros em lote").
+	 * Necessário porque o bean é @ViewScoped e mantém o pedestre salvo após o redirect.
+	 */
+	private void reiniciarTelaCadastroEmLote() {
+		try {
+			setEntidade((PedestreEntity) PedestreEntity.class.newInstance());
+		} catch (Exception e) {
+			mensagemFatal("", "#Não foi possível iniciar um novo cadastro.");
+			e.printStackTrace();
+			return;
+		}
+
+		empresaVisitadaUi = null;
+		croppedImage = null;
+		fileNameTemp = null;
+		idEmpresaSelecionada = null;
+		cpf = null;
+		fotoBase64 = null;
+
+		iniciaListas();
+
+		PedestreEntity pedestre = getPedestreAtual();
+		iniciaVariaveisNovoPedestre(pedestre);
+		carregarEmpresaVisitadaUi();
+		setStep(0);
+
+		if (habilitaTiposQRCode) {
+			montaTipoQRCode();
+		}
+		montaListaTipoUsuario();
+		montaListaStatus();
+		montaListaGenero();
+		montaListaEmpresas();
+		montaListaEquipamentosDisponiveis();
+		montaListaLocais();
+		pedestre.setCodigoCartaoAcesso(gerarCartao(pedestre));
+	}
+
 	public void iniciaVariaveisNovoPedestre(PedestreEntity pedestre) {
 
 	    pedestre.setEndereco(new EnderecoEntity());
@@ -452,6 +567,8 @@ public class CadastroPedestreController extends CadastroBaseController {
 	        } else if ("vi".equals(tipo) || url.contains("cadastroAuto")) {
 
 	            pedestre.setTipo(TipoPedestre.VISITANTE);
+	            pedestre.setEmpresa(null);
+	            pedestre.limparEmpresaVisitada();
 
 	            String nomeLocal = null;
 
@@ -519,7 +636,12 @@ public class CadastroPedestreController extends CadastroBaseController {
 			pedestre.setEndereco(new EnderecoEntity());
 		}
 
-		if (Objects.isNull(pedestre.getEmpresa())) {
+		if (pedestre.isVisitante()) {
+			pedestre.migrarLegadoEmpresaVisitadaSeNecessario();
+			if (Objects.isNull(pedestre.getEmpresa())) {
+				pedestre.setEmpresa(new EmpresaEntity());
+			}
+		} else if (Objects.isNull(pedestre.getEmpresa())) {
 			pedestre.setEmpresa(new EmpresaEntity());
 		}
 
@@ -585,13 +707,45 @@ public class CadastroPedestreController extends CadastroBaseController {
 		
 	}
 
+	/**
+	 * Redirect após salvar: em requisição AJAX envia URL via callback (PrimeFaces);
+	 * em POST completo usa redirect HTTP.
+	 */
+	private void redirectAposSalvar(String retornoStr) {
+		if (retornoStr == null || retornoStr.isEmpty()) {
+			return;
+		}
+		FacesContext fcRedirect = FacesContext.getCurrentInstance();
+		fcRedirect.getExternalContext().getFlash().setKeepMessages(true);
+		if (fcRedirect.getPartialViewContext().isAjaxRequest()) {
+			try {
+				String appName = "/" + AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_NOME_APP);
+				String fullUrl = appName + retornoStr;
+				PrimeFaces.current().ajax().addCallbackParam("saRedirect", fullUrl);
+				String escaped = fullUrl.replace("\\", "\\\\").replace("'", "\\'");
+				PrimeFaces.current().executeScript("window.location.href='" + escaped + "';");
+			} catch (Exception e) {
+				redirect(retornoStr);
+			}
+		} else {
+			redirect(retornoStr);
+		}
+	}
+
 	@Override
 	public String salvar() {
+		FacesContext fc = FacesContext.getCurrentInstance();
+
 		String retornoStr = "";
 		
 		PedestreEntity pedestre = getPedestreAtual();
 		UsuarioEntity usuario = getUsuarioLogado();
 		pedestre.setCliente(getUsuarioLogado().getCliente());
+
+		if (pedestre != null && pedestre.isVisitante()) {
+			sincronizarEmpresaVisitadaNoPedestre(pedestre);
+		}
+		preencherCartaoAutomatico();
 		
 		HttpServletRequest request = (HttpServletRequest)
 		        FacesContext.getCurrentInstance()
@@ -601,16 +755,19 @@ public class CadastroPedestreController extends CadastroBaseController {
 		String url = request.getRequestURL().toString();
 
 		boolean naoPossuiCamposRepetidos = verificaCamposRepetidos();
-		if (!naoPossuiCamposRepetidos)
+		if (!naoPossuiCamposRepetidos) {
 			return "";
+		}
 
 		boolean valido = validaCamposObrigatorios(pedestre);
-		if (!valido)
+		if (!valido) {
 			return "";
+		}
 		
 		boolean validacaoAdicional = verificacaoAdicionais();
-		if (!validacaoAdicional)
+		if (!validacaoAdicional) {
 			return "";
+		}
 		
 		if (matriculaSequencial && pedestre.getMatricula() == null) {
 			String matricula = buscaUltimaMatriculaCadastrada();
@@ -688,7 +845,7 @@ public class CadastroPedestreController extends CadastroBaseController {
 				    	mensagemAviso("", "msg.info.foto.nao.enviada");
 				    }
 
-				    redirect(retornoStr);
+				    redirectAposSalvar(retornoStr);
 
 				    return null;
 				}
@@ -717,7 +874,7 @@ public class CadastroPedestreController extends CadastroBaseController {
 
 				mensagemAviso("", "msg.info.foto.nao.enviada_time_out");
 
-				redirect(retornoStr);
+				redirectAposSalvar(retornoStr);
 
 				return null;
 			}catch (Exception e) {
@@ -728,19 +885,10 @@ public class CadastroPedestreController extends CadastroBaseController {
 		
 		
 		if (cadastroEmLote) {
-		    
-		    if (usuario != null
-		            && Boolean.TRUE.equals(usuario.getCadastroSimples())
-					&& ( url.contains("cadastroPedestre")
-					|| url.contains("cadastroSimplificado"))) {
-
-		    	acao = "ok";
-				retornoStr = "/paginas/sistema/pedestres/cadastroSimplificado.xhtml?acao=OK";
-			}else{
-				acao = "ok";
-		    	retornoStr = "/paginas/sistema/pedestres/cadastroPedestre.xhtml?acao=OK";
-		    }
-		    
+			carregarFlagCadastroEmLote();
+			if (cadastroEmLote) {
+				return finalizarCadastroEmLoteAposSalvar(pedestre);
+			}
 		} else {
 			pedestre = getPedestreAtual();
 			acao = "ok";
@@ -757,18 +905,25 @@ public class CadastroPedestreController extends CadastroBaseController {
 							+ pedestre.getId();
 				}
 
-			}else{
-				acao="ok";
+			} else {
+				acao = "ok";
 				retornoStr = "/paginas/sistema/pedestres/cadastroPedestre.xhtml?id=" + pedestre.getId() + "&acao=ok";
 			}
-
 		}
 
-		if (tipo != null && !tipo.isEmpty())
-			retornoStr += "&tipo=" + tipo;
-		redirect(retornoStr);
+		if (tipo != null && !tipo.isEmpty() && (retornoStr == null || !retornoStr.contains("tipo="))) {
+			retornoStr += (retornoStr.contains("?") ? "&" : "?") + "tipo=" + tipo;
+		}
+		redirectAposSalvar(retornoStr);
 
-		return retorno;
+		if (!fc.getPartialViewContext().isAjaxRequest()) {
+			return null;
+		}
+		return "";
+	}
+
+	public boolean isCadastroEmLote() {
+		return cadastroEmLote;
 	}
 	
 	/**
@@ -789,10 +944,20 @@ public class CadastroPedestreController extends CadastroBaseController {
 			pedestre.setUsuario(getUsuarioLogado());
 
 			// 2. Validações básicas de segurança (evita salvar se o JS falhar)
-			if (pedestre.getCpf() == null || pedestre.getNome() == null || pedestre.getEmpresa() == null
-					|| pedestre.getEmpresa().getId() == null) {
+			if (pedestre.getCpf() == null || pedestre.getNome() == null) {
 				PrimeFaces.current().executeScript("avisar('Preencha todos os campos obrigatórios!', 'error')");
 				return;
+			}
+			if (pedestre.getEmpresa() != null && pedestre.getEmpresa().getId() != null) {
+				EmpresaEntity empTotem = buscaEmpresaPorIdCliente(pedestre.getEmpresa().getId(),
+						getUsuarioLogado().getCliente().getId());
+				pedestre.aplicarEmpresaVisitadaInformada(empTotem != null ? empTotem.getNome() : null, empTotem);
+			} else {
+				String exib = pedestre.getEmpresaVisitadaExibicao();
+				if (exib == null || exib.trim().isEmpty()) {
+					PrimeFaces.current().executeScript("avisar('Informe a empresa visitada!', 'error')");
+					return;
+				}
 			}
 
 			// 4. Aplica a regra de acesso padrão se for um visitante novo
@@ -1001,11 +1166,16 @@ public class CadastroPedestreController extends CadastroBaseController {
 		    pedestre.setEndereco(null);
 		}
 
-		if (pedestre.getEmpresa().getId() == null) {
-			pedestre.setEmpresa(null);
-			pedestre.setDepartamento(null);
-			pedestre.setCargo(null);
-			pedestre.setCentroCusto(null);
+		if (pedestre.isVisitante()) {
+			sincronizarEmpresaVisitadaNoPedestre(pedestre);
+		} else {
+			pedestre.limparEmpresaVisitada();
+			if (pedestre.getEmpresa() == null || pedestre.getEmpresa().getId() == null) {
+				pedestre.setEmpresa(null);
+				pedestre.setDepartamento(null);
+				pedestre.setCargo(null);
+				pedestre.setCentroCusto(null);
+			}
 		}
 
 		if (pedestre.getDepartamento() == null || pedestre.getDepartamento().getId() == null)
@@ -1474,6 +1644,208 @@ public class CadastroPedestreController extends CadastroBaseController {
 		}
 	}
 
+	public boolean isCadastroVisitante() {
+		PedestreEntity p = getPedestreAtual();
+		return p != null && TipoPedestre.VISITANTE.equals(p.getTipo());
+	}
+
+	public boolean isCadastroSimplificado() {
+		return Boolean.TRUE.equals(cadastroSimplificado);
+	}
+
+	private boolean validarEtapaCadastroSimplificadoAntesDeAvancar() {
+		if (!isCadastroSimplificado()) {
+			return true;
+		}
+		PedestreEntity p = getPedestreAtual();
+		if (p == null) {
+			return false;
+		}
+		if (step == 1) {
+			if (p.getNome() == null || p.getNome().trim().isEmpty()) {
+				FacesContext.getCurrentInstance().addMessage(null,
+						new FacesMessage(FacesMessage.SEVERITY_WARN, "Nome obrigatório", null));
+				return false;
+			}
+			if (p.isVisitante()) {
+				if (empresaVisitadaUi == null || empresaVisitadaUi.trim().isEmpty()) {
+					if (verificaObrigatorio("empresa")) {
+						mensagemFatal("", "msg.link.cadastro.facial.empresa.visitada.obrigatoria");
+						return false;
+					}
+				} else {
+					sincronizarEmpresaVisitadaNoPedestre(p);
+					if (verificaObrigatorio("empresa")
+							&& (p.getEmpresaVisitadaExibicao() == null || p.getEmpresaVisitadaExibicao().trim().isEmpty())) {
+						mensagemFatal("", "msg.link.cadastro.facial.empresa.visitada.obrigatoria");
+						return false;
+					}
+				}
+			} else if (verificaObrigatorio("empresa")
+					&& (p.getEmpresa() == null || p.getEmpresa().getId() == null)) {
+				FacesContext.getCurrentInstance().addMessage(null,
+						new FacesMessage(FacesMessage.SEVERITY_WARN, "Empresa obrigatória", null));
+				return false;
+			}
+		}
+		if (step == 2 && (p.getFoto() == null || p.getFoto().length == 0)) {
+			FacesContext.getCurrentInstance().addMessage(null,
+					new FacesMessage(FacesMessage.SEVERITY_WARN, "Foto obrigatória", "Capture a foto para continuar."));
+			return false;
+		}
+		return true;
+	}
+
+	public void carregarEmpresaVisitadaUi() {
+		PedestreEntity p = getPedestreAtual();
+		if (p == null || !p.isVisitante()) {
+			empresaVisitadaUi = null;
+			return;
+		}
+		p.migrarLegadoEmpresaVisitadaSeNecessario();
+		String exib = p.getEmpresaVisitadaExibicao();
+		empresaVisitadaUi = textoEmpresaVisitadaValido(exib) ? exib.trim() : null;
+	}
+
+	public void onEmpresaVisitadaItemSelect(SelectEvent event) {
+		normalizarEmpresaVisitadaUi();
+		Object selected = event.getObject();
+		if (selected == null) {
+			selected = empresaVisitadaUi;
+		}
+		aplicarEmpresaVisitadaFromSelect(selected);
+		normalizarEmpresaVisitadaUi();
+		atualizarInputEmpresaVisitadaNoCliente();
+	}
+
+	private void atualizarInputEmpresaVisitadaNoCliente() {
+		if (!textoEmpresaVisitadaValido(empresaVisitadaUi)) {
+			return;
+		}
+		FacesContext fc = FacesContext.getCurrentInstance();
+		if (fc != null && fc.getPartialViewContext().isAjaxRequest()) {
+			PrimeFaces.current().ajax().addCallbackParam("empresaVisitadaNome", empresaVisitadaUi);
+		}
+	}
+
+	private static boolean textoEmpresaVisitadaValido(String texto) {
+		if (texto == null) {
+			return false;
+		}
+		String t = texto.trim();
+		return !t.isEmpty() && !"null".equalsIgnoreCase(t);
+	}
+
+	private void normalizarEmpresaVisitadaUi() {
+		if (!textoEmpresaVisitadaValido(empresaVisitadaUi)) {
+			empresaVisitadaUi = null;
+		} else {
+			empresaVisitadaUi = empresaVisitadaUi.trim();
+		}
+	}
+
+	/**
+	 * itemSelect do autocomplete: {@link EmpresaEntity} (itemValue=entidade) ou
+	 * {@link String} (itemValue=nome).
+	 */
+	private void aplicarEmpresaVisitadaFromSelect(Object selected) {
+		if (selected == null) {
+			return;
+		}
+		PedestreEntity p = getPedestreAtual();
+		if (p == null || !p.isVisitante()) {
+			return;
+		}
+		EmpresaEntity ref = null;
+		String nome;
+		if (selected instanceof EmpresaEntity) {
+			ref = (EmpresaEntity) selected;
+			nome = ref.getNome() != null ? ref.getNome().trim() : "";
+		} else {
+			nome = selected.toString().trim();
+			if ("null".equalsIgnoreCase(nome)) {
+				return;
+			}
+			if (!nome.isEmpty() && getUsuarioLogado() != null && getUsuarioLogado().getCliente() != null) {
+				Long idCli = getUsuarioLogado().getCliente().getId();
+				final String nomeBusca = nome;
+				ref = listarEmpresasDoCliente(idCli).stream()
+						.filter(emp -> emp.getNome() != null && nomeBusca.equalsIgnoreCase(emp.getNome().trim()))
+						.findFirst().orElse(null);
+			}
+		}
+		if (nome.isEmpty()) {
+			return;
+		}
+		empresaVisitadaUi = nome;
+		p.aplicarEmpresaVisitadaInformada(nome, ref);
+	}
+
+	/** Sincroniza texto digitado (sem item da lista) com a entidade visitante. */
+	public void onEmpresaVisitadaBlur() {
+		if (empresaVisitadaIgnorarBlur) {
+			empresaVisitadaIgnorarBlur = false;
+			return;
+		}
+		PedestreEntity p = getPedestreAtual();
+		if (p != null && p.isVisitante()) {
+			sincronizarEmpresaVisitadaNoPedestre(p);
+			carregarEmpresaVisitadaUi();
+		}
+	}
+
+	public List<EmpresaEntity> completeEmpresaVisitada(String query) {
+		String q = query != null ? query.trim().toLowerCase() : "";
+		if (getUsuarioLogado() == null || getUsuarioLogado().getCliente() == null) {
+			return Collections.emptyList();
+		}
+		return listarEmpresasDoCliente(getUsuarioLogado().getCliente().getId()).stream()
+				.filter(e -> e.getNome() != null && (q.isEmpty() || e.getNome().toLowerCase().contains(q)))
+				.limit(20)
+				.collect(Collectors.toList());
+	}
+
+	private void sincronizarEmpresaVisitadaNoPedestre(PedestreEntity pedestre) {
+		if (pedestre == null || !pedestre.isVisitante()) {
+			return;
+		}
+		String texto = empresaVisitadaUi != null ? empresaVisitadaUi.trim() : "";
+		if (texto.isEmpty()) {
+			pedestre.aplicarEmpresaVisitadaInformada(null, null);
+			return;
+		}
+		EmpresaEntity ref = pedestre.getEmpresaVisitadaRef();
+		if (ref != null && ref.getId() != null && ref.getNome() != null
+				&& texto.equalsIgnoreCase(ref.getNome().trim())) {
+			EmpresaEntity valida = buscaEmpresaPorIdCliente(ref.getId(), pedestre.getCliente().getId());
+			pedestre.aplicarEmpresaVisitadaInformada(texto, valida != null ? valida : ref);
+			return;
+		}
+		Long idCli = pedestre.getCliente() != null ? pedestre.getCliente().getId()
+				: (getUsuarioLogado() != null && getUsuarioLogado().getCliente() != null
+						? getUsuarioLogado().getCliente().getId() : null);
+		if (idCli == null) {
+			pedestre.aplicarEmpresaVisitadaInformada(texto, null);
+			return;
+		}
+		EmpresaEntity porNome = listarEmpresasDoCliente(idCli).stream()
+				.filter(e -> e.getNome() != null && texto.equalsIgnoreCase(e.getNome().trim()))
+				.findFirst().orElse(null);
+		pedestre.aplicarEmpresaVisitadaInformada(texto, porNome);
+	}
+
+	public String getEmpresaVisitadaUi() {
+		return empresaVisitadaUi;
+	}
+
+	public void setEmpresaVisitadaUi(String empresaVisitadaUi) {
+		if (textoEmpresaVisitadaValido(empresaVisitadaUi)) {
+			this.empresaVisitadaUi = empresaVisitadaUi.trim();
+		} else {
+			this.empresaVisitadaUi = null;
+		}
+	}
+
 	@SuppressWarnings("unchecked")
 	public void montaListaDepartamentos() {
 		Map<String, Object> args = new HashMap<String, Object>();
@@ -1863,12 +2235,16 @@ public class CadastroPedestreController extends CadastroBaseController {
 			FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO,
 					"Cadastro encontrado", "Dados carregados automaticamente"));
 		} else {
-
+			PedestreEntity novo = getPedestreAtual();
+			if (novo.getId() == null) {
+				iniciaVariaveisNovoPedestre(novo);
+			}
 			FacesContext.getCurrentInstance().addMessage(null,
 					new FacesMessage(FacesMessage.SEVERITY_INFO, "Novo cadastro", "CPF não encontrado"));
 		}
-		
+
 		this.getPedestreAtual().setCpf(cpfSemMascara);
+		carregarEmpresaVisitadaUi();
 		this.step = 1;
 	}
 	
@@ -1890,7 +2266,8 @@ public class CadastroPedestreController extends CadastroBaseController {
 		montaListaEquipamentosDisponiveis();
 
 		pedestre.setCodigoCartaoAcesso(gerarCartao(pedestre));
-		
+		carregarEmpresaVisitadaUi();
+
 		setStep(1);
 	}
 	
@@ -2050,56 +2427,79 @@ public class CadastroPedestreController extends CadastroBaseController {
 		return "";
 	}
 	
+	/**
+	 * @deprecated use {@link #gerarLinkCadastroFacialLink()}
+	 */
+	@Deprecated
 	public void getLinkAutoatendimento() {
-	    PedestreEntity pedestre = getPedestreAtual();
-	    if (pedestre == null || pedestre.getId() == null ) {
-	        FacesContext.getCurrentInstance().addMessage(null,
-	            new FacesMessage(FacesMessage.SEVERITY_ERROR, "Erro", "Pedestre não selecionado."));
-	        return;
-	    }
-	    pedestre.getTipo();
+		gerarLinkCadastroFacialLink();
+	}
 
-		if (pedestre == null || pedestre.getCelular() == null) {
+	/**
+	 * Gera link público de cadastro facial (WhatsApp), com token em {@link CadastroExternoEntity}.
+	 */
+	public void gerarLinkCadastroFacialLink() {
+		if (!validarPermissaoGerarLinkCadastroFacial()) {
+			return;
+		}
+
+		PedestreEntity pedestre = getPedestreAtual();
+		if (pedestre == null || pedestre.getId() == null) {
+			FacesContext.getCurrentInstance().addMessage(null,
+					new FacesMessage(FacesMessage.SEVERITY_ERROR, "Erro", "Pedestre não selecionado."));
+			return;
+		}
+
+		if (!pedestre.autoAtendimentoLiberado()) {
+			mensagemFatal("", "msg.link.cadastro.facial.gerar.sem.liberacao");
+			return;
+		}
+
+		if (pedestre.getCelular() == null || pedestre.getCelular().trim().isEmpty()) {
 			mensagemFatal("", "msg.celular.nulo");
 			return;
 		}
 
-	    ParametroEntity param = baseEJB.getParametroSistema(
-	            BaseConstant.PARAMETERS_NAME.DIAS_VALIDADE_LINK_CADASTRO_FACIAL_EXTERNO,
-	            getUsuarioLogado().getCliente().getId());
+		ParametroEntity param = baseEJB.getParametroSistema(
+				BaseConstant.PARAMETERS_NAME.DIAS_VALIDADE_LINK_CADASTRO_FACIAL_EXTERNO,
+				getUsuarioLogado().getCliente().getId());
 
-	    int diasValidade = param != null ? Integer.parseInt(param.getValor()) : 1;
+		int diasValidade = param != null ? Integer.parseInt(param.getValor()) : 1;
 
-	    Calendar calendar = Calendar.getInstance();
-	    calendar.add(Calendar.DAY_OF_YEAR, diasValidade);
-	    long tokenValidade = calendar.getTimeInMillis();
+		Calendar calendar = Calendar.getInstance();
+		calendar.add(Calendar.DAY_OF_YEAR, diasValidade);
+		tokenCadastroFacialExterno = calendar.getTimeInMillis();
 
-	    String baseUrl = AppAmbienteUtils.isProdution()
-	            ? AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_MAIN_SITE)
-	              + AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_NOME_APP) + "/"
-	            : "http://localhost:8081/";
+		gravarCadastroExternoGerado(TipoCadastroExterno.FACIAL_LINK_PRECADASTRO);
 
-	    this.linkGerado = baseUrl
-	            + "cadastroAutoatendimento.xhtml"
-	            + "?cliente=" + getUsuarioLogado().getCliente().getId()
-	            + "&idPedestre=" + pedestre.getId()
-	            + "&token=" + tokenValidade;
-	    
+		pedestre.setAutoAtendimentoAt(getDataAtual());
+		try {
+			baseEJB.alteraObjeto(pedestre);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		String baseUrl = AppAmbienteUtils.isProdution()
+				? AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_MAIN_SITE)
+						+ AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_NOME_APP) + "/"
+				: "http://localhost:8081/";
+
+		this.linkGerado = baseUrl + "cadastroFacialPorLink.xhtml" + "?cliente=" + getUsuarioLogado().getCliente().getId()
+				+ "&idPedestre=" + pedestre.getId() + "&token=" + tokenCadastroFacialExterno;
 
 		String celphone = pedestre.getCelular().replace("-", "").replace("(", "").replace(")", "").replace(" ", "");
 
-		String msg = "Olá, acesse o link para cadastro facial:\n" + linkGerado;
+		String msg = "Olá! Acesse o link para concluir seu cadastro facial:\n" + linkGerado;
 
 		try {
-		    String encodedMsg = URLEncoder.encode(msg, "UTF-8");
-		    
-		    PrimeFaces.current().executeScript(
-		        "window.open('" + BaseConstant.URL_WHATSAPP + "55" + celphone + "&text=" + encodedMsg + "','whatsAppTab');");
+			String encodedMsg = URLEncoder.encode(msg, "UTF-8");
+
+			PrimeFaces.current().executeScript("window.open('" + BaseConstant.URL_WHATSAPP + "55" + celphone + "&text="
+					+ encodedMsg + "','whatsAppTab');");
 
 		} catch (UnsupportedEncodingException e) {
-		    e.printStackTrace();
+			e.printStackTrace();
 		}
-
 	}
 
 	public StreamedContent getPrimeiraFotoStreamed() {
@@ -2172,11 +2572,16 @@ public class CadastroPedestreController extends CadastroBaseController {
 	}
 
 	public void gravarCadastroExternoGerado() {
-		CadastroExternoEntity cadastroExterno = procuraCadastroExternoTokenAtivo(getPedestreAtual().getId());
+		gravarCadastroExternoGerado(TipoCadastroExterno.FACIAL_EXTERNO_3FOTOS);
+	}
+
+	public void gravarCadastroExternoGerado(TipoCadastroExterno tipo) {
+		CadastroExternoEntity cadastroExterno = procuraCadastroExternoTokenAtivo(getPedestreAtual().getId(), tipo);
 
 		if (cadastroExterno != null) {
 			try {
 				cadastroExterno.setToken(tokenCadastroFacialExterno);
+				cadastroExterno.setTipo(tipo);
 				baseEJB.alteraObjeto(cadastroExterno);
 
 			} catch (Exception e) {
@@ -2192,6 +2597,7 @@ public class CadastroPedestreController extends CadastroBaseController {
 			cadastroExterno.setPedestre(getPedestreAtual());
 			cadastroExterno.setToken(tokenCadastroFacialExterno);
 			cadastroExterno.setStatusCadastroExterno(StatusCadastroExterno.AGUARDANDO_CADASTRO);
+			cadastroExterno.setTipo(tipo);
 
 			baseEJB.gravaObjeto(cadastroExterno);
 		} catch (Exception e) {
@@ -2200,17 +2606,18 @@ public class CadastroPedestreController extends CadastroBaseController {
 	}
 
 	@SuppressWarnings("unchecked")
-	private CadastroExternoEntity procuraCadastroExternoTokenAtivo(Long idPedestre) {
+	private CadastroExternoEntity procuraCadastroExternoTokenAtivo(Long idPedestre, TipoCadastroExterno tipo) {
 		Map<String, Object> args = new HashMap<>();
 		args.put("ID_PEDESTRE", idPedestre);
 		args.put("STATUS", StatusCadastroExterno.AGUARDANDO_CADASTRO);
 		args.put("TOKEN", Calendar.getInstance().getTimeInMillis());
+		args.put("TIPO", tipo);
 
 		List<CadastroExternoEntity> cadastrosExternos = null;
 
 		try {
 			cadastrosExternos = (List<CadastroExternoEntity>) baseEJB.pesquisaArgFixos(CadastroExternoEntity.class,
-					"findAllTokensActive", args);
+					"findAllTokensActiveByTipo", args);
 
 			if (cadastrosExternos != null && !cadastrosExternos.isEmpty())
 				return cadastrosExternos.get(0);
@@ -2440,16 +2847,6 @@ public class CadastroPedestreController extends CadastroBaseController {
 	    }
 	}
 	
-	public boolean isAdminOrGerente() {
-		if (PerfilAcesso.ADMINISTRADOR.equals(getUsuarioLogado().getPerfil())
-				|| PerfilAcesso.GERENTE.equals(getUsuarioLogado().getPerfil())) {
-			
-			return true;
-		}
-		
-	    return false;
-	}
-	
 	public boolean isOperador() {
 		if (PerfilAcesso.ADMINISTRADOR.equals(getUsuarioLogado().getPerfil())
 				|| PerfilAcesso.GERENTE.equals(getUsuarioLogado().getPerfil())
@@ -2616,8 +3013,16 @@ public class CadastroPedestreController extends CadastroBaseController {
 					PrimeFaces.current().ajax().addCallbackParam("existe", true);
 					PrimeFaces.current().ajax().addCallbackParam("nome", encontrado.getNome());
 					
-					if (encontrado.getEmpresa() != null && encontrado.getEmpresa().getId() != null) {
+					encontrado.migrarLegadoEmpresaVisitadaSeNecessario();
+					if (encontrado.getEmpresaVisitadaRef() != null && encontrado.getEmpresaVisitadaRef().getId() != null) {
+						PrimeFaces.current().ajax().addCallbackParam("idEmpresa",
+								encontrado.getEmpresaVisitadaRef().getId());
+					} else if (encontrado.getEmpresa() != null && encontrado.getEmpresa().getId() != null) {
 						PrimeFaces.current().ajax().addCallbackParam("idEmpresa", encontrado.getEmpresa().getId());
+					}
+					String empVisitada = encontrado.getEmpresaVisitadaExibicao();
+					if (empVisitada != null && !empVisitada.isEmpty()) {
+						PrimeFaces.current().ajax().addCallbackParam("empresaVisitada", empVisitada);
 					}
 				} else {
 					PrimeFaces.current().ajax().addCallbackParam("existe", false);
@@ -3031,11 +3436,20 @@ public class CadastroPedestreController extends CadastroBaseController {
     }
 
     public void proximo() {
+    	if (!validarEtapaCadastroSimplificadoAntesDeAvancar()) {
+    		return;
+    	}
+    	if (isCadastroSimplificado() && step == 1 && getPedestreAtual().isVisitante()) {
+    		sincronizarEmpresaVisitadaNoPedestre(getPedestreAtual());
+    	}
         step = Math.min(step + 1, 3);
     }
 
     public void voltar() {
         step = Math.max(step - 1, 0);
+        if (isCadastroSimplificado() && step == 1) {
+        	carregarEmpresaVisitadaUi();
+        }
     }
 
 	public String getCpf() {

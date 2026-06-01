@@ -1,0 +1,205 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:jsf="http://xmlns.jcp.org/jsf">
+
+<body>
+
+	<ui:composition template="tema/templates/template_externo.xhtml">
+
+		<ui:define name="titulo">
+			Cadastro facial por link
+		</ui:define>
+
+		<ui:define name="modalOutForm">
+
+			<h:panelGroup rendered="#{not cadastroFacialLinkController.acessoPermitido}" layout="block"
+				styleClass="sa-autoatendimento">
+				<div class="sa-autoatendimento__card">
+					<h3>Cadastro facial</h3>
+					<p:messages id="msgsErro" showDetail="true" autoUpdate="true" />
+					<p class="sa-text-muted" style="margin-top: 1rem;">
+						Link inválido, expirado ou já utilizado. Solicite um novo link à recepção.
+					</p>
+				</div>
+			</h:panelGroup>
+
+			<h:form id="formFacialLink" enctype="multipart/form-data"
+				styleClass="sa-autoatendimento"
+				rendered="#{cadastroFacialLinkController.acessoPermitido}">
+
+				<div class="sa-autoatendimento__card">
+					<h3>Cadastro facial</h3>
+
+					<p:messages id="msgs" showDetail="true" autoUpdate="true" />
+
+					<!-- Modo convite: passo CPF -->
+					<h:panelGroup rendered="#{cadastroFacialLinkController.exibeStepCpf}">
+						<p class="sa-text-muted">Informe seu CPF para iniciar o cadastro de visitante.</p>
+						<div class="sa-form-grid" style="grid-template-columns: 1fr;">
+							<div class="sa-field">
+								<span class="sa-label">CPF</span>
+								<p:inputMask id="cpfConvite"
+									value="#{cadastroFacialLinkController.pedestre.cpf}"
+									mask="999.999.999-99" />
+							</div>
+							<div class="sa-field sa-field--full">
+								<p:commandButton value="Continuar" icon="pi pi-arrow-right"
+									action="#{cadastroFacialLinkController.verificarCpfLink}"
+									process="@form" update="@form"
+									styleClass="sa-btn-label ui-button-success w-full" />
+							</div>
+						</div>
+					</h:panelGroup>
+
+					<!-- Modo convite: passo dados (novo visitante) -->
+					<h:panelGroup rendered="#{cadastroFacialLinkController.exibeStepDados}">
+						<p class="sa-text-muted">Preencha seus dados para continuar.</p>
+						<div class="sa-form-grid" style="grid-template-columns: 1fr;">
+							<div class="sa-field">
+								<span class="sa-label">CPF</span>
+								<p:inputMask value="#{cadastroFacialLinkController.pedestre.cpf}"
+									mask="999.999.999-99" readonly="true" />
+							</div>
+							<div class="sa-field">
+								<span class="sa-label">Nome completo</span>
+								<p:inputText id="nomeConvite"
+									value="#{cadastroFacialLinkController.pedestre.nome}"
+									maxlength="200" />
+							</div>
+							<div class="sa-field">
+								<span class="sa-label">#{msgs['label.uc008.empresa.visitada']}</span>
+								<p:autoComplete id="empresaConvite"
+									value="#{cadastroFacialLinkController.empresaVisitadaUi}"
+									completeMethod="#{cadastroFacialLinkController.completeEmpresaVisitadaLink}"
+									var="empL"
+									itemLabel="#{empL.nome}"
+									itemValue="#{empL.nome}"
+									forceSelection="false" placeholder="Digite ou selecione"
+									minQueryLength="0" maxResults="20"
+									emptyMessage="Nenhuma empresa encontrada."
+									styleClass="w-full"
+									widgetVar="saEmpresaVisitadaConvite">
+									<p:ajax event="itemSelect"
+										listener="#{cadastroFacialLinkController.onEmpresaVisitadaLinkSelect}"
+										process="@this" update="@none"
+										oncomplete="saEmpresaVisitadaAposSelect(xhr, status, args);" />
+									<p:column>
+										<h:outputText value="#{empL.nome}" />
+									</p:column>
+								</p:autoComplete>
+							</div>
+							<div class="sa-field sa-field--full">
+								<p:commandButton value="Continuar para foto" icon="pi pi-camera"
+									action="#{cadastroFacialLinkController.avancarParaFoto}"
+									process="@form" update="@form"
+									styleClass="sa-btn-label ui-button-success w-full" />
+							</div>
+						</div>
+					</h:panelGroup>
+
+					<!-- Foto: modo convite (após CPF/dados) ou pré-cadastro -->
+					<h:panelGroup rendered="#{cadastroFacialLinkController.exibeStepFoto}">
+						<p class="sa-text-muted" rendered="#{cadastroFacialLinkController.modoPrecadastro}">
+							Confira seus dados e cadastre o rosto para concluir o acesso.
+						</p>
+						<p class="sa-text-muted" rendered="#{cadastroFacialLinkController.modoConvite}">
+							Cadastre o rosto para concluir seu acesso como visitante.
+						</p>
+
+						<div class="sa-form-grid" style="grid-template-columns: 1fr;">
+
+							<div class="sa-field" rendered="#{cadastroFacialLinkController.modoPrecadastro or cadastroFacialLinkController.dadosSomenteLeitura}">
+								<span class="sa-label">Nome completo</span>
+								<p:inputText value="#{cadastroFacialLinkController.pedestre.nome}"
+									readonly="true" />
+							</div>
+
+							<div class="sa-field" rendered="#{cadastroFacialLinkController.modoPrecadastro or cadastroFacialLinkController.dadosSomenteLeitura}">
+								<span class="sa-label">CPF</span>
+								<p:inputMask value="#{cadastroFacialLinkController.pedestre.cpf}"
+									mask="999.999.999-99" readonly="true" />
+							</div>
+
+							<div class="sa-field"
+								rendered="#{(cadastroFacialLinkController.modoPrecadastro or cadastroFacialLinkController.dadosSomenteLeitura) and not empty cadastroFacialLinkController.pedestre.empresaVisitadaExibicao}">
+								<span class="sa-label">#{msgs['label.uc008.empresa.visitada']}</span>
+								<p:inputText value="#{cadastroFacialLinkController.pedestre.empresaVisitadaExibicao}"
+									readonly="true" />
+							</div>
+
+							<div class="sa-field sa-field--full">
+								<span class="sa-label">Foto</span>
+								<h:panelGroup id="fotoPreview" layout="block"
+									styleClass="sa-autoatendimento__photo">
+									<p:graphicImage
+										value="#{cadastroFacialLinkController.getStreamedContent(cadastroFacialLinkController.pedestre.foto)}"
+										rendered="#{cadastroFacialLinkController.temFoto}"
+										stream="false" />
+									<p:graphicImage
+										value="#{menuController.path}/tema/img/ic_photo_male.png"
+										rendered="#{not cadastroFacialLinkController.temFoto}" />
+								</h:panelGroup>
+							</div>
+
+							<div class="sa-field sa-field--full">
+								<p:commandButton value="Tirar foto" icon="pi pi-camera" type="button"
+									onclick="PF('dlgCamera').show();"
+									styleClass="sa-btn-label ui-button-flat w-full" />
+							</div>
+
+							<div class="sa-field sa-field--full">
+								<p:commandButton value="Concluir cadastro"
+									action="#{cadastroFacialLinkController.salvar}"
+									process="@form"
+									update="msgs @form"
+									disabled="#{not cadastroFacialLinkController.temFoto}"
+									icon="pi pi-check"
+									styleClass="sa-btn-label ui-button-success w-full" />
+							</div>
+
+						</div>
+					</h:panelGroup>
+
+				</div>
+
+				<p:dialog widgetVar="dlgCamera" header="Capturar foto" modal="true"
+					closable="true" width="400" id="dialogCamera"
+					onShow="PF('webcamWidget').attach()"
+					onHide="PF('webcamWidget').detach()"
+					styleClass="sa-dialog">
+
+					<p:photoCam id="webcam" widgetVar="webcamWidget"
+						listener="#{cadastroFacialLinkController.onCapture}"
+						update="formFacialLink:fotoPreview formFacialLink"
+						autoStart="false" width="320"
+						height="240" photoWidth="640" photoHeight="480" format="jpeg"
+						jpegQuality="70" style="margin-bottom: 10px;" />
+
+					<h:outputScript>
+						function capturarEFecharCamera() {
+							PF('webcamWidget').capture();
+							setTimeout(function () {
+								PF('dlgCamera').hide();
+							}, 800);
+						}
+					</h:outputScript>
+
+					<p:commandButton value="Capturar" type="button" icon="pi pi-camera"
+						styleClass="sa-btn-label ui-button-success w-full"
+						onclick="capturarEFecharCamera();" />
+
+				</p:dialog>
+
+			</h:form>
+
+		</ui:define>
+
+	</ui:composition>
+
+</body>
+</html>

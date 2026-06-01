@@ -39,112 +39,107 @@
 
 		<ui:define name="conteudo">
 
-			
-
 				<p:dataTable id="gerenciarParametrosTable"
 					value="#{gerenciarParametrosController.parametrosGerais}"
-					var="item" styleClass="tabela-responsive sa-table">
+					var="item" styleClass="tabela-responsive sa-table"
+					rowKey="#{item.nome}">
 
 					<p:column headerText="#{msgs['label.uc007.nome']}"
-						style="text-align: left">
-						<h:outputText id="nome" value="#{item.nomeAux}" />
+						style="text-align: left; width: 45%;">
+						<h:outputText value="#{item.nomeAux}" />
 					</p:column>
 
 					<p:column headerText="#{msgs['label.uc007.valor']}"
-						style="text-align: left">
-						<p:selectBooleanCheckbox value="#{item.valor}"
-							rendered="#{item.valor == 'true' or item.valor == 'false' }">
+						style="text-align: left;">
+
+						<p:selectBooleanCheckbox value="#{item.valorAtivo}"
+							rendered="#{item.editorBooleano}">
 							<p:ajax process="@this" />
 						</p:selectBooleanCheckbox>
 
-
-						<p:spinner value="#{item.valor}" min="-1" max="23"
-							rendered="#{item.nome.contains('SOC')}">
+						<p:spinner value="#{item.valorComoInteiro}" min="-1" max="23"
+							rendered="#{item.editorHorarioSoc}">
 							<p:ajax process="@this" />
 						</p:spinner>
 
+						<h:panelGroup rendered="#{item.editorQtdeDigitosCartao}" layout="block"
+							styleClass="sa-field-row">
+							<p:spinner value="#{item.valorComoInteiro}" min="1" max="16"
+								style="width: 6rem;">
+								<p:ajax process="@this" />
+							</p:spinner>
+						</h:panelGroup>
 
-						<p:inputNumber value="#{item.valor}" minValue="1" maxValue="16"
-							decimalPlaces="0"
-							rendered="#{not (item.valor == 'true' or item.valor == 'false'
-    or item.nome.contains('Formato')
-    or item.nome.startsWith('Campos')
-    or item.nome.contains('Comtele')
-    or item.nome.startsWith('Limite')
-    or item.nome.contains('QR Code: Tipo padrão')
-    or item.nome.contains('SOC')
-    or item.nome.contains('tolerancia')
-    or item.nome.contains('remoto')
-    or item.nome.contains('Local'))}">
-
+						<p:spinner value="#{item.valorComoInteiro}" min="1" max="365"
+							rendered="#{item.editorDiasValidadeLinkFacial}">
 							<p:ajax process="@this" />
-						</p:inputNumber>
+						</p:spinner>
 
-						<p:inputNumber value="#{item.valor}" minValue="1" maxValue="60"
-							decimalPlaces="0"
-							rendered="#{item.valor != 'true' and item.valor != 'false' 
-									and item.nome.contains('tolerancia')
-									and !item.nome.contains('Local')}">
-
+						<p:spinner value="#{item.valorComoInteiro}" min="1" max="1440"
+							rendered="#{item.editorMinutosQrCodeDinamico}">
 							<p:ajax process="@this" />
-						</p:inputNumber>
+						</p:spinner>
 
-						<p:inputNumber value="#{item.valor}" minValue="1" maxValue="24"
-							decimalPlaces="0"
-							rendered="#{item.valor != 'true' and item.valor != 'false' 
-									and item.nome.contains('cadastro facial remoto')
-									and !item.nome.contains('Local')}">
-
+						<p:spinner value="#{item.valorComoInteiro}" min="1" max="24"
+							rendered="#{item.editorHorasCadastroFacialRemoto}">
 							<p:ajax process="@this" />
-						</p:inputNumber>
+						</p:spinner>
+
+						<p:spinner value="#{item.valorComoInteiro}" min="1" max="60"
+							rendered="#{item.editorToleranciaEntradaSaida}">
+							<p:ajax process="@this" />
+						</p:spinner>
+
+						<h:panelGroup rendered="#{item.editorTextoLocalPadrao}" layout="block"
+							styleClass="sa-field-row">
+							<p:inputText value="#{item.valor}" style="width: 100%; max-width: 28rem;"
+								placeholder="UUID do local padrão">
+								<p:ajax process="@this" />
+							</p:inputText>
+						</h:panelGroup>
+
+						<h:panelGroup rendered="#{item.editorTextoFormato}" layout="block"
+							styleClass="sa-field-row">
+							<p:inputText value="#{item.valor}" style="width: 100%; max-width: 16rem;"
+								placeholder="Ex.: dd/MM/yyyy ou HH:mm">
+								<p:ajax process="@this" />
+							</p:inputText>
+							<p:commandButton type="button" icon="pi pi-info-circle"
+								title="#{msgs['msg.uc007.ver.documentacao']}"
+								onclick="window.open('https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html'); return false;"
+								styleClass="ui-button-info ui-button-flat rounded-button" />
+						</h:panelGroup>
 
 						<p:inputText value="#{item.valor}"
-							rendered="#{item.nome.contains('Formato') or item.nome.contains('Local')}">
-
-							<p:ajax process="@this" />
-						</p:inputText>
-
-						<p:inputText value="#{item.valor}"
-							rendered="#{item.nome.contains('Local')}">
-
-							<p:ajax process="@this" />
-						</p:inputText>
-
-						<p:inputText value="#{item.valor}"
-							rendered="#{item.nome.contains('Comtele')}" style="width: 400px;">
-
+							rendered="#{item.editorTextoLargo}" style="width: 100%; max-width: 28rem;">
 							<p:ajax process="@this" />
 						</p:inputText>
 
 						<p:selectOneMenu value="#{item.valor}"
-							rendered="#{item.nome.startsWith('Limite')}">
+							rendered="#{item.editorSelectLimiteDigitais}"
+							style="min-width: 10rem;">
 							<f:selectItem itemLabel="Sem limite" itemValue="Sem limite" />
-							<f:selectItem itemLabel="1" itemValue="1" />
-							<f:selectItem itemLabel="2" itemValue="2" />
+							<f:selectItem itemLabel="1 digital" itemValue="1" />
+							<f:selectItem itemLabel="2 digitais" itemValue="2" />
+							<p:ajax process="@this" />
 						</p:selectOneMenu>
 
 						<p:selectOneMenu value="#{item.valor}"
-							rendered="#{item.nome.contains('QR Code: Tipo padrão')}">
+							rendered="#{item.editorSelectTipoQrPadrao}"
+							style="min-width: 12rem;">
 							<f:selectItem itemLabel="Estático" itemValue="ESTATICO" />
 							<f:selectItem itemLabel="Dinâmico por tempo"
 								itemValue="DINAMICO_TEMPO" />
 							<f:selectItem itemLabel="Dinâmico por uso"
 								itemValue="DINAMICO_USO" />
+							<p:ajax process="@this" />
 						</p:selectOneMenu>
 
-						<p:commandButton id="btnDoc" type="button" icon="pi pi-info-circle"
-							title="#{msgs[alt.label.ajuda]}"
-							rendered="#{item.nome.contains('Formato')}"
-							onclick="window.open('https://docs.oracle.com/javase/7/docs/api/java/text/SimpleDateFormat.html'); return false;"
-							styleClass="ui-button-info ui-button-flat rounded-button" />
-
-						<p:tooltip for="btnDoc"
-							value="#{msgs['msg.uc007.ver.documentacao']}" />
-
-						<h:panelGroup rendered="#{item.nome.startsWith('Campos')}" layout="block"
+						<h:panelGroup rendered="#{item.editorCamposObrigatorios}" layout="block"
 							styleClass="sa-field-row" style="margin-top: 0.5rem;">
 							<p:selectOneMenu
-								value="#{gerenciarParametrosController.campoObrigatorio}">
+								value="#{gerenciarParametrosController.campoObrigatorio}"
+								style="min-width: 14rem;">
 								<f:selectItems
 									value="#{gerenciarParametrosController.listaCamposObrigatorios}" />
 								<p:ajax process="@this" />
@@ -159,7 +154,7 @@
 
 						<p:dataTable id="tableCamposObrigatorios"
 							value="#{gerenciarParametrosController.camposObrigatorios}"
-							rendered="#{not empty gerenciarParametrosController.camposObrigatorios and item.nome.startsWith('Campos')}"
+							rendered="#{not empty gerenciarParametrosController.camposObrigatorios and item.editorCamposObrigatorios}"
 							var="campo" styleClass="sa-table tabela-responsive" style="margin-top: 0.75rem; max-width: 300px;">
 
 							<p:column headerText="#{msgs['label.uc008.campo']}">

@@ -42,13 +42,28 @@
 					</ui:include>
 
 					<p:commandButton id="save"
+						rendered="#{not cadastroPedestreController.cadastroEmLote}"
 						action="#{cadastroPedestreController.salvar}"
 						value="#{msgs['alt.acao.save']}"
 						title="#{msgs['alt.acao.save']}"
 						icon="pi pi-check" iconPos="left"
-						styleClass="sa-btn-label ui-button-success">
-						<p:ajax process="@form" update="@form" />
-					</p:commandButton>
+						styleClass="sa-btn-label ui-button-success"
+						ajax="false"
+						process="@form"
+						partialSubmit="true"
+						onclick="return saPrepareSalvarAjax();" />
+					<p:commandButton id="saveLote"
+						rendered="#{cadastroPedestreController.cadastroEmLote}"
+						action="#{cadastroPedestreController.salvar}"
+						value="#{msgs['alt.acao.save']}"
+						title="#{msgs['alt.acao.save']}"
+						icon="pi pi-check" iconPos="left"
+						styleClass="sa-btn-label ui-button-success"
+						process="@form" update="growl saMainContent saToolsContent"
+						partialSubmit="true"
+						onclick="return saPrepareSalvarAjax();"
+						oncomplete="saOnSalvarComplete(xhr, status, args);"
+						disableOnAjax="true" />
 
 					<p:commandButton id="addCredito"
 						rendered="#{cadastroPedestreController.exibeBotaoAddCreditoVisitante()}"
@@ -94,9 +109,9 @@
 					</p:commandButton>
 
 					<p:commandButton id="btnAbrirDialogWhatsapp"
-						title="Auto cadastro" icon="pi pi-camera"
-						rendered="#{cadastroPedestreController.entidade.id != null}"
-						action="#{cadastroPedestreController.getLinkAutoatendimento()}"
+						title="Enviar link de cadastro facial" icon="pi pi-camera"
+						rendered="#{cadastroPedestreController.entidade.id != null and cadastroPedestreController.adminOrGerente}"
+						action="#{cadastroPedestreController.gerarLinkCadastroFacialLink()}"
 						process="@this"
 						styleClass="sa-btn-label ui-button-flat" />
 
@@ -372,7 +387,7 @@
 
 							<p:spacer height="20" />
 
-							<p:accordionPanel id="cadastroPedestreTab" cache="true" styleClass="sa-accordion">
+							<p:accordionPanel id="cadastroPedestreTab" dynamic="true" cache="false" styleClass="sa-accordion">
 							<!--  	<p:ajax event="tabChange"
 									listener="#{cadastroPedestreController.onTabChange}"
 									process="@this" update="@form" /> -->
@@ -451,6 +466,39 @@
 			</h:panelGroup>
 
 
+		</ui:define>
+
+		<ui:define name="scripts">
+			<script type="text/javascript">
+				window.saPrepareSalvarAjax = function () {
+					if (window.saEmpresaVisitadaBlurTimer) {
+						clearTimeout(window.saEmpresaVisitadaBlurTimer);
+						window.saEmpresaVisitadaBlurTimer = null;
+					}
+					var el = document.activeElement;
+					if (el &amp;&amp; typeof el.blur === 'function') {
+						el.blur();
+					}
+					return true;
+				};
+
+				window.saOnSalvarComplete = function (xhr, status, args) {
+					var pfArgs = args;
+					if ((!pfArgs || pfArgs.saRedirect === undefined) &amp;&amp; xhr &amp;&amp; xhr.pfArgs) {
+						pfArgs = xhr.pfArgs;
+					}
+					if (pfArgs &amp;&amp; pfArgs.validationFailed) {
+						return;
+					}
+					if (pfArgs &amp;&amp; pfArgs.saRedirect) {
+						window.location.href = pfArgs.saRedirect;
+						return;
+					}
+					if (pfArgs &amp;&amp; pfArgs.saCadastroEmLoteLimpo) {
+						window.scrollTo(0, 0);
+					}
+				};
+			</script>
 		</ui:define>
 
 	</ui:composition>

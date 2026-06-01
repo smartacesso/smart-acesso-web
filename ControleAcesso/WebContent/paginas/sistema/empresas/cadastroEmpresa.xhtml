@@ -105,7 +105,10 @@
 									<div class="ui-g-12">
 										<p:selectBooleanCheckbox id="autoAtendimentoLiberado"
 											value="#{cadastroEmpresaController.entidade.autoAtendimentoLiberado}"
-											itemLabel="Auto atendimento liberado" />
+											itemLabel="Liberar cadastro facial por link (visitantes)" />
+										<p class="sa-text-muted" style="margin: 0.25rem 0 0 1.5rem; font-size: 0.85rem;">
+											Para convidar visitantes, use a pesquisa de visitantes ou o app (perfil gerencial).
+										</p>
 									</div>
 								</div>
 							</p:panel>
@@ -469,6 +472,7 @@
 							</p:outputPanel>
 						</p:tab>
 					</p:accordionPanel>
+
 		</ui:define>
 
 	</ui:composition>
