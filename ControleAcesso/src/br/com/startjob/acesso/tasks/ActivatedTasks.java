@@ -69,4 +69,12 @@ public class ActivatedTasks {
 			}
 		}
 	}
+
+	public void limpaTimersRhid() {
+		for (String key : timers.keySet()) {
+			if (key.contains("RHID")) {
+				timers.get(key).cancel();
+			}
+		}
+	}
 }

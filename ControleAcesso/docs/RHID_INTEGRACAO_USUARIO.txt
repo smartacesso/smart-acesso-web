@@ -1,0 +1,339 @@
+================================================================================
+  INTEGRAÇÃO RHID — DOCUMENTAÇÃO DE USUÁRIO
+  Smart Acesso Web
+================================================================================
+
+1. O QUE A INTEGRAÇÃO FAZ
+--------------------------------------------------------------------------------
+
+O Smart Acesso exporta funcionários de uma API externa (folha de pagamento, ERP,
+etc.) para o RHID (https://rhid.com.br/v2).
+
+IMPORTANTE: os dados NÃO são salvos como pedestres no Smart Acesso. Apenas um
+mapa de sincronização (dominio::idExterno -> idRhid) fica armazenado na
+configuração RHID.
+
+A exportação pode ser:
+  - Manual (completa ou incremental)
+  - Automática (rotina agendada por timer)
+
+Configuração: menu Configuração -> Integração RHID
+
+
+2. FLUXO COMPLETO
+--------------------------------------------------------------------------------
+
+  1. Buscar funcionários na API externa
+           |
+           v
+  2. Filtrar por data (incremental) ou trazer todos (completa)
+           |
+           v
+  3. Para cada funcionário: definir o domínio RHID de destino (nomeDominio)
+           |
+           v
+  4. Agrupar funcionários por domínio
+           |
+           v
+  5. Para cada domínio:
+       a) Login no RHID (e-mail, senha, domain)
+       b) Carregar catálogos (empresa, horário, departamento, centro de custo,
+          cargo)
+       c) Para cada funcionário:
+          - Resolver IDs internos do RHID a partir de nomes/CNPJ
+          - Se já existe no mapa de sync -> PUT (atualizar)
+          - Se não existe -> POST (criar) e gravar idRhid no mapa
+           |
+           v
+  6. Salvar mapa de IDs
+           |
+           v
+  7. Se a exportação terminou sem erros -> atualizar ultimaExportacao
+
+
+2.1 Roteamento por domínio
+--------------------------------------------------------------------------------
+
+O campo nomeDominio do funcionário define PARA QUAL DOMÍNIO RHID ele será
+exportado. Esse valor é o mesmo usado no parâmetro "domain" do login RHID.
+
+  Situação                                    | Comportamento
+  --------------------------------------------|----------------------------------
+  nomeDominio informado e cadastrado          | Exporta somente para esse domínio
+  nomeDominio informado mas NÃO cadastrado    | Erro — funcionário ignorado
+  Sem nomeDominio + config "Ignorar"          | Funcionário não exportado
+  Sem nomeDominio + config "Enviar p/ todos"  | Exporta para todos os domínios
+
+ATENÇÃO: idCompany NÃO identifica o domínio. É o ID da empresa DENTRO do
+domínio RHID (campo do cadastro de pessoa).
+
+Exemplo:
+
+  Domínios cadastrados: direcional1, direcional2
+
+  Funcionário   | nomeDominio  | Destino
+  --------------|--------------|------------------
+  João          | direcional1  | direcional1
+  Maria         | direcional2  | direcional2
+  Pedro         | (vazio)      | Ignorado ou todos (conforme config)
+
+
+2.2 Resolução de IDs no RHID
+--------------------------------------------------------------------------------
+
+Após o login, a integração consulta os catálogos do RHID e converte chaves de
+negócio (CNPJ, nomes) em IDs internos:
+
+  Campo externo              | Catálogo RHID     | Regra
+  ---------------------------|-------------------|-------------------------------
+  cnpjEmpresa ou idCompany   | Empresa           | OBRIGATÓRIO — busca só por CNPJ
+  nomeHorario ou idShift     | Horário           | Se não achar pelo nome, usa o
+                             |                   | PRIMEIRO horário do catálogo
+  nomeDepartamento           | Departamento      | Opcional — se não achar, NÃO
+                             |                   | vincula (fica em branco)
+  nomeCentroCusto            | Centro de custo   | Opcional — se não achar, NÃO
+                             |                   | vincula (fica em branco)
+  nomeCargo                  | Cargo             | Opcional — se não achar, NÃO
+                             |                   | vincula (fica em branco)
+
+
+2.3 Criar vs atualizar
+--------------------------------------------------------------------------------
+
+  POST (criar)     -> funcionário ainda NÃO está no mapa dominio::idExterno
+  PUT (atualizar)  -> já existe idRhid registrado no mapa de sincronização
+
+
+3. MODOS DE EXPORTAÇÃO E FILTRO POR DATA
+--------------------------------------------------------------------------------
+
+  Modo          | Quando usar                    | O que busca na API externa
+  --------------|--------------------------------|-------------------------------
+  Completa      | 1ª carga ou reprocessamento    | Todos os funcionários
+                | total                          |
+  Incremental   | Rotinas seguintes              | Somente alterados desde a
+                |                                | última execução bem-sucedida
+  Automática    | Timer configurado na tela      | 1ª vez completa; depois
+                |                                | incremental
+
+
+3.1 Regra de filtro incremental (API externa)
+--------------------------------------------------------------------------------
+
+Na exportação INCREMENTAL, o sistema informa à fonte externa a data
+ultimaExportacao — timestamp da última exportação concluída SEM ERROS
+(TB_CONFIG_RHID.ULTIMA_EXPORTACAO).
+
+A API externa deve retornar APENAS funcionários em que:
+
+  dataAlteracao > ultimaExportacao
+
+Ou seja: somente registros alterados DEPOIS da última execução bem-sucedida
+da rotina entram no processamento.
+
+Comportamento esperado:
+
+  - ultimaExportacao nula (nunca exportou):
+      equivalente à exportação completa — retornar todos os registros
+
+  - dataAlteracao nula no DTO:
+      registro NÃO entra no incremental (deve ser preenchido sempre que houver
+      alteração na fonte)
+
+  - Exportação com erros:
+      ultimaExportacao NÃO avança — na próxima incremental, os pendentes serão
+      reprocessados
+
+Contrato técnico da interface (RhidFuncionarioFonte):
+
+  buscarTodos()
+      -> exportação completa
+
+  buscarAlteradosDesde(Date dataReferencia)
+      -> exportação incremental; filtrar por dataAlteracao > dataReferencia
+         (dataReferencia = ultimaExportacao)
+
+A dataAlteracao deve refletir a ÚLTIMA MODIFICAÇÃO do registro na fonte
+(cadastro, admissão, transferência, demissão, mudança de cargo, etc.), e NÃO
+a data em que a integração leu o registro.
+
+
+4. DTO DA API EXTERNA (RhidFuncionarioExternoDTO)
+--------------------------------------------------------------------------------
+
+Modelo que a implementação real da API externa deve popular. A integração
+mapeia esses campos para o endpoint RHID /customerdb/person.svc/a.
+
+
+4.1 Identificação e controle de sync
+--------------------------------------------------------------------------------
+
+  Campo           | Tipo   | Obrigatório | Descrição
+  ----------------|--------|-------------|----------------------------------
+  idExterno       | String | SIM         | ID único na fonte; chave do mapa
+  dataAlteracao   | Date   | SIM*        | Última alteração na fonte;
+                  |        |             | *obrigatório para incremental
+  nomeDominio     | String | SIM*        | Domínio RHID destino;
+                  |        |             | *obrigatório salvo config
+                  |        |             | "Enviar para todos"
+
+
+4.2 Dados pessoais e trabalhistas
+--------------------------------------------------------------------------------
+
+  Campo           | Tipo    | Obrigatório | Descrição
+  ----------------|---------|-------------|----------------------------------
+  nome            | String  | SIM         | Nome completo
+  cpf             | String  | SIM         | 11 dígitos (com ou sem máscara)
+  pis             | String  | Não         | Se ausente, RHID recebe 9 + CPF
+  matricula       | String  | Não         | Matrícula (registration)
+  email           | String  | Não         | E-mail
+  status          | Integer | Não         | 1 = ativo (padrão), 0 = inativo
+  dataAdmissao    | Date    | Não         | Data de admissão; padrão = hoje
+  dataNascimento  | Date    | Não         | Data de nascimento
+  rg              | String  | Não         | RG
+  ctps            | String  | Não         | CTPS
+  numFolha        | String  | Não         | Número folha
+  admin           | Boolean | Não         | Admin RHID (padrão false)
+
+
+4.3 Empresa e estrutura organizacional
+--------------------------------------------------------------------------------
+
+  Campo                        | Tipo            | Obrigatório | Descrição
+  -----------------------------|-----------------|-------------|------------------
+  idCompany                    | Integer         | Cond.       | ID RHID direto OU
+                               |                 |             | usar cnpjEmpresa
+  cnpjEmpresa                  | String          | Cond.       | CNPJ (14 dígitos);
+                               |                 |             | obrigatório se
+                               |                 |             | idCompany ausente
+  idShift / nomeHorario        | Integer/String  | Cond.       | Horário; se nome
+                               |                 |             | não existir ->
+                               |                 |             | primeiro do catálogo
+  idDepartment /               | Integer/String  | Não         | Departamento; null
+  nomeDepartamento             |                 |             | se não encontrado
+  idCostCenter /               | Integer/String  | Não         | Centro de custo;
+  nomeCentroCusto              |                 |             | null se não encontrado
+  idPersonRole / nomeCargo     | Integer/String  | Não         | Cargo; null se
+                               |                 |             | não encontrado
+  idPersonBoss                 | String          | Não         | ID do superior
+
+
+4.4 Endereço e contato
+--------------------------------------------------------------------------------
+
+  Campo       | Tipo   | Descrição
+  ------------|--------|----------
+  endereco    | String | Logradouro
+  bairro      | String | Bairro
+  cidade      | String | Cidade
+  uf          | String | UF
+  cep         | String | CEP
+  telefone    | String | Telefone
+
+
+4.5 Exemplo JSON (referência para a API externa)
+--------------------------------------------------------------------------------
+
+{
+  "idExterno": "12345",
+  "nome": "JOÃO DA SILVA",
+  "cpf": "12345678901",
+  "pis": "912345678901",
+  "matricula": "MAT001",
+  "email": "joao@empresa.com.br",
+  "status": 1,
+  "dataAdmissao": "2024-03-15T00:00:00-03:00",
+  "dataAlteracao": "2026-05-24T14:30:00-03:00",
+  "nomeDominio": "direcional1",
+  "cnpjEmpresa": "16614075000879",
+  "nomeHorario": "Horário Comercial",
+  "nomeDepartamento": "Engenharia",
+  "nomeCentroCusto": "CC Administrativo",
+  "nomeCargo": "Analista",
+  "cidade": "São Paulo",
+  "uf": "SP"
+}
+
+
+5. REGRA DO PIS
+--------------------------------------------------------------------------------
+
+  1. Se o funcionário TEM PIS -> envia o PIS (somente números)
+  2. Se NÃO tem PIS -> envia 9 + CPF (12 dígitos)
+     Exemplo: CPF 11144477735 -> PIS 911144477735
+
+CPF: 11 dígitos obrigatórios na validação interna.
+
+
+6. IMPLEMENTAÇÃO DA API EXTERNA (CHECKLIST)
+--------------------------------------------------------------------------------
+
+  1. Criar RhidFuncionarioFonteApi implementando RhidFuncionarioFonte
+
+  2. buscarAlteradosDesde(dataReferencia):
+     chamar a API externa passando dataReferencia OU filtrar localmente com
+     dataAlteracao > dataReferencia
+
+  3. Garantir que dataAlteracao esteja sempre preenchida na fonte quando o
+     registro for criado ou alterado
+
+  4. Registrar em RhidFuncionarioFonteFactory.criarFonte() a implementação
+     real (substituir o mock atual)
+
+  5. Preferir enviar nomes/CNPJ em vez de IDs RHID — a integração resolve
+     os IDs automaticamente nos catálogos do domínio
+
+
+7. PERSISTÊNCIA E CONTROLE
+--------------------------------------------------------------------------------
+
+  Item              | Onde                  | Uso
+  ------------------|-----------------------|-------------------------------
+  Mapa de sync      | MAPA_IDS_RHID         | {dominio}::{idExterno} -> idRhid
+  Última exportação | ULTIMA_EXPORTACAO     | Referência do filtro incremental
+  Domínios          | TB_DOMINIO_RHID         | Nomes válidos p/ login e roteamento
+
+Formato do mapa de IDs (exemplo):
+
+  {
+    "direcional1::EXT001": 15,
+    "direcional2::EXT002": 22
+  }
+
+
+8. TELA DE CONFIGURAÇÃO
+--------------------------------------------------------------------------------
+
+  Caminho: Configuração -> Integração RHID
+  URL: /paginas/sistema/rhid/rhidConfig.xhtml
+
+  Cadastre cada domínio com o nome correto (mesmo valor do "domain" do login
+  RHID). Informe nomeDominio na API externa para rotear cada funcionário ao
+  domínio correto.
+
+  Opções disponíveis:
+    - Credenciais RHID (e-mail, senha, URL base)
+    - Domínios
+    - Exportação automática (intervalo em minutos)
+    - Ação para funcionário sem nomeDominio (Ignorar / Enviar para todos)
+    - Exportação manual completa ou incremental
+
+
+9. ARQUIVOS TÉCNICOS DE REFERÊNCIA
+--------------------------------------------------------------------------------
+
+  RhidIntegracaoEJB           Orquestração da exportação
+  RhidFuncionarioExternoDTO   Modelo do DTO da API externa
+  RhidFuncionarioFonte        Contrato da fonte externa
+  RhidCatalogoLoader          Carrega catálogos RHID
+  RhidCatalogoResolver        Resolve IDs a partir de nomes/CNPJ
+  RhidPersonPayloadBuilder    Monta JSON para POST/PUT no RHID
+  RhidDominioResolver         Roteamento funcionário -> domínio
+  ExportarRhidTask            Rotina automática (timer)
+
+Documentação técnica complementar: ControleAcesso/docs/RHID_INTEGRACAO.md
+
+================================================================================
+  Fim do documento
+================================================================================

@@ -78,6 +78,7 @@ import br.com.startjob.acesso.modelo.entity.AcessoEntity;
 import br.com.startjob.acesso.modelo.entity.CargoEntity;
 import br.com.startjob.acesso.modelo.entity.CentroCustoEntity;
 import br.com.startjob.acesso.modelo.entity.ClienteEntity;
+
 import br.com.startjob.acesso.modelo.entity.DepartamentoEntity;
 import br.com.startjob.acesso.modelo.entity.EmpresaEntity;
 import br.com.startjob.acesso.modelo.entity.EnderecoEntity;
