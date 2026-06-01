@@ -508,10 +508,10 @@ public class CadastroPedestreController extends CadastroBaseController {
 	}
 
 	/**
-	 * Limpa o formulário para o próximo cadastro (parâmetro "Realiza cadastros em lote").
-	 * Necessário porque o bean é @ViewScoped e mantém o pedestre salvo após o redirect.
+	 * Reinicia a entidade do cadastro simplificado preservando {@link #tipo} (vi/pe da URL).
+	 * ViewScoped: necessário ao voltar à etapa do CPF ou iniciar novo cadastro após busca vazia.
 	 */
-	private void reiniciarTelaCadastroEmLote() {
+	private void prepararNovaEntidadeCadastroSimplificado() {
 		try {
 			setEntidade((PedestreEntity) PedestreEntity.class.newInstance());
 		} catch (Exception e) {
@@ -524,7 +524,6 @@ public class CadastroPedestreController extends CadastroBaseController {
 		croppedImage = null;
 		fileNameTemp = null;
 		idEmpresaSelecionada = null;
-		cpf = null;
 		fotoBase64 = null;
 
 		iniciaListas();
@@ -532,7 +531,6 @@ public class CadastroPedestreController extends CadastroBaseController {
 		PedestreEntity pedestre = getPedestreAtual();
 		iniciaVariaveisNovoPedestre(pedestre);
 		carregarEmpresaVisitadaUi();
-		setStep(0);
 
 		if (habilitaTiposQRCode) {
 			montaTipoQRCode();
@@ -544,6 +542,16 @@ public class CadastroPedestreController extends CadastroBaseController {
 		montaListaEquipamentosDisponiveis();
 		montaListaLocais();
 		pedestre.setCodigoCartaoAcesso(gerarCartao(pedestre));
+	}
+
+	/**
+	 * Limpa o formulário para o próximo cadastro (parâmetro "Realiza cadastros em lote").
+	 * Necessário porque o bean é @ViewScoped e mantém o pedestre salvo após o redirect.
+	 */
+	private void reiniciarTelaCadastroEmLote() {
+		cpf = null;
+		prepararNovaEntidadeCadastroSimplificado();
+		setStep(0);
 	}
 
 	public void iniciaVariaveisNovoPedestre(PedestreEntity pedestre) {
@@ -2315,16 +2323,26 @@ public class CadastroPedestreController extends CadastroBaseController {
 		PedestreEntity encontrado = buscaPedestrePeloCpf(cpfSemMascara, idCliente);
 
 		if (encontrado != null) {
+			if ("vi".equals(tipo) && TipoPedestre.PEDESTRE.equals(encontrado.getTipo())) {
+				FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_WARN,
+						"CPF já cadastrado como pedestre",
+						"Este CPF pertence a um pedestre. Utilize a tela de pedestres ou informe outro CPF."));
+				return;
+			}
+			if ("pe".equals(tipo) && TipoPedestre.VISITANTE.equals(encontrado.getTipo())) {
+				FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_WARN,
+						"CPF já cadastrado como visitante",
+						"Este CPF pertence a um visitante. Utilize a tela de visitantes ou informe outro CPF."));
+				return;
+			}
+
 			setPedestreAtual(encontrado);
 			montaListaCadastroSimplificado(getPedestreAtual());
 
 			FacesContext.getCurrentInstance().addMessage(null, new FacesMessage(FacesMessage.SEVERITY_INFO,
 					"Cadastro encontrado", "Dados carregados automaticamente"));
 		} else {
-			PedestreEntity novo = getPedestreAtual();
-			if (novo.getId() == null) {
-				iniciaVariaveisNovoPedestre(novo);
-			}
+			prepararNovaEntidadeCadastroSimplificado();
 			FacesContext.getCurrentInstance().addMessage(null,
 					new FacesMessage(FacesMessage.SEVERITY_INFO, "Novo cadastro", "CPF não encontrado"));
 		}
@@ -3116,6 +3134,10 @@ public class CadastroPedestreController extends CadastroBaseController {
 	}
 	
 	public boolean isPedestre() {
+		PedestreEntity p = getPedestreAtual();
+		if (p != null && p.getTipo() != null) {
+			return TipoPedestre.PEDESTRE.equals(p.getTipo());
+		}
 		return "pe".equals(tipo);
 	}
 	
@@ -3512,7 +3534,9 @@ public class CadastroPedestreController extends CadastroBaseController {
 
     public void voltar() {
         step = Math.max(step - 1, 0);
-        if (isCadastroSimplificado() && step == 1) {
+        if (isCadastroSimplificado() && step == 0) {
+        	prepararNovaEntidadeCadastroSimplificado();
+        } else if (isCadastroSimplificado() && step == 1) {
         	carregarEmpresaVisitadaUi();
         }
     }

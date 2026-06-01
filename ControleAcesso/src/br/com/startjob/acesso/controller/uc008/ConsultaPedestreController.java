@@ -51,6 +51,9 @@ import br.com.startjob.acesso.service.CadastroFacialLinkService;
 public class ConsultaPedestreController extends BaseController {
 
 	private static final long serialVersionUID = 1L;
+
+	/** Mantém vi/pe ao voltar da pesquisa sem query string (POST JSF não repete ?tipo=). */
+	private static final String SESSION_TIPO_CONSULTA_PEDESTRE = "sa_consulta_pedestre_tipo";
 	
 	private List<SelectItem> listaTiposPedestre;
 	private List<SelectItem> listaEmpresas;
@@ -101,14 +104,16 @@ public class ConsultaPedestreController extends BaseController {
 	    long tAcao = System.currentTimeMillis();
 	    acao = getRequest().getParameter("acao");
 	    tipo = getRequest().getParameter("tipo");
-	    
-	    if(tipo != null && !tipo.isEmpty()) {
-	        if("pe".equals(tipo)) {
-	            getParans().put("tipo", TipoPedestre.PEDESTRE);
-	        } else if("vi".equals(tipo)) {
-	            getParans().put("tipo", TipoPedestre.VISITANTE);
-	        }
-	        setUrlNovoRegistro(getUrlNovoRegistro() + "?tipo=" + tipo);
+
+	    if (tipo != null && !tipo.isEmpty()) {
+	    	setSessioAtrribute(SESSION_TIPO_CONSULTA_PEDESTRE, tipo);
+	    	aplicarTipoConsultaPedestre(tipo);
+	    } else {
+	    	Object tipoSessao = getSessionAtrribute(SESSION_TIPO_CONSULTA_PEDESTRE);
+	    	if (tipoSessao instanceof String && !((String) tipoSessao).isEmpty()) {
+	    		tipo = (String) tipoSessao;
+	    		aplicarTipoConsultaPedestre(tipo);
+	    	}
 	    }
 	    System.out.println("PERF: Setup parâmetros demorou " + (System.currentTimeMillis() - tAcao) + "ms");
 	    
@@ -136,6 +141,60 @@ public class ConsultaPedestreController extends BaseController {
 	    System.out.println("PERF: Buscar Parâmetro Sistema demorou " + (System.currentTimeMillis() - tParam) + "ms");
 	    
 	    System.out.println("PERF: INIT TOTAL demorou " + (System.currentTimeMillis() - t0) + "ms");
+	}
+
+	private void aplicarTipoConsultaPedestre(String tipoParam) {
+		if ("pe".equals(tipoParam)) {
+			getParans().put("tipo", TipoPedestre.PEDESTRE);
+		} else if ("vi".equals(tipoParam)) {
+			getParans().put("tipo", TipoPedestre.VISITANTE);
+		}
+		setUrlNovoRegistro("/paginas/sistema/pedestres/cadastroPedestre.xhtml?tipo=" + tipoParam);
+	}
+
+	/**
+	 * POST JSF para "Novo"/"Editar" não inclui {@code ?tipo=vi} na requisição;
+	 * garante que a URL salva para "Voltar" preserve o contexto visitante/pedestre.
+	 */
+	@Override
+	protected void salvarUrlRetornoLista() {
+		super.salvarUrlRetornoLista();
+		garantirTipoNaUrlRetornoLista();
+	}
+
+	private void garantirTipoNaUrlRetornoLista() {
+		String tipoContexto = resolverTipoConsultaAtual();
+		if (tipoContexto == null || tipoContexto.isEmpty()) {
+			return;
+		}
+		Object url = getSessionAtrribute(SESSION_URL_RETORNO_LISTA);
+		if (!(url instanceof String) || ((String) url).isEmpty()) {
+			return;
+		}
+		String path = (String) url;
+		if (path.contains("tipo=")) {
+			return;
+		}
+		path = path + (path.contains("?") ? "&" : "?") + "tipo=" + tipoContexto;
+		setSessioAtrribute(SESSION_URL_RETORNO_LISTA, path);
+	}
+
+	private String resolverTipoConsultaAtual() {
+		if (tipo != null && !tipo.isEmpty()) {
+			return tipo;
+		}
+		Object tipoSessao = getSessionAtrribute(SESSION_TIPO_CONSULTA_PEDESTRE);
+		if (tipoSessao instanceof String && !((String) tipoSessao).isEmpty()) {
+			return (String) tipoSessao;
+		}
+		Object filtroTipo = getParans().get("tipo");
+		if (TipoPedestre.VISITANTE.equals(filtroTipo)) {
+			return "vi";
+		}
+		if (TipoPedestre.PEDESTRE.equals(filtroTipo)) {
+			return "pe";
+		}
+		return null;
 	}
 	
 	public void excluirPedestre() {
