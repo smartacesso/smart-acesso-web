@@ -160,8 +160,9 @@ public class ConfiguraRotinasServlet extends BaseServlet {
 
 	}
 
+	/** @deprecated Liberação por link usa token em CadastroExterno (dias), não autoAtendimento em horas. */
 	private void registraTimersAutoAtendimento() {
-		log.info("Registrando rotina de reset do autoAtendimento...");
+		log.info("Registrando rotina de reset do autoAtendimento (legado — desativada)...");
 
 		ActivatedTasks.getInstancia().limpaTimersAutoAtendimento();
 

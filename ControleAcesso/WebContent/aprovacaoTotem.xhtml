@@ -1,0 +1,80 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:jsf="http://xmlns.jcp.org/jsf">
+
+<body>
+
+	<ui:composition template="tema/templates/template_externo.xhtml">
+
+		<ui:define name="titulo">
+			Aprovação de visitante — totem
+		</ui:define>
+
+		<ui:define name="modalOutForm">
+
+			<h:panelGroup rendered="#{not aprovacaoTotemPublicController.acessoPermitido}" layout="block"
+				styleClass="sa-autoatendimento">
+				<div class="sa-autoatendimento__card">
+					<h3>Aprovação de visitante</h3>
+					<p:messages id="msgsErro" showDetail="true" autoUpdate="true" />
+					<p class="sa-text-muted" style="margin-top: 1rem;">
+						Link inválido, expirado ou solicitação já decidida. Solicite um novo link à portaria.
+					</p>
+				</div>
+			</h:panelGroup>
+
+			<h:form id="formAprovacaoTotem" styleClass="sa-autoatendimento"
+				rendered="#{aprovacaoTotemPublicController.acessoPermitido}">
+
+				<div class="sa-autoatendimento__card">
+					<h3>Aprovar visitante do totem</h3>
+					<p:messages id="msgs" showDetail="true" autoUpdate="true" />
+
+					<div class="sa-form-grid" style="grid-template-columns: 1fr 1fr; gap: 1rem;">
+						<div class="sa-field" style="text-align: center;">
+							<p:graphicImage value="#{aprovacaoTotemPublicController.fotoStream}"
+								stream="false" cache="false"
+								rendered="#{aprovacaoTotemPublicController.fotoStream != null}"
+								style="max-width: 220px; border-radius: 12px;" />
+						</div>
+						<div class="sa-field">
+							<p><strong>Nome:</strong>
+								#{aprovacaoTotemPublicController.solicitacao.nomeVisitante}</p>
+							<p><strong>CPF:</strong>
+								#{aprovacaoTotemPublicController.formatarCpf(aprovacaoTotemPublicController.solicitacao.cpfVisitante)}</p>
+							<p><strong>Empresa visitada:</strong>
+								#{aprovacaoTotemPublicController.solicitacao.empresa.nome}</p>
+							<p rendered="#{not empty aprovacaoTotemPublicController.solicitacao.observacaoTotem}">
+								<strong>Observação:</strong>
+								#{aprovacaoTotemPublicController.solicitacao.observacaoTotem}
+							</p>
+						</div>
+					</div>
+
+					<div class="sa-field sa-field--full" style="margin-top: 1rem;">
+						<span class="sa-label">Motivo da recusa (obrigatório ao recusar)</span>
+						<p:inputTextarea value="#{aprovacaoTotemPublicController.motivoRecusa}"
+							rows="3" maxlength="500" styleClass="w-full" />
+					</div>
+
+					<div class="sa-form-grid" style="grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-top: 1.25rem;">
+						<p:commandButton value="Aprovar visitante" icon="pi pi-check"
+							action="#{aprovacaoTotemPublicController.aprovar}"
+							process="@form" update="@form"
+							styleClass="sa-btn-label ui-button-success w-full" />
+						<p:commandButton value="Recusar" icon="pi pi-times"
+							action="#{aprovacaoTotemPublicController.recusar}"
+							process="@form" update="@form"
+							styleClass="sa-btn-label ui-button-danger ui-button-outlined w-full" />
+					</div>
+				</div>
+			</h:form>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

@@ -1,0 +1,140 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui">
+
+<body>
+	<ui:composition template="/tema/templates/template.xhtml">
+
+		<ui:define name="titulo">
+			#{msgs['title.sistema']} | Aprovações pendentes
+		</ui:define>
+		<ui:define name="pageTitle">
+			<h:outputText value="Aprovações pendentes do totem" />
+		</ui:define>
+		<ui:define name="pageSubtitle">
+			<h:outputText value="#{sessionScope.usuario.cliente.nome}" rendered="#{sessionScope.usuario != null}" />
+		</ui:define>
+
+		<ui:define name="tools">
+			<p:toolbar styleClass="sa-toolbar-wrap">
+				<p:toolbarGroup styleClass="sa-toolbar-actions">
+					<p:commandButton value="Atualizar" icon="pi pi-refresh" iconPos="left"
+						action="#{aprovacaoTotemController.carregarPendentes}"
+						process="@this" update="@form"
+						styleClass="sa-btn-label ui-button-flat" />
+				</p:toolbarGroup>
+			</p:toolbar>
+		</ui:define>
+
+		<ui:define name="conteudo">
+			<p:messages id="msgs" showDetail="true" closable="true" />
+
+			<p:outputPanel styleClass="p-col-12">
+				<h:panelGroup layout="block"
+					rendered="#{empty aprovacaoTotemController.pendentes}">
+					<p class="sa-text-muted" style="padding: 1.5rem;">
+						Nenhuma solicitação aguardando aprovação.
+					</p>
+				</h:panelGroup>
+
+				<p:dataTable id="totemPendentesTable"
+					value="#{aprovacaoTotemController.pendentes}" var="item"
+					rendered="#{not empty aprovacaoTotemController.pendentes}"
+					paginator="true" rows="15" paginatorPosition="bottom"
+					styleClass="tabela-responsive sa-table">
+
+					<p:column headerText="Foto" style="width: 90px; text-align: center;">
+						<p:graphicImage value="#{aprovacaoTotemController.fotoSolicitacao(item)}"
+							stream="false" cache="false"
+							rendered="#{not empty item.primeiraFoto}"
+							styleClass="sa-cell-thumb" />
+					</p:column>
+
+					<p:column headerText="Visitante">
+						<span class="sa-cell-primary">#{item.nomeVisitante}</span>
+						<br />
+						<span class="sa-cell-secondary">
+							CPF: #{aprovacaoTotemController.formatarCpf(item.cpfVisitante)}
+						</span>
+					</p:column>
+
+					<p:column headerText="Empresa visitada">
+						<span class="sa-cell-primary">#{item.empresa.nome}</span>
+					</p:column>
+
+					<p:column headerText="Observação">
+						<h:outputText value="#{item.observacaoTotem}"
+							rendered="#{not empty item.observacaoTotem}" />
+						<h:outputText value="—" rendered="#{empty item.observacaoTotem}"
+							styleClass="sa-text-muted" />
+					</p:column>
+
+					<p:column headerText="Solicitado em" style="width: 160px;">
+						<h:outputText value="#{item.dataCriacao}">
+							<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+						</h:outputText>
+					</p:column>
+
+					<p:column headerText="" style="width: 200px; text-align: right;">
+						<div class="sa-table-actions sa-table-actions--end sa-table-col-actions--multi">
+							<p:commandButton value="Aprovar" icon="pi pi-check"
+								styleClass="sa-btn-label ui-button-success"
+								process="@this"
+								update="form:dlgAprovarTotem form:msgs"
+								oncomplete="PF('dlgAprovarTotem').show()"
+								action="#{aprovacaoTotemController.prepararAprovacao(item)}" />
+							<p:commandButton value="Recusar" icon="pi pi-times"
+								styleClass="sa-btn-label ui-button-danger ui-button-outlined"
+								process="@this"
+								update="form:dlgRecusarTotem form:msgs"
+								oncomplete="PF('dlgRecusarTotem').show()"
+								action="#{aprovacaoTotemController.prepararRecusa(item)}" />
+						</div>
+					</p:column>
+				</p:dataTable>
+			</p:outputPanel>
+
+			<p:dialog id="dlgAprovarTotem" widgetVar="dlgAprovarTotem" header="Confirmar aprovação"
+				modal="true" resizable="false" width="480">
+				<p>Aprovar o cadastro de
+					<strong>#{aprovacaoTotemController.selecionado.nomeVisitante}</strong>
+					na empresa
+					<strong>#{aprovacaoTotemController.selecionado.empresa.nome}</strong>?
+					O visitante será liberado e a foto enviada aos equipamentos (se configurado).
+				</p>
+				<f:facet name="footer">
+					<p:commandButton value="Cancelar" type="button"
+						onclick="PF('dlgAprovarTotem').hide()"
+						styleClass="ui-button-secondary sa-btn-label" />
+					<p:commandButton value="Aprovar" icon="pi pi-check"
+						action="#{aprovacaoTotemController.aprovar}"
+						process="@this" update="@form"
+						styleClass="ui-button-success sa-btn-label" />
+				</f:facet>
+			</p:dialog>
+
+			<p:dialog id="dlgRecusarTotem" widgetVar="dlgRecusarTotem" header="Recusar solicitação"
+				modal="true" resizable="false" width="520">
+				<div class="sa-field sa-field--full">
+					<span class="sa-label">Motivo da recusa</span>
+					<p:inputTextarea value="#{aprovacaoTotemController.motivoRecusa}"
+						rows="4" maxlength="500" autoResize="false" styleClass="w-full" />
+				</div>
+				<f:facet name="footer">
+					<p:commandButton value="Cancelar" type="button"
+						onclick="PF('dlgRecusarTotem').hide()"
+						styleClass="ui-button-secondary sa-btn-label" />
+					<p:commandButton value="Recusar" icon="pi pi-times"
+						action="#{aprovacaoTotemController.recusar}"
+						process="dlgRecusarTotem" update="@form"
+						styleClass="ui-button-danger sa-btn-label" />
+				</f:facet>
+			</p:dialog>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

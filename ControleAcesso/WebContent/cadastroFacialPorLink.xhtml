@@ -73,27 +73,20 @@
 							</div>
 							<div class="sa-field">
 								<span class="sa-label">#{msgs['label.uc008.empresa.visitada']}</span>
-								<p:autoComplete id="empresaConvite"
-									value="#{cadastroFacialLinkController.empresaVisitadaUi}"
-									completeMethod="#{cadastroFacialLinkController.completeEmpresaVisitadaLink}"
-									var="empL"
-									itemLabel="#{empL.nome}"
-									itemValue="#{empL.nome}"
-									forceSelection="false" placeholder="Digite ou selecione"
-									minQueryLength="0" maxResults="20"
-									emptyMessage="Nenhuma empresa encontrada."
-									styleClass="w-full"
-									widgetVar="saEmpresaVisitadaConvite">
-									<p:ajax event="itemSelect"
-										listener="#{cadastroFacialLinkController.onEmpresaVisitadaLinkSelect}"
-										process="@this" update="@none"
-										oncomplete="saEmpresaVisitadaAposSelect(xhr, status, args);" />
-									<p:column>
-										<h:outputText value="#{empL.nome}" />
-									</p:column>
-								</p:autoComplete>
+								<p:selectOneMenu id="empresaConvite"
+									value="#{cadastroFacialLinkController.idEmpresaSelecionada}"
+									filter="true" filterMatchMode="contains"
+									styleClass="w-full">
+									<f:selectItems value="#{cadastroFacialLinkController.listaEmpresas}" />
+									<p:ajax event="change"
+										listener="#{cadastroFacialLinkController.onEmpresaVisitadaLinkChange}"
+										process="@this" update="@none" />
+								</p:selectOneMenu>
+								<p class="sa-text-muted" style="margin: 0.35rem 0 0; font-size: 0.8125rem;">
+									Digite no campo para filtrar empresas já cadastradas.
+								</p>
 							</div>
-							<div class="sa-field sa-field--full">
+							<div class="sa-field sa-field--full sa-autoatendimento__actions">
 								<p:commandButton value="Continuar para foto" icon="pi pi-camera"
 									action="#{cadastroFacialLinkController.avancarParaFoto}"
 									process="@form" update="@form"
@@ -126,9 +119,9 @@
 							</div>
 
 							<div class="sa-field"
-								rendered="#{(cadastroFacialLinkController.modoPrecadastro or cadastroFacialLinkController.dadosSomenteLeitura) and not empty cadastroFacialLinkController.pedestre.empresaVisitadaExibicao}">
+								rendered="#{cadastroFacialLinkController.exibeEmpresaVisitadaStepFoto}">
 								<span class="sa-label">#{msgs['label.uc008.empresa.visitada']}</span>
-								<p:inputText value="#{cadastroFacialLinkController.pedestre.empresaVisitadaExibicao}"
+								<p:inputText value="#{cadastroFacialLinkController.empresaVisitadaLabelFoto}"
 									readonly="true" />
 							</div>
 

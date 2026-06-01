@@ -357,8 +357,7 @@ public class AppRequestService extends BaseService {
 		novo.setObservacoes(novo.getObservacoes());
 		novo.setStatus(br.com.startjob.acesso.modelo.enumeration.Status.ATIVO);
 		novo.setCodigoCartaoAcesso(cpfTratado);
-		novo.setAutoAtendimento(true);
-		
+
 		return novo;
 	}
 

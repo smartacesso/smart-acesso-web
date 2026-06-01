@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
+import javax.ejb.EJB;
 import javax.enterprise.context.SessionScoped;
 import javax.faces.event.ValueChangeEvent;
 import javax.inject.Named;
@@ -16,9 +17,11 @@ import org.primefaces.model.menu.MenuModel;
 import org.primefaces.util.SerializableFunction;
 
 import br.com.startjob.acesso.modelo.BaseConstant;
+import br.com.startjob.acesso.modelo.ejb.PedestreEJBRemote;
 import br.com.startjob.acesso.modelo.entity.ParametroEntity;
 import br.com.startjob.acesso.modelo.entity.UsuarioEntity;
 import br.com.startjob.acesso.modelo.enumeration.PerfilAcesso;
+import br.com.startjob.acesso.service.TotemAprovacaoService;
 import br.com.startjob.acesso.modelo.utils.AppAmbienteUtils;
 import br.com.startjob.acesso.utils.CookieUtils;
 import br.com.startjob.acesso.utils.ResourceBundleUtils;
@@ -59,6 +62,14 @@ public class MenuController extends BaseController {
 	private String emailSuporte;
 
 	private ResourceBundleUtils resource;
+
+	@EJB
+	private PedestreEJBRemote pedestreEJB;
+
+	private int quantidadeAprovacoesPendentes;
+
+	/** Última quantidade já refletida no {@link #menu} montado (evita rebuild desnecessário). */
+	private int quantidadePendentesNoMenu = -1;
 
 	@PostConstruct
 	@Override
@@ -134,6 +145,7 @@ public class MenuController extends BaseController {
 			this.menu = new DefaultMenuModel();
 			
 			usuarioLogado = getUsuarioLogado();
+			atualizarQuantidadeAprovacoesPendentes();
 	
 			/*
 			 * Adiciona os menus do primeiro nÃ­vel
@@ -294,6 +306,21 @@ public class MenuController extends BaseController {
 				.styleClass("ui-simple-menu").build();
 		cadastros.getElements().add(visitantes);
 
+		if (PerfilAcesso.ADMINISTRADOR.equals(usuarioLogado.getPerfil())
+				|| PerfilAcesso.GERENTE.equals(usuarioLogado.getPerfil())) {
+			boolean alertaPendentes = quantidadeAprovacoesPendentes > 0;
+			String rotuloAprovacoes = alertaPendentes
+					? "Aprovações pendentes (" + quantidadeAprovacoesPendentes + ")"
+					: "Aprovações pendentes";
+			DefaultMenuItem aprovacaoPendentes = DefaultMenuItem.builder()
+					.value(rotuloAprovacoes)
+					.url(BaseConstant.URL_APLICACAO + "/paginas/sistema/pedestres/pesquisaAprovacaoTotem.xhtml")
+					.styleClass(alertaPendentes ? "ui-simple-menu sa-menu-aprovacoes-pendentes--alert"
+							: "ui-simple-menu")
+					.build();
+			cadastros.getElements().add(aprovacaoPendentes);
+		}
+
 		if (isModuloCorrespondenciaHabilitad()) {
 			// para admins ou gerentes
 			DefaultMenuItem cadastroCorrespondencia = DefaultMenuItem.builder()
@@ -339,6 +366,7 @@ public class MenuController extends BaseController {
 		}
 
 		menu.getElements().add(cadastros);
+		quantidadePendentesNoMenu = quantidadeAprovacoesPendentes;
 	}
 	
 	private void criaMenuDispositivos() {
@@ -423,15 +451,72 @@ public class MenuController extends BaseController {
 	 */
 	public MenuModel getMenu() {
 		try {
-
-			if (menu == null)
+			sincronizarIndicadorMenuPendentes();
+			if (menu == null) {
 				montaMenu();
-
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
 		return this.menu;
+	}
+
+	/**
+	 * Atualiza contagem e invalida o menu quando o número de pendentes mudou.
+	 * Chamado no preRenderView e antes de exibir o menu.
+	 */
+	public void sincronizarIndicadorMenuPendentes() {
+		atualizarQuantidadeAprovacoesPendentes();
+		if (menu != null && quantidadePendentesNoMenu != quantidadeAprovacoesPendentes) {
+			menu = null;
+		}
+	}
+
+	public void invalidarMenuAprovacoesPendentes() {
+		atualizarQuantidadeAprovacoesPendentes();
+		quantidadePendentesNoMenu = -1;
+		menu = null;
+	}
+
+	/** Rebuild do menu via AJAX (totem / aprovação) para exibir o alerta sem recarregar a página inteira. */
+	public void recarregarMenuPendentesAjax() {
+		invalidarMenuAprovacoesPendentes();
+		try {
+			montaMenu();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void atualizarQuantidadeAprovacoesPendentes() {
+		quantidadeAprovacoesPendentes = 0;
+		UsuarioEntity usuario = getUsuarioLogado();
+		if (usuario == null || usuario.getCliente() == null) {
+			return;
+		}
+		if (!PerfilAcesso.ADMINISTRADOR.equals(usuario.getPerfil())
+				&& !PerfilAcesso.GERENTE.equals(usuario.getPerfil())) {
+			return;
+		}
+		try {
+			if (baseEJB == null && pedestreEJB != null) {
+				baseEJB = pedestreEJB;
+			}
+			if (baseEJB != null) {
+				quantidadeAprovacoesPendentes = new TotemAprovacaoService(baseEJB)
+						.contarPendentes(usuario.getCliente().getId());
+			}
+		} catch (Exception e) {
+			quantidadeAprovacoesPendentes = 0;
+		}
+	}
+
+	public int getQuantidadeAprovacoesPendentes() {
+		return quantidadeAprovacoesPendentes;
+	}
+
+	public boolean isExibirAlertaAprovacoesPendentes() {
+		return quantidadeAprovacoesPendentes > 0;
 	}
 
 	public void logoff() {

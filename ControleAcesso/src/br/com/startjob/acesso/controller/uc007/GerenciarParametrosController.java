@@ -77,6 +77,11 @@ public class GerenciarParametrosController extends BaseController {
 		}
 	}
 
+	/** Parâmetros substituídos por token + dias em {@link CadastroExternoEntity}. */
+	private static boolean isParametroDepreciadoCadastroFacialLink(String nome) {
+		return BaseConstant.PARAMETERS_NAME.TEMPO_EXPIRACAO_CADASTRO_FACIAL.equals(nome);
+	}
+
 	private void normalizarNomeParametroLegado(ParametroEntity item) {
 		if (item.getNome() == null) {
 			return;
@@ -155,6 +160,12 @@ public class GerenciarParametrosController extends BaseController {
 				normalizarValorParametro(item);
 				item.invalidarTipoEditor();
 				if (!nomesJaIncluidos.add(item.getNome())) {
+					continue;
+				}
+				if (isParametroDepreciadoCadastroFacialLink(item.getNome())) {
+					if (item.getNome().equals(BaseConstant.PARAMETERS_NAME.TEMPO_EXPIRACAO_CADASTRO_FACIAL)) {
+						tempoCadastroFacialRemoto = true;
+					}
 					continue;
 				}
 
@@ -238,7 +249,7 @@ public class GerenciarParametrosController extends BaseController {
 				if (item.getNome().equals(BaseConstant.PARAMETERS_NAME.TEMPO_QRCODE_DINAMICO)) {
 					tempoQRCodeDinamico = true;
 				}
-				if (item.getNome().equals(BaseConstant.PARAMETERS_NAME.TEMPO_EXPIRACAO_CADASTRO_FACIAL )) {
+				if (item.getNome().equals(BaseConstant.PARAMETERS_NAME.TEMPO_EXPIRACAO_CADASTRO_FACIAL)) {
 					tempoCadastroFacialRemoto = true;
 				}
 				if (item.getNome().equals(BaseConstant.PARAMETERS_NAME.HABILITA_APP_PEDESTRE)) {
@@ -400,11 +411,7 @@ public class GerenciarParametrosController extends BaseController {
 				parametrosGerais.add(p);
 			}
 			
-			if (!tempoCadastroFacialRemoto) {
-				ParametroEntity p = new ParametroEntity(BaseConstant.PARAMETERS_NAME.TEMPO_EXPIRACAO_CADASTRO_FACIAL, "1",
-						getUsuarioLogado().getCliente());
-				parametrosGerais.add(p);
-			}
+			/* TEMPO_EXPIRACAO_CADASTRO_FACIAL (horas) depreciado: validade unificada em DIAS_VALIDADE_LINK + token */
 
 			if (!habilitaAppPedestre) {
 				ParametroEntity p = new ParametroEntity(BaseConstant.PARAMETERS_NAME.HABILITA_APP_PEDESTRE, "false",

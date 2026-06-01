@@ -49,6 +49,9 @@ import br.com.startjob.acesso.to.WebSocketPedestrianAccessTO;
 
 /**
  * Cadastro facial via link (WhatsApp).
+ * <p>Permissão e prazo: {@link CadastroExternoEntity} com token (validade em dias no parâmetro
+ * {@link br.com.startjob.acesso.modelo.BaseConstant.PARAMETERS_NAME#DIAS_VALIDADE_LINK_CADASTRO_FACIAL_EXTERNO}),
+ * não o flag {@code pedestre.autoAtendimento}.</p>
  * <ul>
  * <li>Modo pré-cadastro: {@code idPedestre} na URL (visitante já cadastrado)</li>
  * <li>Modo convite: sem {@code idPedestre} (novo visitante ou CPF existente)</li>
@@ -134,11 +137,6 @@ public class CadastroFacialLinkController extends BaseController {
 		pedestre.migrarLegadoEmpresaVisitadaSeNecessario();
 		carregarEmpresaVisitadaUiLink();
 
-		if (!pedestre.autoAtendimentoLiberado()) {
-			mensagemFatal("", "msg.link.cadastro.facial.nao.liberado");
-			return;
-		}
-
 		cadastroExterno = buscaCadastroExternoPrecadastro(idPedestre, idCliente, token);
 		if (cadastroExterno == null) {
 			mensagemFatal("", "msg.link.cadastro.facial.invalido");
@@ -185,7 +183,9 @@ public class CadastroFacialLinkController extends BaseController {
 
 		pedestre = new PedestreEntity();
 		pedestre.setCliente(cadastroExterno.getCliente());
+		pedestre.setTipo(TipoPedestre.VISITANTE);
 		empresaVisitadaUi = empresaConvite.getNome();
+		pedestre.aplicarEmpresaVisitadaInformada(empresaVisitadaUi, empresaValida);
 
 		step = STEP_CPF;
 		acessoPermitido = true;
@@ -226,6 +226,14 @@ public class CadastroFacialLinkController extends BaseController {
 
 		dadosSomenteLeitura = false;
 		pedestre.setNome(null);
+		if (pedestre.getTipo() == null) {
+			pedestre.setTipo(TipoPedestre.VISITANTE);
+		}
+		montarListaEmpresas();
+		if (idEmpresaSelecionada == null && cadastroExterno != null && cadastroExterno.getEmpresa() != null) {
+			idEmpresaSelecionada = cadastroExterno.getEmpresa().getId();
+		}
+		carregarEmpresaVisitadaUiLink();
 		step = STEP_DADOS;
 	}
 
@@ -237,10 +245,15 @@ public class CadastroFacialLinkController extends BaseController {
 			mensagemFatal("", "msg.link.cadastro.facial.nome.obrigatorio");
 			return;
 		}
+		if (idEmpresaSelecionada == null) {
+			mensagemFatal("", "msg.link.cadastro.facial.empresa.visitada.obrigatoria");
+			return;
+		}
 		if (!resolverEmpresaVisitada()) {
 			mensagemFatal("", "msg.link.cadastro.facial.empresa.visitada.obrigatoria");
 			return;
 		}
+		carregarEmpresaVisitadaUiLink();
 		step = STEP_FOTO;
 	}
 
@@ -282,10 +295,6 @@ public class CadastroFacialLinkController extends BaseController {
 			}
 
 			finalizarCadastroExterno();
-
-			if (modoPrecadastro) {
-				desligarLiberacaoFacialLink();
-			}
 
 			LOG.info(String.format("Cadastro facial por link concluído: cliente=%s pedestre=%s convite=%s", idCliente,
 					pedestre.getId(), modoConvite));
@@ -353,6 +362,14 @@ public class CadastroFacialLinkController extends BaseController {
 		if (pedestre == null) {
 			return false;
 		}
+		if (idEmpresaSelecionada != null) {
+			EmpresaEntity porId = buscaEmpresaPorIdCliente(idEmpresaSelecionada, idCliente);
+			if (porId != null && porId.getNome() != null) {
+				empresaVisitadaUi = porId.getNome().trim();
+				pedestre.aplicarEmpresaVisitadaInformada(empresaVisitadaUi, porId);
+				return true;
+			}
+		}
 		String texto = empresaVisitadaUi != null ? empresaVisitadaUi.trim() : "";
 		if (texto.isEmpty()) {
 			return false;
@@ -380,6 +397,18 @@ public class CadastroFacialLinkController extends BaseController {
 				.filter(e -> e.getNome() != null && (q.isEmpty() || e.getNome().toLowerCase().contains(q)))
 				.limit(20)
 				.collect(Collectors.toList());
+	}
+
+	public void onEmpresaVisitadaLinkChange() {
+		if (pedestre == null || idEmpresaSelecionada == null) {
+			return;
+		}
+		EmpresaEntity empresa = buscaEmpresaPorIdCliente(idEmpresaSelecionada, idCliente);
+		if (empresa == null || empresa.getNome() == null) {
+			return;
+		}
+		empresaVisitadaUi = empresa.getNome().trim();
+		pedestre.aplicarEmpresaVisitadaInformada(empresaVisitadaUi, empresa);
 	}
 
 	public void onEmpresaVisitadaLinkSelect(SelectEvent event) {
@@ -487,10 +516,6 @@ public class CadastroFacialLinkController extends BaseController {
 				mensagemFatal("", "msg.link.cadastro.facial.invalido");
 				return false;
 			}
-			if (!pedestre.autoAtendimentoLiberado()) {
-				mensagemFatal("", "msg.link.cadastro.facial.nao.liberado");
-				return false;
-			}
 			if (buscaCadastroExternoPrecadastro(idPedestre, idCliente, token) == null) {
 				mensagemFatal("", "msg.link.cadastro.facial.invalido");
 				return false;
@@ -515,16 +540,6 @@ public class CadastroFacialLinkController extends BaseController {
 			cadastroExterno.setPedestre(pedestre);
 		}
 		baseEJB.gravaObjeto(cadastroExterno);
-	}
-
-	private void desligarLiberacaoFacialLink() {
-		try {
-			pedestre.setAutoAtendimento(false);
-			pedestre.setAutoAtendimentoAt(null);
-			baseEJB.alteraObjeto(pedestre);
-		} catch (Exception e) {
-			LOG.log(Level.WARNING, "Falha ao desligar liberação de cadastro facial por link", e);
-		}
 	}
 
 	private void aplicarRegraPadraoVisitante(PedestreEntity p) throws Exception {
@@ -587,10 +602,10 @@ public class CadastroFacialLinkController extends BaseController {
 
 	private void montarListaEmpresas() {
 		listaEmpresas = new ArrayList<>();
-		listaEmpresas.add(new SelectItem("", "Selecione..."));
+		listaEmpresas.add(new SelectItem(null, "Selecione a empresa visitada..."));
 		for (EmpresaEntity e : listarEmpresasDoCliente(idCliente)) {
-			if (e.getId() != null && e.getNome() != null) {
-				listaEmpresas.add(new SelectItem(e.getId(), e.getNome()));
+			if (e.getId() != null && e.getNome() != null && !e.getNome().trim().isEmpty()) {
+				listaEmpresas.add(new SelectItem(e.getId(), e.getNome().trim()));
 			}
 		}
 	}
@@ -758,6 +773,30 @@ public class CadastroFacialLinkController extends BaseController {
 
 	public boolean isExibeStepFoto() {
 		return (modoConvite && step == STEP_FOTO) || modoPrecadastro;
+	}
+
+	/** Nome da empresa visitada para exibir no passo da foto (convite ou pré-cadastro). */
+	public String getEmpresaVisitadaLabelFoto() {
+		if (pedestre != null) {
+			String exib = pedestre.getEmpresaVisitadaExibicao();
+			if (exib != null && !exib.trim().isEmpty()) {
+				return exib.trim();
+			}
+		}
+		if (empresaVisitadaUi != null && !empresaVisitadaUi.trim().isEmpty()) {
+			return empresaVisitadaUi.trim();
+		}
+		if (idEmpresaSelecionada != null) {
+			EmpresaEntity empresa = buscaEmpresaPorIdCliente(idEmpresaSelecionada, idCliente);
+			if (empresa != null && empresa.getNome() != null) {
+				return empresa.getNome().trim();
+			}
+		}
+		return "";
+	}
+
+	public boolean isExibeEmpresaVisitadaStepFoto() {
+		return isExibeStepFoto() && !getEmpresaVisitadaLabelFoto().isEmpty();
 	}
 
 	public boolean isTemFoto() {

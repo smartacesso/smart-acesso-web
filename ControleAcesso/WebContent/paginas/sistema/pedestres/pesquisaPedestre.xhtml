@@ -186,8 +186,8 @@
 									icon="pi pi-link" iconPos="left"
 									action="#{consultaPedestreController.abrirDialogLinkConviteVisitante}"
 									process="@this"
-									update="form:painelLinkConviteDialog"
-									oncomplete="PF('dlgLinkConviteVisitante').show();"
+									update="form:painelLinkConviteDialog form:growl"
+									oncomplete="if (args &amp;&amp; !args.validationFailed) { PF('dlgLinkConviteVisitante').show(); }"
 									styleClass="sa-btn-label ui-button-flat"
 									title="Gerar link de cadastro facial para visitante sem cadastro prévio" />
 								<p:commandButton id="acaoExportar"
@@ -360,14 +360,15 @@
 							</p:column>
 
 							<p:column headerText="" exportable="false"
-								styleClass="sa-table-col-actions">
-								<div class="sa-table-actions">
-									<p:commandButton icon="pi pi-link"
+								styleClass="sa-table-col-actions sa-table-col-actions--multi">
+								<h:panelGroup styleClass="sa-table-actions">
+									<p:commandButton icon="pi pi-share-alt"
 										rendered="#{consultaPedestreController.telaVisitantes and consultaPedestreController.adminOrGerente}"
 										title="Enviar link cadastro facial"
 										action="#{consultaPedestreController.gerarLinkFacialVisitanteExistente}"
 										process="@this"
-										styleClass="rounded-button ui-button-help ui-button-flat">
+										update="form:growl"
+										styleClass="ui-button-rounded ui-button-outlined ui-button-secondary">
 										<f:setPropertyActionListener value="#{pedestre}"
 											target="#{consultaPedestreController.pedestreSelecionado}" />
 									</p:commandButton>
@@ -375,16 +376,16 @@
 										title="#{msgs['alt.acao.editar']}"
 										action="#{consultaPedestreController.editar(pedestre.id)}"
 										ajax="false"
-										styleClass="rounded-button ui-button-info ui-button-flat" />
+										styleClass="ui-button-rounded ui-button-info ui-button-flat" />
 									<p:commandButton icon="pi pi-trash"
 										title="#{msgs['alt.acao.excluir']}"
 										rendered="#{sessionScope.usuario.perfil != 'OPERADOR'}"
-										styleClass="rounded-button ui-button-danger ui-button-flat">
+										styleClass="ui-button-rounded ui-button-danger ui-button-flat">
 										<f:setPropertyActionListener value="#{pedestre}"
 											target="#{consultaPedestreController.pedestreSelecionado}" />
 										<p:ajax oncomplete="PF('confirmarExclusao').show()" />
 									</p:commandButton>
-								</div>
+								</h:panelGroup>
 							</p:column>
 
 						</p:dataTable>
@@ -431,9 +432,9 @@
 						</div>
 					</div>
 
-					<h:panelGroup id="painelLinkConviteResultado" layout="block"
-						rendered="#{consultaPedestreController.linkConviteGerado}"
-						style="margin-top: 1rem;">
+					<p:outputPanel id="painelLinkConviteResultado" layout="block"
+						styleClass="sa-link-convite-resultado"
+						style="margin-top: 1rem; display: #{consultaPedestreController.linkConviteGerado ? 'block' : 'none'};">
 						<div class="sa-field">
 							<span class="sa-label">Link gerado</span>
 							<p:inputTextarea id="linkConviteTexto"
@@ -444,13 +445,14 @@
 							styleClass="sa-btn-label ui-button-flat w-full"
 							style="margin-top: 0.5rem;"
 							onclick="saCopiarLinkConvite(); return false;" />
-					</h:panelGroup>
+					</p:outputPanel>
 
 					<div class="sa-dialog-actions" style="margin-top: 1rem;">
 						<p:commandButton value="Gerar link" icon="pi pi-check"
 							action="#{consultaPedestreController.gerarLinkConviteVisitante}"
-							process="form:empresaLinkConvite"
+							process="form:painelLinkConviteDialog"
 							update="form:painelLinkConviteDialog form:growl"
+							oncomplete="saAposGerarLinkConvite(xhr, status, args);"
 							styleClass="sa-btn-label ui-button-success" />
 						<p:commandButton value="Fechar" type="button"
 							onclick="PF('dlgLinkConviteVisitante').hide();"
@@ -459,6 +461,19 @@
 				</h:panelGroup>
 
 				<h:outputScript>
+					function saAposGerarLinkConvite(xhr, status, args) {
+						if (args &amp;&amp; args.validationFailed) {
+							return;
+						}
+						var painel = document.querySelector('[id$="painelLinkConviteResultado"]');
+						var campo = document.querySelector('[id$="linkConviteTexto"]');
+						if (painel &amp;&amp; campo &amp;&amp; (campo.value || '').trim()) {
+							painel.style.display = 'block';
+							campo.focus();
+							campo.select();
+						}
+					}
+
 					function saCopiarLinkConvite() {
 						var campo = document.querySelector('[id$="linkConviteTexto"]');
 						if (!campo) {

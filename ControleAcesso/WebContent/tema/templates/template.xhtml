@@ -24,7 +24,7 @@
 	<link type="text/css" rel="stylesheet" href="/#{menuController.appName}/#{menuController.path}/tema/css/sb-admin-2.css" />
 	<link type="text/css" rel="stylesheet" href="/#{menuController.appName}/#{menuController.path}/tema/css/ui-theme.css" />
 	<link type="text/css" rel="stylesheet" href="/#{menuController.appName}/#{menuController.path}/tema/css/base.css" />
-	<link type="text/css" rel="stylesheet" href="/#{menuController.appName}/#{menuController.path}/tema/css/smart-design.css?v=55" />
+	<link type="text/css" rel="stylesheet" href="/#{menuController.appName}/#{menuController.path}/tema/css/smart-design.css?v=58" />
 	<script type="text/javascript">
 		// Evita flash do sidebar antes do CSS/JS carregar
 		(function () {
@@ -46,7 +46,11 @@
 	<ui:insert name="scripts"></ui:insert>
 </h:head>
 
-<f:view locale="pt_BR" contentType="text/html" >	
+<f:view locale="pt_BR" contentType="text/html" >
+
+	<f:metadata>
+		<f:event type="preRenderView" listener="#{menuController.sincronizarIndicadorMenuPendentes}" />
+	</f:metadata>
 	
 	<f:loadBundle basename="br.com.startjob.acesso.resources.#{menuController.pathCode}message"
 			var="msgs" />

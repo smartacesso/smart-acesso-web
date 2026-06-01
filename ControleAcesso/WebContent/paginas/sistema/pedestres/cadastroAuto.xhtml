@@ -110,7 +110,7 @@
 
 							<h:inputHidden id="cpfHiddenTotem" value="#{cadastroPedestreController.entidade.cpf}" />
 							<h:inputHidden id="nomeHiddenTotem" value="#{cadastroPedestreController.entidade.nome}" />
-							<h:inputHidden id="empresaHiddenTotem" value="#{cadastroPedestreController.entidade.empresa.id}" />
+							<h:inputHidden id="empresaHiddenTotem" value="#{cadastroPedestreController.idEmpresaSelecionada}" />
 							<h:inputHidden id="obsHiddenTotem" value="#{cadastroPedestreController.entidade.observacoes}" />
 							<h:inputHidden id="fotoHiddenTotem" value="#{cadastroPedestreController.fotoBase64}" />
 
@@ -128,7 +128,7 @@
 								process="cpfHiddenTotem nomeHiddenTotem empresaHiddenTotem obsHiddenTotem fotoHiddenTotem @this"
 								action="#{cadastroPedestreController.salvarAutoatendimento}"
 								update="mensagensTotem"
-								oncomplete="verificarMensagensServidor(xhr, status, args)" />
+								oncomplete="verificarMensagensServidor(xhr, status, args); if (typeof rcAtualizarBadgePendentes === 'function') { rcAtualizarBadgePendentes(); }" />
 
 							<div id="listaDeEmpresasOculta" style="display: none;">
 								<ui:repeat value="#{cadastroPedestreController.listaEmpresas}" var="emp">

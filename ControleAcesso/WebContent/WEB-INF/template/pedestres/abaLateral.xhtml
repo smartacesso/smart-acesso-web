@@ -76,14 +76,6 @@
 					value="#{cadastroPedestreController.entidade.habilitarTeclado}"
 					itemLabel="Teclado" />
 
-				<p:selectBooleanCheckbox id="autoCheck"
-					value="#{cadastroPedestreController.entidade.autoAtendimento}"
-					itemLabel="Liberar cadastro facial por link">
-					<p:ajax
-						listener="#{cadastroPedestreController.onAutoAtendimentoChange}"
-						process="@this" />
-				</p:selectBooleanCheckbox>
-
 				<p:selectBooleanCheckbox id="facialCheck"
 					rendered="#{cadastroPedestreController.exibeCampoCadastroFacialObrigatorio()}"
 					value="#{cadastroPedestreController.entidade.cadastroFacialObrigatorio}"

@@ -32,6 +32,7 @@ import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.SelectItem;
 import javax.faces.view.ViewScoped;
 import javax.imageio.stream.FileImageOutputStream;
+import javax.inject.Inject;
 import javax.inject.Named;
 import javax.servlet.http.HttpServletRequest;
 import org.primefaces.PrimeFaces;
@@ -82,6 +83,9 @@ import br.com.startjob.acesso.modelo.enumeration.TipoRegra;
 import br.com.startjob.acesso.modelo.utils.AppAmbienteUtils;
 import br.com.startjob.acesso.modelo.utils.EncryptionUtils;
 import br.com.startjob.acesso.modelo.utils.MailUtils;
+import br.com.startjob.acesso.service.FacialWebSocketHelper;
+import br.com.startjob.acesso.service.NotificacaoAprovacaoTotemService;
+import br.com.startjob.acesso.service.TotemAprovacaoService;
 import br.com.startjob.acesso.to.WebSocketPedestrianAccessTO;
 import br.com.startjob.acesso.utils.ResourceBundleUtils;
 import br.com.startjob.acesso.utils.Utils;
@@ -94,6 +98,9 @@ public class CadastroPedestreController extends CadastroBaseController {
 
 	@EJB
 	private PedestreEJBRemote pedestreEJB;
+
+	@Inject
+	private MenuController menuController;
 
 	private String fileNameTemp;
 
@@ -196,8 +203,6 @@ public class CadastroPedestreController extends CadastroBaseController {
 
 	private CadastroExternoEntity ultimoCadastroExterno;
 
-	private MenuController menuController = new MenuController();
-	
 	private AcessoEntity relatorio = new AcessoEntity(); // para binding do formulário
 	private List<AcessoEntity> listaRelatorios = new ArrayList<>();
 	
@@ -927,100 +932,159 @@ public class CadastroPedestreController extends CadastroBaseController {
 	}
 	
 	/**
-	 * Método de salvamento otimizado exclusivo para o Totem de Autoatendimento
+	 * Método de salvamento otimizado exclusivo para o Totem de Autoatendimento.
+	 * Empresa sem cadastro automático: grava solicitação e aguarda aprovação (sem WebSocket).
 	 */
 	public void salvarAutoatendimento() {
 		try {
 			PedestreEntity pedestre = getPedestreAtual();
-			
-			if(pedestre.isPedestre()) {
+
+			if (pedestre.isPedestre()) {
 				PrimeFaces.current().executeScript("avisar('Liberado apenas para visitantes.', 'error')");
 				return;
 			}
 
-			// 1. Configurações padrão do Totem
-			pedestre.setTipo(TipoPedestre.VISITANTE);
-			pedestre.setCliente(getUsuarioLogado().getCliente());
-			pedestre.setUsuario(getUsuarioLogado());
-
-			// 2. Validações básicas de segurança (evita salvar se o JS falhar)
 			if (pedestre.getCpf() == null || pedestre.getNome() == null) {
 				PrimeFaces.current().executeScript("avisar('Preencha todos os campos obrigatórios!', 'error')");
 				return;
 			}
-			if (pedestre.getEmpresa() != null && pedestre.getEmpresa().getId() != null) {
-				EmpresaEntity empTotem = buscaEmpresaPorIdCliente(pedestre.getEmpresa().getId(),
-						getUsuarioLogado().getCliente().getId());
-				pedestre.aplicarEmpresaVisitadaInformada(empTotem != null ? empTotem.getNome() : null, empTotem);
-			} else {
-				String exib = pedestre.getEmpresaVisitadaExibicao();
-				if (exib == null || exib.trim().isEmpty()) {
-					PrimeFaces.current().executeScript("avisar('Informe a empresa visitada!', 'error')");
-					return;
-				}
+
+			EmpresaEntity empTotem = resolverEmpresaVisitadaTotem(pedestre);
+			if (empTotem == null) {
+				PrimeFaces.current().executeScript("avisar('Selecione a empresa visitada!', 'error')");
+				return;
 			}
 
-			// 4. Aplica a regra de acesso padrão se for um visitante novo
-			if (pedestre.getRegras() == null || pedestre.getRegras().isEmpty()) {
-				PedestreRegraEntity pedestreRegra = buscaPedestreRegraPadraoVisitante();
-				pedestreRegra.setPedestre(pedestre);
-				pedestre.setRegras(Arrays.asList(pedestreRegra));
+			if (pedestre.getFoto() == null || pedestre.getFoto().length == 0) {
+				PrimeFaces.current().executeScript("avisar('Capture a foto antes de concluir.', 'error')");
+				return;
 			}
 
-			// 5. Gera cartão de acesso caso não tenha
-			if (pedestre.getCodigoCartaoAcesso() == null || pedestre.getCodigoCartaoAcesso().trim().isEmpty()) {
-				pedestre.setCodigoCartaoAcesso(gerarCartao(pedestre));
+			if (!TotemAprovacaoService.empresaPermiteCadastroAutomatico(empTotem)) {
+				String cpfLimpo = pedestre.getCpf().replaceAll("\\D", "");
+				TotemAprovacaoService totemSvc = new TotemAprovacaoService(baseEJB);
+				long tokenAprov = totemSvc.calcularTokenAprovacao(getUsuarioLogado().getCliente().getId());
+				CadastroExternoEntity solic = totemSvc.gravarSolicitacaoTotem(getUsuarioLogado().getCliente(),
+						empTotem, cpfLimpo, pedestre.getNome(), pedestre.getObservacoes(), pedestre.getFoto(),
+						tokenAprov);
+				String baseUrl = AppAmbienteUtils.isProdution()
+						? AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_MAIN_SITE)
+								+ AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_NOME_APP) + "/"
+						: "http://localhost:8081/";
+				String urlAprov = totemSvc.montarUrlAprovacaoPublica(getUsuarioLogado().getCliente().getId(),
+						tokenAprov, baseUrl);
+				String telEmpresa = empTotem != null
+						? (empTotem.getCelular() != null ? empTotem.getCelular() : empTotem.getTelefone())
+						: null;
+				new NotificacaoAprovacaoTotemService().enviarLinkAprovacao(solic, urlAprov, telEmpresa);
+				PrimeFaces.current().executeScript(
+						"avisar('Cadastro enviado. Aguarde a aprovação da empresa visitada.', 'success')");
+				invalidarMenuAprovacoesPendentes();
+				limparPedestreTotemAposEnvio();
+				return;
 			}
 
-			// 6. Prepara as listas e grava na Base de Dados
+			prepararVisitanteTotem(pedestre);
 			validaListasPedestre(pedestre);
 
-			String retornoStatus = super.salvar(); // Chama a persistência base do EJB
-			
-			if (envioFacial) {
-				try {
-
-					String jsonStr = gson.toJson(WebSocketPedestrianAccessTO.fromPedestre(pedestre));
-					String resposta = WebSocketCadastroEndpoint.enviarEEsperar(pedestre.getCliente().getId().toString(),
-							jsonStr);
-
-					if (!resposta.equals("ok")) {
-
-						FacesContext.getCurrentInstance().getExternalContext().getFlash().setKeepMessages(true);
-
-						if (resposta.contains("UsuarioErro")) {
-							PrimeFaces.current().executeScript("avisar('Usuario não enviado!', 'error')");
-						} else if (resposta.contains("CartaoErro")) {
-							PrimeFaces.current().executeScript("avisar('Cartão não enviado!', 'error')");
-						} else if (resposta.contains("FotoErro")) {
-							PrimeFaces.current().executeScript("avisar('Foto não enviada!', 'error')");
-						}
-					}
-
-				} catch (TimeoutException e) {
-
-					PrimeFaces.current().executeScript("avisar('Foto não enviada, timeout!', 'error')");
-
-				} catch (Exception e) {
-					PrimeFaces.current().executeScript("avisar('Erro no serviço hikivision', 'error')");
-					e.printStackTrace();
+			String retornoStatus = super.salvar();
+			if ("ok".equals(retornoStatus)) {
+				pedestre = (PedestreEntity) getEntidade();
+				boolean facialOk = !envioFacial || enviarPedestreParaFaciais(pedestre);
+				if (!facialOk) {
+					TotemAprovacaoService totemSvc = new TotemAprovacaoService(baseEJB);
+					long tokenAprov = totemSvc.calcularTokenAprovacao(getUsuarioLogado().getCliente().getId());
+					totemSvc.gravarSolicitacaoTotemComPedestre(getUsuarioLogado().getCliente(), empTotem, pedestre,
+							pedestre.getObservacoes(), pedestre.getFoto(), tokenAprov,
+							"Falha ao enviar foto/cartão aos equipamentos faciais");
+					PrimeFaces.current().executeScript(
+							"avisar('Cadastro salvo. Aguarde aprovação na portaria (envio facial pendente).', 'success')");
+				} else {
+					PrimeFaces.current().executeScript("avisar('Cadastro concluído com sucesso!', 'success')");
 				}
+				if (!facialOk) {
+					invalidarMenuAprovacoesPendentes();
+				}
+				limparPedestreTotemAposEnvio();
+			} else {
+				PrimeFaces.current().executeScript("avisar('Erro ao gravar no banco.', 'error')");
 			}
-
-//			if ("ok".equals(retornoStatus)) {
-//	            // Mensagem de sucesso
-//	            PrimeFaces.current().executeScript("avisar('Cadastro concluído com sucesso!', 'success')");
-//	            
-//	            setEntidade(new PedestreEntity());
-//	            this.fotoBase64 = null;
-//	        } else {
-//	            PrimeFaces.current().executeScript("avisar('Erro ao gravar no banco.', 'error')");
-//	        }
 
 		} catch (Exception e) {
 			e.printStackTrace();
-			PrimeFaces.current().executeScript("avisar('Erro interno no servidor hikivision.', 'error')");
+			PrimeFaces.current().executeScript("avisar('Erro interno no servidor.', 'error')");
 		}
+	}
+
+	private void invalidarMenuAprovacoesPendentes() {
+		if (menuController != null) {
+			try {
+				menuController.recarregarMenuPendentesAjax();
+			} catch (Exception e) {
+				menuController.invalidarMenuAprovacoesPendentes();
+			}
+			PrimeFaces.current().executeScript(
+					"if (typeof rcAtualizarBadgePendentes === 'function') { rcAtualizarBadgePendentes(); }");
+		}
+	}
+
+	private void prepararVisitanteTotem(PedestreEntity pedestre) {
+		pedestre.setTipo(TipoPedestre.VISITANTE);
+		pedestre.setCliente(getUsuarioLogado().getCliente());
+		pedestre.setUsuario(getUsuarioLogado());
+
+		if (pedestre.getRegras() == null || pedestre.getRegras().isEmpty()) {
+			PedestreRegraEntity pedestreRegra = buscaPedestreRegraPadraoVisitante();
+			pedestreRegra.setPedestre(pedestre);
+			pedestre.setRegras(Arrays.asList(pedestreRegra));
+		}
+
+		if (pedestre.getCodigoCartaoAcesso() == null || pedestre.getCodigoCartaoAcesso().trim().isEmpty()) {
+			pedestre.setCodigoCartaoAcesso(gerarCartao(pedestre));
+		}
+	}
+
+	private EmpresaEntity resolverEmpresaVisitadaTotem(PedestreEntity pedestre) {
+		Long idEmp = idEmpresaSelecionada;
+		if (idEmp == null && pedestre.getEmpresa() != null) {
+			idEmp = pedestre.getEmpresa().getId();
+		}
+		if (idEmp == null) {
+			return null;
+		}
+		EmpresaEntity empTotem = buscaEmpresaPorIdCliente(idEmp, getUsuarioLogado().getCliente().getId());
+		if (empTotem != null) {
+			pedestre.aplicarEmpresaVisitadaInformada(empTotem.getNome(), empTotem);
+		}
+		return empTotem;
+	}
+
+	private void limparPedestreTotemAposEnvio() {
+		fotoBase64 = null;
+		idEmpresaSelecionada = null;
+		try {
+			setEntidade((PedestreEntity) PedestreEntity.class.newInstance());
+			iniciaVariaveisNovoPedestre(getPedestreAtual());
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * Envia visitante aos equipamentos faciais quando {@link #envioFacial} está ativo.
+	 * @return true se não há envio facial ou se o WebSocket respondeu {@code ok}
+	 */
+	public boolean enviarPedestreParaFaciais(PedestreEntity pedestre) {
+		if (!envioFacial) {
+			return true;
+		}
+		boolean ok = FacialWebSocketHelper.enviarPedestre(pedestre, gson);
+		if (!ok) {
+			FacesContext.getCurrentInstance().getExternalContext().getFlash().setKeepMessages(true);
+			PrimeFaces.current().executeScript(
+					"avisar('Falha no envio facial. O cadastro ficará pendente de aprovação.', 'error')");
+		}
+		return ok;
 	}
 
 	private boolean verificaCamposRepetidos() {
@@ -2450,11 +2514,6 @@ public class CadastroPedestreController extends CadastroBaseController {
 			return;
 		}
 
-		if (!pedestre.autoAtendimentoLiberado()) {
-			mensagemFatal("", "msg.link.cadastro.facial.gerar.sem.liberacao");
-			return;
-		}
-
 		if (pedestre.getCelular() == null || pedestre.getCelular().trim().isEmpty()) {
 			mensagemFatal("", "msg.celular.nulo");
 			return;
@@ -2471,13 +2530,6 @@ public class CadastroPedestreController extends CadastroBaseController {
 		tokenCadastroFacialExterno = calendar.getTimeInMillis();
 
 		gravarCadastroExternoGerado(TipoCadastroExterno.FACIAL_LINK_PRECADASTRO);
-
-		pedestre.setAutoAtendimentoAt(getDataAtual());
-		try {
-			baseEJB.alteraObjeto(pedestre);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 
 		String baseUrl = AppAmbienteUtils.isProdution()
 				? AppAmbienteUtils.getConfig(AppAmbienteUtils.CONFIG_AMBIENTE_MAIN_SITE)
@@ -2837,16 +2889,6 @@ public class CadastroPedestreController extends CadastroBaseController {
 		}
 	}
 
-	public void onAutoAtendimentoChange() {
-		PedestreEntity pedestre = getPedestreAtual();
-		
-	    if (pedestre.getAutoAtendimento()) {
-	    	pedestre.setAutoAtendimentoAt(getDataAtual());
-	    } else {
-	    	pedestre.setAutoAtendimentoAt(null); // ou manter a última data, se preferir
-	    }
-	}
-	
 	public boolean isOperador() {
 		if (PerfilAcesso.ADMINISTRADOR.equals(getUsuarioLogado().getPerfil())
 				|| PerfilAcesso.GERENTE.equals(getUsuarioLogado().getPerfil())
@@ -3015,10 +3057,11 @@ public class CadastroPedestreController extends CadastroBaseController {
 					
 					encontrado.migrarLegadoEmpresaVisitadaSeNecessario();
 					if (encontrado.getEmpresaVisitadaRef() != null && encontrado.getEmpresaVisitadaRef().getId() != null) {
-						PrimeFaces.current().ajax().addCallbackParam("idEmpresa",
-								encontrado.getEmpresaVisitadaRef().getId());
+						idEmpresaSelecionada = encontrado.getEmpresaVisitadaRef().getId();
+						PrimeFaces.current().ajax().addCallbackParam("idEmpresa", idEmpresaSelecionada);
 					} else if (encontrado.getEmpresa() != null && encontrado.getEmpresa().getId() != null) {
-						PrimeFaces.current().ajax().addCallbackParam("idEmpresa", encontrado.getEmpresa().getId());
+						idEmpresaSelecionada = encontrado.getEmpresa().getId();
+						PrimeFaces.current().ajax().addCallbackParam("idEmpresa", idEmpresaSelecionada);
 					}
 					String empVisitada = encontrado.getEmpresaVisitadaExibicao();
 					if (empVisitada != null && !empVisitada.isEmpty()) {

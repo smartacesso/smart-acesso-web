@@ -98,6 +98,30 @@ import br.com.startjob.acesso.modelo.enumeration.TipoCadastroExterno;
 					  + "and obj.statusCadastroExterno = :STATUS "
 					  + "and obj.tipo = :TIPO "
 					  + "and obj.token > :TOKEN "
+					  + "order by obj.id asc"),
+	@NamedQuery(name = "CadastroExternoEntity.findTotemPendentesByCliente",
+				query = "select obj from CadastroExternoEntity obj "
+					  + "     left join fetch obj.empresa e "
+					  + "where obj.cliente.id = :ID_CLIENTE "
+					  + "and obj.tipo = :TIPO "
+					  + "and obj.statusCadastroExterno = :STATUS "
+					  + "and (obj.removido = false or obj.removido is null) "
+					  + "order by obj.dataCriacao desc"),
+	@NamedQuery(name = "CadastroExternoEntity.findTotemByTokenAndCliente",
+				query = "select obj from CadastroExternoEntity obj "
+					  + "     left join fetch obj.empresa e "
+					  + "where obj.cliente.id = :ID_CLIENTE "
+					  + "and obj.tipo = :TIPO "
+					  + "and obj.token = :TOKEN "
+					  + "and obj.statusCadastroExterno = :STATUS "
+					  + "order by obj.id asc"),
+	@NamedQuery(name = "CadastroExternoEntity.findTotemByIdAndCliente",
+				query = "select obj from CadastroExternoEntity obj "
+					  + "     left join fetch obj.empresa e "
+					  + "     left join fetch obj.pedestre p "
+					  + "where obj.id = :ID "
+					  + "and obj.cliente.id = :ID_CLIENTE "
+					  + "and obj.tipo = :TIPO "
 					  + "order by obj.id asc")
 })
 public class CadastroExternoEntity extends ClienteBaseEntity {
@@ -158,6 +182,22 @@ public class CadastroExternoEntity extends ClienteBaseEntity {
 	
 	@Column(name="IMAGE_HEIGHT", nullable=true)
 	private Integer imageHeight;
+
+	@Column(name="CPF_VISITANTE", nullable=true, length=20)
+	private String cpfVisitante;
+
+	@Column(name="NOME_VISITANTE", nullable=true, length=255)
+	private String nomeVisitante;
+
+	@Column(name="OBSERVACAO_TOTEM", nullable=true, length=500)
+	private String observacaoTotem;
+
+	@Column(name="MOTIVO_RECUSA", nullable=true, length=500)
+	private String motivoRecusa;
+
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(name="DATA_DECISAO", nullable=true)
+	private Date dataDecisao;
 	
 	public Long getId() {
 		return id;
@@ -278,5 +318,45 @@ public class CadastroExternoEntity extends ClienteBaseEntity {
 	public void setDescricaoResultadoProcessamento(String descricaoResultadoProcessamento) {
 		this.descricaoResultadoProcessamento = descricaoResultadoProcessamento;
 	}
-	
+
+	public String getCpfVisitante() {
+		return cpfVisitante;
+	}
+
+	public void setCpfVisitante(String cpfVisitante) {
+		this.cpfVisitante = cpfVisitante;
+	}
+
+	public String getNomeVisitante() {
+		return nomeVisitante;
+	}
+
+	public void setNomeVisitante(String nomeVisitante) {
+		this.nomeVisitante = nomeVisitante;
+	}
+
+	public String getObservacaoTotem() {
+		return observacaoTotem;
+	}
+
+	public void setObservacaoTotem(String observacaoTotem) {
+		this.observacaoTotem = observacaoTotem;
+	}
+
+	public String getMotivoRecusa() {
+		return motivoRecusa;
+	}
+
+	public void setMotivoRecusa(String motivoRecusa) {
+		this.motivoRecusa = motivoRecusa;
+	}
+
+	public Date getDataDecisao() {
+		return dataDecisao;
+	}
+
+	public void setDataDecisao(Date dataDecisao) {
+		this.dataDecisao = dataDecisao;
+	}
+
 }

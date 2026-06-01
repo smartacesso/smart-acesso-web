@@ -5,17 +5,36 @@ public enum StatusCadastroExterno {
 	AGUARDANDO_CADASTRO,
 	CADASTRADO,
 	PROCESSADO,
-	ERRO;
+	ERRO,
+	/** Totem: aguardando aprovação da empresa visitada (foto ainda não enviada aos faciais). */
+	AGUARDANDO_APROVACAO,
+	/** Totem: aprovado e visitante liberado. */
+	APROVADO,
+	/** Totem: recusado pela empresa/recepção. */
+	RECUSADO;
 	
 	public String getNomeFormated() {
-		if(AGUARDANDO_CADASTRO.equals(this))
+		if (AGUARDANDO_CADASTRO.equals(this)) {
 			return "Aguardando cadastro";
-		else if(CADASTRADO.equals(this))
+		}
+		if (CADASTRADO.equals(this)) {
 			return "Cadastro em validação";
-		else if(PROCESSADO.equals(this))
+		}
+		if (PROCESSADO.equals(this)) {
 			return "Processado";
-		else if(ERRO.equals(this))
+		}
+		if (ERRO.equals(this)) {
 			return "Erro";
+		}
+		if (AGUARDANDO_APROVACAO.equals(this)) {
+			return "Aguardando aprovação";
+		}
+		if (APROVADO.equals(this)) {
+			return "Aprovado";
+		}
+		if (RECUSADO.equals(this)) {
+			return "Recusado";
+		}
 		return "";
 	}
 	

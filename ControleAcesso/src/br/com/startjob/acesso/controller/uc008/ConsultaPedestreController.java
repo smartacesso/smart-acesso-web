@@ -47,7 +47,7 @@ import br.com.startjob.acesso.service.CadastroFacialLinkService;
 @Named("consultaPedestreController")
 @ViewScoped
 @UseCase(classEntidade=PedestreEntity.class, funcionalidade="Consulta pedestres", logicalRemove = true, 
-		urlNovoRegistro="/paginas/sistema/pedestres/cadastroPedestre.xhtml", lazyLoad = true, quantPorPagina = 6)
+		urlNovoRegistro="/paginas/sistema/pedestres/cadastroPedestre.xhtml", lazyLoad = true, quantPorPagina = 12)
 public class ConsultaPedestreController extends BaseController {
 
 	private static final long serialVersionUID = 1L;
@@ -749,6 +749,7 @@ public class ConsultaPedestreController extends BaseController {
 			return;
 		}
 		linkGeradoFacial = null;
+		idEmpresaLinkConvite = null;
 	}
 
 	public boolean isLinkConviteGerado() {
@@ -804,7 +805,7 @@ public class ConsultaPedestreController extends BaseController {
 	}
 
 	/**
-	 * Link para visitante já cadastrado (completar facial). Exige autoAtendimento e celular.
+	 * Link para visitante já cadastrado (completar facial). Exige celular; permissão via token em CadastroExterno.
 	 */
 	public void gerarLinkFacialVisitanteExistente() {
 		if (!validarPermissaoGerarLinkCadastroFacial()) {
@@ -819,11 +820,6 @@ public class ConsultaPedestreController extends BaseController {
 
 		if (!TipoPedestre.VISITANTE.equals(p.getTipo())) {
 			mensagemFatal("", "msg.link.cadastro.facial.apenas.visitante");
-			return;
-		}
-
-		if (!Boolean.TRUE.equals(p.getAutoAtendimento())) {
-			mensagemFatal("", "msg.link.cadastro.facial.gerar.sem.liberacao");
 			return;
 		}
 
@@ -842,9 +838,6 @@ public class ConsultaPedestreController extends BaseController {
 				mensagemFatal("", "msg.link.cadastro.facial.invalido");
 				return;
 			}
-
-			completo.setAutoAtendimentoAt(new Date());
-			pedestreEJB.alteraObjeto(completo);
 
 			linkService.gravarCadastroExternoPrecadastro(completo, getUsuarioLogado().getCliente(), token);
 			linkGeradoFacial = linkService.montarUrlPrecadastro(idCliente, completo.getId(), token);

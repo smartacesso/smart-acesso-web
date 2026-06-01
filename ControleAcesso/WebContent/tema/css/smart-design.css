@@ -488,6 +488,29 @@ body .sa-sidebar-nav .ui-panelmenu .ui-panelmenu-content .ui-menuitem-link.ui-st
 	border: 1px solid transparent;
 }
 
+/* Aprovações pendentes (totem): destaque vermelho no submenu Cadastros */
+.sa-sidebar-nav .ui-panelmenu-content .ui-menuitem-link.sa-menu-aprovacoes-pendentes--alert {
+	border-left: 3px solid #e74c3c !important;
+	padding-left: 0.55rem !important;
+}
+
+.sa-sidebar-nav .ui-panelmenu-content .ui-menuitem-link.sa-menu-aprovacoes-pendentes--alert .ui-menuitem-text {
+	color: #ff6b6b !important;
+	font-weight: 600 !important;
+}
+
+.sa-sidebar-nav .ui-panelmenu-content .ui-menuitem-link.sa-menu-aprovacoes-pendentes--alert::after {
+	content: '';
+	display: inline-block;
+	width: 10px;
+	height: 10px;
+	background: #e74c3c;
+	border-radius: 50%;
+	margin-left: 0.5rem;
+	vertical-align: middle;
+	box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.35);
+}
+
 .sa-sidebar-nav .ui-panelmenu-content .ui-menuitem-link .ui-menuitem-icon,
 .sa-sidebar-nav .ui-panelmenu-content .ui-menuitem-link .pi {
 	font-size: 1.0625rem !important;
@@ -2477,6 +2500,33 @@ body .ui-datatable.sa-table tbody td.sa-table-col-actions {
 	padding-right: 0.5rem !important;
 }
 
+body .ui-datatable.sa-table thead th.sa-table-col-actions--multi,
+body .ui-datatable.sa-table tbody td.sa-table-col-actions--multi {
+	width: auto !important;
+	min-width: 9.75rem !important;
+	max-width: none !important;
+	white-space: nowrap !important;
+}
+
+body .ui-datatable.sa-table tbody td.sa-table-col-actions--multi .sa-table-actions {
+	display: inline-flex !important;
+	flex-direction: row !important;
+	flex-wrap: nowrap !important;
+	align-items: center !important;
+	justify-content: center !important;
+	gap: 0.35rem !important;
+	vertical-align: middle;
+}
+
+body .ui-datatable.sa-table tbody td.sa-table-col-actions--multi .sa-table-actions .ui-button {
+	display: inline-flex !important;
+	flex: 0 0 auto !important;
+	width: 2.25rem !important;
+	height: 2.25rem !important;
+	min-width: 2.25rem !important;
+	padding: 0 !important;
+}
+
 body .ui-datatable.sa-table.ui-datatable-scrollable .ui-datatable-scrollable-header thead th:last-child,
 body .ui-datatable.sa-table.ui-datatable-scrollable .ui-datatable-scrollable-header thead th:nth-last-child(2),
 body .ui-datatable.sa-table:not(.ui-datatable-scrollable) thead th:last-child,
@@ -3161,6 +3211,7 @@ body .ui-datatable .sa-table-actions .ui-button {
 .sa-autoatendimento {
 	max-width: 480px;
 	margin: 2rem auto 1rem;
+	width: 100%;
 }
 
 .sa-autoatendimento__card {
@@ -3169,6 +3220,26 @@ body .ui-datatable .sa-table-actions .ui-button {
 	border-radius: var(--sa-radius);
 	box-shadow: var(--sa-shadow-md);
 	padding: 2rem;
+	overflow: visible;
+}
+
+.sa-autoatendimento__actions {
+	margin-top: 0.5rem;
+	padding-top: 0.25rem;
+}
+
+.sa-autoatendimento .ui-autocomplete-panel {
+	z-index: 1100 !important;
+}
+
+.sa-body-external .sa-login-page {
+	overflow: visible;
+	align-items: flex-start;
+	padding-bottom: 3rem;
+}
+
+.sa-body-external .container-internal.sa-external-body {
+	overflow: visible;
 }
 
 .sa-autoatendimento__card h3 {
