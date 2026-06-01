@@ -122,7 +122,40 @@ import br.com.startjob.acesso.modelo.enumeration.TipoCadastroExterno;
 					  + "where obj.id = :ID "
 					  + "and obj.cliente.id = :ID_CLIENTE "
 					  + "and obj.tipo = :TIPO "
-					  + "order by obj.id asc")
+					  + "order by obj.id asc"),
+	@NamedQuery(name = "CadastroExternoEntity.findErrosInternosByCliente",
+				query = "select obj from CadastroExternoEntity obj "
+					  + "     left join fetch obj.pedestre p "
+					  + "     left join fetch obj.empresa e "
+					  + "where obj.cliente.id = :ID_CLIENTE "
+					  + "and obj.statusCadastroExterno = :STATUS "
+					  + "and (obj.tipo = :TIPO_SIMPLIFICADO or obj.tipo = :TIPO_COMPLETO) "
+					  + "and (obj.removido = false or obj.removido is null) "
+					  + "order by obj.dataCriacao desc"),
+	@NamedQuery(name = "CadastroExternoEntity.findErroInternoByIdAndCliente",
+				query = "select obj from CadastroExternoEntity obj "
+					  + "     left join fetch obj.pedestre p "
+					  + "     left join fetch obj.empresa e "
+					  + "where obj.id = :ID "
+					  + "and obj.cliente.id = :ID_CLIENTE "
+					  + "and obj.statusCadastroExterno = :STATUS "
+					  + "and (obj.tipo = :TIPO_SIMPLIFICADO or obj.tipo = :TIPO_COMPLETO) "
+					  + "and (obj.removido = false or obj.removido is null) "
+					  + "order by obj.id asc"),
+	@NamedQuery(name = "CadastroExternoEntity.findErroInternoAbertoByPedestre",
+				query = "select obj from CadastroExternoEntity obj "
+					  + "where obj.cliente.id = :ID_CLIENTE "
+					  + "and obj.pedestre.id = :ID_PEDESTRE "
+					  + "and obj.statusCadastroExterno = :STATUS "
+					  + "and (obj.tipo = :TIPO_SIMPLIFICADO or obj.tipo = :TIPO_COMPLETO) "
+					  + "and (obj.removido = false or obj.removido is null) "
+					  + "order by obj.dataCriacao desc"),
+	@NamedQuery(name = "CadastroExternoEntity.countErrosInternosByCliente",
+				query = "select count(obj) from CadastroExternoEntity obj "
+					  + "where obj.cliente.id = :ID_CLIENTE "
+					  + "and obj.statusCadastroExterno = :STATUS "
+					  + "and (obj.tipo = :TIPO_SIMPLIFICADO or obj.tipo = :TIPO_COMPLETO) "
+					  + "and (obj.removido = false or obj.removido is null)")
 })
 public class CadastroExternoEntity extends ClienteBaseEntity {
 	

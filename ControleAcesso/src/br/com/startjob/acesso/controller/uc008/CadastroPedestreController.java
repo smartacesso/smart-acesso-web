@@ -83,6 +83,7 @@ import br.com.startjob.acesso.modelo.enumeration.TipoRegra;
 import br.com.startjob.acesso.modelo.utils.AppAmbienteUtils;
 import br.com.startjob.acesso.modelo.utils.EncryptionUtils;
 import br.com.startjob.acesso.modelo.utils.MailUtils;
+import br.com.startjob.acesso.service.CadastroErroService;
 import br.com.startjob.acesso.service.FacialWebSocketHelper;
 import br.com.startjob.acesso.service.NotificacaoAprovacaoTotemService;
 import br.com.startjob.acesso.service.TotemAprovacaoService;
@@ -197,6 +198,11 @@ public class CadastroPedestreController extends CadastroBaseController {
 	private String camposObrigatorios;
 
 	private String origem;
+
+	/** Registro em TB_CADASTRO_EXTERNO (status ERRO) ao refazer a partir da lista de falhas. */
+	private Long idErroCadastro;
+
+	private static final String URL_LISTA_CADASTROS_ERRO = "/paginas/sistema/pedestres/pesquisaCadastroErro.xhtml?acao=registrado";
 	private String tipo;
 
 	private String acao;
@@ -251,6 +257,15 @@ public class CadastroPedestreController extends CadastroBaseController {
 
 		buscaConfiguracoes();
 
+		String idErroParam = getRequest().getParameter("idErro");
+		if (idErroParam != null && !idErroParam.isEmpty()) {
+			try {
+				idErroCadastro = Long.parseLong(idErroParam);
+			} catch (NumberFormatException e) {
+				idErroCadastro = null;
+			}
+		}
+
 		String idParam = getRequest().getParameter("id");
 		if (cadastroEmLote && idParam == null && acao != null
 				&& ("OK".equalsIgnoreCase(acao) || "ok".equalsIgnoreCase(acao))) {
@@ -260,7 +275,11 @@ public class CadastroPedestreController extends CadastroBaseController {
 			setStep(0);
 		} else if (pedestre.getId() != null) {
 			iniciaVariaveisEditarPedestre(pedestre);
-			setStep(1);
+			if ("erro".equalsIgnoreCase(origem)) {
+				setStep(isCadastroSimplificado() ? 3 : 1);
+			} else {
+				setStep(1);
+			}
 		}
 
 		carregarEmpresaVisitadaUi();
@@ -311,6 +330,8 @@ public class CadastroPedestreController extends CadastroBaseController {
 			} else {
 				mensagemInfo("", "msg.pedestre.cadastrado.sucesso");
 			}
+		} else if ("erro".equalsIgnoreCase(origem)) {
+			mensagemInfo("", "msg.cadastro.erro.refazer.instrucao");
 		}
 
 		acao = null;
@@ -720,6 +741,78 @@ public class CadastroPedestreController extends CadastroBaseController {
 		
 	}
 
+	private boolean isFluxoCadastroSimplificado(String url, UsuarioEntity usuario) {
+		if (url != null && url.contains("cadastroSimplificado")) {
+			return true;
+		}
+		return usuario != null && Boolean.TRUE.equals(usuario.getCadastroSimples())
+				&& url != null
+				&& (url.contains("cadastroPedestre") || url.contains("cadastroSimplificado"));
+	}
+
+	private String motivoErroFacial(String resposta) {
+		if (resposta == null) {
+			return "Falha no envio aos equipamentos faciais";
+		}
+		if (resposta.contains("UsuarioErro")) {
+			return "Usuário não enviado aos equipamentos";
+		}
+		if (resposta.contains("CartaoErro")) {
+			return "Cartão de acesso não enviado aos equipamentos";
+		}
+		if (resposta.contains("FotoErro")) {
+			return "Foto não enviada aos equipamentos faciais";
+		}
+		return "Falha no envio aos equipamentos: " + resposta;
+	}
+
+	private void invalidarMenuCadastrosErro() {
+		if (menuController != null) {
+			try {
+				menuController.recarregarMenuCadastrosErroAjax();
+			} catch (Exception e) {
+				menuController.invalidarMenuCadastrosErro();
+			}
+		}
+		FacesContext fc = FacesContext.getCurrentInstance();
+		if (fc != null && fc.getPartialViewContext().isAjaxRequest()) {
+			PrimeFaces.current().executeScript(
+					"if (typeof rcAtualizarBadgeCadastrosErro === 'function') { rcAtualizarBadgeCadastrosErro(); }");
+		}
+	}
+
+	private void registrarErroERedirecionarLista(PedestreEntity pedestre, String url, UsuarioEntity usuario,
+			String motivo) {
+		try {
+			boolean simplificado = isFluxoCadastroSimplificado(url, usuario);
+			new CadastroErroService(baseEJB).gravarOuAtualizarErro(getUsuarioLogado().getCliente(), pedestre,
+					simplificado, motivo);
+			invalidarMenuCadastrosErro();
+			FacesContext.getCurrentInstance().getExternalContext().getFlash().setKeepMessages(true);
+			mensagemAviso("", "msg.cadastro.erro.registrado.lista");
+			redirectAposSalvar(URL_LISTA_CADASTROS_ERRO);
+		} catch (Exception e) {
+			e.printStackTrace();
+			mensagemFatal("", "msg.cadastro.erro.registrar.falha");
+		}
+	}
+
+	private void resolverErroCadastroSeAplicavel(PedestreEntity pedestre) {
+		try {
+			Long idCliente = getUsuarioLogado().getCliente().getId();
+			CadastroErroService svc = new CadastroErroService(baseEJB);
+			if (idErroCadastro != null) {
+				svc.resolverErro(idErroCadastro, idCliente);
+			} else if (pedestre != null && pedestre.getId() != null) {
+				svc.resolverErroPorPedestre(pedestre.getId(), idCliente);
+			}
+			idErroCadastro = null;
+			invalidarMenuCadastrosErro();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
 	/**
 	 * Redirect após salvar: em requisição AJAX envia URL via callback (PrimeFaces);
 	 * em POST completo usa redirect HTTP.
@@ -794,8 +887,8 @@ public class CadastroPedestreController extends CadastroBaseController {
 		String retorno = super.salvar();
 
 		if (!retorno.equals("ok")) {
-			mensagemFatal("", "msg.fatal.pedestre.nao.gravado");
-			return "";
+			registrarErroERedirecionarLista(pedestre, url, usuario, "Falha ao gravar no banco de dados");
+			return null;
 		}
 		
 		pedestre = (PedestreEntity) getEntidade();
@@ -825,78 +918,25 @@ public class CadastroPedestreController extends CadastroBaseController {
 						jsonStr);
 				
 				if (!resposta.equals("ok")) {
-					
-					
-					if (usuario != null
-				            && Boolean.TRUE.equals(usuario.getCadastroSimples())
-							&& ( url.contains("cadastroPedestre")
-							|| url.contains("cadastroSimplificado"))) {
-
-						if (TipoPedestre.VISITANTE.equals(pedestre.getTipo())) {
-							retornoStr = "/paginas/sistema/pedestres/cadastroSimplificado.xhtml?tipo=vi&id="
-									+ pedestre.getId();
-						} else {
-							retornoStr = "/paginas/sistema/pedestres/cadastroSimplificado.xhtml?tipo=pe&id="
-									+ pedestre.getId();
-						}
-
-					}else{
-						acao="invalido";
-						retornoStr = "/paginas/sistema/pedestres/cadastroPedestre.xhtml?id=" + pedestre.getId() + "&acao=invalido";
-					}
-
-				    FacesContext.getCurrentInstance()
-				        .getExternalContext()
-				        .getFlash()
-				        .setKeepMessages(true);
-				    
-				    if(resposta.contains("UsuarioErro")) {
-				    	 mensagemAviso("", "msg.info.usuario.nao.enviada");
-				    }else if(resposta.contains("CartaoErro")) {
-				    	mensagemAviso("", "msg.info.cartao.nao.enviada");
-				    }else if (resposta.contains("FotoErro")) {
-				    	mensagemAviso("", "msg.info.foto.nao.enviada");
-				    }
-
-				    redirectAposSalvar(retornoStr);
-
-				    return null;
+					registrarErroERedirecionarLista(pedestre, url, usuario, motivoErroFacial(resposta));
+					return null;
 				}
 
 			} catch (TimeoutException e) {
-				
-				if (usuario != null
-			            && Boolean.TRUE.equals(usuario.getCadastroSimples())
-						&& ( url.contains("cadastroPedestre")
-						|| url.contains("cadastroSimplificado"))) {
-
-					if (TipoPedestre.VISITANTE.equals(pedestre.getTipo())) {
-						retornoStr = "/paginas/sistema/pedestres/cadastroSimplificado.xhtml?tipo=vi&id="
-								+ pedestre.getId();
-					} else {
-						retornoStr = "/paginas/sistema/pedestres/cadastroSimplificado.xhtml?tipo=pe&id="
-								+ pedestre.getId();
-					}
-
-				}else{
-					acao="invalido";
-					retornoStr = "/paginas/sistema/pedestres/cadastroPedestre.xhtml?id=" + pedestre.getId() + "&acao=invalido";
-				}
-
-				FacesContext.getCurrentInstance().getExternalContext().getFlash().setKeepMessages(true);
-
-				mensagemAviso("", "msg.info.foto.nao.enviada_time_out");
-
-				redirectAposSalvar(retornoStr);
-
+				registrarErroERedirecionarLista(pedestre, url, usuario,
+						"Tempo esgotado ao enviar foto/cartão aos equipamentos faciais");
 				return null;
-			}catch (Exception e) {
-				mensagemFatal("", "msg.fatal.pedestre.nao.gravado");
+			} catch (Exception e) {
+				registrarErroERedirecionarLista(pedestre, url, usuario,
+						"Erro inesperado no envio facial: " + e.getMessage());
 				e.printStackTrace();
+				return null;
 			}
 		}
 		
 		
+		resolverErroCadastroSeAplicavel(pedestre);
+
 		if (cadastroEmLote) {
 			carregarFlagCadastroEmLote();
 			if (cadastroEmLote) {
@@ -3376,6 +3416,14 @@ public class CadastroPedestreController extends CadastroBaseController {
 
 	public String getOrigem() {
 		return origem;
+	}
+
+	public Long getIdErroCadastro() {
+		return idErroCadastro;
+	}
+
+	public void setIdErroCadastro(Long idErroCadastro) {
+		this.idErroCadastro = idErroCadastro;
 	}
 
 	public String getTipo() {

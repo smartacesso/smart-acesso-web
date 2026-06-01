@@ -511,6 +511,29 @@ body .sa-sidebar-nav .ui-panelmenu .ui-panelmenu-content .ui-menuitem-link.ui-st
 	box-shadow: 0 0 0 2px rgba(231, 76, 60, 0.35);
 }
 
+/* Cadastros com erro (cadastro pedestre / simplificado) */
+.sa-sidebar-nav .ui-panelmenu-content .ui-menuitem-link.sa-menu-cadastros-erro--alert {
+	border-left: 3px solid #e67e22 !important;
+	padding-left: 0.55rem !important;
+}
+
+.sa-sidebar-nav .ui-panelmenu-content .ui-menuitem-link.sa-menu-cadastros-erro--alert .ui-menuitem-text {
+	color: #f39c12 !important;
+	font-weight: 600 !important;
+}
+
+.sa-sidebar-nav .ui-panelmenu-content .ui-menuitem-link.sa-menu-cadastros-erro--alert::after {
+	content: '';
+	display: inline-block;
+	width: 10px;
+	height: 10px;
+	background: #e67e22;
+	border-radius: 50%;
+	margin-left: 0.5rem;
+	vertical-align: middle;
+	box-shadow: 0 0 0 2px rgba(230, 126, 34, 0.35);
+}
+
 .sa-sidebar-nav .ui-panelmenu-content .ui-menuitem-link .ui-menuitem-icon,
 .sa-sidebar-nav .ui-panelmenu-content .ui-menuitem-link .pi {
 	font-size: 1.0625rem !important;

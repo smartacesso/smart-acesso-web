@@ -21,6 +21,7 @@ import br.com.startjob.acesso.modelo.ejb.PedestreEJBRemote;
 import br.com.startjob.acesso.modelo.entity.ParametroEntity;
 import br.com.startjob.acesso.modelo.entity.UsuarioEntity;
 import br.com.startjob.acesso.modelo.enumeration.PerfilAcesso;
+import br.com.startjob.acesso.service.CadastroErroService;
 import br.com.startjob.acesso.service.TotemAprovacaoService;
 import br.com.startjob.acesso.modelo.utils.AppAmbienteUtils;
 import br.com.startjob.acesso.utils.CookieUtils;
@@ -68,8 +69,12 @@ public class MenuController extends BaseController {
 
 	private int quantidadeAprovacoesPendentes;
 
+	private int quantidadeCadastrosComErro;
+
 	/** Última quantidade já refletida no {@link #menu} montado (evita rebuild desnecessário). */
 	private int quantidadePendentesNoMenu = -1;
+
+	private int quantidadeErrosNoMenu = -1;
 
 	@PostConstruct
 	@Override
@@ -146,6 +151,7 @@ public class MenuController extends BaseController {
 			
 			usuarioLogado = getUsuarioLogado();
 			atualizarQuantidadeAprovacoesPendentes();
+			atualizarQuantidadeCadastrosComErro();
 	
 			/*
 			 * Adiciona os menus do primeiro nível
@@ -306,6 +312,18 @@ public class MenuController extends BaseController {
 				.styleClass("ui-simple-menu").build();
 		cadastros.getElements().add(visitantes);
 
+		boolean alertaErrosCadastro = quantidadeCadastrosComErro > 0;
+		String rotuloErros = alertaErrosCadastro
+				? resource.recuperaChave("menu.cadastro.erros", getFacesContext()) + " ("
+						+ quantidadeCadastrosComErro + ")"
+				: resource.recuperaChave("menu.cadastro.erros", getFacesContext());
+		DefaultMenuItem cadastrosErro = DefaultMenuItem.builder()
+				.value(rotuloErros)
+				.url(BaseConstant.URL_APLICACAO + "/paginas/sistema/pedestres/pesquisaCadastroErro.xhtml")
+				.styleClass(alertaErrosCadastro ? "ui-simple-menu sa-menu-cadastros-erro--alert" : "ui-simple-menu")
+				.build();
+		cadastros.getElements().add(cadastrosErro);
+
 		if (PerfilAcesso.ADMINISTRADOR.equals(usuarioLogado.getPerfil())
 				|| PerfilAcesso.GERENTE.equals(usuarioLogado.getPerfil())) {
 			boolean alertaPendentes = quantidadeAprovacoesPendentes > 0;
@@ -368,6 +386,7 @@ public class MenuController extends BaseController {
 
 		menu.getElements().add(cadastros);
 		quantidadePendentesNoMenu = quantidadeAprovacoesPendentes;
+		quantidadeErrosNoMenu = quantidadeCadastrosComErro;
 	}
 	
 	private void criaMenuDispositivos() {
@@ -468,7 +487,9 @@ public class MenuController extends BaseController {
 	 */
 	public void sincronizarIndicadorMenuPendentes() {
 		atualizarQuantidadeAprovacoesPendentes();
-		if (menu != null && quantidadePendentesNoMenu != quantidadeAprovacoesPendentes) {
+		atualizarQuantidadeCadastrosComErro();
+		if (menu != null && (quantidadePendentesNoMenu != quantidadeAprovacoesPendentes
+				|| quantidadeErrosNoMenu != quantidadeCadastrosComErro)) {
 			menu = null;
 		}
 	}
@@ -479,9 +500,35 @@ public class MenuController extends BaseController {
 		menu = null;
 	}
 
+	public void invalidarMenuCadastrosErro() {
+		atualizarQuantidadeCadastrosComErro();
+		quantidadeErrosNoMenu = -1;
+		menu = null;
+	}
+
 	/** Rebuild do menu via AJAX (totem / aprovação) para exibir o alerta sem recarregar a página inteira. */
 	public void recarregarMenuPendentesAjax() {
 		invalidarMenuAprovacoesPendentes();
+		try {
+			montaMenu();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void recarregarMenuCadastrosErroAjax() {
+		invalidarMenuCadastrosErro();
+		try {
+			montaMenu();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	/** Atualiza contadores de aprovações pendentes e cadastros com erro no menu lateral. */
+	public void recarregarMenuIndicadoresAjax() {
+		invalidarMenuAprovacoesPendentes();
+		invalidarMenuCadastrosErro();
 		try {
 			montaMenu();
 		} catch (Exception e) {
@@ -518,6 +565,33 @@ public class MenuController extends BaseController {
 
 	public boolean isExibirAlertaAprovacoesPendentes() {
 		return quantidadeAprovacoesPendentes > 0;
+	}
+
+	public void atualizarQuantidadeCadastrosComErro() {
+		quantidadeCadastrosComErro = 0;
+		UsuarioEntity usuario = getUsuarioLogado();
+		if (usuario == null || usuario.getCliente() == null) {
+			return;
+		}
+		try {
+			if (baseEJB == null && pedestreEJB != null) {
+				baseEJB = pedestreEJB;
+			}
+			if (baseEJB != null) {
+				quantidadeCadastrosComErro = new CadastroErroService(baseEJB)
+						.contarErros(usuario.getCliente().getId());
+			}
+		} catch (Exception e) {
+			quantidadeCadastrosComErro = 0;
+		}
+	}
+
+	public int getQuantidadeCadastrosComErro() {
+		return quantidadeCadastrosComErro;
+	}
+
+	public boolean isExibirAlertaCadastrosComErro() {
+		return quantidadeCadastrosComErro > 0;
 	}
 
 	public void logoff() {

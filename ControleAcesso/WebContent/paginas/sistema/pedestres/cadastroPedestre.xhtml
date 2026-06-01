@@ -148,6 +148,8 @@
 
 		<ui:define name="conteudo">
 
+			<h:inputHidden value="#{cadastroPedestreController.idErroCadastro}" />
+
 			<p:dialog id="alteraSenhaDialog" widgetVar="alteraSenha"
 				header="#{msgs['header.alterar.dados.login.pedestre']}" modal="true"
 				styleClass="sa-dialog">

@@ -1,0 +1,125 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui">
+
+<body>
+	<f:metadata>
+		<f:event type="preRenderView"
+			listener="#{consultaCadastroErroController.exibeMensagens}" />
+	</f:metadata>
+
+	<ui:composition template="/tema/templates/template.xhtml">
+
+		<ui:define name="titulo">
+			#{msgs['title.sistema']} | #{msgs['title.uc008.cadastros.erro']}
+		</ui:define>
+		<ui:define name="pageTitle">
+			<h:outputText value="#{msgs['title.uc008.cadastros.erro']}" />
+		</ui:define>
+		<ui:define name="pageSubtitle">
+			<h:outputText value="#{msgs['subtitle.uc008.cadastros.erro']}" />
+		</ui:define>
+
+		<ui:define name="tools">
+			<p:toolbar styleClass="sa-toolbar-wrap">
+				<p:toolbarGroup styleClass="sa-toolbar-actions">
+					<p:commandButton value="#{msgs['btn.atualizar']}" icon="pi pi-refresh" iconPos="left"
+						action="#{consultaCadastroErroController.carregarErros}"
+						process="@this" update="@form"
+						styleClass="sa-btn-label ui-button-flat" />
+				</p:toolbarGroup>
+			</p:toolbar>
+		</ui:define>
+
+		<ui:define name="conteudo">
+			<p:messages id="msgs" showDetail="true" closable="true" />
+
+			<p:outputPanel styleClass="p-col-12">
+				<h:panelGroup layout="block"
+					rendered="#{empty consultaCadastroErroController.erros}">
+					<p class="sa-text-muted" style="padding: 1.5rem;">
+						#{msgs['msg.cadastro.erro.lista.vazia']}
+					</p>
+				</h:panelGroup>
+
+				<p:dataTable id="cadastroErroTable"
+					value="#{consultaCadastroErroController.erros}" var="item"
+					rendered="#{not empty consultaCadastroErroController.erros}"
+					paginator="true" rows="15" paginatorPosition="bottom"
+					styleClass="tabela-responsive sa-table">
+
+					<p:column headerText="Foto" style="width: 90px; text-align: center;">
+						<p:graphicImage value="#{consultaCadastroErroController.fotoItem(item)}"
+							stream="false" cache="false"
+							rendered="#{not empty item.primeiraFoto}"
+							styleClass="sa-cell-thumb" />
+					</p:column>
+
+					<p:column headerText="#{msgs['label.uc008.nome']}">
+						<span class="sa-cell-primary">#{consultaCadastroErroController.nomeExibicao(item)}</span>
+						<br />
+						<span class="sa-cell-secondary">
+							CPF: #{consultaCadastroErroController.cpfExibicao(item)}
+						</span>
+					</p:column>
+
+					<p:column headerText="#{msgs['label.uc008.cadastro.erro.origem']}">
+						<span class="sa-cell-primary">#{consultaCadastroErroController.labelOrigem(item)}</span>
+					</p:column>
+
+					<p:column headerText="#{msgs['label.uc008.cadastro.erro.motivo']}">
+						<h:outputText value="#{item.observacaoTotem}"
+							rendered="#{not empty item.observacaoTotem}" />
+						<h:outputText value="—" rendered="#{empty item.observacaoTotem}"
+							styleClass="sa-text-muted" />
+					</p:column>
+
+					<p:column headerText="#{msgs['label.uc008.cadastro.erro.data']}" style="width: 160px;">
+						<h:outputText value="#{item.dataCriacao}">
+							<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+						</h:outputText>
+					</p:column>
+
+					<p:column headerText="" style="width: 220px; text-align: right;">
+						<div class="sa-table-actions sa-table-actions--end sa-table-col-actions--multi">
+							<p:commandButton value="#{msgs['btn.cadastro.erro.refazer']}" icon="pi pi-refresh"
+								styleClass="sa-btn-label ui-button-success"
+								action="#{consultaCadastroErroController.refazer(item)}"
+								ajax="false" process="@this" />
+							<p:commandButton value="#{msgs['btn.cadastro.erro.descartar']}" icon="pi pi-trash"
+								styleClass="sa-btn-label ui-button-danger ui-button-outlined"
+								process="@this"
+								update="form:dlgDescartarCadastroErro form:msgs"
+								oncomplete="PF('dlgDescartarCadastroErro').show()"
+								action="#{consultaCadastroErroController.prepararDescarte(item)}" />
+						</div>
+					</p:column>
+				</p:dataTable>
+			</p:outputPanel>
+
+			<p:dialog id="dlgDescartarCadastroErro" widgetVar="dlgDescartarCadastroErro"
+				header="#{msgs['dlg.cadastro.erro.descartar.titulo']}"
+				modal="true" resizable="false" width="480">
+				<p>
+					#{msgs['dlg.cadastro.erro.descartar.texto']}
+					<strong>#{consultaCadastroErroController.nomeExibicao(consultaCadastroErroController.selecionado)}</strong>?
+				</p>
+				<f:facet name="footer">
+					<p:commandButton value="#{msgs['btn.cancelar']}" type="button"
+						onclick="PF('dlgDescartarCadastroErro').hide()"
+						styleClass="ui-button-secondary sa-btn-label" />
+					<p:commandButton value="#{msgs['btn.cadastro.erro.descartar']}" icon="pi pi-trash"
+						action="#{consultaCadastroErroController.descartar}"
+						process="@this" update="@form menuForm:menuPrincipal"
+						oncomplete="if (typeof rcAtualizarBadgeCadastrosErro === 'function') { rcAtualizarBadgeCadastrosErro(); }"
+						styleClass="ui-button-danger sa-btn-label" />
+				</f:facet>
+			</p:dialog>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>
