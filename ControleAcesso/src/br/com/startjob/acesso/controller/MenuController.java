@@ -148,7 +148,7 @@ public class MenuController extends BaseController {
 			atualizarQuantidadeAprovacoesPendentes();
 	
 			/*
-			 * Adiciona os menus do primeiro nÃ­vel
+			 * Adiciona os menus do primeiro nível
 			 * NOTA: Colocar um método para cada grupo de menus
 			 */
 			if(usuarioLogado != null) {
@@ -310,8 +310,9 @@ public class MenuController extends BaseController {
 				|| PerfilAcesso.GERENTE.equals(usuarioLogado.getPerfil())) {
 			boolean alertaPendentes = quantidadeAprovacoesPendentes > 0;
 			String rotuloAprovacoes = alertaPendentes
-					? "Aprovações pendentes (" + quantidadeAprovacoesPendentes + ")"
-					: "Aprovações pendentes";
+					? resource.recuperaChave("menu.cadastro.aprovacao.pendentes", getFacesContext()) + " ("
+							+ quantidadeAprovacoesPendentes + ")"
+					: resource.recuperaChave("menu.cadastro.aprovacao.pendentes", getFacesContext());
 			DefaultMenuItem aprovacaoPendentes = DefaultMenuItem.builder()
 					.value(rotuloAprovacoes)
 					.url(BaseConstant.URL_APLICACAO + "/paginas/sistema/pedestres/pesquisaAprovacaoTotem.xhtml")
@@ -331,7 +332,7 @@ public class MenuController extends BaseController {
 		}
 		
 		DefaultMenuItem caadastroAuto = DefaultMenuItem.builder()
-				.value("Totem de visitantes")
+				.value(resource.recuperaChave("menu.cadastro.totem", getFacesContext()))
 				.url(BaseConstant.URL_APLICACAO + "/paginas/sistema/pedestres/cadastroAuto.xhtml")
 				.styleClass("ui-simple-menu").build();
 		cadastros.getElements().add(caadastroAuto);

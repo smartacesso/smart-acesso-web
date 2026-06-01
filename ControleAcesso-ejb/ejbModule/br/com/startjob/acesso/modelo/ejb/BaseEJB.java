@@ -1075,7 +1075,7 @@ public class BaseEJB implements BaseEJBRemote {
 				} else {
 
 					/*
-					 * faz para itens que Não sÃ£o datas
+					 * faz para itens que Não são datas
 					 */
 
 					// like ou igual

@@ -13,7 +13,7 @@ import java.util.Locale;
 public interface BaseConstant {
 	
 	/**
-	 * Mensagem que identifica concorrÃªncia
+	 * Mensagem que identifica concorrência
 	 */
 	public static final String MSG_CONCORRENCIA = "Row was updated or deleted"; 
 	

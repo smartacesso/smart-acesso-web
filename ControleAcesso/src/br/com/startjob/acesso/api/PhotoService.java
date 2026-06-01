@@ -31,7 +31,7 @@ import br.com.startjob.acesso.modelo.ejb.PedestreEJBRemote;
 import br.com.startjob.acesso.to.PedestrianPhotoTO;
 
 /**
- * ServiÃ§o para atualizar lista de acesso de atletas nas catracas
+ * Serviço para atualizar lista de acesso de atletas nas catracas
  * 
  */
 @Path("/photo")

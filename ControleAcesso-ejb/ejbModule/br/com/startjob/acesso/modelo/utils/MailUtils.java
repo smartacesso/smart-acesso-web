@@ -416,7 +416,7 @@ public class MailUtils {
 					+"/mail-template"+(idAcademy == null ? "" : idAcademy)+".html");
 			if(template.exists() && template.isFile()){
 				
-				//lÃª template
+				//lê template
 				BufferedReader br = new BufferedReader(new FileReader(template));
 				StringBuffer arquivo = new StringBuffer();
 				while(br.ready()){
