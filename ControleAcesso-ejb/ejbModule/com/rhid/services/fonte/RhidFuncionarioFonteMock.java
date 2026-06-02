@@ -24,8 +24,16 @@ public class RhidFuncionarioFonteMock implements RhidFuncionarioFonte {
 		if (dataReferencia == null) {
 			return buscarTodos();
 		}
+		java.time.LocalDate ref = com.rhid.services.fonte.totvs.RhidTotvsDataUtil.toLocalDate(dataReferencia);
 		return criarFuncionariosMock().stream()
-				.filter(f -> f.getDataAlteracao() != null && f.getDataAlteracao().after(dataReferencia))
+				.filter(f -> {
+					if (f.getDataAlteracao() == null || ref == null) {
+						return false;
+					}
+					java.time.LocalDate alteracao = com.rhid.services.fonte.totvs.RhidTotvsDataUtil
+							.toLocalDate(f.getDataAlteracao());
+					return alteracao != null && ref != null && !alteracao.isBefore(ref);
+				})
 				.collect(Collectors.toList());
 	}
 

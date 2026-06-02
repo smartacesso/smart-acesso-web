@@ -213,7 +213,7 @@ public class MenuController extends BaseController {
 				.icon("pi pi-fw pi-cog").build();
 
 		DefaultMenuItem rhidConfig = DefaultMenuItem.builder()
-				.value("Integração RHID")
+				.value("Configuração RHID")
 				.styleClass("ui-simple-menu")
 				.url(BaseConstant.URL_APLICACAO + "/paginas/sistema/rhid/rhidConfig.xhtml").build();
 		configuracaoes.getElements().add(rhidConfig);

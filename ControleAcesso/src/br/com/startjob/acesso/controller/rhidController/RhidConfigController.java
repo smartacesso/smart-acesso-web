@@ -185,7 +185,11 @@ public class RhidConfigController extends BaseController {
 
 		nova.setDominios(new ArrayList<DominioRhidEntity>());
 
-		nova.setSemDominioAcao(RhidSemDominioAcaoEnum.IGNORAR);
+		nova.setSemDominioAcao(RhidSemDominioAcaoEnum.ENVIAR_TODOS);
+		nova.setHoraExecucaoAutomatica(ConfiguracaoRhidEntity.HORA_EXECUCAO_AUTOMATICA_PADRAO);
+		nova.setCodColigadaTotvs("1");
+		nova.setCodSentencaTotvs("API.PTO.001");
+		nova.setCodSistemaTotvs("A");
 
 		return nova;
 
@@ -380,9 +384,12 @@ public class RhidConfigController extends BaseController {
 			}
 
 			if (tinhaExportacaoAutomatica) {
-
-				cancelarExportacaoAutomatica();
-
+				try {
+					lookupAgendadorService().sincronizarTimersExportacao();
+				} catch (Exception e) {
+					exibirErro("Configuração excluída, porém não foi possível sincronizar timers RHID: "
+							+ extrairMensagem(e));
+				}
 			}
 
 			exibirInfo("Configuração RHID excluída com sucesso.");
@@ -505,7 +512,7 @@ public class RhidConfigController extends BaseController {
 
 		}
 
-		return new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(data);
+		return new SimpleDateFormat("dd/MM/yyyy").format(data);
 
 	}
 
@@ -522,49 +529,12 @@ public class RhidConfigController extends BaseController {
 
 
 	private void agendarRotinaSeNecessario() {
-
-		if (!Boolean.TRUE.equals(configuracao.getExportacaoAutomatica())
-
-				|| configuracao.getIntervaloMinutos() == null
-
-				|| configuracao.getIntervaloMinutos() <= 0) {
-
-			return;
-
-		}
-
 		try {
-
-			RhidAgendadorService agendador = lookupAgendadorService();
-
-			agendador.agendarExportacaoFuncionarios(configuracao.getIntervaloMinutos());
-
+			lookupAgendadorService().sincronizarTimersExportacao();
 		} catch (Exception e) {
-
-			exibirErro("Configuração salva, porém não foi possível agendar a rotina automática: "
-
+			exibirErro("Configuração salva, porém não foi possível sincronizar a rotina automática: "
 					+ extrairMensagem(e));
-
 		}
-
-	}
-
-
-
-	private void cancelarExportacaoAutomatica() {
-
-		try {
-
-			lookupAgendadorService().cancelarExportacaoAutomatica();
-
-		} catch (Exception e) {
-
-			exibirErro("Configuração excluída, porém não foi possível cancelar a rotina automática: "
-
-					+ extrairMensagem(e));
-
-		}
-
 	}
 
 
@@ -623,7 +593,7 @@ public class RhidConfigController extends BaseController {
 
 		if (configuracao == null || configuracao.getUltimaExportacao() == null) {
 
-			return "Nunca executada (próxima rotina automática será completa)";
+			return "Nunca executada — execute a importação completa antes de ativar a exportação automática";
 
 		}
 

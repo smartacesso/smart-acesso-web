@@ -107,55 +107,66 @@ negócio (CNPJ, nomes) em IDs internos:
 3. MODOS DE EXPORTAÇÃO E FILTRO POR DATA
 --------------------------------------------------------------------------------
 
-  Modo          | Quando usar                    | O que busca na API externa
-  --------------|--------------------------------|-------------------------------
-  Completa      | 1ª carga ou reprocessamento    | Todos os funcionários
-                | total                          |
-  Incremental   | Rotinas seguintes              | Somente alterados desde a
-                |                                | última execução bem-sucedida
-  Automática    | Timer configurado na tela      | 1ª vez completa; depois
-                |                                | incremental
+  Modo          | Quando usar                    | O que busca na TOTVS (API.PTO.001)
+  --------------|--------------------------------|------------------------------------
+  Completa      | 1ª carga ou reprocessamento    | DATA_INI = data início; ATIVO=1
+                | total                          | (somente ativos)
+  Incremental   | Rotinas diárias seguintes      | DATA_INI = ultimaExportacao;
+                |                                | ATIVO=0 (alterações e inativos)
+  Automática    | Timer 1x por dia na tela       | 1ª vez completa; depois incremental
 
 
-3.1 Regra de filtro incremental (API externa)
+3.1 Regra de filtro incremental (TOTVS wsConsultaSQL)
 --------------------------------------------------------------------------------
 
-Na exportação INCREMENTAL, o sistema informa à fonte externa a data
-ultimaExportacao — timestamp da última exportação concluída SEM ERROS
-(TB_CONFIG_RHID.ULTIMA_EXPORTACAO).
+A sentença SQL aceita apenas DATA_INI=yyyy-MM-dd (SEM hora). Por isso a rotina
+deve rodar no máximo 1x por dia, preferencialmente após o fechamento da folha.
 
-A API externa deve retornar APENAS funcionários em que:
+Parâmetros enviados ao SOAP RealizarConsultaSQL:
 
-  dataAlteracao > ultimaExportacao
+  Completa:     DATA_INI=<data início configurada>;ATIVO=1
+  Incremental:  DATA_INI=<ultimaExportacao>;ATIVO=0
 
-Ou seja: somente registros alterados DEPOIS da última execução bem-sucedida
-da rotina entram no processamento.
+  ultimaExportacao = TB_CONFIG_RHID.ULTIMA_EXPORTACAO (data da última exportação
+  concluída SEM ERROS).
+
+IMPORTANTE — DATA_INI usa a MESMA data de ultimaExportacao (não soma +1 dia):
+
+  - Evita perder alterações tardias no mesmo dia (TOTVS grava DATAALTERACAO
+    sem hora, ex.: 2026-06-02T00:00:00)
+  - Registros já sincronizados são reenviados e atualizados via PUT no RHID
+    (idempotente)
+
+Após exportação bem-sucedida:
+
+  - ultimaExportacao = maior DATAALTERACAO retornada
+  - Se nenhum registro: ultimaExportacao = data de hoje
 
 Comportamento esperado:
 
   - ultimaExportacao nula (nunca exportou):
-      equivalente à exportação completa — retornar todos os registros
+      execute importação completa manualmente antes de ativar a automática
 
-  - dataAlteracao nula no DTO:
-      registro NÃO entra no incremental (deve ser preenchido sempre que houver
-      alteração na fonte)
+  - Ativar exportação automática na tela:
+      exige importação completa prévia (ultimaExportacao preenchida)
+
+  - Várias configurações cadastradas:
+      cada uma com automática ativa recebe timer diário na hora configurada
 
   - Exportação com erros:
-      ultimaExportacao NÃO avança — na próxima incremental, os pendentes serão
-      reprocessados
+      ultimaExportacao NÃO avança — próxima incremental reprocessa o mesmo
+      DATA_INI
 
 Contrato técnico da interface (RhidFuncionarioFonte):
 
   buscarTodos()
-      -> exportação completa
+      -> exportação completa (TOTVS ATIVO=1)
 
   buscarAlteradosDesde(Date dataReferencia)
-      -> exportação incremental; filtrar por dataAlteracao > dataReferencia
-         (dataReferencia = ultimaExportacao)
+      -> exportação incremental TOTVS (DATA_INI = dataReferencia, ATIVO=0)
 
-A dataAlteracao deve refletir a ÚLTIMA MODIFICAÇÃO do registro na fonte
-(cadastro, admissão, transferência, demissão, mudança de cargo, etc.), e NÃO
-a data em que a integração leu o registro.
+A DATAALTERACAO no XML TOTVS reflete a data da última modificação na folha
+(cadastro, admissão, demissão, etc.) — sempre com hora 00:00:00.
 
 
 4. DTO DA API EXTERNA (RhidFuncionarioExternoDTO)
@@ -171,8 +182,8 @@ mapeia esses campos para o endpoint RHID /customerdb/person.svc/a.
   Campo           | Tipo   | Obrigatório | Descrição
   ----------------|--------|-------------|----------------------------------
   idExterno       | String | SIM         | ID único na fonte; chave do mapa
-  dataAlteracao   | Date   | SIM*        | Última alteração na fonte;
-                  |        |             | *obrigatório para incremental
+  dataAlteracao   | Date   | SIM*        | Última alteração na TOTVS (DATAALTERACAO);
+                  |        |             | usada como watermark (ultimaExportacao)
   nomeDominio     | String | SIM*        | Domínio RHID destino;
                   |        |             | *obrigatório salvo config
                   |        |             | "Enviar para todos"
@@ -272,8 +283,8 @@ CPF: 11 dígitos obrigatórios na validação interna.
   1. Criar RhidFuncionarioFonteApi implementando RhidFuncionarioFonte
 
   2. buscarAlteradosDesde(dataReferencia):
-     chamar a API externa passando dataReferencia OU filtrar localmente com
-     dataAlteracao > dataReferencia
+     na TOTVS: DATA_INI = dataReferencia (mesmo dia), ATIVO=0
+     em outras fontes: filtrar por dataAlteracao >= dataReferencia (granularidade diária)
 
   3. Garantir que dataAlteracao esteja sempre preenchida na fonte quando o
      registro for criado ou alterado
@@ -315,7 +326,7 @@ Formato do mapa de IDs (exemplo):
   Opções disponíveis:
     - Credenciais RHID (e-mail, senha, URL base)
     - Domínios
-    - Exportação automática (intervalo em minutos)
+    - Exportação automática (hora 0–23, padrão 22h; exige carga completa prévia)
     - Ação para funcionário sem nomeDominio (Ignorar / Enviar para todos)
     - Exportação manual completa ou incremental
 

@@ -63,6 +63,19 @@ public class RhidOperacaoResultDTO implements Serializable {
 		totalProcessados++;
 	}
 
+	public void absorver(RhidOperacaoResultDTO outro) {
+		if (outro == null) {
+			return;
+		}
+		totalProcessados += outro.totalProcessados;
+		totalCriados += outro.totalCriados;
+		totalAtualizados += outro.totalAtualizados;
+		totalErros += outro.totalErros;
+		if (outro.mensagens != null) {
+			mensagens.addAll(outro.mensagens);
+		}
+	}
+
 	public List<String> getMensagens() {
 		return mensagens;
 	}

@@ -25,7 +25,6 @@ import br.com.startjob.acesso.tasks.ImportaSponteTask;
 import br.com.startjob.acesso.tasks.ImportacaoSocTask;
 import br.com.startjob.acesso.tasks.ImportarSalesianoTask;
 import br.com.startjob.acesso.tasks.ImportarTotvsTask;
-import br.com.startjob.acesso.tasks.ExportarRhidTask;
 import br.com.startjob.acesso.tasks.ImportarUsuarioTask;
 
 @SuppressWarnings("serial")
@@ -277,13 +276,25 @@ public class ConfiguraRotinasServlet extends BaseServlet {
 	}
 
 	private void registraTimersRhid() {
-		log.info("Registra Integração RHID");
+		log.info("Registra Integração RHID (legado — preferir RhidAgendadorService)");
 
 		ActivatedTasks.getInstancia().limpaTimersRhid();
 
 		Long period = 60 * 60 * 1000L;
 		Timer timer = new Timer();
-		TimerTask rhidTask = new ExportarRhidTask();
+		TimerTask rhidTask = new TimerTask() {
+			@Override
+			public void run() {
+				try {
+					br.com.startjob.acesso.modelo.ejb.RhidIntegracaoEJBRemote ejb =
+							(br.com.startjob.acesso.modelo.ejb.RhidIntegracaoEJBRemote) BaseServlet
+									.getEjb(br.com.startjob.acesso.modelo.ejb.RhidIntegracaoEJBRemote.class);
+					ejb.exportarRhidAutomatico();
+				} catch (Exception e) {
+					log.severe("Erro na exportação RHID (timer legado): " + e.getMessage());
+				}
+			}
+		};
 		timer.scheduleAtFixedRate(rhidTask, 0, period);
 
 		log.info("Registrando rotina de exportação RHID");

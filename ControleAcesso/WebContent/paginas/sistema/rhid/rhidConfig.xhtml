@@ -114,12 +114,19 @@
                         <p:inputText id="urlBase" value="#{rhidConfigController.configuracao.urlBase}" />
                     </div>
                     <div class="ui-g-12 ui-md-3">
-                        <p:outputLabel value="Intervalo automático (min):" for="intervalo" />
-                        <p:inputNumber id="intervalo" value="#{rhidConfigController.configuracao.intervaloMinutos}" decimalPlaces="0" />
+                        <p:outputLabel value="Hora execução diária (0-23):" for="horaExec" />
+                        <p:inputNumber id="horaExec" value="#{rhidConfigController.configuracao.horaExecucaoAutomatica}"
+                            decimalPlaces="0" minValue="0" maxValue="23" />
+                        <small style="display:block; margin-top: 4px; color: #666;">
+                            Padrão 22h (após processamento da folha). Cada configuração com automática ativa recebe timer próprio.
+                        </small>
                     </div>
                     <div class="ui-g-12 ui-md-3">
                         <p:outputLabel value="Exportação automática:" for="auto" />
                         <p:selectBooleanCheckbox id="auto" value="#{rhidConfigController.configuracao.exportacaoAutomatica}" />
+                        <small style="display:block; margin-top: 4px; color: #666;">
+                            Só pode ser ativada após uma importação completa bem-sucedida.
+                        </small>
                     </div>
                     <div class="ui-g-12 ui-md-6">
                         <p:outputLabel value="Funcionário sem nomeDominio:" for="semDominioAcao" />
@@ -128,8 +135,46 @@
                                 var="opcao" itemLabel="#{opcao.label}" itemValue="#{opcao}" />
                         </p:selectOneMenu>
                         <small style="display:block; margin-top: 4px; color: #666;">
-                            O DTO externo deve informar nomeDominio para rotear. Sem domínio: ignorar ou enviar para todos.
+                            TOTVS não envia nomeDominio por funcionário — use &quot;Enviar para todos os domínios&quot; (ativos vão para cada domínio cadastrado).
                         </small>
+                    </div>
+                </div>
+            </p:panel>
+
+            <p:panel header="Fonte TOTVS (wsConsultaSQL)" styleClass="ui-fluid" style="margin-top: 20px;">
+                <p:outputLabel value="Consulta API.PTO.001 — completa (ATIVO=1) traz só ativos; incremental (ATIVO=0) traz alterações e inativos desde DATA_INI=ultimaExportacao (filtro só por dia — rotina recomendada 1x/dia)."
+                    style="display:block; margin-bottom: 15px;" />
+                <div class="ui-g">
+                    <div class="ui-g-12 ui-md-6">
+                        <p:outputLabel value="URL wsConsultaSQL:" for="urlTotvs" />
+                        <p:inputText id="urlTotvs" value="#{rhidConfigController.configuracao.urlTotvs}"
+                            placeholder="http://host:8051/wsConsultaSQL/IwsConsultaSQL" />
+                    </div>
+                    <div class="ui-g-12 ui-md-3">
+                        <p:outputLabel value="Usuário TOTVS:" for="usuarioTotvs" />
+                        <p:inputText id="usuarioTotvs" value="#{rhidConfigController.configuracao.usuarioTotvs}" />
+                    </div>
+                    <div class="ui-g-12 ui-md-3">
+                        <p:outputLabel value="Senha TOTVS:" for="senhaTotvs" />
+                        <p:password id="senhaTotvs" value="#{rhidConfigController.configuracao.senhaTotvs}" redisplay="true" />
+                    </div>
+                    <div class="ui-g-12 ui-md-2">
+                        <p:outputLabel value="Coligada:" for="codColigada" />
+                        <p:inputText id="codColigada" value="#{rhidConfigController.configuracao.codColigadaTotvs}" />
+                    </div>
+                    <div class="ui-g-12 ui-md-3">
+                        <p:outputLabel value="Sentença SQL:" for="codSentenca" />
+                        <p:inputText id="codSentenca" value="#{rhidConfigController.configuracao.codSentencaTotvs}" />
+                    </div>
+                    <div class="ui-g-12 ui-md-2">
+                        <p:outputLabel value="Sistema:" for="codSistema" />
+                        <p:inputText id="codSistema" value="#{rhidConfigController.configuracao.codSistemaTotvs}" />
+                    </div>
+                    <div class="ui-g-12 ui-md-3">
+                        <p:outputLabel value="Data início carga completa:" for="dataInicioCompleta" />
+                        <p:calendar id="dataInicioCompleta" value="#{rhidConfigController.configuracao.dataInicioCompleta}"
+                            pattern="dd/MM/yyyy" showIcon="true" locale="pt" />
+                        <small style="display:block; margin-top: 4px; color: #666;">DATA_INI da 1ª importação (somente ativos).</small>
                     </div>
                 </div>
             </p:panel>

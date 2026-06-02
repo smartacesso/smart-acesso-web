@@ -17,6 +17,8 @@ public interface RhidIntegracaoEJBRemote extends BaseEJBRemote {
 
 	RhidOperacaoResultDTO exportarRhidAutomatico() throws Exception;
 
+	RhidOperacaoResultDTO exportarRhidAutomaticoPorId(Long configId) throws Exception;
+
 	ConfiguracaoRhidEntity salvarConfiguracao(ConfiguracaoRhidEntity configuracao) throws Exception;
 
 	ConfiguracaoRhidEntity buscarConfiguracaoPorId(Long id) throws Exception;

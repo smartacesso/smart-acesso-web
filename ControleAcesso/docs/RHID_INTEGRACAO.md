@@ -181,7 +181,36 @@ CPF: **11 dígitos obrigatórios** na validação interna.
 | `nomeCargo` | Não | Resolve `idPersonRole`; se não achar no catálogo → **não vincula** (null) |
 | `status` | Não | Padrão `1` |
 | `dataAdmissao` | Não | Usa data atual |
-| `dataAlteracao` | Não | Filtro incremental |
+| `dataAlteracao` | Não | Watermark diário (`ultimaExportacao`) após exportação TOTVS |
+
+---
+
+## Integração TOTVS (filtro diário)
+
+A sentença `API.PTO.001` via `wsConsultaSQL` aceita apenas **`DATA_INI=yyyy-MM-dd`** (sem hora). Por isso:
+
+| Modo | Parâmetros SOAP | Comportamento |
+|------|-----------------|---------------|
+| **Completa** | `DATA_INI` = data início configurada; `ATIVO=1` | Somente funcionários **ativos** |
+| **Incremental** | `DATA_INI` = **`ultimaExportacao`** (mesmo dia, sem +1); `ATIVO=0` | Alterações e **inativos** desde essa data |
+| **Automática** | Timer **1x por dia** por configuração (`horaExecucaoAutomatica`, padrão **22h**) | Só ativável após **importação completa**; depois incremental |
+
+### Por que `DATA_INI` não soma +1 dia
+
+Com `DATA_INI = ultimaExportacao + 1`, alterações gravadas na TOTVS **no mesmo dia** após a rotina (ex.: admissão às 14h com `DATAALTERACAO=2026-06-02`) ficam **fora** da próxima consulta (`DATA_INI=2026-06-03`).
+
+Usando **`DATA_INI = ultimaExportacao`**, a próxima execução reconsulta o último dia processado e captura pendências. Registros já exportados são **atualizados via PUT** no RHID (idempotente) — o custo extra de reprocessar o dia é aceitável frente à segurança dos dados.
+
+### Watermark (`ultimaExportacao`)
+
+Após exportação **sem erros**:
+
+- `ultimaExportacao` = maior `DATAALTERACAO` retornada pela TOTVS
+- Se nenhum registro vier, avança para **hoje** (evita repetir a mesma consulta vazia indefinidamente)
+
+Com erro, `ultimaExportacao` **não avança** — a próxima incremental reprocessa o mesmo `DATA_INI`.
+
+**Recomendação operacional:** agendar a rotina **1x por dia**, após o processamento da folha na TOTVS (padrão **22h**). A exportação automática só pode ser ativada **após importação completa** bem-sucedida. Cada configuração cadastrada recebe **timer próprio** quando a automática está ligada.
 | Demais opcionais | Não | Ver tabela acima |
 
 ---
@@ -235,9 +264,9 @@ Somente o **nome do domínio** é necessário. `idCompany`, `idShift` e demais d
 
 | Modo | Comportamento |
 |------|---------------|
-| Completa | Todos os funcionários da fonte |
-| Incremental | `dataAlteracao > ultimaExportacao` |
-| Automática | Completa na 1ª vez; depois incremental |
+| Completa | TOTVS: `ATIVO=1` desde `dataInicioCompleta` |
+| Incremental | TOTVS: `ATIVO=0` com `DATA_INI = ultimaExportacao` (filtro diário) |
+| Automática | Completa manual obrigatória antes de ativar; depois incremental **1x/dia por config** |
 
 ---
 

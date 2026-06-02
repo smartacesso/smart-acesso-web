@@ -7,6 +7,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.time.LocalDate;
 
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
@@ -26,6 +27,7 @@ import com.rhid.services.dto.RhidLoginResponseDTO;
 import com.rhid.services.dto.RhidOperacaoResultDTO;
 import com.rhid.services.fonte.RhidFuncionarioFonte;
 import com.rhid.services.fonte.RhidFuncionarioFonteFactory;
+import com.rhid.services.fonte.totvs.RhidTotvsDataUtil;
 
 import br.com.startjob.acesso.modelo.entity.ConfiguracaoRhidEntity;
 import br.com.startjob.acesso.modelo.entity.DominioRhidEntity;
@@ -52,17 +54,23 @@ public class RhidIntegracaoEJB extends BaseEJB implements RhidIntegracaoEJBRemot
 
 		validarEmailUnico(email, configuracao.getId());
 		validarDominiosObrigatorios(configuracao);
+		validarTotvsSeInformado(configuracao);
 		configuracao.setEmail(email);
 		prepararValoresPadrao(configuracao);
 		prepararDominios(configuracao);
 
 		Long idSalvo;
 		if (configuracao.getId() == null) {
+			validarExportacaoAutomatica(configuracao, null);
 			Object[] retorno = gravaObjeto(configuracao);
 			idSalvo = ((ConfiguracaoRhidEntity) retorno[0]).getId();
 		} else {
 			ConfiguracaoRhidEntity gerenciada = (ConfiguracaoRhidEntity) recuperaObjeto(
 					ConfiguracaoRhidEntity.class, configuracao.getId());
+			if (configuracao.getSenhaTotvs() == null || configuracao.getSenhaTotvs().trim().isEmpty()) {
+				configuracao.setSenhaTotvs(gerenciada.getSenhaTotvs());
+			}
+			validarExportacaoAutomatica(configuracao, gerenciada);
 			aplicarCamposConfiguracao(configuracao, gerenciada);
 			sincronizarDominios(gerenciada, configuracao.getDominios());
 			alteraObjeto(gerenciada);
@@ -138,6 +146,14 @@ public class RhidIntegracaoEJB extends BaseEJB implements RhidIntegracaoEJBRemot
 		destino.setIntervaloMinutos(origem.getIntervaloMinutos());
 		destino.setExportacaoAutomatica(origem.getExportacaoAutomatica());
 		destino.setSemDominioAcao(origem.getSemDominioAcao());
+		destino.setUrlTotvs(origem.getUrlTotvs());
+		destino.setUsuarioTotvs(origem.getUsuarioTotvs());
+		destino.setSenhaTotvs(origem.getSenhaTotvs());
+		destino.setCodColigadaTotvs(origem.getCodColigadaTotvs());
+		destino.setCodSentencaTotvs(origem.getCodSentencaTotvs());
+		destino.setCodSistemaTotvs(origem.getCodSistemaTotvs());
+		destino.setDataInicioCompleta(origem.getDataInicioCompleta());
+		destino.setHoraExecucaoAutomatica(origem.getHoraExecucaoAutomatica());
 	}
 
 	private void sincronizarDominios(ConfiguracaoRhidEntity configuracao,
@@ -148,6 +164,36 @@ public class RhidIntegracaoEJB extends BaseEJB implements RhidIntegracaoEJBRemot
 			dominio.setNomeDominio(domOrigem.getNomeDominio());
 			dominio.setConfiguracao(configuracao);
 			configuracao.getDominios().add(dominio);
+		}
+	}
+
+	private void validarExportacaoAutomatica(ConfiguracaoRhidEntity configuracao, ConfiguracaoRhidEntity existente) {
+		if (!Boolean.TRUE.equals(configuracao.getExportacaoAutomatica())) {
+			return;
+		}
+		Date ultima = configuracao.getUltimaExportacao();
+		if (ultima == null && existente != null) {
+			ultima = existente.getUltimaExportacao();
+		}
+		if (ultima == null) {
+			throw new IllegalArgumentException(
+					"Execute a importação completa antes de ativar a exportação automática.");
+		}
+	}
+
+	private void validarTotvsSeInformado(ConfiguracaoRhidEntity configuracao) {
+		if (configuracao.getUrlTotvs() == null || configuracao.getUrlTotvs().trim().isEmpty()) {
+			return;
+		}
+		if (configuracao.getUsuarioTotvs() == null || configuracao.getUsuarioTotvs().trim().isEmpty()) {
+			throw new IllegalArgumentException("Informe o usuário TOTVS quando a URL wsConsultaSQL estiver preenchida.");
+		}
+		if (configuracao.getSenhaTotvs() == null || configuracao.getSenhaTotvs().trim().isEmpty()) {
+			throw new IllegalArgumentException("Informe a senha TOTVS quando a URL wsConsultaSQL estiver preenchida.");
+		}
+		if (configuracao.getHoraExecucaoAutomatica() != null
+				&& (configuracao.getHoraExecucaoAutomatica() < 0 || configuracao.getHoraExecucaoAutomatica() > 23)) {
+			throw new IllegalArgumentException("Hora de execução automática deve estar entre 0 e 23.");
 		}
 	}
 
@@ -191,11 +237,23 @@ public class RhidIntegracaoEJB extends BaseEJB implements RhidIntegracaoEJBRemot
 		if (configuracao.getIntervaloMinutos() == null) {
 			configuracao.setIntervaloMinutos(60);
 		}
+		if (configuracao.getHoraExecucaoAutomatica() == null) {
+			configuracao.setHoraExecucaoAutomatica(ConfiguracaoRhidEntity.HORA_EXECUCAO_AUTOMATICA_PADRAO);
+		}
 		if (configuracao.getExportacaoAutomatica() == null) {
 			configuracao.setExportacaoAutomatica(Boolean.FALSE);
 		}
 		if (configuracao.getSemDominioAcao() == null) {
-			configuracao.setSemDominioAcao(com.rhid.services.RhidSemDominioAcaoEnum.IGNORAR);
+			configuracao.setSemDominioAcao(com.rhid.services.RhidSemDominioAcaoEnum.ENVIAR_TODOS);
+		}
+		if (configuracao.getCodColigadaTotvs() == null || configuracao.getCodColigadaTotvs().trim().isEmpty()) {
+			configuracao.setCodColigadaTotvs("1");
+		}
+		if (configuracao.getCodSentencaTotvs() == null || configuracao.getCodSentencaTotvs().trim().isEmpty()) {
+			configuracao.setCodSentencaTotvs("API.PTO.001");
+		}
+		if (configuracao.getCodSistemaTotvs() == null || configuracao.getCodSistemaTotvs().trim().isEmpty()) {
+			configuracao.setCodSistemaTotvs("A");
 		}
 		if (configuracao.getDominios() == null) {
 			configuracao.setDominios(new java.util.ArrayList<DominioRhidEntity>());
@@ -219,12 +277,52 @@ public class RhidIntegracaoEJB extends BaseEJB implements RhidIntegracaoEJBRemot
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
 	@TransactionTimeout(unit = TimeUnit.HOURS, value = 2)
 	public RhidOperacaoResultDTO exportarRhidAutomatico() throws Exception {
-		ConfiguracaoRhidEntity config = carregarConfiguracaoRhid();
+		List<ConfiguracaoRhidEntity> configs = listarConfiguracoes();
+		RhidOperacaoResultDTO agregado = new RhidOperacaoResultDTO();
+		agregado.setCompleta(false);
+		boolean algumaAtiva = false;
+
+		for (ConfiguracaoRhidEntity config : configs) {
+			if (!Boolean.TRUE.equals(config.getExportacaoAutomatica())) {
+				continue;
+			}
+			algumaAtiva = true;
+			agregado.addMensagem("--- Configuração: " + config.getEmail() + " ---");
+			try {
+				agregado.absorver(exportarRhidAutomaticoPorId(config.getId()));
+			} catch (Exception e) {
+				agregado.incrementErros();
+				String msg = e.getMessage() != null ? e.getMessage() : "Erro inesperado";
+				agregado.addMensagem("Falha em " + config.getEmail() + ": " + msg);
+			}
+		}
+
+		if (!algumaAtiva) {
+			throw new IllegalStateException("Nenhuma configuração RHID com exportação automática ativa.");
+		}
+		return agregado;
+	}
+
+	@Override
+	@TransactionAttribute(TransactionAttributeType.REQUIRED)
+	@TransactionTimeout(unit = TimeUnit.HOURS, value = 2)
+	public RhidOperacaoResultDTO exportarRhidAutomaticoPorId(Long configId) throws Exception {
+		if (configId == null) {
+			throw new IllegalArgumentException("Informe a configuração RHID para exportação automática.");
+		}
+		ConfiguracaoRhidEntity config = carregarConfiguracaoPorId(configId);
 		if (config == null) {
 			throw new IllegalStateException("Configuração RHID não encontrada.");
 		}
-		boolean completa = config.getUltimaExportacao() == null;
-		return exportarRhid(completa);
+		if (!Boolean.TRUE.equals(config.getExportacaoAutomatica())) {
+			throw new IllegalStateException("Exportação automática desativada para: " + config.getEmail());
+		}
+		if (config.getUltimaExportacao() == null) {
+			throw new IllegalStateException(
+					"Importação completa pendente para " + config.getEmail()
+							+ ". Execute manualmente antes da rotina automática.");
+		}
+		return exportarRhidPorId(configId, false);
 	}
 
 	@Override
@@ -261,19 +359,23 @@ public class RhidIntegracaoEJB extends BaseEJB implements RhidIntegracaoEJBRemot
 		}
 
 		List<DominioRhidEntity> dominios = resolverDominios(config);
-		RhidFuncionarioFonte fonte = RhidFuncionarioFonteFactory.criarFonte();
+		RhidFuncionarioFonte fonte = RhidFuncionarioFonteFactory.criarFonte(config);
 		List<RhidFuncionarioExternoDTO> funcionarios = buscarFuncionariosExternos(fonte, completa,
 				config.getUltimaExportacao());
 		Map<String, Integer> mapaIds = RhidSincronizacaoControle.carregarMapa(config);
 
 		if (funcionarios == null || funcionarios.isEmpty()) {
-			resultado.addMensagem("Nenhum funcionário retornado pela API externa para exportação "
+			resultado.addMensagem("Nenhum funcionário retornado pela fonte externa para exportação "
 					+ (completa ? "completa" : "incremental") + ".");
-			atualizarUltimaExportacao(config.getId());
+			atualizarUltimaExportacao(config.getId(), funcionarios);
 			return resultado;
 		}
 
-		resultado.addMensagem("Fonte: mock (substituir por API externa quando disponível)");
+		if (config.getUrlTotvs() != null && !config.getUrlTotvs().trim().isEmpty()) {
+			resultado.addMensagem(descricaoConsultaTotvs(config, completa));
+		} else {
+			resultado.addMensagem("Fonte: mock (configure URL TOTVS na configuração para produção)");
+		}
 		resultado.addMensagem("Funcionários obtidos da API externa: " + funcionarios.size());
 		resultado.addMensagem("Domínios configurados: " + dominios.size()
 				+ " (roteamento por nomeDominio; sem domínio: "
@@ -372,7 +474,7 @@ public class RhidIntegracaoEJB extends BaseEJB implements RhidIntegracaoEJBRemot
 
 		salvarMapaIds(config.getId(), mapaIds);
 		if (resultado.getTotalErros() == 0) {
-			atualizarUltimaExportacao(config.getId());
+			atualizarUltimaExportacao(config.getId(), funcionarios);
 		} else {
 			resultado.addMensagem(
 					"ultimaExportacao não atualizada devido a erros — a próxima incremental reprocessará os pendentes.");
@@ -392,9 +494,12 @@ public class RhidIntegracaoEJB extends BaseEJB implements RhidIntegracaoEJBRemot
 		alteraObjeto(gerenciada);
 	}
 
-	private void atualizarUltimaExportacao(Long configId) throws Exception {
+	private void atualizarUltimaExportacao(Long configId, List<RhidFuncionarioExternoDTO> funcionarios) throws Exception {
 		ConfiguracaoRhidEntity gerenciada = carregarConfiguracaoPorId(configId);
-		gerenciada.setUltimaExportacao(new Date());
+		LocalDate maxAlteracao = RhidTotvsDataUtil.maxDataAlteracao(funcionarios);
+		// Maior DATAALTERACAO processada; se vazio, avança para hoje (rotina diária TOTVS).
+		LocalDate watermark = maxAlteracao != null ? maxAlteracao : LocalDate.now();
+		gerenciada.setUltimaExportacao(RhidTotvsDataUtil.toDateAtStartOfDay(watermark));
 		alteraObjeto(gerenciada);
 	}
 
@@ -412,6 +517,27 @@ public class RhidIntegracaoEJB extends BaseEJB implements RhidIntegracaoEJBRemot
 			throw new IllegalStateException("Informe ao menos um domínio RHID na configuração.");
 		}
 		return dominios;
+	}
+
+	private String descricaoConsultaTotvs(ConfiguracaoRhidEntity config, boolean completa) {
+		LocalDate dataIni;
+		int ativo;
+		if (completa) {
+			dataIni = RhidTotvsDataUtil.toLocalDate(config.getDataInicioCompleta());
+			if (dataIni == null) {
+				dataIni = LocalDate.of(2010, 1, 1);
+			}
+			ativo = 1;
+		} else {
+			dataIni = RhidTotvsDataUtil.calcularDataIniIncremental(config.getUltimaExportacao());
+			if (dataIni == null) {
+				dataIni = LocalDate.of(2010, 1, 1);
+			}
+			ativo = 0;
+		}
+		return "Fonte: TOTVS " + config.getCodSentencaTotvs() + " — DATA_INI="
+				+ RhidTotvsDataUtil.formatarDataIni(dataIni) + ", ATIVO=" + ativo
+				+ " (funcionários ativos na completa → todos os domínios)";
 	}
 
 	private List<RhidFuncionarioExternoDTO> buscarFuncionariosExternos(RhidFuncionarioFonte fonte, boolean completa,
