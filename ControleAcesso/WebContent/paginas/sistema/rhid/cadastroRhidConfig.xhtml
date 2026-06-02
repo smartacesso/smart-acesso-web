@@ -65,7 +65,7 @@
 
 		<ui:define name="conteudo">
 
-			<h:panelGroup id="painelCadastroRhid" layout="block">
+			<h:panelGroup id="painelCadastroRhid" layout="block" styleClass="sa-rhid-page">
 
 				<h:panelGroup id="painelDominios" layout="block">
 					<p:panel header="Domínios RHID (obrigatório)" styleClass="ui-fluid">
@@ -79,7 +79,7 @@
 									<p:inputText id="novoDominio" value="#{cadastroRhidConfigController.novoDominio}"
 										placeholder="Nome do domínio (ex: docintegracao)" />
 								</div>
-								<div class="ui-g-12 ui-md-4">
+								<div class="ui-g-12 ui-md-4 sa-field-col-btn">
 									<p:outputLabel value="&#160;" />
 									<p:commandButton id="btnAddDominio" value="#{msgs['alt.acao.adicionar']}"
 										action="#{cadastroRhidConfigController.adicionarDominio}"
@@ -91,7 +91,7 @@
 							</div>
 						</p:panel>
 
-						<p:outputPanel id="painelListaDominios" layout="block" style="margin-top: 1rem;">
+						<p:outputPanel id="painelListaDominios" layout="block" styleClass="sa-card-table" style="margin-top: 1rem;">
 							<ui:include src="/tema/templates/vazio.xhtml">
 								<ui:param name="exibe" value="#{not cadastroRhidConfigController.possuiDominios}" />
 								<ui:param name="exibeAdicionar" value="true" />
@@ -104,17 +104,17 @@
 								rendered="#{cadastroRhidConfigController.possuiDominios}"
 								styleClass="tabela-responsive sa-table">
 
-								<p:column headerText="Domínio" styleClass="sa-table-col-center">
+								<p:column headerText="Domínio" styleClass="align-left">
 									<h:outputText value="#{dom.nomeDominio}" />
 								</p:column>
 
-								<p:column headerText="#{msgs['alt.acao.excluir']}" styleClass="sa-table-col-actions" style="width: 80px;">
+								<p:column headerText="#{msgs['alt.acao.excluir']}" style="text-align: center; width: 5rem;">
 									<p:commandButton icon="pi pi-trash"
 										title="#{msgs['alt.acao.excluir']}"
 										actionListener="#{cadastroRhidConfigController.removerDominio(dom)}"
 										process="@this"
 										update="@form:painelListaDominios @form:saToolsContent"
-										styleClass="ui-button-danger ui-button-flat rounded-button" />
+										styleClass="rounded-button ui-button-danger ui-button-flat" />
 								</p:column>
 
 							</p:dataTable>
@@ -123,9 +123,9 @@
 				</h:panelGroup>
 
 				<p:panel header="Credenciais e parâmetros RHID" styleClass="ui-fluid" style="margin-top: 1.25rem;">
-					<p:outputPanel rendered="#{cadastroRhidConfigController.edicao}" style="margin-bottom: 1rem;">
-						<h:outputText value="Editando: #{cadastroRhidConfigController.configuracao.email}" style="font-weight: 600; margin-right: 1.25rem;" />
-						<h:outputText value="Última exportação: #{cadastroRhidConfigController.ultimaExportacaoFormatada}" />
+					<p:outputPanel rendered="#{cadastroRhidConfigController.edicao}" styleClass="sa-rhid-meta">
+						<span class="sa-rhid-meta__item"><strong>E-mail:</strong> #{cadastroRhidConfigController.configuracao.email}</span>
+						<span class="sa-rhid-meta__item"><strong>Última exportação:</strong> #{cadastroRhidConfigController.ultimaExportacaoFormatada}</span>
 					</p:outputPanel>
 
 					<div class="form-grid sa-cadastro-grid ui-fluid ui-g">
@@ -151,9 +151,10 @@
 						</div>
 						<div class="ui-g-12 ui-md-3">
 							<p:outputLabel value="Exportação automática" for="auto" />
-							<p:selectBooleanCheckbox id="auto" value="#{cadastroRhidConfigController.configuracao.exportacaoAutomatica}" />
-							<h:outputText value="Pode ser marcada agora; a rotina diária só será agendada após a primeira importação completa bem-sucedida."
-								styleClass="sa-hint-text" />
+							<h:panelGroup layout="block" styleClass="sa-field-row">
+								<p:selectBooleanCheckbox id="auto" value="#{cadastroRhidConfigController.configuracao.exportacaoAutomatica}" />
+								<h:outputText value="Ativar rotina diária após a 1ª importação completa bem-sucedida." styleClass="sa-hint-text" />
+							</h:panelGroup>
 						</div>
 						<div class="ui-g-12 ui-md-6">
 							<p:outputLabel value="Funcionário sem nomeDominio" for="semDominioAcao" />
@@ -212,32 +213,34 @@
 						styleClass="sa-hint-text" style="display: block;"
 						rendered="#{cadastroRhidConfigController.ultimoResultado == null}" />
 					<p:outputPanel rendered="#{cadastroRhidConfigController.ultimoResultado != null}">
-						<div class="form-grid sa-cadastro-grid ui-fluid ui-g">
-							<div class="ui-g-12 ui-md-4">
-								<p:outputLabel value="Modo" />
-								<h:outputText value="#{cadastroRhidConfigController.ultimoResultado.completa ? 'Completa' : 'Incremental'}" />
+						<div class="sa-rhid-resultado-stats">
+							<div class="sa-rhid-stat">
+								<span class="sa-rhid-stat__label">Modo</span>
+								<span class="sa-rhid-stat__value">#{cadastroRhidConfigController.ultimoResultado.completa ? 'Completa' : 'Incremental'}</span>
 							</div>
-							<div class="ui-g-12 ui-md-2">
-								<p:outputLabel value="Processados" />
-								<h:outputText value="#{cadastroRhidConfigController.ultimoResultado.totalProcessados}" />
+							<div class="sa-rhid-stat">
+								<span class="sa-rhid-stat__label">Processados</span>
+								<span class="sa-rhid-stat__value">#{cadastroRhidConfigController.ultimoResultado.totalProcessados}</span>
 							</div>
-							<div class="ui-g-12 ui-md-2">
-								<p:outputLabel value="Criados" />
-								<h:outputText value="#{cadastroRhidConfigController.ultimoResultado.totalCriados}" />
+							<div class="sa-rhid-stat">
+								<span class="sa-rhid-stat__label">Criados</span>
+								<span class="sa-rhid-stat__value">#{cadastroRhidConfigController.ultimoResultado.totalCriados}</span>
 							</div>
-							<div class="ui-g-12 ui-md-2">
-								<p:outputLabel value="Atualizados" />
-								<h:outputText value="#{cadastroRhidConfigController.ultimoResultado.totalAtualizados}" />
+							<div class="sa-rhid-stat">
+								<span class="sa-rhid-stat__label">Atualizados</span>
+								<span class="sa-rhid-stat__value">#{cadastroRhidConfigController.ultimoResultado.totalAtualizados}</span>
 							</div>
-							<div class="ui-g-12 ui-md-2">
-								<p:outputLabel value="Erros" />
-								<h:outputText value="#{cadastroRhidConfigController.ultimoResultado.totalErros}" />
+							<div class="sa-rhid-stat sa-rhid-stat--erro">
+								<span class="sa-rhid-stat__label">Erros</span>
+								<span class="sa-rhid-stat__value">#{cadastroRhidConfigController.ultimoResultado.totalErros}</span>
 							</div>
 						</div>
-						<p:dataList value="#{cadastroRhidConfigController.ultimoResultado.mensagens}" var="msg"
-							type="unordered" style="margin-top: 1rem;">
-							<h:outputText value="#{msg}" style="display: block; margin-bottom: 0.35rem;" />
-						</p:dataList>
+						<div class="sa-rhid-log">
+							<p:dataList value="#{cadastroRhidConfigController.ultimoResultado.mensagens}" var="msg"
+								type="unordered">
+								<h:outputText value="#{msg}" />
+							</p:dataList>
+						</div>
 					</p:outputPanel>
 				</p:panel>
 

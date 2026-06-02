@@ -62,7 +62,7 @@
 
 		<ui:define name="conteudo">
 
-			<p:outputPanel styleClass="p-grid">
+			<p:outputPanel styleClass="p-grid sa-rhid-page">
 				<p:outputPanel styleClass="p-col-12">
 
 					<ui:include src="/tema/templates/vazio.xhtml">
@@ -77,53 +77,46 @@
 						emptyMessage="Nenhuma configuração cadastrada."
 						styleClass="tabela-responsive sa-table">
 
-						<p:column headerText="E-mail" styleClass="sa-table-col-center">
+						<p:column headerText="E-mail" styleClass="align-left sa-table-col-name">
 							<h:outputText value="#{cfg.email}" />
 						</p:column>
 
-						<p:column headerText="Domínios" styleClass="sa-table-col-center">
+						<p:column headerText="Domínios" styleClass="align-left">
 							<h:outputText value="#{consultaRhidConfigController.formatarDominios(cfg)}" />
 						</p:column>
 
-						<p:column headerText="Última exportação" styleClass="sa-table-col-center">
+						<p:column headerText="Última exportação" styleClass="align-left col-desktop-only">
 							<h:outputText value="#{consultaRhidConfigController.formatarUltimaExportacao(cfg.ultimaExportacao)}" />
 						</p:column>
 
-						<p:column headerText="Automática" styleClass="sa-table-col-center" style="width: 100px;">
+						<p:column headerText="Automática" styleClass="align-left" style="width: 6.5rem;">
 							<h:outputText value="#{cfg.exportacaoAutomatica ? 'Sim' : 'Não'}" />
 						</p:column>
 
-						<p:column headerText="#{msgs['alt.acao.editar']}" styleClass="sa-table-col-edit" style="width: 80px;">
-							<p:commandButton icon="pi pi-pencil"
-								title="#{msgs['alt.acao.editar']}"
-								action="#{consultaRhidConfigController.editar(cfg.id)}"
-								styleClass="ui-button-info ui-button-flat rounded-button" />
-						</p:column>
-
-						<p:column headerText="Importação" styleClass="sa-table-col-actions" style="width: 220px;">
+						<p:column headerText="Ações" exportable="false"
+							styleClass="sa-table-col-actions sa-table-col-actions--multi">
 							<h:panelGroup styleClass="sa-table-actions">
+								<p:commandButton icon="pi pi-pencil"
+									title="#{msgs['alt.acao.editar']}"
+									action="#{consultaRhidConfigController.editar(cfg.id)}"
+									styleClass="rounded-button ui-button-info ui-button-flat" />
 								<p:commandButton icon="pi pi-cloud-upload"
 									title="Importação completa"
 									actionListener="#{consultaRhidConfigController.executarImportacaoCompletaConfig(cfg.id)}"
-									styleClass="ui-button-warning ui-button-flat rounded-button"
+									styleClass="rounded-button ui-button-warning ui-button-flat"
 									process="@this"
 									update="@form:painelResultadoImportacao @form:tabelaConfigs"
 									disabled="#{consultaRhidConfigController.processando}" />
 								<p:commandButton icon="pi pi-sync"
 									title="Importação incremental"
 									actionListener="#{consultaRhidConfigController.executarImportacaoIncrementalConfig(cfg.id)}"
-									styleClass="ui-button-flat rounded-button"
+									styleClass="rounded-button ui-button-flat"
 									process="@this"
 									update="@form:painelResultadoImportacao @form:tabelaConfigs"
 									disabled="#{consultaRhidConfigController.processando}" />
-							</h:panelGroup>
-						</p:column>
-
-						<p:column headerText="#{msgs['alt.acao.excluir']}" styleClass="sa-table-col-actions" style="width: 80px;">
-							<h:panelGroup styleClass="sa-table-actions">
 								<p:commandButton icon="pi pi-trash"
 									title="#{msgs['alt.acao.excluir']}"
-									styleClass="ui-button-danger ui-button-flat rounded-button">
+									styleClass="rounded-button ui-button-danger ui-button-flat">
 									<f:setPropertyActionListener value="#{cfg.id}"
 										target="#{consultaRhidConfigController.configIdParaExclusao}" />
 									<p:ajax process="@this" update="@none"
@@ -140,32 +133,34 @@
 							styleClass="sa-hint-text" style="display: block;"
 							rendered="#{consultaRhidConfigController.ultimoResultado == null}" />
 						<p:outputPanel rendered="#{consultaRhidConfigController.ultimoResultado != null}">
-							<div class="form-grid sa-cadastro-grid ui-fluid ui-g">
-								<div class="ui-g-12 ui-md-4">
-									<p:outputLabel value="Modo" />
-									<h:outputText value="#{consultaRhidConfigController.ultimoResultado.completa ? 'Completa' : 'Incremental'}" />
+							<div class="sa-rhid-resultado-stats">
+								<div class="sa-rhid-stat">
+									<span class="sa-rhid-stat__label">Modo</span>
+									<span class="sa-rhid-stat__value">#{consultaRhidConfigController.ultimoResultado.completa ? 'Completa' : 'Incremental'}</span>
 								</div>
-								<div class="ui-g-12 ui-md-2">
-									<p:outputLabel value="Processados" />
-									<h:outputText value="#{consultaRhidConfigController.ultimoResultado.totalProcessados}" />
+								<div class="sa-rhid-stat">
+									<span class="sa-rhid-stat__label">Processados</span>
+									<span class="sa-rhid-stat__value">#{consultaRhidConfigController.ultimoResultado.totalProcessados}</span>
 								</div>
-								<div class="ui-g-12 ui-md-2">
-									<p:outputLabel value="Criados" />
-									<h:outputText value="#{consultaRhidConfigController.ultimoResultado.totalCriados}" />
+								<div class="sa-rhid-stat">
+									<span class="sa-rhid-stat__label">Criados</span>
+									<span class="sa-rhid-stat__value">#{consultaRhidConfigController.ultimoResultado.totalCriados}</span>
 								</div>
-								<div class="ui-g-12 ui-md-2">
-									<p:outputLabel value="Atualizados" />
-									<h:outputText value="#{consultaRhidConfigController.ultimoResultado.totalAtualizados}" />
+								<div class="sa-rhid-stat">
+									<span class="sa-rhid-stat__label">Atualizados</span>
+									<span class="sa-rhid-stat__value">#{consultaRhidConfigController.ultimoResultado.totalAtualizados}</span>
 								</div>
-								<div class="ui-g-12 ui-md-2">
-									<p:outputLabel value="Erros" />
-									<h:outputText value="#{consultaRhidConfigController.ultimoResultado.totalErros}" />
+								<div class="sa-rhid-stat sa-rhid-stat--erro">
+									<span class="sa-rhid-stat__label">Erros</span>
+									<span class="sa-rhid-stat__value">#{consultaRhidConfigController.ultimoResultado.totalErros}</span>
 								</div>
 							</div>
-							<p:dataList value="#{consultaRhidConfigController.ultimoResultado.mensagens}" var="msg"
-								type="unordered" style="margin-top: 1rem;">
-								<h:outputText value="#{msg}" style="display: block; margin-bottom: 0.35rem;" />
-							</p:dataList>
+							<div class="sa-rhid-log">
+								<p:dataList value="#{consultaRhidConfigController.ultimoResultado.mensagens}" var="msg"
+									type="unordered">
+									<h:outputText value="#{msg}" />
+								</p:dataList>
+							</div>
 						</p:outputPanel>
 					</p:panel>
 
@@ -178,9 +173,11 @@
 				message="Tem certeza que deseja excluir esta configuração RHID?"
 				styleClass="sa-dialog">
 
-				<p:button value="Não" onclick="PF('confirmarExclusaoRhid').hide(); return false;"
+				<p:button value="Não" icon="pi pi-times" iconPos="left"
+					onclick="PF('confirmarExclusaoRhid').hide(); return false;"
 					styleClass="sa-btn-label ui-button-flat" />
-				<p:commandButton value="Sim" oncomplete="PF('confirmarExclusaoRhid').hide();"
+				<p:commandButton value="Sim" icon="pi pi-check" iconPos="left"
+					oncomplete="PF('confirmarExclusaoRhid').hide();"
 					action="#{consultaRhidConfigController.excluirConfiguracaoConfirmada}"
 					process="@this" update="@form"
 					styleClass="sa-btn-label ui-button-success" />
