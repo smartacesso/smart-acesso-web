@@ -61,7 +61,6 @@ public class RhidIntegracaoEJB extends BaseEJB implements RhidIntegracaoEJBRemot
 
 		Long idSalvo;
 		if (configuracao.getId() == null) {
-			validarExportacaoAutomatica(configuracao, null);
 			Object[] retorno = gravaObjeto(configuracao);
 			idSalvo = ((ConfiguracaoRhidEntity) retorno[0]).getId();
 		} else {
@@ -70,7 +69,6 @@ public class RhidIntegracaoEJB extends BaseEJB implements RhidIntegracaoEJBRemot
 			if (configuracao.getSenhaTotvs() == null || configuracao.getSenhaTotvs().trim().isEmpty()) {
 				configuracao.setSenhaTotvs(gerenciada.getSenhaTotvs());
 			}
-			validarExportacaoAutomatica(configuracao, gerenciada);
 			aplicarCamposConfiguracao(configuracao, gerenciada);
 			sincronizarDominios(gerenciada, configuracao.getDominios());
 			alteraObjeto(gerenciada);
@@ -164,20 +162,6 @@ public class RhidIntegracaoEJB extends BaseEJB implements RhidIntegracaoEJBRemot
 			dominio.setNomeDominio(domOrigem.getNomeDominio());
 			dominio.setConfiguracao(configuracao);
 			configuracao.getDominios().add(dominio);
-		}
-	}
-
-	private void validarExportacaoAutomatica(ConfiguracaoRhidEntity configuracao, ConfiguracaoRhidEntity existente) {
-		if (!Boolean.TRUE.equals(configuracao.getExportacaoAutomatica())) {
-			return;
-		}
-		Date ultima = configuracao.getUltimaExportacao();
-		if (ultima == null && existente != null) {
-			ultima = existente.getUltimaExportacao();
-		}
-		if (ultima == null) {
-			throw new IllegalArgumentException(
-					"Execute a importação completa antes de ativar a exportação automática.");
 		}
 	}
 

@@ -1,0 +1,251 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui">
+
+<body>
+	<f:metadata>
+		<f:event type="preRenderView"
+			listener="#{cadastroRhidConfigController.exibeMensagens}" />
+	</f:metadata>
+
+	<ui:composition template="/tema/templates/template.xhtml">
+
+		<ui:define name="titulo">
+			#{msgs['title.sistema']} | #{cadastroRhidConfigController.edicao ? 'Editar configuração RHID' : 'Nova configuração RHID'}
+		</ui:define>
+
+		<ui:define name="pageTitle">
+			<h:outputText value="#{cadastroRhidConfigController.edicao ? 'Editar configuração RHID' : 'Nova configuração RHID'}" />
+		</ui:define>
+
+		<ui:define name="pageSubtitle">
+			<h:outputText value="#{sessionScope.usuario.cliente.nome}" rendered="#{sessionScope.usuario != null}" />
+		</ui:define>
+
+		<ui:define name="tools">
+			<p:toolbar styleClass="sa-toolbar-wrap">
+				<p:toolbarGroup styleClass="sa-toolbar-actions">
+					<ui:include src="/WEB-INF/template/sa-voltar-lista.xhtml">
+						<ui:param name="ctrl" value="#{cadastroRhidConfigController}" />
+					</ui:include>
+					<p:commandButton id="save"
+						action="#{cadastroRhidConfigController.salvar}"
+						value="#{msgs['alt.acao.save']}"
+						title="#{msgs['alt.acao.save']}"
+						icon="pi pi-check" iconPos="left"
+						styleClass="sa-btn-label ui-button-success"
+						disabled="#{not cadastroRhidConfigController.podeSalvarConfig}">
+						<p:ajax process="@form" update="@form" />
+					</p:commandButton>
+					<p:commandButton id="acaoImportacaoCompleta"
+						actionListener="#{cadastroRhidConfigController.executarImportacaoCompleta}"
+						value="Importação completa"
+						title="Importação completa da configuração em edição"
+						icon="pi pi-cloud-upload" iconPos="left"
+						styleClass="sa-btn-label ui-button-warning"
+						process="@this"
+						update="@form:painelResultadoImportacao @form:saToolsContent"
+						disabled="#{cadastroRhidConfigController.processando or not cadastroRhidConfigController.edicao}" />
+					<p:commandButton id="acaoImportacaoIncremental"
+						actionListener="#{cadastroRhidConfigController.executarImportacaoIncremental}"
+						value="Importação incremental"
+						title="Importação incremental da configuração em edição"
+						icon="pi pi-sync" iconPos="left"
+						styleClass="sa-btn-label"
+						process="@this"
+						update="@form:painelResultadoImportacao @form:saToolsContent"
+						disabled="#{cadastroRhidConfigController.processando or not cadastroRhidConfigController.edicao}" />
+				</p:toolbarGroup>
+			</p:toolbar>
+		</ui:define>
+
+		<ui:define name="conteudo">
+
+			<h:panelGroup id="painelCadastroRhid" layout="block">
+
+				<h:panelGroup id="painelDominios" layout="block">
+					<p:panel header="Domínios RHID (obrigatório)" styleClass="ui-fluid">
+						<h:outputText value="O login na API RHID exige o parâmetro domain. Adicione ao menos um domínio antes de salvar."
+							styleClass="sa-hint-text" style="display: block; margin-bottom: 1rem;" />
+
+						<p:panel id="painelAddDominio" header="Incluir domínio" styleClass="ui-fluid">
+							<div class="form-grid sa-cadastro-grid ui-fluid ui-g">
+								<div class="ui-g-12 ui-md-8">
+									<p:outputLabel value="Domínio" for="novoDominio" />
+									<p:inputText id="novoDominio" value="#{cadastroRhidConfigController.novoDominio}"
+										placeholder="Nome do domínio (ex: docintegracao)" />
+								</div>
+								<div class="ui-g-12 ui-md-4">
+									<p:outputLabel value="&#160;" />
+									<p:commandButton id="btnAddDominio" value="#{msgs['alt.acao.adicionar']}"
+										action="#{cadastroRhidConfigController.adicionarDominio}"
+										icon="pi pi-plus" iconPos="left"
+										process="@form:painelAddDominio"
+										update="@form:painelAddDominio @form:painelListaDominios @form:saToolsContent"
+										styleClass="sa-btn-label ui-button-success w-full" />
+								</div>
+							</div>
+						</p:panel>
+
+						<p:outputPanel id="painelListaDominios" layout="block" style="margin-top: 1rem;">
+							<ui:include src="/tema/templates/vazio.xhtml">
+								<ui:param name="exibe" value="#{not cadastroRhidConfigController.possuiDominios}" />
+								<ui:param name="exibeAdicionar" value="true" />
+								<ui:param name="msgEspecifica" value="Nenhum domínio cadastrado. Adicione ao menos um domínio para habilitar o salvamento." />
+							</ui:include>
+
+							<p:dataTable id="tabelaDominios"
+								value="#{cadastroRhidConfigController.configuracao.dominios}" var="dom"
+								rowKey="#{dom.nomeDominio}"
+								rendered="#{cadastroRhidConfigController.possuiDominios}"
+								styleClass="tabela-responsive sa-table">
+
+								<p:column headerText="Domínio" styleClass="sa-table-col-center">
+									<h:outputText value="#{dom.nomeDominio}" />
+								</p:column>
+
+								<p:column headerText="#{msgs['alt.acao.excluir']}" styleClass="sa-table-col-actions" style="width: 80px;">
+									<p:commandButton icon="pi pi-trash"
+										title="#{msgs['alt.acao.excluir']}"
+										actionListener="#{cadastroRhidConfigController.removerDominio(dom)}"
+										process="@this"
+										update="@form:painelListaDominios @form:saToolsContent"
+										styleClass="ui-button-danger ui-button-flat rounded-button" />
+								</p:column>
+
+							</p:dataTable>
+						</p:outputPanel>
+					</p:panel>
+				</h:panelGroup>
+
+				<p:panel header="Credenciais e parâmetros RHID" styleClass="ui-fluid" style="margin-top: 1.25rem;">
+					<p:outputPanel rendered="#{cadastroRhidConfigController.edicao}" style="margin-bottom: 1rem;">
+						<h:outputText value="Editando: #{cadastroRhidConfigController.configuracao.email}" style="font-weight: 600; margin-right: 1.25rem;" />
+						<h:outputText value="Última exportação: #{cadastroRhidConfigController.ultimaExportacaoFormatada}" />
+					</p:outputPanel>
+
+					<div class="form-grid sa-cadastro-grid ui-fluid ui-g">
+						<div class="ui-g-12 ui-md-4">
+							<p:outputLabel value="E-mail" for="emailGlobal" />
+							<p:inputText id="emailGlobal" value="#{cadastroRhidConfigController.configuracao.email}" />
+							<h:outputText value="Apenas uma configuração por e-mail." styleClass="sa-hint-text" />
+						</div>
+						<div class="ui-g-12 ui-md-4">
+							<p:outputLabel value="Senha" for="senhaGlobal" />
+							<p:password id="senhaGlobal" value="#{cadastroRhidConfigController.configuracao.senha}" redisplay="true" />
+						</div>
+						<div class="ui-g-12 ui-md-4">
+							<p:outputLabel value="URL base" for="urlBase" />
+							<p:inputText id="urlBase" value="#{cadastroRhidConfigController.configuracao.urlBase}" />
+						</div>
+						<div class="ui-g-12 ui-md-3">
+							<p:outputLabel value="Hora execução diária (0-23)" for="horaExec" />
+							<p:inputNumber id="horaExec" value="#{cadastroRhidConfigController.configuracao.horaExecucaoAutomatica}"
+								decimalPlaces="0" minValue="0" maxValue="23" />
+							<h:outputText value="Padrão 22h (após processamento da folha). Cada configuração com automática ativa recebe timer próprio."
+								styleClass="sa-hint-text" />
+						</div>
+						<div class="ui-g-12 ui-md-3">
+							<p:outputLabel value="Exportação automática" for="auto" />
+							<p:selectBooleanCheckbox id="auto" value="#{cadastroRhidConfigController.configuracao.exportacaoAutomatica}" />
+							<h:outputText value="Pode ser marcada agora; a rotina diária só será agendada após a primeira importação completa bem-sucedida."
+								styleClass="sa-hint-text" />
+						</div>
+						<div class="ui-g-12 ui-md-6">
+							<p:outputLabel value="Funcionário sem nomeDominio" for="semDominioAcao" />
+							<p:selectOneMenu id="semDominioAcao" value="#{cadastroRhidConfigController.configuracao.semDominioAcao}">
+								<f:selectItems value="#{cadastroRhidConfigController.semDominioAcaoOpcoes}"
+									var="opcao" itemLabel="#{opcao.label}" itemValue="#{opcao}" />
+							</p:selectOneMenu>
+							<h:outputText value="TOTVS não envia nomeDominio por funcionário — use &quot;Enviar para todos os domínios&quot; (ativos vão para cada domínio cadastrado)."
+								styleClass="sa-hint-text" />
+						</div>
+					</div>
+				</p:panel>
+
+				<p:panel header="Fonte TOTVS (wsConsultaSQL)" styleClass="ui-fluid" style="margin-top: 1.25rem;">
+					<h:outputText value="Consulta API.PTO.001 — completa (ATIVO=1) traz só ativos; incremental (ATIVO=0) traz alterações e inativos desde DATA_INI=ultimaExportacao (filtro só por dia — rotina recomendada 1x/dia)."
+						styleClass="sa-hint-text" style="display: block; margin-bottom: 1rem;" />
+
+					<div class="form-grid sa-cadastro-grid ui-fluid ui-g">
+						<div class="ui-g-12 ui-md-6">
+							<p:outputLabel value="URL wsConsultaSQL" for="urlTotvs" />
+							<p:inputText id="urlTotvs" value="#{cadastroRhidConfigController.configuracao.urlTotvs}"
+								placeholder="http://host:8051/wsConsultaSQL/IwsConsultaSQL" />
+						</div>
+						<div class="ui-g-12 ui-md-3">
+							<p:outputLabel value="Usuário TOTVS" for="usuarioTotvs" />
+							<p:inputText id="usuarioTotvs" value="#{cadastroRhidConfigController.configuracao.usuarioTotvs}" />
+						</div>
+						<div class="ui-g-12 ui-md-3">
+							<p:outputLabel value="Senha TOTVS" for="senhaTotvs" />
+							<p:password id="senhaTotvs" value="#{cadastroRhidConfigController.configuracao.senhaTotvs}" redisplay="true" />
+						</div>
+						<div class="ui-g-12 ui-md-2">
+							<p:outputLabel value="Coligada" for="codColigada" />
+							<p:inputText id="codColigada" value="#{cadastroRhidConfigController.configuracao.codColigadaTotvs}" />
+						</div>
+						<div class="ui-g-12 ui-md-3">
+							<p:outputLabel value="Sentença SQL" for="codSentenca" />
+							<p:inputText id="codSentenca" value="#{cadastroRhidConfigController.configuracao.codSentencaTotvs}" />
+						</div>
+						<div class="ui-g-12 ui-md-2">
+							<p:outputLabel value="Sistema" for="codSistema" />
+							<p:inputText id="codSistema" value="#{cadastroRhidConfigController.configuracao.codSistemaTotvs}" />
+						</div>
+						<div class="ui-g-12 ui-md-3">
+							<p:outputLabel value="Data início carga completa" for="dataInicioCompleta" />
+							<p:calendar id="dataInicioCompleta" value="#{cadastroRhidConfigController.configuracao.dataInicioCompleta}"
+								pattern="dd/MM/yyyy" mask="99/99/9999" navigator="true" showIcon="true" locale="pt_BR" />
+							<h:outputText value="DATA_INI da 1ª importação (somente ativos)." styleClass="sa-hint-text" />
+						</div>
+					</div>
+				</p:panel>
+
+				<p:panel id="painelResultadoImportacao" header="Resultado da última importação"
+					styleClass="ui-fluid" style="margin-top: 1.25rem;">
+					<h:outputText value="Execute uma importação completa ou incremental para ver o detalhamento dos processamentos e erros."
+						styleClass="sa-hint-text" style="display: block;"
+						rendered="#{cadastroRhidConfigController.ultimoResultado == null}" />
+					<p:outputPanel rendered="#{cadastroRhidConfigController.ultimoResultado != null}">
+						<div class="form-grid sa-cadastro-grid ui-fluid ui-g">
+							<div class="ui-g-12 ui-md-4">
+								<p:outputLabel value="Modo" />
+								<h:outputText value="#{cadastroRhidConfigController.ultimoResultado.completa ? 'Completa' : 'Incremental'}" />
+							</div>
+							<div class="ui-g-12 ui-md-2">
+								<p:outputLabel value="Processados" />
+								<h:outputText value="#{cadastroRhidConfigController.ultimoResultado.totalProcessados}" />
+							</div>
+							<div class="ui-g-12 ui-md-2">
+								<p:outputLabel value="Criados" />
+								<h:outputText value="#{cadastroRhidConfigController.ultimoResultado.totalCriados}" />
+							</div>
+							<div class="ui-g-12 ui-md-2">
+								<p:outputLabel value="Atualizados" />
+								<h:outputText value="#{cadastroRhidConfigController.ultimoResultado.totalAtualizados}" />
+							</div>
+							<div class="ui-g-12 ui-md-2">
+								<p:outputLabel value="Erros" />
+								<h:outputText value="#{cadastroRhidConfigController.ultimoResultado.totalErros}" />
+							</div>
+						</div>
+						<p:dataList value="#{cadastroRhidConfigController.ultimoResultado.mensagens}" var="msg"
+							type="unordered" style="margin-top: 1rem;">
+							<h:outputText value="#{msg}" style="display: block; margin-bottom: 0.35rem;" />
+						</p:dataList>
+					</p:outputPanel>
+				</p:panel>
+
+			</h:panelGroup>
+
+		</ui:define>
+
+	</ui:composition>
+
+</body>
+</html>
