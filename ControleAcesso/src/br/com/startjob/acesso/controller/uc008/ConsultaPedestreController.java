@@ -47,7 +47,7 @@ import br.com.startjob.acesso.service.CadastroFacialLinkService;
 @Named("consultaPedestreController")
 @ViewScoped
 @UseCase(classEntidade=PedestreEntity.class, funcionalidade="Consulta pedestres", logicalRemove = true, 
-		urlNovoRegistro="/paginas/sistema/pedestres/cadastroPedestre.xhtml", lazyLoad = true, quantPorPagina = 12)
+		urlNovoRegistro="/paginas/sistema/pedestres/cadastroPedestre.xhtml", lazyLoad = true, quantPorPagina = 10)
 public class ConsultaPedestreController extends BaseController {
 
 	private static final long serialVersionUID = 1L;
