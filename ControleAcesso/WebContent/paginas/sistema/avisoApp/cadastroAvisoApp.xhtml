@@ -44,72 +44,116 @@
 
 		<ui:define name="conteudo">
 
-			<p:accordionPanel id="cadastroAvisoTab" styleClass="sa-accordion" activeIndex="0" multiple="true">
+			<h:inputHidden id="avisoIdUpload" value="#{cadastroAvisoAppController.avisoIdUpload}" />
 
-				<p:tab title="Conteúdo do aviso">
-					<p:panel header="Texto do comunicado" styleClass="ui-fluid">
-						<div class="form-grid sa-cadastro-grid ui-fluid ui-g">
-							<div class="ui-g-12 ui-md-8">
-								<p:outputLabel value="Título:" for="titulo" indicateRequired="true" />
-								<p:inputText id="titulo" value="#{cadastroAvisoAppController.entidade.titulo}"
-									required="true" maxlength="255" placeholder="Título exibido no app" />
-							</div>
-							<div class="ui-g-12 ui-md-4">
-								<p:outputLabel value="Data de publicação:" for="dataPub" indicateRequired="true" />
-								<p:calendar id="dataPub" value="#{cadastroAvisoAppController.entidade.dataPublicacao}"
-									pattern="dd/MM/yyyy HH:mm" showTime="true" hourFormat="24" required="true"
-									showIcon="true" />
-							</div>
-							<div class="ui-g-12">
-								<p:outputLabel value="Descrição:" for="descricao" />
-								<p:inputTextarea id="descricao" value="#{cadastroAvisoAppController.entidade.descricao}"
-									rows="6" autoResize="false" maxlength="2000"
-									placeholder="Texto completo do aviso para o morador" />
-							</div>
-						</div>
-					</p:panel>
-				</p:tab>
+			<p:remoteCommand name="rcAvisoImagemCarregada"
+				action="#{cadastroAvisoAppController.onImagemCarregadaExterna}"
+				update="form:barraImagemAviso form:painelPreviewAviso form:growl"
+				onstart="if (typeof PF === 'function' &amp;&amp; PF('statusDialog')) PF('statusDialog').show();"
+				oncomplete="if (typeof PF === 'function' &amp;&amp; PF('statusDialog')) PF('statusDialog').hide();" />
 
-				<p:tab title="Imagem (opcional)">
-					<p:panel header="Imagem do aviso" styleClass="ui-fluid">
-						<h:outputText value="JPG ou PNG, até 3 MB. O envio é automático ao escolher o arquivo; depois clique em Salvar no topo."
-							styleClass="sa-hint-text" style="display: block; margin-bottom: 1rem;" />
-						<div class="form-grid sa-cadastro-grid ui-fluid ui-g">
-							<div class="ui-g-12">
-								<h:panelGroup id="barraImagemAviso" layout="block" styleClass="sa-upload-row sa-aviso-upload-row">
-									<p:fileUpload id="uploadImagemAviso"
-										listener="#{cadastroAvisoAppController.onImagemUpload}"
-										mode="simple" skinSimple="true" auto="true" multiple="false" fileLimit="1"
-										label="Escolher imagem"
-										sizeLimit="3145728" allowTypes="/(\.|\/)(jpe?g|png)$/"
-										invalidFileMessage="Use apenas JPG ou PNG (máx. 3 MB)."
-										styleClass="sa-aviso-fileupload"
-										update="form:cadastroAvisoTab:painelPreviewAviso form:cadastroAvisoTab:barraImagemAviso form:growl"
-										onstart="PF('statusDialog').show(); return true;"
-										oncomplete="PF('statusDialog').hide();" />
-									<p:commandButton value="Remover imagem" icon="pi pi-times"
-										action="#{cadastroAvisoAppController.removerImagem}"
-										process="@this"
-										update="form:cadastroAvisoTab:painelPreviewAviso form:cadastroAvisoTab:barraImagemAviso form:growl"
-										rendered="#{cadastroAvisoAppController.temImagemCadastrada}"
-										styleClass="sa-btn-label ui-button-outlined ui-button-secondary" />
-								</h:panelGroup>
-								<p:outputPanel id="painelPreviewAviso" layout="block" styleClass="sa-aviso-preview" style="margin-top: 1rem;">
-									<h:outputText value="Nenhuma imagem anexada."
-										rendered="#{not cadastroAvisoAppController.temImagemCadastrada}"
-										styleClass="sa-photo-capture__empty" />
-									<h:panelGroup layout="block" rendered="#{cadastroAvisoAppController.temImagemCadastrada}">
-										<img src="#{cadastroAvisoAppController.imagemPreviewDataUrl}"
-											alt="Pré-visualização" class="sa-aviso-preview__img" />
-									</h:panelGroup>
-								</p:outputPanel>
-							</div>
-						</div>
-					</p:panel>
-				</p:tab>
+			<p:panel header="Texto do comunicado" styleClass="ui-fluid sa-accordion" style="margin-bottom: 1rem;">
+				<div class="form-grid sa-cadastro-grid ui-fluid ui-g">
+					<div class="ui-g-12 ui-md-8">
+						<p:outputLabel value="Título:" for="titulo" indicateRequired="true" />
+						<p:inputText id="titulo" value="#{cadastroAvisoAppController.entidade.titulo}"
+							required="true" maxlength="255" placeholder="Título exibido no app" />
+					</div>
+					<div class="ui-g-12 ui-md-4">
+						<p:outputLabel value="Data de publicação:" for="dataPub" indicateRequired="true" />
+						<p:calendar id="dataPub" value="#{cadastroAvisoAppController.entidade.dataPublicacao}"
+							pattern="dd/MM/yyyy HH:mm" showTime="true" hourFormat="24" required="true"
+							showIcon="true" />
+					</div>
+					<div class="ui-g-12">
+						<p:outputLabel value="Descrição:" for="descricao" />
+						<p:inputTextarea id="descricao" value="#{cadastroAvisoAppController.entidade.descricao}"
+							rows="6" autoResize="false" maxlength="2000"
+							placeholder="Texto completo do aviso para o morador" />
+					</div>
+				</div>
+			</p:panel>
 
-			</p:accordionPanel>
+			<p:panel header="Imagem do aviso (opcional)" styleClass="ui-fluid">
+				<h:outputText value="JPG ou PNG, até 3 MB. Ao selecionar o arquivo o anexo é enviado automaticamente; depois clique em Salvar no topo."
+					styleClass="sa-hint-text" style="display: block; margin-bottom: 1rem;" />
+				<div class="form-grid sa-cadastro-grid ui-fluid ui-g">
+					<div class="ui-g-12">
+						<h:panelGroup id="barraImagemAviso" layout="block" styleClass="sa-upload-row">
+							<label class="sa-btn-label ui-button ui-widget ui-state-default ui-corner-all ui-button-outlined"
+								style="cursor: pointer; display: inline-flex; align-items: center; gap: 0.35rem; margin: 0;">
+								<i class="pi pi-upload" aria-hidden="true"></i>
+								<span>Escolher imagem</span>
+								<input type="file" accept="image/jpeg,image/png,.jpg,.jpeg,.png"
+									onchange="saUploadImagemAvisoArquivo(this);"
+									style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0;" />
+							</label>
+							<p:commandButton value="Remover imagem" icon="pi pi-times"
+								action="#{cadastroAvisoAppController.removerImagem}"
+								process="@this"
+								update="form:barraImagemAviso form:painelPreviewAviso form:growl"
+								rendered="#{cadastroAvisoAppController.temImagemCadastrada}"
+								styleClass="sa-btn-label ui-button-outlined ui-button-secondary" />
+						</h:panelGroup>
+						<p:outputPanel id="painelPreviewAviso" layout="block" styleClass="sa-aviso-preview" style="margin-top: 1rem;">
+							<h:outputText value="Nenhuma imagem anexada."
+								rendered="#{not cadastroAvisoAppController.temImagemCadastrada}"
+								styleClass="sa-photo-capture__empty" />
+							<h:panelGroup layout="block" rendered="#{cadastroAvisoAppController.temImagemCadastrada}">
+								<img src="#{cadastroAvisoAppController.imagemPreviewDataUrl}"
+									alt="Pré-visualização" class="sa-aviso-preview__img" />
+							</h:panelGroup>
+						</p:outputPanel>
+					</div>
+				</div>
+			</p:panel>
 
+		</ui:define>
+
+		<ui:define name="scripts">
+			<script type="text/javascript">
+				var saAvisoUploadUrl = '#{request.contextPath}/avisoApp/uploadImagem';
+				var saAvisoUploadMaxBytes = 3145728;
+
+				function saUploadImagemAvisoArquivo(input) {
+					if (!input || !input.files || !input.files.length) {
+						return;
+					}
+					var file = input.files[0];
+					if (file.size &gt; saAvisoUploadMaxBytes) {
+						alert('Use uma imagem de no maximo 3 MB.');
+						input.value = '';
+						return;
+					}
+					var idField = document.getElementById('form:avisoIdUpload');
+					var fd = new FormData();
+					fd.append('imagem', file);
+					fd.append('avisoId', idField ? idField.value : 'novo');
+					if (typeof PF === 'function' &amp;&amp; PF('statusDialog')) {
+						PF('statusDialog').show();
+					}
+					fetch(saAvisoUploadUrl, { method: 'POST', body: fd, credentials: 'same-origin' })
+						.then(function (response) {
+							if (typeof PF === 'function' &amp;&amp; PF('statusDialog')) {
+								PF('statusDialog').hide();
+							}
+							if (!response.ok) {
+								throw new Error('upload');
+							}
+							if (typeof rcAvisoImagemCarregada === 'function') {
+								rcAvisoImagemCarregada();
+							}
+							input.value = '';
+						})
+						.catch(function () {
+							if (typeof PF === 'function' &amp;&amp; PF('statusDialog')) {
+								PF('statusDialog').hide();
+							}
+							alert('Nao foi possivel anexar a imagem. Verifique se e JPG/PNG (max. 3 MB).');
+							input.value = '';
+						});
+				}
+			</script>
 		</ui:define>
 
 	</ui:composition>

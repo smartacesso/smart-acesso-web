@@ -9,13 +9,11 @@ import javax.ejb.EJB;
 import javax.faces.view.ViewScoped;
 import javax.inject.Named;
 
-import org.primefaces.event.FileUploadEvent;
-import org.primefaces.model.file.UploadedFile;
-
 import br.com.startjob.acesso.annotations.UseCase;
 import br.com.startjob.acesso.controller.BaseController;
 import br.com.startjob.acesso.modelo.ejb.AppEJBRemote;
 import br.com.startjob.acesso.modelo.entity.AvisoAppEntity;
+import br.com.startjob.acesso.services.AvisoAppImagemUploadServlet;
 
 @Named("cadastroAvisoAppController")
 @ViewScoped
@@ -25,14 +23,10 @@ public class CadastroAvisoAppController extends BaseController implements Serial
 
 	private static final long serialVersionUID = 1L;
 
-	private static final long LIMITE_IMAGEM_BYTES = 3145728L;
-
 	@EJB
 	private AppEJBRemote appEJB;
 
 	private boolean imagemAlterada;
-
-	private byte[] imagemAnexo;
 
 	private String imagemPreviewContentType = "image/jpeg";
 
@@ -46,16 +40,60 @@ public class CadastroAvisoAppController extends BaseController implements Serial
 		}
 		if (entidade.getId() == null) {
 			entidade.setDataPublicacao(new Date());
+			limparImagemPendente();
+			imagemAlterada = false;
+			imagemPreviewContentType = "image/jpeg";
 			return;
 		}
 		carregarImagemExistente(entidade.getId());
 	}
 
+	public String getAvisoIdUpload() {
+		AvisoAppEntity entidade = (AvisoAppEntity) getEntidade();
+		if (entidade != null && entidade.getId() != null) {
+			return String.valueOf(entidade.getId());
+		}
+		return "novo";
+	}
+
+	public void setAvisoIdUpload(String ignored) {
+		// Campo somente leitura para o upload via servlet.
+	}
+
+	private String chaveImagemSessao() {
+		AvisoAppEntity entidade = (AvisoAppEntity) getEntidade();
+		Long clienteId = getUsuarioLogado().getCliente().getId();
+		String idPart = entidade != null && entidade.getId() != null
+				? String.valueOf(entidade.getId()) : "novo";
+		return AvisoAppImagemUploadServlet.SESSION_IMAGEM_PREFIX + clienteId + "_" + idPart;
+	}
+
+	private byte[] lerImagemPendente() {
+		return (byte[]) getSessionAtrribute(chaveImagemSessao());
+	}
+
+	private String lerNomeImagemPendente() {
+		return (String) getSessionAtrribute(chaveImagemSessao() + AvisoAppImagemUploadServlet.SESSION_IMAGEM_NOME_SUFFIX);
+	}
+
+	private void gravarImagemPendente(byte[] imagem, String nomeArquivo) {
+		setSessioAtrribute(chaveImagemSessao(), imagem);
+		setSessioAtrribute(chaveImagemSessao() + AvisoAppImagemUploadServlet.SESSION_IMAGEM_NOME_SUFFIX, nomeArquivo);
+	}
+
+	private void limparImagemPendente() {
+		String chave = chaveImagemSessao();
+		setSessioAtrribute(chave, null);
+		setSessioAtrribute(chave + AvisoAppImagemUploadServlet.SESSION_IMAGEM_NOME_SUFFIX, null);
+		setSessioAtrribute(chave + AvisoAppImagemUploadServlet.SESSION_IMAGEM_ALTERADA_SUFFIX, null);
+	}
+
 	private void carregarImagemExistente(Long idAviso) {
 		try {
-			imagemAnexo = appEJB.buscarImagemAvisoApp(idAviso, getUsuarioLogado().getCliente().getId());
+			byte[] imagem = appEJB.buscarImagemAvisoApp(idAviso, getUsuarioLogado().getCliente().getId());
+			gravarImagemPendente(imagem, null);
 			imagemAlterada = false;
-			atualizarContentTypePreview(imagemAnexo);
+			atualizarContentTypePreview(imagem);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -74,6 +112,7 @@ public class CadastroAvisoAppController extends BaseController implements Serial
 			boolean novo = entidade.getId() == null;
 			aplicarImagemNaEntidade(entidade, novo);
 			appEJB.salvarAvisoApp(entidade);
+			limparImagemPendente();
 			mensagemInfo("", novo ? "msg.generica.objeto.incluido.sucesso" : "msg.generica.objeto.alterado.sucesso");
 			redirect("/paginas/sistema/avisoApp/pesquisaAvisoApp.xhtml?acao=OK");
 		} catch (Exception e) {
@@ -85,7 +124,7 @@ public class CadastroAvisoAppController extends BaseController implements Serial
 
 	private void aplicarImagemNaEntidade(AvisoAppEntity entidade, boolean novo) throws Exception {
 		if (imagemAlterada || novo) {
-			entidade.setImagem(imagemAnexo);
+			entidade.setImagem(lerImagemPendente());
 			return;
 		}
 		if (entidade.getId() != null) {
@@ -94,37 +133,35 @@ public class CadastroAvisoAppController extends BaseController implements Serial
 		}
 	}
 
-	public void onImagemUpload(FileUploadEvent event) {
-		UploadedFile file = event.getFile();
-		if (file == null || file.getContent() == null || file.getContent().length == 0) {
+	/** Chamado apos {@link AvisoAppImagemUploadServlet} gravar a imagem na sessao. */
+	public void onImagemCarregadaExterna() {
+		byte[] imagem = lerImagemPendente();
+		if (imagem == null || imagem.length == 0) {
 			mensagemErro("", "msg.generica.erro.processamento");
 			return;
 		}
-		if (file.getSize() > LIMITE_IMAGEM_BYTES) {
-			mensagemErro("", "msg.generica.erro.processamento");
-			return;
-		}
-		imagemAnexo = file.getContent();
 		imagemAlterada = true;
-		atualizarContentTypePreview(file.getFileName(), imagemAnexo);
+		atualizarContentTypePreview(lerNomeImagemPendente(), imagem);
 		mensagemInfo("", "msg.aviso.imagem.carregada");
 	}
 
 	public void removerImagem() {
-		imagemAnexo = null;
+		limparImagemPendente();
 		imagemAlterada = true;
 		imagemPreviewContentType = "image/jpeg";
 	}
 
 	public boolean isTemImagemCadastrada() {
-		return imagemAnexo != null && imagemAnexo.length > 0;
+		byte[] imagem = lerImagemPendente();
+		return imagem != null && imagem.length > 0;
 	}
 
 	public String getImagemPreviewDataUrl() {
-		if (!isTemImagemCadastrada()) {
+		byte[] imagem = lerImagemPendente();
+		if (imagem == null || imagem.length == 0) {
 			return "";
 		}
-		String base64 = Base64.getEncoder().encodeToString(imagemAnexo);
+		String base64 = Base64.getEncoder().encodeToString(imagem);
 		return "data:" + imagemPreviewContentType + ";base64," + base64;
 	}
 

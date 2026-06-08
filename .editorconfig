@@ -1,0 +1,16 @@
+# Padrao do repositorio Smart Acesso
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.properties]
+# Java 8 ResourceBundle le .properties como ISO-8859-1.
+# Prefira chaves ASCII ou escapes \uXXXX (como message_pt_BR.properties).
+charset = iso-8859-1
+
+[*.{java,xhtml,xml,js,css}]
+charset = utf-8
