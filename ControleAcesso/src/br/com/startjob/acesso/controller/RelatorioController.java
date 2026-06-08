@@ -1,5 +1,6 @@
 package br.com.startjob.acesso.controller;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -184,13 +185,15 @@ public abstract class RelatorioController extends BaseController {
 	}
 	
 	public void exportarExcelCustomizado(List<AcessoEntity> registrosTela) {
-	    System.out.println("--- INICIANDO EXPORTAÇÃO DA PÁGINA ATUAL ---");
+	    System.out.println("--- INICIANDO EXPORTAÇÃO DO RELATÓRIO ---");
 
 	    if (registrosTela == null || registrosTela.isEmpty()) {
-	        System.out.println("Nenhum dado na tela para exportar.");
-	        mensagemAviso("", "Não há dados na tela para exportar.");
+	        System.out.println("Nenhum dado para exportar.");
+	        mensagemAviso("", "Não há dados para exportar.");
 	        return;
 	    }
+
+	    SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 
 	    try (SXSSFWorkbook workbook = new SXSSFWorkbook(100)) {
 	        workbook.setCompressTempFiles(true);
@@ -199,15 +202,11 @@ public abstract class RelatorioController extends BaseController {
 	        
 	        criarCabecalho(sheet.createRow(rowNum++));
 
-	        // Faz o loop direto na lista da tela
 	        for (BaseEntity baseObj : registrosTela) {
-	            
-	            // Faz o cast (conversão) para a sua Entidade real
 	            AcessoEntity acesso = (AcessoEntity) baseObj;
 
 	            Row row = sheet.createRow(rowNum++);
 	            
-	            // Lógica de proteção contra NullPointerException ao navegar nos relacionamentos
 	            String matricula = acesso.getPedestre() != null ? safe(acesso.getPedestre().getMatricula()) : "";
 	            String nome = acesso.getPedestre() != null ? safe(acesso.getPedestre().getNome()) : "";
 	            
@@ -224,19 +223,15 @@ public abstract class RelatorioController extends BaseController {
 	            String cargo = (acesso.getPedestre() != null && acesso.getPedestre().getCargo() != null) 
 	                           ? safe(acesso.getPedestre().getCargo().getNome()) : "";
 
-	            // Preenchimento chamando os GETTERS da entidade, na mesma ordem do seu cabeçalho
 	            row.createCell(0).setCellValue(matricula); 
-	            row.createCell(1).setCellValue(safe(acesso.getCartaoAcessoRecebido())); 
+	            row.createCell(1).setCellValue(resolverCartao(acesso)); 
 	            row.createCell(2).setCellValue(nome); 
 	            row.createCell(3).setCellValue(empresa); 
 	            row.createCell(4).setCellValue(cargo); 
-	            
-	            // Formatação da Data (pode usar Date nativo ou converter para String)
-	            row.createCell(5).setCellValue(safe(acesso.getData())); 
-	            
+	            row.createCell(5).setCellValue(formatarData(acesso.getData(), dateFormat)); 
 	            row.createCell(6).setCellValue(safe(acesso.getEquipamento())); 
-	            row.createCell(7).setCellValue(traduzTipo(safe(acesso.getTipo()))); 
-	            row.createCell(8).setCellValue(safe(acesso.getSentido())); 
+	            row.createCell(7).setCellValue(formatarTipoAcesso(acesso)); 
+	            row.createCell(8).setCellValue(formatarSentido(acesso)); 
 	        }
 
 	        // Fluxo de envio do arquivo único para o navegador
@@ -273,9 +268,43 @@ public abstract class RelatorioController extends BaseController {
 	    return value != null ? value.toString() : "";
 	}
 
+	private String formatarData(Date data, SimpleDateFormat dateFormat) {
+	    if (data == null) {
+	        return "";
+	    }
+	    return dateFormat.format(data);
+	}
+
+	private String resolverCartao(AcessoEntity acesso) {
+	    if (acesso.getPedestre() != null) {
+	        String codigoCartao = acesso.getPedestre().getCodigoCartaoAcesso();
+	        if (codigoCartao != null && !codigoCartao.trim().isEmpty()) {
+	            return codigoCartao.trim();
+	        }
+	    }
+	    return safe(acesso.getCartaoAcessoRecebido());
+	}
+
+	private String formatarTipoAcesso(AcessoEntity acesso) {
+	    String tipo = traduzTipo(acesso.getTipo());
+	    if (acesso.getRazao() != null && !acesso.getRazao().trim().isEmpty()) {
+	        tipo = tipo + " - " + acesso.getRazao().trim();
+	    }
+	    return tipo;
+	}
+
+	private String formatarSentido(AcessoEntity acesso) {
+	    if ("ATIVO".equalsIgnoreCase(safe(acesso.getTipo()))) {
+	        return safe(acesso.getSentido());
+	    }
+	    return "---";
+	}
+
 	private String traduzTipo(String tipo) {
-	    if (tipo == null) return "";
-	    switch (tipo) {
+	    if (tipo == null || tipo.trim().isEmpty()) {
+	        return "";
+	    }
+	    switch (tipo.trim().toUpperCase()) {
 	        case "ATIVO": return "LIBERADO";
 	        case "INATIVO": return "BLOQUEADO";
 	        case "INDEFINIDO": return "NÃO GIROU";

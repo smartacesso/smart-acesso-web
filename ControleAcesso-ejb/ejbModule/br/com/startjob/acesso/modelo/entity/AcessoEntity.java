@@ -95,11 +95,16 @@ import br.com.startjob.acesso.modelo.entity.base.ClienteBaseEntity;
 						+ "order by obj.data desc"),
 		@NamedQuery(name = "AcessoEntity.findAllComPedestreEmpresaECargoOtimizado", 
 				query = "select new br.com.startjob.acesso.modelo.entity.AcessoEntity("
-						+ "p.id, p.matricula, obj.cartaoAcessoRecebido, p.nome, "
+						+ "p.id, p.matricula, p.codigoCartaoAcesso, p.nome, "
 						+ "COALESCE(ev.nome, p.empresaVisitada, e.nome), c.nome, "
-						+ "obj.data, obj.equipamento, obj.tipo, obj.sentido) " + "from AcessoEntity obj "
-						+ "join obj.pedestre p " + "left join p.empresa e " + "left join p.empresaVisitadaRef ev "
-						+ "left join p.cargo c " + "left join p.departamento d " + "left join p.centroCusto cc "
+						+ "obj.data, obj.equipamento, obj.tipo, obj.sentido, obj.razao) "
+						+ "from AcessoEntity obj "
+						+ "join obj.pedestre p "
+						+ "left join p.empresa e "
+						+ "left join p.empresaVisitadaRef ev "
+						+ "left join p.cargo c "
+						+ "left join p.departamento d "
+						+ "left join p.centroCusto cc "
 						+ "where (obj.removido = false or obj.removido is null) "
 						+ "order by obj.data desc"),
 		@NamedQuery(name = "AcessoEntity.findAcessosHoje",
@@ -249,22 +254,21 @@ public class AcessoEntity extends ClienteBaseEntity {
 		this.qtdePedestresHora = qtdePedestresHora;
 	}
 	
-	// Construtor otimizado para a tela
-	public AcessoEntity(Long idPedestre, String matricula, String cartaoAcessoRecebido, 
-	                    String nomePedestre, String nomeEmpresa, String nomeCargo, 
-	                    Date data, String equipamento, String tipoAcesso, String sentido) {
-	                    
-	    this.cartaoAcessoRecebido = cartaoAcessoRecebido;
+	// Construtor otimizado para exportação e consultas com projeção
+	public AcessoEntity(Long idPedestre, String matricula, String codigoCartaoAcesso,
+	                    String nomePedestre, String nomeEmpresa, String nomeCargo,
+	                    Date data, String equipamento, String tipoAcesso, String sentido, String razao) {
+
 	    this.data = data;
 	    this.equipamento = equipamento;
-	    // Faça o cast do tipoAcesso para o seu Enum se for necessário
-	    // this.tipo = tipoAcesso; 
+	    this.tipo = tipoAcesso;
 	    this.sentido = sentido;
-	    
-	    // Falsifica as entidades filhas para o XHTML ler as colunas sem dar NullPointer
+	    this.razao = razao;
+
 	    this.pedestre = new PedestreEntity();
 	    this.pedestre.setId(idPedestre);
 	    this.pedestre.setMatricula(matricula);
+	    this.pedestre.setCodigoCartaoAcesso(codigoCartaoAcesso);
 	    this.pedestre.setNome(nomePedestre);
 	    
 	    if(nomeEmpresa != null) {
