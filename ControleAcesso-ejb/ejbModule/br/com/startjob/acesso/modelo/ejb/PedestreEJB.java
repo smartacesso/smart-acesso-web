@@ -4492,25 +4492,32 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		return null;
 	}
 
+	private static final int AUTOCOMPLETE_PEDESTRE_MAX = 15;
+	private static final int AUTOCOMPLETE_PEDESTRE_MIN_CHARS = 4;
+
 	@SuppressWarnings("unchecked")
 	public List<PedestreEntity> buscaPedestrePorNomeAndIdCliente(String nome, Long idCliente) {
-	    try {
-	        Map<String, Object> args = new HashMap<>();
-	        args.put("NOME", "%" + nome + "%");
-	        args.put("ID_CLIENTE", idCliente);
+		if (nome == null || nome.trim().length() < AUTOCOMPLETE_PEDESTRE_MIN_CHARS || idCliente == null) {
+			return Collections.emptyList();
+		}
+		try {
+			Map<String, Object> args = new HashMap<>();
+			args.put("NOME", nome.trim().toUpperCase() + "%");
+			args.put("ID_CLIENTE", idCliente);
 
-	        List<PedestreEntity> listaPedestre = (List<PedestreEntity>) pesquisaArgFixos(
-	                PedestreEntity.class,
-	                "findByNomePedestreLista",
-	                args
-	        );
+			List<PedestreEntity> listaPedestre = (List<PedestreEntity>) pesquisaArgFixosLimitado(
+					PedestreEntity.class,
+					"findByNomePedestreAutocomplete",
+					args,
+					0,
+					AUTOCOMPLETE_PEDESTRE_MAX);
 
-	        return Optional.ofNullable(listaPedestre).orElse(Collections.emptyList());
+			return Optional.ofNullable(listaPedestre).orElse(Collections.emptyList());
 
-	    } catch (Exception e) {
-	        e.printStackTrace();
-	        return new ArrayList<>();
-	    }
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ArrayList<>();
+		}
 	}
 	
 	@SuppressWarnings("unchecked")

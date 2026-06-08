@@ -5,7 +5,10 @@ public class AcessosRequest {
     private String dataFim;
     private int pagina = 0;
     private int tamanho = 20;
-    
+    /** ENTRADA, SAIDA ou null para todos. */
+    private String sentido;
+    private String busca;
+
 	public String getDataInicio() {
 		return dataInicio;
 	}
@@ -29,5 +32,21 @@ public class AcessosRequest {
 	}
 	public void setTamanho(int tamanho) {
 		this.tamanho = tamanho;
+	}
+
+	public String getSentido() {
+		return sentido;
+	}
+
+	public void setSentido(String sentido) {
+		this.sentido = sentido;
+	}
+
+	public String getBusca() {
+		return busca;
+	}
+
+	public void setBusca(String busca) {
+		this.busca = busca;
 	}
 }

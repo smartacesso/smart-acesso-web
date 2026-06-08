@@ -4718,3 +4718,191 @@ body .ui-datatable .sa-table-actions .ui-button {
 .sa-rhid-page .ui-datatable.sa-table .sa-table-actions .ui-button.rounded-button .pi {
 	font-size: 1rem !important;
 }
+
+/* —— Badges e preview (correspondência / avisos) —— */
+.sa-badge {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.25rem;
+	padding: 0.25rem 0.6rem;
+	border-radius: 999px;
+	font-size: 0.75rem;
+	font-weight: 600;
+	line-height: 1.2;
+	white-space: nowrap;
+}
+
+.sa-badge--ok {
+	background: rgba(34, 197, 94, 0.12);
+	color: #15803d;
+}
+
+.sa-badge--warn {
+	background: rgba(251, 191, 36, 0.18);
+	color: #b45309;
+}
+
+.sa-badge--muted {
+	background: var(--sa-surface-muted, #f1f5f9);
+	color: var(--sa-text-muted);
+}
+
+/* Webcam: tamanho fixo evita “pulo” do layout */
+.sa-photo-capture__camera video,
+.sa-photo-capture__camera canvas,
+.sa-photo-capture__camera .ui-widget-content {
+	max-width: 100% !important;
+	width: 320px !important;
+	height: 240px !important;
+	margin: 0 auto;
+}
+
+.sa-aviso-preview {
+	min-height: 120px;
+	padding: 0.75rem;
+	text-align: center;
+	border: 1px dashed var(--sa-border);
+	border-radius: var(--sa-radius-sm);
+	background: var(--sa-surface-muted, #f8fafc);
+	width: 100%;
+	max-width: 100%;
+	box-sizing: border-box;
+}
+
+.sa-aviso-preview__img {
+	display: block;
+	max-width: 100%;
+	max-height: 240px;
+	margin: 0 auto;
+	border-radius: var(--sa-radius-sm);
+	object-fit: contain;
+}
+
+/* —— Toolbar em duas faixas (ações | busca) —— */
+.tools_content .sa-toolbar-page.ui-toolbar,
+.sa-toolbar-page.ui-toolbar {
+	display: flex !important;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.5rem 0.75rem;
+	width: 100%;
+	border: none;
+	background: transparent;
+	padding: 0;
+}
+
+.sa-toolbar-page .sa-toolbar-page__group--end {
+	margin-left: auto;
+}
+
+.sa-toolbar-page--cadastro .sa-toolbar-page__group {
+	gap: 0.5rem !important;
+}
+
+.sa-toolbar-page--cadastro a.sa-btn-label.ui-button,
+.sa-toolbar-page--cadastro .ui-button.sa-btn-label {
+	min-height: 2.375rem !important;
+}
+
+/* Upload + botão na mesma linha */
+.sa-upload-row {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.75rem;
+}
+
+.sa-upload-row .ui-fileupload {
+	flex: 0 1 auto;
+}
+
+.sa-upload-row .ui-button.sa-btn-label {
+	flex: 0 0 auto;
+}
+
+/* Aviso app: só o botão de escolher — sem caixa vazia do fileUpload advanced */
+.sa-aviso-upload-row .ui-fileupload-content,
+.sa-aviso-upload-row .ui-fileupload-files,
+.sa-aviso-upload-row .ui-fileupload-simple .ui-fileupload-filename {
+	display: none !important;
+}
+
+.sa-aviso-upload-row .ui-fileupload-simple {
+	display: inline-flex;
+	align-items: center;
+	border: none;
+	background: transparent;
+	padding: 0;
+}
+
+.sa-aviso-upload-row .ui-fileupload-simple .ui-button {
+	margin: 0;
+}
+
+/* Accordion + panel interno: uma coluna contínua */
+.sa-accordion .ui-accordion-content .ui-panel {
+	margin: 0;
+	width: 100%;
+	box-sizing: border-box;
+}
+
+.sa-accordion .ui-accordion-content .form-grid.sa-cadastro-grid.ui-g {
+	width: 100% !important;
+	margin-left: 0 !important;
+	margin-right: 0 !important;
+}
+
+.sa-photo-capture__frame {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	min-height: 240px;
+	max-width: 320px;
+	margin: 0 auto 0.5rem;
+	padding: 0.5rem;
+	border: 1px solid var(--sa-border);
+	border-radius: var(--sa-radius-sm);
+	background: var(--sa-surface-muted, #f8fafc);
+	overflow: hidden;
+}
+
+.sa-filtros-avancados__actions {
+	margin-top: 0.5rem;
+	padding-top: 0.85rem;
+	border-top: 1px solid var(--sa-border);
+}
+
+/* Diálogos: botões alinhados à direita */
+.sa-dialog.ui-dialog .sa-dialog-actions,
+.ui-confirmdialog.sa-dialog .sa-dialog-actions {
+	margin-top: 0.75rem;
+	padding-top: 0.85rem;
+	border-top: 1px solid var(--sa-border);
+}
+
+.ui-confirmdialog.sa-dialog .ui-dialog-content {
+	padding-bottom: 0.5rem;
+}
+
+/* Ações da tabela — mesma altura */
+.sa-table-actions .ui-button.rounded-button {
+	width: 2.375rem !important;
+	min-width: 2.375rem !important;
+	height: 2.375rem !important;
+	min-height: 2.375rem !important;
+	margin: 0 !important;
+}
+
+@media (max-width: 767px) {
+	.sa-toolbar-page .sa-toolbar-page__group--end {
+		margin-left: 0;
+		width: 100%;
+	}
+
+	.sa-toolbar-page .sa-toolbar-search {
+		max-width: none;
+		width: 100%;
+	}
+}

@@ -477,8 +477,19 @@
 			return;
 		}
 
+		/* Split layout: flex + rodapé de paginação — não aplicar maxHeight inline (colapsa a tabela). */
+		if (tableEl.closest('.sa-pesquisa-split')) {
+			wrapper.style.maxHeight = '';
+			wrapper.style.overflowY = '';
+			wrapper.style.overflowX = '';
+			return;
+		}
+
 		var tableTop = tableEl.getBoundingClientRect().top;
-		var available = Math.floor(bottomLimit - tableTop - 4);
+		var paginator = tableEl.querySelector(':scope > .ui-paginator');
+		var paginatorH = paginator ? paginator.offsetHeight : 0;
+		var available = Math.floor(bottomLimit - tableTop - paginatorH - 8);
+		var minBody = 220;
 
 		if (available <= 80) {
 			return;
@@ -488,8 +499,14 @@
 
 		requestAnimationFrame(function () {
 			var contentHeight = wrapper.scrollHeight;
-			if (contentHeight <= available) {
-				wrapper.style.maxHeight = contentHeight + 'px';
+			var targetHeight = contentHeight <= available
+				? Math.max(contentHeight, minBody)
+				: available;
+			if (targetHeight > available) {
+				targetHeight = available;
+			}
+			wrapper.style.maxHeight = targetHeight + 'px';
+			if (contentHeight <= available && contentHeight < minBody) {
 				wrapper.style.overflowY = 'hidden';
 			} else {
 				wrapper.style.overflowY = 'auto';
@@ -602,8 +619,11 @@
 				bottomLimit = Math.min(bottomLimit, split.getBoundingClientRect().bottom);
 			}
 
-			if (splitFooter && splitFooter.querySelector('.ui-paginator')) {
-				bottomLimit = Math.min(bottomLimit, splitFooter.getBoundingClientRect().top);
+			if (splitFooter) {
+				var footerTop = splitFooter.getBoundingClientRect().top;
+				if (footerTop > 0) {
+					bottomLimit = Math.min(bottomLimit, footerTop);
+				}
 			}
 
 			if (table.classList.contains('ui-datatable-scrollable')) {

@@ -62,7 +62,7 @@ import br.com.startjob.acesso.modelo.utils.EncryptionUtils;
         @Index(name = "idx_pedestre_departamento", columnList = "ID_DEPARTAMENTO"),
         @Index(name = "idx_pedestre_centrocusto", columnList = "ID_CENTRO_CUSTO"),
         @Index(name = "idx_pedestre_cargo", columnList = "ID_CARGO"),
-        @Index(name = "idx_pedestre_cliente_nome", columnList = "ID_CLIENTE, NOME"),
+        @Index(name = "IX_PEDESTRE_CLIENTE_NOME", columnList = "ID_CLIENTE, NOME"),
         @Index(name = "idx_pedestre_cliente_cpf", columnList = "ID_CLIENTE, CPF"),
         @Index(name = "idx_pedestre_id_temp_cliente", columnList = "ID_TEMP, ID_CLIENTE"),
 		@Index(name = "idx_pedestre_login_cliente_removido", columnList = "LOGIN, ID_CLIENTE, REMOVIDO")
@@ -210,6 +210,13 @@ import br.com.startjob.acesso.modelo.utils.EncryptionUtils;
 			          + "and obj.cliente.id = :ID_CLIENTE " 
 			          + "and (obj.removido = false or obj.removido is null) "
 			          + "order by obj.id desc"),
+		@NamedQuery(name = "PedestreEntity.findByNomePedestreAutocomplete",
+			 query = "select new br.com.startjob.acesso.modelo.entity.PedestreEntity(obj.id, obj.nome, obj.cpf) "
+			          + "from PedestreEntity obj "
+			          + "where UPPER(obj.nome) LIKE :NOME "
+			          + "and obj.cliente.id = :ID_CLIENTE "
+			          + "and (obj.removido = false or obj.removido is null) "
+			          + "order by obj.nome asc"),
 		@NamedQuery(name = "PedestreEntity.findByLoginOtimizado",
 			 query = "select new br.com.startjob.acesso.modelo.entity.PedestreEntity(" +
 			            " obj.id, obj.login, obj.senha, obj.perfilApp ) " +
@@ -488,6 +495,13 @@ public class PedestreEntity extends ClienteBaseEntity {
 	    this.login = login;
 	    this.senha = senha;
 	    this.perfilApp = perfilApp;
+	}
+
+	/** Projeção leve para autocomplete (sem foto nem joins). */
+	public PedestreEntity(Long id, String nome, String cpf) {
+		this.id = id;
+		this.nome = nome;
+		this.cpf = cpf;
 	}
 	
 	// CONSTRUTOR OTIMIZADO PARA A TELA (Substitui o DTO)

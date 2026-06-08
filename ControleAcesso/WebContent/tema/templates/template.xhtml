@@ -24,7 +24,7 @@
 	<link type="text/css" rel="stylesheet" href="/#{menuController.appName}/#{menuController.path}/tema/css/sb-admin-2.css" />
 	<link type="text/css" rel="stylesheet" href="/#{menuController.appName}/#{menuController.path}/tema/css/ui-theme.css" />
 	<link type="text/css" rel="stylesheet" href="/#{menuController.appName}/#{menuController.path}/tema/css/base.css" />
-	<link type="text/css" rel="stylesheet" href="/#{menuController.appName}/#{menuController.path}/tema/css/smart-design.css?v=63" />
+	<link type="text/css" rel="stylesheet" href="/#{menuController.appName}/#{menuController.path}/tema/css/smart-design.css?v=68" />
 	<script type="text/javascript">
 		// Evita flash do sidebar antes do CSS/JS carregar
 		(function () {
@@ -41,7 +41,7 @@
 	
 	<script type="text/javascript" src="/#{menuController.appName}/tema/js/bootstrap.min.js"></script>
 	<script type="text/javascript" src="/#{menuController.appName}/tema/js/base.js?v=7"></script>
-	<script type="text/javascript" src="/#{menuController.appName}/#{menuController.path}/tema/js/sa-layout.js?v=46"></script>
+	<script type="text/javascript" src="/#{menuController.appName}/#{menuController.path}/tema/js/sa-layout.js?v=47"></script>
 	
 	<ui:insert name="scripts"></ui:insert>
 </h:head>
@@ -101,7 +101,7 @@
 					</h:panelGroup>
 				</header>
 
-				<h:form id="form" styleClass="form_external sa-main-form" >
+				<h:form id="form" styleClass="form_external sa-main-form" enctype="multipart/form-data">
 
 					<p:ajaxStatus onstart="PF('statusDialog').show()" onsuccess="PF('statusDialog').hide()" />
 

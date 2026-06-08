@@ -16,7 +16,7 @@
 						var="p" itemLabel="#{p.nome}" itemValue="#{p}"
 						converter="pedestreConverter" forceSelection="true"
 						placeholder="Digite nome, CPF ou unidade"
-						scrollHeight="250" maxResults="15" minQueryLength="3" delay="600">
+						scrollHeight="250" maxResults="15" minQueryLength="4" delay="600">
 						<p:ajax event="itemSelect"
 							listener="#{cadastroPedestreController.adicionarResponsavel}"
 							update="painelTabelaResponsaveis responsavelAuto" />

@@ -3,8 +3,11 @@ package br.com.startjob.acesso.controller.uc018;
 
 import java.io.Serializable;
 import java.util.Base64;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.faces.view.ViewScoped;
@@ -18,14 +21,15 @@ import br.com.startjob.acesso.utils.MailSendUtils;
 @Named("consultaCorrespondenciaController")
 @ViewScoped
 @UseCase(classEntidade=CorrespondenciaEntity.class, funcionalidade="Consulta de Correspondências",
-		urlNovoRegistro="/paginas/sistema/correspondencia/cadastroCorrespondencia.jsf", quantPorPagina = 6)
+		urlNovoRegistro="/paginas/sistema/correspondencia/cadastroCorrespondencia.jsf",
+		lazyLoad = true, quantPorPagina = 6)
 public class ConsultaCorrespondenciaController extends BaseController implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 	
 	private String filtroRetirado; // "S", "N" ou null para todos
 	private CorrespondenciaEntity correspondenciaSelecionada;
-	private String dataPesquisa;
+	private Date dataPesquisa;
 	private String nomeRetirada;
 	private String documentoRetirada;
 
@@ -44,20 +48,79 @@ public class ConsultaCorrespondenciaController extends BaseController implements
 
 	@Override
 	public String buscar() {
-		// Montamos os parâmetros para a query baseada no seu padrão de framework
-		
 		getParans().put("cliente.id", getUsuarioLogado().getCliente().getId());
 
 		getParans().remove("confirmaRetirada");
+		getParans().remove("dataRecebimento_maior_data");
+		getParans().remove("dataRecebimento_menor_data");
 
 		if (filtroRetirado != null && !filtroRetirado.isEmpty()) {
 			getParans().put("confirmaRetirada", filtroRetirado);
 		}
 
+		if (dataPesquisa != null) {
+			Calendar cal = Calendar.getInstance();
+			cal.setTime(dataPesquisa);
+			cal.set(Calendar.HOUR_OF_DAY, 0);
+			cal.set(Calendar.MINUTE, 0);
+			cal.set(Calendar.SECOND, 0);
+			cal.set(Calendar.MILLISECOND, 0);
+			getParans().put("dataRecebimento_maior_data", cal.getTime());
+
+			cal.set(Calendar.HOUR_OF_DAY, 23);
+			cal.set(Calendar.MINUTE, 59);
+			cal.set(Calendar.SECOND, 59);
+			cal.set(Calendar.MILLISECOND, 999);
+			getParans().put("dataRecebimento_menor_data", cal.getTime());
+		}
+
+		removerParansVazios();
+
 		return super.buscar();
 	}
+
+	@Override
+	public String limpar() {
+		filtroRetirado = "N";
+		dataPesquisa = null;
+		limparSelecaoRetirada();
+		super.limpar();
+		buscar();
+		return "";
+	}
+
+	private void removerParansVazios() {
+		Iterator<Map.Entry<String, Object>> it = getParans().entrySet().iterator();
+		while (it.hasNext()) {
+			Map.Entry<String, Object> entry = it.next();
+			Object valor = entry.getValue();
+			if (valor == null || (valor instanceof String && ((String) valor).trim().isEmpty())) {
+				it.remove();
+			}
+		}
+	}
 	
+	public void limparSelecaoRetirada() {
+		correspondenciaSelecionada = null;
+		nomeRetirada = "";
+		documentoRetirada = "";
+	}
+
+	public String prepararDialogRetirada() {
+		nomeRetirada = "";
+		documentoRetirada = "";
+		return null;
+	}
+
 	public void confirmarRetiradaComDados() {
+		if (nomeRetirada == null || nomeRetirada.trim().isEmpty()) {
+			mensagemFatal("", "Informe o nome de quem está retirando.");
+			return;
+		}
+		if (documentoRetirada == null || documentoRetirada.trim().isEmpty()) {
+			mensagemFatal("", "Informe o documento de quem está retirando.");
+			return;
+		}
 		if (correspondenciaSelecionada != null) {
 			try {
 				correspondenciaSelecionada.setConfirmaRetirada("S");
@@ -134,11 +197,11 @@ public class ConsultaCorrespondenciaController extends BaseController implements
 		this.correspondenciaSelecionada = correspondenciaSelecionada;
 	}
 
-	public String getDataPesquisa() {
+	public Date getDataPesquisa() {
 		return dataPesquisa;
 	}
 
-	public void setDataPesquisa(String dataPesquisa) {
+	public void setDataPesquisa(Date dataPesquisa) {
 		this.dataPesquisa = dataPesquisa;
 	}
 	

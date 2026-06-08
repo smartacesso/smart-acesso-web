@@ -1,0 +1,117 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui">
+
+<body>
+
+	<f:metadata>
+		<f:event type="preRenderView" listener="#{cadastroAvisoAppController.exibeMensagens}" />
+	</f:metadata>
+
+	<ui:composition template="/tema/templates/template.xhtml">
+
+		<ui:define name="titulo">
+			#{msgs['title.sistema']} | #{cadastroAvisoAppController.entidade.id != null ? 'Editar Aviso' : 'Novo Aviso'}
+		</ui:define>
+		<ui:define name="pageTitle">
+			<h:outputText value="#{cadastroAvisoAppController.entidade.id != null ? 'Editar Aviso do App' : 'Publicar Aviso no App'}" />
+		</ui:define>
+		<ui:define name="pageSubtitle">
+			<h:outputText value="#{sessionScope.usuario.cliente.nome}" rendered="#{sessionScope.usuario != null}" />
+		</ui:define>
+
+		<ui:define name="tools">
+			<p:toolbar styleClass="sa-toolbar-wrap sa-toolbar-page sa-toolbar-page--cadastro">
+				<p:toolbarGroup styleClass="sa-toolbar-actions sa-toolbar-page__group">
+					<ui:include src="/WEB-INF/template/sa-voltar-lista.xhtml">
+						<ui:param name="ctrl" value="#{cadastroAvisoAppController}" />
+					</ui:include>
+					<p:commandButton id="save"
+						action="#{cadastroAvisoAppController.salvar}"
+						value="#{msgs['alt.acao.save']}"
+						title="#{msgs['alt.acao.save']}"
+						icon="pi pi-check" iconPos="left"
+						process="@form"
+						update="form:growl"
+						styleClass="sa-btn-label ui-button-success" />
+				</p:toolbarGroup>
+			</p:toolbar>
+		</ui:define>
+
+		<ui:define name="conteudo">
+
+			<p:accordionPanel id="cadastroAvisoTab" styleClass="sa-accordion" activeIndex="0" multiple="true">
+
+				<p:tab title="Conteúdo do aviso">
+					<p:panel header="Texto do comunicado" styleClass="ui-fluid">
+						<div class="form-grid sa-cadastro-grid ui-fluid ui-g">
+							<div class="ui-g-12 ui-md-8">
+								<p:outputLabel value="Título:" for="titulo" indicateRequired="true" />
+								<p:inputText id="titulo" value="#{cadastroAvisoAppController.entidade.titulo}"
+									required="true" maxlength="255" placeholder="Título exibido no app" />
+							</div>
+							<div class="ui-g-12 ui-md-4">
+								<p:outputLabel value="Data de publicação:" for="dataPub" indicateRequired="true" />
+								<p:calendar id="dataPub" value="#{cadastroAvisoAppController.entidade.dataPublicacao}"
+									pattern="dd/MM/yyyy HH:mm" showTime="true" hourFormat="24" required="true"
+									showIcon="true" />
+							</div>
+							<div class="ui-g-12">
+								<p:outputLabel value="Descrição:" for="descricao" />
+								<p:inputTextarea id="descricao" value="#{cadastroAvisoAppController.entidade.descricao}"
+									rows="6" autoResize="false" maxlength="2000"
+									placeholder="Texto completo do aviso para o morador" />
+							</div>
+						</div>
+					</p:panel>
+				</p:tab>
+
+				<p:tab title="Imagem (opcional)">
+					<p:panel header="Imagem do aviso" styleClass="ui-fluid">
+						<h:outputText value="JPG ou PNG, até 3 MB. O envio é automático ao escolher o arquivo; depois clique em Salvar no topo."
+							styleClass="sa-hint-text" style="display: block; margin-bottom: 1rem;" />
+						<div class="form-grid sa-cadastro-grid ui-fluid ui-g">
+							<div class="ui-g-12">
+								<h:panelGroup id="barraImagemAviso" layout="block" styleClass="sa-upload-row sa-aviso-upload-row">
+									<p:fileUpload id="uploadImagemAviso"
+										listener="#{cadastroAvisoAppController.onImagemUpload}"
+										mode="simple" skinSimple="true" auto="true" multiple="false" fileLimit="1"
+										label="Escolher imagem"
+										sizeLimit="3145728" allowTypes="/(\.|\/)(jpe?g|png)$/"
+										invalidFileMessage="Use apenas JPG ou PNG (máx. 3 MB)."
+										styleClass="sa-aviso-fileupload"
+										update="form:cadastroAvisoTab:painelPreviewAviso form:cadastroAvisoTab:barraImagemAviso form:growl"
+										onstart="PF('statusDialog').show(); return true;"
+										oncomplete="PF('statusDialog').hide();" />
+									<p:commandButton value="Remover imagem" icon="pi pi-times"
+										action="#{cadastroAvisoAppController.removerImagem}"
+										process="@this"
+										update="form:cadastroAvisoTab:painelPreviewAviso form:cadastroAvisoTab:barraImagemAviso form:growl"
+										rendered="#{cadastroAvisoAppController.temImagemCadastrada}"
+										styleClass="sa-btn-label ui-button-outlined ui-button-secondary" />
+								</h:panelGroup>
+								<p:outputPanel id="painelPreviewAviso" layout="block" styleClass="sa-aviso-preview" style="margin-top: 1rem;">
+									<h:outputText value="Nenhuma imagem anexada."
+										rendered="#{not cadastroAvisoAppController.temImagemCadastrada}"
+										styleClass="sa-photo-capture__empty" />
+									<h:panelGroup layout="block" rendered="#{cadastroAvisoAppController.temImagemCadastrada}">
+										<img src="#{cadastroAvisoAppController.imagemPreviewDataUrl}"
+											alt="Pré-visualização" class="sa-aviso-preview__img" />
+									</h:panelGroup>
+								</p:outputPanel>
+							</div>
+						</div>
+					</p:panel>
+				</p:tab>
+
+			</p:accordionPanel>
+
+		</ui:define>
+
+	</ui:composition>
+</body>
+</html>

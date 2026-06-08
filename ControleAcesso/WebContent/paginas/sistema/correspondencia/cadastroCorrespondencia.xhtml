@@ -24,130 +24,130 @@
 			<h:outputText value="#{sessionScope.usuario.cliente.nome}" rendered="#{sessionScope.usuario != null}" />
 		</ui:define>
 
-
-<ui:define name="tools">
-			<p:toolbar styleClass="sa-toolbar-wrap">
-				<p:toolbarGroup styleClass="sa-toolbar-actions">
-					<ui:include src="/WEB-INF/template/sa-voltar-lista.xhtml">
-						<ui:param name="ctrl" value="#{cadastroCorrespondenciaController}" />
-					</ui:include>
-					<p:commandButton id="save"
-						action="#{cadastroCorrespondenciaController.salvar}"
-						value="#{msgs['alt.acao.save']}"
-						title="#{msgs['alt.acao.save']}"
-						icon="pi pi-check" iconPos="left"
-						styleClass="sa-btn-label ui-button-success">
-						<p:ajax process="@form" update="@form" />
-					</p:commandButton>
-				</p:toolbarGroup>
-			</p:toolbar>
+		<ui:define name="tools">
+			<ui:include src="/WEB-INF/template/sa-toolbar-cadastro.xhtml">
+				<ui:param name="ctrl" value="#{cadastroCorrespondenciaController}" />
+			</ui:include>
 		</ui:define>
 
 		<ui:define name="conteudo">
 
-			
+			<p:accordionPanel id="cadastroCorrespondenciaTab" styleClass="sa-accordion" activeIndex="0">
 
-				<p:accordionPanel id="cadastroCorrespondenciaTab" styleClass="sa-accordion">
-					
-					<p:tab title="Dados do Volume">
-						<p:panel id="painelDados" styleClass="ui-fluid">
-							<div class="form-grid sa-cadastro-grid ui-fluid ui-g">
+				<p:tab title="Dados do volume">
+					<p:panel header="Identificação do volume" styleClass="ui-fluid">
+						<h:outputText value="Busca do destinatário: mínimo de 4 letras do nome."
+							styleClass="sa-hint-text" style="display: block; margin-bottom: 1rem;" />
+						<div class="form-grid sa-cadastro-grid ui-fluid ui-g">
 
-								<div class="ui-g-12 ui-md-6">
-									<p:outputLabel value="Destinatário:" for="destinatario" indicateRequired="true" />
-									<p:autoComplete id="destinatario" 
-										value="#{cadastroCorrespondenciaController.entidade.destinatario}"
-										completeMethod="#{cadastroCorrespondenciaController.completePedestre}"
-										var="p" itemLabel="#{p.nome}" itemValue="#{p}" 
-										converter="pedestreConverter" forceSelection="true" required="true"
-										placeholder="Digite o nome ou unidade"
-										emptyMessage="Nenhum morador encontrado."
-										scrollHeight="250" 
-										maxResults="15"
-										minQueryLength="3" 
-										delay="600">
-										<p:column>
-											<h:outputText value="#{p.nome}" />
-										</p:column>
-									</p:autoComplete>
-								</div>
-
-								<div class="ui-g-12 ui-md-3">
-									<p:outputLabel value="Tipo de Volume:" for="tipo" indicateRequired="true" />
-									<p:selectOneMenu id="tipo" value="#{cadastroCorrespondenciaController.entidade.tipo}" required="true">
-										<f:selectItems value="#{cadastroCorrespondenciaController.listaTipos}" />
-									</p:selectOneMenu>
-								</div>
-
-								<div class="ui-g-12 ui-md-3">
-									<p:outputLabel value="Código de Rastreio:" for="rastreio" />
-									<p:inputText id="rastreio" value="#{cadastroCorrespondenciaController.entidade.codigoRastreio}" />
-								</div>
-
-								<div class="ui-g-12 ui-md-12">
-									<p:outputLabel value="Observações Adicionais:" for="obs" />
-									<p:inputTextarea id="obs" value="#{cadastroCorrespondenciaController.entidade.observacao}" 
-													 rows="3" autoResize="false" placeholder="Ex: Caixa amassada, entregar urgente..." />
-								</div>
-
+							<div class="ui-g-12 ui-md-6">
+								<p:outputLabel value="Destinatário:" for="destinatario" indicateRequired="true" />
+								<p:autoComplete id="destinatario"
+									value="#{cadastroCorrespondenciaController.entidade.destinatario}"
+									completeMethod="#{cadastroCorrespondenciaController.completePedestre}"
+									var="p" itemLabel="#{p.nome}" itemValue="#{p}"
+									converter="pedestreConverter" forceSelection="true" required="true"
+									placeholder="Digite o nome (mín. 4 letras)"
+									emptyMessage="Nenhum morador encontrado."
+									scrollHeight="250"
+									maxResults="15"
+									minQueryLength="4"
+									delay="600">
+									<p:column>
+										<h:outputText value="#{p.nome}" styleClass="sa-cell-primary" />
+									</p:column>
+									<p:column style="width: 130px;">
+										<h:outputText value="#{p.cpf != null ? p.cpf : '—'}" styleClass="sa-cell-secondary" />
+									</p:column>
+								</p:autoComplete>
 							</div>
-						</p:panel>
-					</p:tab>
 
-					<p:tab title="Registro Fotográfico (Opcional)">
-						<p:panel styleClass="ui-fluid">
-							<div class="form-grid sa-cadastro-grid ui-fluid ui-g sa-photo-capture">
-
-								<div class="ui-g-12 ui-md-6 sa-photo-capture__camera">
-									<p:photoCam widgetVar="pc" listener="#{cadastroCorrespondenciaController.onCapture}" update="painelFoto" />
-									<p:commandButton type="button" value="Capturar Foto" icon="pi pi-camera" 
-													 onclick="PF('pc').capture()"
-													 styleClass="sa-btn-label ui-button-outlined" />
-								</div>
-
-								<div class="ui-g-12 ui-md-6 sa-photo-capture__status">
-									<p:outputPanel id="painelFoto">
-										<h:outputText value="Nenhuma foto capturada." 
-													  rendered="#{empty cadastroCorrespondenciaController.entidade.fotoVolume}" 
-													  styleClass="sa-photo-capture__empty" />
-										
-										<h:panelGroup rendered="#{not empty cadastroCorrespondenciaController.entidade.fotoVolume}">
-											<i class="pi pi-check-circle sa-photo-capture__success-icon"></i>
-											<h:outputText value=" Foto do volume registrada com sucesso!" styleClass="sa-photo-capture__success" />
-											<br/>
-											<h:outputText value="(A imagem será salva no banco ao concluir o cadastro)" styleClass="sa-photo-capture__hint" />
-										</h:panelGroup>
-									</p:outputPanel>
-								</div>
-
+							<div class="ui-g-12 ui-md-3">
+								<p:outputLabel value="Tipo de volume:" for="tipo" indicateRequired="true" />
+								<p:selectOneMenu id="tipo" value="#{cadastroCorrespondenciaController.entidade.tipo}" required="true">
+									<f:selectItems value="#{cadastroCorrespondenciaController.listaTipos}" />
+								</p:selectOneMenu>
 							</div>
-						</p:panel>
-					</p:tab>
 
-					<p:tab title="Baixa / Retirada" rendered="#{cadastroCorrespondenciaController.entidade.id != null}">
-						<p:panel styleClass="ui-fluid">
-							<div class="form-grid sa-cadastro-grid ui-fluid ui-g">
-								
-								<div class="ui-g-12 ui-md-4">
-									<p:outputLabel value="O morador já retirou o volume?" for="statusRetirada" />
-									<p:selectOneMenu id="statusRetirada" value="#{cadastroCorrespondenciaController.entidade.confirmaRetirada}">
-										<f:selectItem itemLabel="Não (Aguardando)" itemValue="N" />
-										<f:selectItem itemLabel="Sim (Entregue)" itemValue="S" />
-									</p:selectOneMenu>
-								</div>
-								
-								<h:panelGroup layout="block" styleClass="ui-g-12 ui-md-4" rendered="#{cadastroCorrespondenciaController.entidade.dataRetirada != null}">
-									<p:outputLabel value="Data e Hora da Retirada:" />
-									<p:inputText value="#{cadastroCorrespondenciaController.entidade.dataRetirada}" disabled="true">
-										<f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
-									</p:inputText>
-								</h:panelGroup>
-
+							<div class="ui-g-12 ui-md-3">
+								<p:outputLabel value="Código de rastreio:" for="rastreio" />
+								<p:inputText id="rastreio" value="#{cadastroCorrespondenciaController.entidade.codigoRastreio}" />
 							</div>
-						</p:panel>
-					</p:tab>
 
-				</p:accordionPanel>
+							<div class="ui-g-12">
+								<p:outputLabel value="Observações:" for="obs" />
+								<p:inputTextarea id="obs" value="#{cadastroCorrespondenciaController.entidade.observacao}"
+									rows="3" autoResize="false"
+									placeholder="Ex.: caixa amassada, entregar urgente..." />
+							</div>
+
+						</div>
+					</p:panel>
+				</p:tab>
+
+				<p:tab title="Foto (opcional)">
+					<p:panel header="Registro fotográfico" styleClass="ui-fluid">
+						<h:outputText value="Opcional. Posicione o volume e clique em Capturar foto."
+							styleClass="sa-hint-text" style="display: block; margin-bottom: 1rem;" />
+						<div class="form-grid sa-cadastro-grid ui-fluid ui-g sa-photo-capture">
+
+							<div class="ui-g-12 ui-md-6 sa-photo-capture__camera">
+								<p:outputLabel value="Webcam:" />
+								<div class="sa-photo-capture__frame">
+									<p:photoCam widgetVar="pc" listener="#{cadastroCorrespondenciaController.onCapture}"
+										update="painelFoto" width="320" height="240" />
+								</div>
+								<div class="sa-upload-row" style="margin-top: 0.75rem;">
+									<p:commandButton type="button" value="Capturar foto" icon="pi pi-camera"
+										onclick="PF('pc').capture()"
+										styleClass="sa-btn-label ui-button-outlined" />
+								</div>
+							</div>
+
+							<div class="ui-g-12 ui-md-6 sa-photo-capture__status">
+								<p:outputLabel value="Status:" />
+								<p:outputPanel id="painelFoto" layout="block" styleClass="sa-aviso-preview">
+									<h:outputText value="Nenhuma foto capturada."
+										rendered="#{empty cadastroCorrespondenciaController.entidade.fotoVolume}"
+										styleClass="sa-photo-capture__empty" />
+									<h:panelGroup rendered="#{not empty cadastroCorrespondenciaController.entidade.fotoVolume}">
+										<i class="pi pi-check-circle sa-photo-capture__success-icon"></i>
+										<h:outputText value="Foto registrada com sucesso!" styleClass="sa-photo-capture__success" />
+										<br />
+										<h:outputText value="(Salva ao concluir o cadastro)" styleClass="sa-photo-capture__hint" />
+									</h:panelGroup>
+								</p:outputPanel>
+							</div>
+
+						</div>
+					</p:panel>
+				</p:tab>
+
+				<p:tab title="Baixa / retirada" rendered="#{cadastroCorrespondenciaController.entidade.id != null}">
+					<p:panel header="Situação na portaria" styleClass="ui-fluid">
+						<div class="form-grid sa-cadastro-grid ui-fluid ui-g">
+
+							<div class="ui-g-12 ui-md-4">
+								<p:outputLabel value="Situação:" for="statusRetirada" />
+								<p:selectOneMenu id="statusRetirada" value="#{cadastroCorrespondenciaController.entidade.confirmaRetirada}">
+									<f:selectItem itemLabel="Aguardando retirada" itemValue="N" />
+									<f:selectItem itemLabel="Já retirado" itemValue="S" />
+								</p:selectOneMenu>
+							</div>
+
+							<h:panelGroup layout="block" styleClass="ui-g-12 ui-md-6"
+								rendered="#{cadastroCorrespondenciaController.entidade.dataRetirada != null}">
+								<p:outputLabel value="Data e hora da retirada:" />
+								<p:inputText value="#{cadastroCorrespondenciaController.entidade.dataRetirada}" disabled="true">
+									<f:convertDateTime pattern="dd/MM/yyyy HH:mm:ss" />
+								</p:inputText>
+							</h:panelGroup>
+
+						</div>
+					</p:panel>
+				</p:tab>
+
+			</p:accordionPanel>
 
 		</ui:define>
 	</ui:composition>

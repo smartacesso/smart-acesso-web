@@ -347,6 +347,15 @@ public class MenuController extends BaseController {
 					.styleClass("ui-simple-menu").build();
 			cadastros.getElements().add(cadastroCorrespondencia);
 		}
+
+		if (PerfilAcesso.ADMINISTRADOR.equals(usuarioLogado.getPerfil())
+				|| PerfilAcesso.GERENTE.equals(usuarioLogado.getPerfil())) {
+			DefaultMenuItem avisosApp = DefaultMenuItem.builder()
+					.value(resource.recuperaChave("menu.cadastro.aviso.app", getFacesContext()))
+					.url(BaseConstant.URL_APLICACAO + "/paginas/sistema/avisoApp/pesquisaAvisoApp.xhtml")
+					.styleClass("ui-simple-menu").build();
+			cadastros.getElements().add(avisosApp);
+		}
 		
 		DefaultMenuItem caadastroAuto = DefaultMenuItem.builder()
 				.value(resource.recuperaChave("menu.cadastro.totem", getFacesContext()))

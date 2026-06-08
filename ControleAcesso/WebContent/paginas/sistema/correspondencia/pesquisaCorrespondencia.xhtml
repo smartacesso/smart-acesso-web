@@ -1,305 +1,688 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+
         "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
 <html xmlns="http://www.w3.org/1999/xhtml"
+
 	xmlns:ui="http://java.sun.com/jsf/facelets"
+
 	xmlns:f="http://java.sun.com/jsf/core"
+
 	xmlns:h="http://java.sun.com/jsf/html"
+
 	xmlns:p="http://primefaces.org/ui">
 
+
+
 <body>
+
 	<ui:composition template="/tema/templates/template.xhtml">
 
+
+
 		<ui:define name="titulo">
+
 			#{msgs['title.sistema']} | Consulta de Correspondências
+
 		</ui:define>
+
 		<ui:define name="pageTitle">
+
 			<h:outputText value="Lista de Correspondências" />
+
 		</ui:define>
+
 		<ui:define name="pageSubtitle">
+
 			<h:outputText value="#{sessionScope.usuario.cliente.nome}" rendered="#{sessionScope.usuario != null}" />
+
 		</ui:define>
+
 
 
 		<ui:define name="tools">
-			<p:toolbar styleClass="sa-toolbar-wrap">
-				<p:toolbarGroup styleClass="sa-toolbar-actions">
-					<p:commandButton id="acaoNovo"
-						action="#{consultaCorrespondenciaController.novo}"
-						value="Nova"
-						icon="pi pi-plus" iconPos="left"
-						process="@this" update="@form"
-						title="Nova Correspondência"
-						styleClass="sa-btn-label ui-button-success" />
-					<p:commandButton id="acaoExportar"
-						value="Exportar"
-						icon="pi pi-file-excel" iconPos="left"
-						ajax="false" title="Exportar para Excel"
-						styleClass="sa-btn-label ui-button-flat">
-						<p:dataExporter type="xlsx" target="form:correspondenciaTable"
-							fileName="correspondencias" />
-					</p:commandButton>
-					<p:commandButton id="acaoLimpar"
-						action="#{consultaCorrespondenciaController.limpar}"
-						value="#{msgs['alt.acao.limpar']}"
-						title="#{msgs['alt.acao.limpar']}"
-						icon="pi pi-filter" iconPos="left"
-						process="@this" update="@form"
-						styleClass="sa-btn-label ui-button-flat" />
-					<div class="sa-toolbar-search">
-						<p:inputText id="filtro-busca-geral" placeholder="Destinatário..."
-							value="#{consultaCorrespondenciaController.parans['destinatario.nome']}"
-							styleClass="sa-search-input" />
-						<p:commandButton id="acaoBuscar"
-							action="#{consultaCorrespondenciaController.buscar}"
-							value="#{msgs['alt.acao.buscar']}"
-							title="#{msgs['alt.acao.buscar']}"
-							icon="pi pi-search" iconPos="left"
-							process="@form" update="@form" styleClass="sa-btn-label" />
-					</div>
-					<p:commandButton id="acaoFiltroAvancado"
-						value="Filtros"
-						icon="pi pi-sliders-h" iconPos="left"
-						title="Filtros Avançados" process="@this"
-						update="containerDeFiltro"
-						action="#{consultaCorrespondenciaController.toggleFiltroFlag('filtroCorrespondencia-flag')}"
-						styleClass="sa-btn-label col-desktop-only" />
-				</p:toolbarGroup>
-			</p:toolbar>
+
+			<!-- Toolbar interna: sa-pesquisa-split__toolbar -->
+
 		</ui:define>
+
+
 
 		<ui:define name="conteudo">
 
-			<h:panelGroup id="containerDeFiltro" layout="block">
-				<h:panelGroup id="filtrosAvancadosWrapper" layout="block"
-					rendered="#{consultaCorrespondenciaController.getFiltroFlag('filtroCorrespondencia-flag')}"
-					styleClass="filtros-avancados">
 
-					<h3 class="sa-filtros-avancados__title">Filtros avançados</h3>
 
-					<div class="form-grid sa-cadastro-grid ui-fluid ui-g">
+			<h:panelGroup id="saPesquisaSplit" layout="block" styleClass="sa-pesquisa-split">
 
-						<div class="ui-g-12 ui-md-3">
-							<p:outputLabel for="f-rastreio" value="Cód. Rastreio:" />
-							<p:inputText id="f-rastreio"
-								value="#{consultaCorrespondenciaController.parans['codigoRastreio']}" />
-						</div>
 
-						<div class="ui-g-12 ui-md-3">
-							<p:outputLabel for="f-tipo" value="Tipo:" />
-							<p:selectOneMenu id="f-tipo"
-								value="#{consultaCorrespondenciaController.parans['tipo']}">
-								<f:selectItem itemLabel="Todos" itemValue="" />
-								<f:selectItem itemLabel="Carta" itemValue="CARTA" />
-								<f:selectItem itemLabel="Pacote" itemValue="PACOTE" />
-								<f:selectItem itemLabel="Documento" itemValue="DOCUMENTO" />
-							</p:selectOneMenu>
-						</div>
 
-						<div class="ui-g-12 ui-md-3">
-							<p:outputLabel for="f-retirado" value="Já Retirado?" />
-							<p:selectOneMenu id="f-retirado"
-								value="#{consultaCorrespondenciaController.filtroRetirado}">
-								<f:selectItem itemLabel="Todos" itemValue="" />
-								<f:selectItem itemLabel="Sim" itemValue="S" />
-								<f:selectItem itemLabel="Não" itemValue="N" />
-							</p:selectOneMenu>
-						</div>
+				<div class="sa-pesquisa-split__main">
 
-						<div class="ui-g-12 ui-md-3">
-							<p:outputLabel for="f-data" value="Data Recebimento:" />
-							<p:calendar id="f-data"
-								value="#{consultaCorrespondenciaController.dataPesquisa}"
-								pattern="dd/MM/yyyy" navigator="true" />
-						</div>
 
-					</div>
-				</h:panelGroup>
-			</h:panelGroup>
 
-<p:outputPanel styleClass="p-col-12">
-				<h:panelGroup layout="block"
-					rendered="#{not empty consultaCorrespondenciaController.result}">
-					<p:dataTable id="correspondenciaTable"
-						value="#{consultaCorrespondenciaController.result}" var="item"
-						lazy="true" paginator="true"
-						rows="#{consultaCorrespondenciaController.quantPorPagina}"
-						paginatorPosition="bottom"
-						styleClass="tabela-responsive sa-table">
+					<h:panelGroup id="containerDeFiltro" layout="block" styleClass="sa-pesquisa-split__filtros">
 
-						<p:column headerText="Foto"
-							style="width: 80px; text-align: center;">
-							<div class="sa-cell-group sa-cell-group--center">
-								<div style="text-align: center;">
+						<h:panelGroup id="filtrosAvancadosWrapper" layout="block"
 
-									<h:panelGroup rendered="#{not empty item.fotoVolume}">
-										<img
-											src="data:image/png;base64,#{consultaCorrespondenciaController.getFotoBase64(item.fotoVolume)}"
-											class="sa-cell-thumb"
-											alt="Pacote" title="Clique para ampliar"
-											onclick="ampliarFoto(this.src);" />
-									</h:panelGroup>
+							rendered="#{consultaCorrespondenciaController.getFiltroFlag('filtroCorrespondencia-flag')}"
 
-									<h:panelGroup rendered="#{empty item.fotoVolume}">
-										<div class="sa-cell-avatar">
-											<i class="pi pi-box"></i>
-										</div>
-									</h:panelGroup>
+							styleClass="filtros-avancados">
+
+
+
+							<h3 class="sa-filtros-avancados__title">Filtros avançados</h3>
+
+
+
+							<div class="form-grid sa-cadastro-grid ui-fluid ui-g sa-filtros-avancados__grid">
+
+
+
+								<div class="ui-g-12 ui-md-3">
+
+									<p:outputLabel for="f-rastreio" value="Cód. Rastreio:" />
+
+									<p:inputText id="f-rastreio"
+
+										value="#{consultaCorrespondenciaController.parans['codigoRastreio']}" />
 
 								</div>
+
+
+
+								<div class="ui-g-12 ui-md-3">
+
+									<p:outputLabel for="f-tipo" value="Tipo:" />
+
+									<p:selectOneMenu id="f-tipo"
+
+										value="#{consultaCorrespondenciaController.parans['tipo']}">
+
+										<f:selectItem itemLabel="Todos" itemValue="" />
+
+										<f:selectItem itemLabel="Carta" itemValue="CARTA" />
+
+										<f:selectItem itemLabel="Pacote" itemValue="PACOTE" />
+
+										<f:selectItem itemLabel="Documento" itemValue="DOCUMENTO" />
+
+									</p:selectOneMenu>
+
+								</div>
+
+
+
+								<div class="ui-g-12 ui-md-3">
+
+									<p:outputLabel for="f-retirado" value="Já Retirado?" />
+
+									<p:selectOneMenu id="f-retirado"
+
+										value="#{consultaCorrespondenciaController.filtroRetirado}">
+
+										<f:selectItem itemLabel="Todos" itemValue="" />
+
+										<f:selectItem itemLabel="Sim" itemValue="S" />
+
+										<f:selectItem itemLabel="Não" itemValue="N" />
+
+									</p:selectOneMenu>
+
+								</div>
+
+
+
+								<div class="ui-g-12 ui-md-3">
+
+									<p:outputLabel for="f-data" value="Data Recebimento:" />
+
+									<p:calendar id="f-data"
+
+										value="#{consultaCorrespondenciaController.dataPesquisa}"
+
+										pattern="dd/MM/yyyy" navigator="true">
+
+										<f:convertDateTime pattern="dd/MM/yyyy" />
+
+									</p:calendar>
+
+								</div>
+
+
+
 							</div>
-						</p:column>
 
-						<p:column headerText="Unidade / Destinatário"
-							style="text-align: center;">
-							<h:panelGroup layout="block" style="text-align: center;">
 
-								<i class="pi pi-box"></i>
 
-								<br />
+							<div class="sa-form-actions sa-form-actions--end sa-filtros-avancados__actions">
 
-								<h:outputText value="#{item.destinatario.nome}"
-									styleClass="sa-cell-primary" />
+								<p:commandButton id="acaoBuscarAvancado" value="#{msgs['alt.acao.buscar']}" icon="pi pi-search" iconPos="left"
 
-								<br />
+									action="#{consultaCorrespondenciaController.buscar}"
 
-								<h:outputText value="ID: #{item.destinatario.id}"
-									styleClass="sa-cell-secondary" />
+									process="@form"
+
+									update="form:saPesquisaSplit form:growl"
+
+									oncomplete="if(window.saScheduleFitDataTables){saScheduleFitDataTables();}"
+
+									styleClass="sa-btn-label ui-button-success" />
+
+								<p:commandButton value="Ocultar filtros" icon="pi pi-times" iconPos="left"
+
+									process="@this" update="containerDeFiltro"
+
+									action="#{consultaCorrespondenciaController.toggleFiltroFlag('filtroCorrespondencia-flag')}"
+
+									oncomplete="if(window.saScheduleFitDataTables){saScheduleFitDataTables();}"
+
+									styleClass="sa-btn-label ui-button-flat" />
+
+							</div>
+
+						</h:panelGroup>
+
+					</h:panelGroup>
+
+
+
+					<p:outputPanel id="tabelaPainel" styleClass="sa-pesquisa-split__tabela p-col-12">
+
+
+
+						<div class="sa-pesquisa-split__toolbar">
+
+							<p:toolbar styleClass="sa-toolbar-wrap sa-toolbar-wrap--inline">
+
+								<p:toolbarGroup styleClass="sa-toolbar-actions sa-toolbar-page__group sa-toolbar-page__group--start">
+
+									<p:commandButton id="acaoNovo"
+
+										action="#{consultaCorrespondenciaController.novo}"
+
+										value="Nova"
+
+										icon="pi pi-plus" iconPos="left"
+
+										process="@this"
+
+										title="Nova Correspondência"
+
+										styleClass="sa-btn-label ui-button-success" />
+
+									<p:commandButton id="acaoExportar"
+
+										value="Exportar"
+
+										icon="pi pi-file-excel" iconPos="left"
+
+										ajax="false" title="Exportar para Excel"
+
+										styleClass="sa-btn-label ui-button-flat">
+
+										<p:dataExporter type="xlsx" target="form:correspondenciaTable"
+
+											fileName="correspondencias" />
+
+									</p:commandButton>
+
+									<p:commandButton id="acaoLimpar"
+
+										action="#{consultaCorrespondenciaController.limpar}"
+
+										value="#{msgs['alt.acao.limpar']}"
+
+										title="#{msgs['alt.acao.limpar']}"
+
+										icon="pi pi-filter" iconPos="left"
+
+										process="@this"
+
+										update="form:saPesquisaSplit form:growl"
+
+										oncomplete="if(window.saScheduleFitDataTables){saScheduleFitDataTables();}"
+
+										styleClass="sa-btn-label ui-button-flat" />
+
+								</p:toolbarGroup>
+
+								<p:toolbarGroup styleClass="sa-toolbar-actions sa-toolbar-page__group sa-toolbar-page__group--end">
+
+									<div class="sa-toolbar-search">
+
+										<p:inputText id="filtro-busca-geral" placeholder="Destinatário..."
+
+											value="#{consultaCorrespondenciaController.parans['destinatario.nome']}"
+
+											styleClass="sa-search-input" />
+
+										<p:commandButton id="acaoBuscar"
+
+											action="#{consultaCorrespondenciaController.buscar}"
+
+											value="#{msgs['alt.acao.buscar']}"
+
+											title="#{msgs['alt.acao.buscar']}"
+
+											icon="pi pi-search" iconPos="left"
+
+											process="@form"
+
+											update="form:saPesquisaSplit form:growl"
+
+											oncomplete="if(window.saScheduleFitDataTables){saScheduleFitDataTables();}"
+
+											styleClass="sa-btn-label" />
+
+									</div>
+
+									<p:commandButton id="acaoFiltroAvancado"
+
+										value="Filtros"
+
+										icon="pi pi-sliders-h" iconPos="left"
+
+										title="Filtros Avançados" process="@this"
+
+										update="containerDeFiltro"
+
+										action="#{consultaCorrespondenciaController.toggleFiltroFlag('filtroCorrespondencia-flag')}"
+
+										oncomplete="if(window.saScheduleFitDataTables){saScheduleFitDataTables();}"
+
+										styleClass="sa-btn-label ui-button-outlined col-desktop-only" />
+
+								</p:toolbarGroup>
+
+							</p:toolbar>
+
+						</div>
+
+
+
+						<div class="sa-pesquisa-split__grid">
+
+							<h:panelGroup layout="block"
+
+								rendered="#{empty consultaCorrespondenciaController.result}">
+
+								<ui:include src="/tema/templates/vazio.xhtml">
+
+									<ui:param name="exibe" value="true" />
+
+									<ui:param name="exibeAdicionar" value="true" />
+
+								</ui:include>
 
 							</h:panelGroup>
-						</p:column>
 
-						<p:column headerText="Volume">
-							<div style="text-align: center;">
-								<span class="sa-cell-primary">#{item.tipo != null ?
-									item.tipo : 'Pacote'}</span> <span class="sa-cell-secondary">Rastreio:
-									#{item.codigoRastreio != null ? item.codigoRastreio : 'S/N'}</span> <span
-									class="sa-cell-secondary">#{item.observacao}</span>
-							</div>
-						</p:column>
 
-						<p:column headerText="Recebimento" style="text-align: center;">
-							<h:panelGroup layout="block" style="text-align: center;">
-								<span class="sa-cell-primary"> <h:outputText
-										value="#{item.dataRecebimento}">
-										<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
-									</h:outputText>
-								</span>
 
-								<br />
+							<h:panelGroup layout="block"
 
-								<span class="sa-cell-secondary"> Portaria Principal </span>
+								rendered="#{not empty consultaCorrespondenciaController.result}">
+
+								<p:dataTable id="correspondenciaTable"
+
+									value="#{consultaCorrespondenciaController.result}" var="item"
+
+									lazy="true" paginator="true"
+
+									rows="#{consultaCorrespondenciaController.quantPorPagina}"
+
+									paginatorPosition="bottom" paginatorAlwaysVisible="false"
+
+									styleClass="tabela-responsive sa-table">
+
+
+
+									<p:ajax event="page"
+
+										oncomplete="if(window.saScheduleFitDataTables){saScheduleFitDataTables();}" />
+
+
+
+									<p:column headerText="Foto"
+
+										style="width: 80px; text-align: center;">
+
+										<div class="sa-cell-group sa-cell-group--center">
+
+											<div style="text-align: center;">
+
+												<h:panelGroup rendered="#{not empty item.fotoVolume}">
+
+													<img
+
+														src="data:image/png;base64,#{consultaCorrespondenciaController.getFotoBase64(item.fotoVolume)}"
+
+														class="sa-cell-thumb"
+
+														alt="Pacote" title="Clique para ampliar"
+
+														onclick="ampliarFoto(this.src);" />
+
+												</h:panelGroup>
+
+												<h:panelGroup rendered="#{empty item.fotoVolume}">
+
+													<div class="sa-cell-avatar">
+
+														<i class="pi pi-box"></i>
+
+													</div>
+
+												</h:panelGroup>
+
+											</div>
+
+										</div>
+
+									</p:column>
+
+
+
+									<p:column headerText="Unidade / Destinatário"
+
+										style="text-align: center;">
+
+										<h:panelGroup layout="block" style="text-align: center;">
+
+											<i class="pi pi-box"></i>
+
+											<br />
+
+											<h:outputText value="#{item.destinatario.nome}"
+
+												styleClass="sa-cell-primary" />
+
+											<br />
+
+											<h:outputText value="ID: #{item.destinatario.id}"
+
+												styleClass="sa-cell-secondary" />
+
+										</h:panelGroup>
+
+									</p:column>
+
+
+
+									<p:column headerText="Volume">
+
+										<div style="text-align: center;">
+
+											<span class="sa-cell-primary">#{item.tipo != null ? item.tipo : 'Pacote'}</span>
+
+											<span class="sa-cell-secondary">Rastreio:
+
+												#{item.codigoRastreio != null ? item.codigoRastreio : 'S/N'}</span>
+
+											<span class="sa-cell-secondary">#{item.observacao}</span>
+
+										</div>
+
+									</p:column>
+
+
+
+									<p:column headerText="Recebimento" style="text-align: center;">
+
+										<h:panelGroup layout="block" style="text-align: center;">
+
+											<span class="sa-cell-primary">
+
+												<h:outputText value="#{item.dataRecebimento}">
+
+													<f:convertDateTime pattern="dd/MM/yyyy HH:mm" />
+
+												</h:outputText>
+
+											</span>
+
+											<br />
+
+											<span class="sa-cell-secondary"> Portaria Principal </span>
+
+										</h:panelGroup>
+
+									</p:column>
+
+
+
+									<p:column headerText="Situação"
+
+										style="width: 150px; text-align: center;">
+
+										<span class="sa-badge #{item.confirmaRetirada == 'S' ? 'sa-badge--ok' : 'sa-badge--warn'}">
+
+											<i class="pi #{item.confirmaRetirada == 'S' ? 'pi-check' : 'pi-clock'}"></i>
+
+											#{item.confirmaRetirada == 'S' ? 'Retirada' : 'Aguardando'}
+
+										</span>
+
+									</p:column>
+
+
+
+									<p:column headerText="" style="text-align: right; width: 180px;">
+
+										<div class="sa-table-actions sa-table-actions--end">
+
+											<p:commandButton icon="pi pi-check" title="Confirmar Retirada"
+
+												rendered="#{item.confirmaRetirada == 'N'}" process="@this"
+
+												action="#{consultaCorrespondenciaController.prepararDialogRetirada}"
+
+												update="form:painelRetirada"
+
+												oncomplete="PF('widgetConfirmarRetirada').show();"
+
+												styleClass="rounded-button ui-button-outlined ui-button-secondary">
+
+												<f:setPropertyActionListener value="#{item}"
+
+													target="#{consultaCorrespondenciaController.correspondenciaSelecionada}" />
+
+											</p:commandButton>
+
+											<p:commandButton icon="pi pi-pencil" title="Editar"
+
+												action="#{consultaCorrespondenciaController.editar(item.id)}"
+
+												process="@this"
+
+												styleClass="rounded-button ui-button-outlined ui-button-secondary" />
+
+											<p:commandButton icon="pi pi-trash" title="Excluir"
+
+												process="@this" update="form:growl"
+
+												styleClass="rounded-button ui-button-outlined ui-button-secondary">
+
+												<f:setPropertyActionListener value="#{item}"
+
+													target="#{consultaCorrespondenciaController.correspondenciaSelecionada}" />
+
+												<p:ajax oncomplete="PF('confirmarExclusao').show();" />
+
+											</p:commandButton>
+
+										</div>
+
+									</p:column>
+
+
+
+								</p:dataTable>
+
 							</h:panelGroup>
-						</p:column>
 
-						<p:column headerText="Situação"
-							style="width: 150px; text-align: center;">
-							<h:outputText
-								value="#{item.confirmaRetirada == 'S' ? 'Retirada' : 'Não Retirada'}"
-								styleClass="#{item.confirmaRetirada == 'S' ? 'sa-status-retirado' : 'sa-status-pendente'}" />
-						</p:column>
+						</div>
 
-						<p:column headerText="" style="text-align: right; width: 180px;">
-							<div class="sa-table-actions sa-table-actions--end">
 
-								<p:commandButton icon="pi pi-check" title="Confirmar Retirada"
-									rendered="#{item.confirmaRetirada == 'N'}" process="@this"
-									update="form:painelRetirada"
-									oncomplete="PF('widgetConfirmarRetirada').show()"
-									styleClass="rounded-button ui-button-outlined ui-button-secondary">
-									<f:setPropertyActionListener value="#{item}"
-										target="#{consultaCorrespondenciaController.correspondenciaSelecionada}" />
-								</p:commandButton>
 
-								<p:commandButton icon="pi pi-pencil" title="Editar"
-									action="#{consultaCorrespondenciaController.editar(item.id)}"
-									process="@this"
-									styleClass="rounded-button ui-button-outlined ui-button-secondary" />
+					</p:outputPanel>
 
-								<p:commandButton icon="pi pi-trash" title="Excluir"
-									process="@this" oncomplete="PF('confirmarExclusao').show()"
-									styleClass="rounded-button ui-button-outlined ui-button-secondary">
-									<f:setPropertyActionListener value="#{item}"
-										target="#{consultaCorrespondenciaController.correspondenciaSelecionada}" />
-								</p:commandButton>
 
-							</div>
-						</p:column>
 
-					</p:dataTable>
-				</h:panelGroup>
-			</p:outputPanel>
+				</div>
 
-			<p:confirmDialog widgetVar="confirmarExclusao" header="Confirmar"
-				message="Deseja excluir este registro?" styleClass="sa-dialog">
-				<p:button value="Não"
-					onclick="PF('confirmarExclusao').hide(); return false;"
-					styleClass="sa-btn-label ui-button-flat" />
-				<p:commandButton value="Sim"
-					oncomplete="PF('confirmarExclusao').hide();"
-					action="#{consultaCorrespondenciaController.excluirCorrespondencia()}"
-					process="@this" update="@form"
-					styleClass="sa-btn-label ui-button-success" />
+
+
+			</h:panelGroup>
+
+
+
+			<p:confirmDialog widgetVar="confirmarExclusao" header="Confirmar exclusão"
+
+				message="Deseja excluir este registro?" styleClass="sa-dialog"
+
+				showEffect="fade" hideEffect="fade">
+
+				<div class="sa-dialog-actions">
+
+					<p:button value="Cancelar"
+
+						onclick="PF('confirmarExclusao').hide(); return false;"
+
+						styleClass="sa-btn-label ui-button-flat" />
+
+					<p:commandButton value="Excluir" icon="pi pi-trash" iconPos="left"
+
+						oncomplete="PF('confirmarExclusao').hide();"
+
+						action="#{consultaCorrespondenciaController.excluirCorrespondencia()}"
+
+						process="@this" update="form:saPesquisaSplit form:growl"
+
+						styleClass="sa-btn-label ui-button-danger" />
+
+				</div>
+
 			</p:confirmDialog>
 
+
+
 			<p:dialog id="dialogAmpliarFoto" widgetVar="dialogFotoWidget"
+
 				modal="true" resizable="false" draggable="false" showHeader="true"
+
 				header="Foto do Volume" closeOnEscape="true" dismissableMask="true"
+
 				styleClass="sa-dialog sa-dialog-photo">
 
 				<div class="sa-dialog-photo__body">
+
 					<img id="imagemAmpliada" src="" class="sa-dialog-photo__img" />
+
 				</div>
+
 			</p:dialog>
 
+
+
 			<p:dialog id="dialogConfirmarRetirada"
+
 				widgetVar="widgetConfirmarRetirada" header="Confirmar Retirada"
+
 				modal="true" resizable="false" width="400" closeOnEscape="true"
+
 				showEffect="fade" hideEffect="fade" styleClass="sa-dialog">
 
+
+
 				<h:panelGroup id="painelRetirada" layout="block">
-					<p class="sa-hint-text" style="font-weight: 600; margin-bottom: 1rem;">
+
+					<p class="sa-hint-text" style="font-weight: 600; margin-bottom: 1rem;"
+
+						rendered="#{consultaCorrespondenciaController.correspondenciaSelecionada != null}">
+
 						Pacote de: #{consultaCorrespondenciaController.correspondenciaSelecionada.destinatario.nome}
+
 					</p>
+
+
 
 					<p:messages id="msgRetirada" showDetail="false" closable="true" />
 
+
+
 					<div class="sa-form-grid" style="grid-template-columns: 1fr;">
+
 						<div class="sa-field">
+
 							<span class="sa-label">Nome de quem está retirando</span>
+
 							<p:inputText id="nomeRetirada"
+
 								value="#{consultaCorrespondenciaController.nomeRetirada}"
-								required="true" requiredMessage="Informe o nome."
+
 								placeholder="Ex: João da Silva" />
+
 						</div>
+
 						<div class="sa-field">
+
 							<span class="sa-label">Documento (RG/CPF)</span>
+
 							<p:inputText id="docRetirada"
+
 								value="#{consultaCorrespondenciaController.documentoRetirada}"
-								required="true" requiredMessage="Informe o documento."
+
 								placeholder="Apenas números ou formato padrão" />
+
 						</div>
+
 					</div>
+
+
 
 					<div class="sa-dialog-actions">
+
 						<p:commandButton value="Cancelar" icon="pi pi-times"
+
 							onclick="PF('widgetConfirmarRetirada').hide(); return false;"
+
 							styleClass="sa-btn-label ui-button-flat" />
+
 						<p:commandButton value="Confirmar" icon="pi pi-check"
+
 							action="#{consultaCorrespondenciaController.confirmarRetiradaComDados}"
-							process="painelRetirada" update="@form"
+
+							process="painelRetirada" update="form:saPesquisaSplit form:growl painelRetirada"
+
 							styleClass="sa-btn-label ui-button-success"
-							oncomplete="if (args &amp;&amp; !args.validationFailed) PF('widgetConfirmarRetirada').hide();" />
+
+							oncomplete="if (args &amp;&amp; !args.validationFailed) { PF('widgetConfirmarRetirada').hide(); if(window.saScheduleFitDataTables){saScheduleFitDataTables();} }" />
+
 					</div>
+
 				</h:panelGroup>
+
 			</p:dialog>
 
+
+
 			<script type="text/javascript">
+
 				function ampliarFoto(srcBase64) {
+
 					document.getElementById('imagemAmpliada').src = srcBase64;
+
 					PF('dialogFotoWidget').show();
+
 				}
+
 			</script>
+
 		</ui:define>
+
 	</ui:composition>
+
 </body>
+
 </html>
+

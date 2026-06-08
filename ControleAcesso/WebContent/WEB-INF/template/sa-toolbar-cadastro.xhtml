@@ -1,0 +1,20 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui">
+
+	<!-- ctrl = bean do cadastro (ex.: cadastroCorrespondenciaController); deve expor salvar() -->
+	<p:toolbar styleClass="sa-toolbar-wrap sa-toolbar-page sa-toolbar-page--cadastro">
+		<p:toolbarGroup styleClass="sa-toolbar-actions sa-toolbar-page__group">
+			<ui:include src="/WEB-INF/template/sa-voltar-lista.xhtml">
+				<ui:param name="ctrl" value="#{ctrl}" />
+			</ui:include>
+			<p:commandButton id="save"
+				action="#{ctrl.salvar}"
+				value="#{msgs['alt.acao.save']}"
+				title="#{msgs['alt.acao.save']}"
+				icon="pi pi-check" iconPos="left"
+				styleClass="sa-btn-label ui-button-success" />
+		</p:toolbarGroup>
+	</p:toolbar>
+
+</ui:composition>
