@@ -9,6 +9,7 @@ import javax.inject.Named;
 import br.com.startjob.acesso.annotations.UseCase;
 import br.com.startjob.acesso.controller.BaseController;
 import br.com.startjob.acesso.modelo.entity.UsuarioEntity;
+import br.com.startjob.acesso.modelo.enumeration.WebPermissao;
 
 @SuppressWarnings("serial")
 @Named("consultaUsuarioController")
@@ -35,9 +36,13 @@ public class ConsultaUsuarioController extends BaseController {
 	}
 	
 	public void excluirUsuario() {
-		if(usuarioSelecionado != null) {
-			super.excluir(usuarioSelecionado.getId());
+		if (usuarioSelecionado == null) {
+			return;
 		}
+		if (!validarPermissaoWeb(br.com.startjob.acesso.modelo.enumeration.WebPermissao.USUARIO_EDITAR)) {
+			return;
+		}
+		super.excluir(usuarioSelecionado.getId());
 	}
 	
 	@Override
@@ -89,6 +94,10 @@ public class ConsultaUsuarioController extends BaseController {
 
 	public void setParamBuscaGeral(String paramBuscaGeral) {
 	    this.paramBuscaGeral = paramBuscaGeral;
+	}
+
+	public boolean isPodeEditar() {
+		return temPermissaoWeb(WebPermissao.USUARIO_EDITAR);
 	}
 	
 }

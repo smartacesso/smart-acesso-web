@@ -30,6 +30,7 @@
 						value="#{msgs['alt.acao.save']}"
 						title="#{msgs['alt.acao.save']}"
 						icon="pi pi-check" iconPos="left"
+						rendered="#{gerenciarParametrosController.podeEditar}"
 						styleClass="sa-btn-label ui-button-success">
 						<p:ajax process="@form" update="@form menuForm" />
 					</p:commandButton>

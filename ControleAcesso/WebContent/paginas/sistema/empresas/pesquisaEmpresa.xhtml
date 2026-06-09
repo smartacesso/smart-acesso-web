@@ -34,6 +34,7 @@
 						icon="pi pi-plus" iconPos="left"
 						process="@this" update="@form"
 						title="#{msgs['alt.acao.nova.empresa']}"
+						rendered="#{consultaEmpresaController.podeEditar}"
 						styleClass="sa-btn-label ui-button-success" />
 					<p:commandButton id="acaoExportar"
 						value="#{msgs['alt.acao.exportar']}"
@@ -117,7 +118,8 @@
 						</p:column>
 
 						<p:column headerText="#{msgs['alt.acao.editar']}"
-							style="text-align: center;">
+							style="text-align: center;"
+							rendered="#{consultaEmpresaController.podeEditar}">
 							<p:commandButton icon="pi pi-pencil"
 								title="#{msgs['alt.acao.editar.empresa']}"
 								action="#{consultaEmpresaController.editar(empresa.id)}"
@@ -125,7 +127,8 @@
 						</p:column>
 
 						<p:column headerText="#{msgs['alt.acao.excluir']}"
-							style="text-align: center;">
+							style="text-align: center;"
+							rendered="#{consultaEmpresaController.podeEditar}">
 							<p:commandButton icon="pi pi-trash"
 								title="#{msgs['alt.acao.excluir']}"
 								styleClass="rounded-button ui-button-danger ui-button-flat">

@@ -9,6 +9,7 @@ import javax.inject.Named;
 import br.com.startjob.acesso.annotations.UseCase;
 import br.com.startjob.acesso.controller.BaseController;
 import br.com.startjob.acesso.modelo.entity.EmpresaEntity;
+import br.com.startjob.acesso.modelo.enumeration.WebPermissao;
 
 @Named("consultaEmpresaController")
 @ViewScoped
@@ -33,9 +34,13 @@ public class ConsultaEmpresaController extends BaseController{
 	}
 	
 	public void excluirEmpresa() {
-		if(empresaSelecionada != null) {
-			super.excluir(empresaSelecionada.getId());
+		if (empresaSelecionada == null) {
+			return;
 		}
+		if (!validarPermissaoWeb(br.com.startjob.acesso.modelo.enumeration.WebPermissao.EMPRESA_EDITAR)) {
+			return;
+		}
+		super.excluir(empresaSelecionada.getId());
 	}
 	
 	@Override
@@ -84,6 +89,10 @@ public class ConsultaEmpresaController extends BaseController{
 
 	public void setParamBuscaGeral(String paramBuscaGeral) {
 	    this.paramBuscaGeral = paramBuscaGeral;
+	}
+
+	public boolean isPodeEditar() {
+		return temPermissaoWeb(WebPermissao.EMPRESA_EDITAR);
 	}
 
 }

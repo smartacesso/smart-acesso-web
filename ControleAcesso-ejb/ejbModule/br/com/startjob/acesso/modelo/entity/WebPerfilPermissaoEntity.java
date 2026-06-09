@@ -27,7 +27,10 @@ import br.com.startjob.acesso.modelo.enumeration.PerfilAcesso;
 				+ "from WebPerfilPermissaoEntity obj "
 				+ "where obj.cliente.id = :ID_CLIENTE "
 				+ "and obj.perfil = :PERFIL "
-				+ "and (obj.removido = false or obj.removido is null)") })
+				+ "and (obj.removido = false or obj.removido is null)"),
+		@NamedQuery(name = "WebPerfilPermissaoEntity.findAllByIdCliente", query = "select obj "
+				+ "from WebPerfilPermissaoEntity obj "
+				+ "where obj.cliente.id = :ID_CLIENTE") })
 @SuppressWarnings("serial")
 public class WebPerfilPermissaoEntity extends ClienteBaseEntity {
 

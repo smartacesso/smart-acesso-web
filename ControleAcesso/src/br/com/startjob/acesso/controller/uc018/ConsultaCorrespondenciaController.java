@@ -16,6 +16,7 @@ import javax.inject.Named;
 import br.com.startjob.acesso.annotations.UseCase;
 import br.com.startjob.acesso.controller.BaseController;
 import br.com.startjob.acesso.modelo.entity.CorrespondenciaEntity;
+import br.com.startjob.acesso.modelo.enumeration.WebPermissao;
 import br.com.startjob.acesso.utils.MailSendUtils;
 
 @Named("consultaCorrespondenciaController")
@@ -167,16 +168,20 @@ public class ConsultaCorrespondenciaController extends BaseController implements
 	}
 
 	public void excluirCorrespondencia() {
-		if (correspondenciaSelecionada != null) {
-			try {
-				correspondenciaSelecionada.setRemovido(true);
-				correspondenciaSelecionada.setDataRemovido(new Date());
-				baseEJB.alteraObjeto(correspondenciaSelecionada);
-				mensagemInfo("", "msg.generica.objeto.excluido.sucesso");
-				buscar();
-			} catch (Exception e) {
-				mensagemFatal("", "msg.nao.excluido");
-			}
+		if (correspondenciaSelecionada == null) {
+			return;
+		}
+		if (!validarPermissaoWeb(br.com.startjob.acesso.modelo.enumeration.WebPermissao.CORRESPONDENCIA_EDITAR)) {
+			return;
+		}
+		try {
+			correspondenciaSelecionada.setRemovido(true);
+			correspondenciaSelecionada.setDataRemovido(new Date());
+			baseEJB.alteraObjeto(correspondenciaSelecionada);
+			mensagemInfo("", "msg.generica.objeto.excluido.sucesso");
+			buscar();
+		} catch (Exception e) {
+			mensagemFatal("", "msg.nao.excluido");
 		}
 	}
 
@@ -226,5 +231,9 @@ public class ConsultaCorrespondenciaController extends BaseController implements
 
 	public void setDocumentoRetirada(String documentoRetirada) {
 	    this.documentoRetirada = documentoRetirada;
+	}
+
+	public boolean isPodeEditar() {
+		return temPermissaoWeb(WebPermissao.CORRESPONDENCIA_EDITAR);
 	}
 }

@@ -88,10 +88,15 @@ public class WebPermissaoEJB extends BaseEJB implements WebPermissaoEJBRemote {
 		Map<String, Object> args = new HashMap<>();
 		args.put("ID_CLIENTE", idCliente);
 		List<WebPerfilPermissaoEntity> existentes = (List<WebPerfilPermissaoEntity>) pesquisaArgFixos(
-				WebPerfilPermissaoEntity.class, "findByIdCliente", args);
+				WebPerfilPermissaoEntity.class, "findAllByIdCliente", args);
+
+		Map<String, WebPerfilPermissaoEntity> indice = new HashMap<>();
 		if (existentes != null) {
 			for (WebPerfilPermissaoEntity row : existentes) {
-				excluiObjeto(row);
+				if (row.getPerfil() == null || row.getCodigoPermissao() == null) {
+					continue;
+				}
+				indice.put(chaveMatriz(row.getPerfil(), row.getCodigoPermissao()), row);
 			}
 		}
 
@@ -102,14 +107,25 @@ public class WebPermissaoEJB extends BaseEJB implements WebPermissaoEJBRemote {
 				continue;
 			}
 			for (WebPermissao permissao : WebPermissao.values()) {
-				WebPerfilPermissaoEntity row = new WebPerfilPermissaoEntity();
-				row.setCliente(cliente);
-				row.setPerfil(perfil);
-				row.setCodigoPermissao(permissao.getCodigo());
-				row.setHabilitado(habilitadas.contains(permissao.getCodigo()));
+				String codigo = permissao.getCodigo();
+				WebPerfilPermissaoEntity row = indice.get(chaveMatriz(perfil, codigo));
+				if (row == null) {
+					row = new WebPerfilPermissaoEntity();
+					row.setCliente(cliente);
+					row.setPerfil(perfil);
+					row.setCodigoPermissao(codigo);
+				}
+				row.setHabilitado(habilitadas.contains(codigo));
+				row.setRemovido(false);
+				row.setDataRemovido(null);
 				gravaObjeto(row);
+				indice.put(chaveMatriz(perfil, codigo), row);
 			}
 		}
+	}
+
+	private static String chaveMatriz(PerfilAcesso perfil, String codigo) {
+		return perfil.name() + "|" + codigo;
 	}
 
 	@Override

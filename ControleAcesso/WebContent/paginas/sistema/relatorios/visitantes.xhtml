@@ -283,9 +283,8 @@
 
 						<p:column headerText="#{msgs['label.uc011.cpf']}"
 						styleClass="col-desktop-only sa-table-col-center">
-							<h:outputText value="#{visitante.pedestre.cpf}">
-								<f:convertDateTime pattern="dd/MM/yyyy" />
-							</h:outputText>
+							<h:outputText
+								value="#{relatorioVisitantesController.cpfExibicaoPedestre(visitante.pedestre.cpf)}" />
 						</p:column>
 
 						<p:column styleClass="col-desktop-only sa-table-col-center sa-table-col-abbr">

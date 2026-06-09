@@ -208,6 +208,8 @@
 
 										title="Nova Correspondência"
 
+										rendered="#{consultaCorrespondenciaController.podeEditar}"
+
 										styleClass="sa-btn-label ui-button-success" />
 
 									<p:commandButton id="acaoExportar"
@@ -472,7 +474,7 @@
 
 											<p:commandButton icon="pi pi-check" title="Confirmar Retirada"
 
-												rendered="#{item.confirmaRetirada == 'N'}" process="@this"
+												rendered="#{consultaCorrespondenciaController.podeEditar and item.confirmaRetirada == 'N'}" process="@this"
 
 												action="#{consultaCorrespondenciaController.prepararDialogRetirada}"
 
@@ -494,11 +496,15 @@
 
 												process="@this"
 
+												rendered="#{consultaCorrespondenciaController.podeEditar}"
+
 												styleClass="rounded-button ui-button-outlined ui-button-secondary" />
 
 											<p:commandButton icon="pi pi-trash" title="Excluir"
 
 												process="@this" update="form:growl"
+
+												rendered="#{consultaCorrespondenciaController.podeEditar}"
 
 												styleClass="rounded-button ui-button-outlined ui-button-secondary">
 

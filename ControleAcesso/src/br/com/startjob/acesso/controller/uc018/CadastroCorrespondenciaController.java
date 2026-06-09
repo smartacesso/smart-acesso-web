@@ -55,6 +55,9 @@ public class CadastroCorrespondenciaController extends BaseController implements
 	}
 
 	public String salvar() {
+		if (!validarPermissaoWeb(br.com.startjob.acesso.modelo.enumeration.WebPermissao.CORRESPONDENCIA_EDITAR)) {
+			return "";
+		}
 		CorrespondenciaEntity entidade = (CorrespondenciaEntity) getEntidade();
 
 		entidade.setCliente(getUsuarioLogado().getCliente());

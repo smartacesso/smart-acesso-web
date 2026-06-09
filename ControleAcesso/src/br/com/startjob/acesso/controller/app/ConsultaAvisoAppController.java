@@ -20,6 +20,7 @@ import org.primefaces.PrimeFaces;
 import br.com.startjob.acesso.annotations.UseCase;
 import br.com.startjob.acesso.controller.BaseController;
 import br.com.startjob.acesso.modelo.entity.AvisoAppEntity;
+import br.com.startjob.acesso.modelo.enumeration.WebPermissao;
 import br.com.startjob.acesso.modelo.entity.base.BaseEntity;
 
 @Named("consultaAvisoAppController")
@@ -135,6 +136,9 @@ public class ConsultaAvisoAppController extends BaseController implements Serial
 			mensagemFatal("", "msg.nao.excluido");
 			return;
 		}
+		if (!validarPermissaoWeb(br.com.startjob.acesso.modelo.enumeration.WebPermissao.AVISO_APP_EDITAR)) {
+			return;
+		}
 		try {
 			avisoSelecionado.setRemovido(true);
 			avisoSelecionado.setDataRemovido(new Date());
@@ -152,5 +156,9 @@ public class ConsultaAvisoAppController extends BaseController implements Serial
 
 	public void setAvisoSelecionado(AvisoAppEntity avisoSelecionado) {
 		this.avisoSelecionado = avisoSelecionado;
+	}
+
+	public boolean isPodeEditar() {
+		return temPermissaoWeb(WebPermissao.AVISO_APP_EDITAR);
 	}
 }

@@ -148,7 +148,7 @@ public class ConsultaCadastroErroController extends BaseController {
 		if ((cpf == null || cpf.isEmpty()) && item.getPedestre() != null) {
 			cpf = item.getPedestre().getCpf();
 		}
-		return formatarCpf(cpf);
+		return cpfExibicaoPedestre(cpf);
 	}
 
 	public String formatarCpf(String cpf) {

@@ -32,6 +32,7 @@
 						value="#{msgs['alt.acao.nova.regra']}"
 						title="#{msgs['alt.acao.nova.regra']}"
 						icon="pi pi-plus" iconPos="left"
+						rendered="#{consultaRegraAcessoController.podeEditar}"
 						styleClass="sa-btn-label ui-button-success">
 						<p:ajax process="@this" update="@form" />
 					</p:commandButton>
@@ -104,7 +105,8 @@
 							<h:outputText value="#{regra.status}" />
 						</p:column>
 						
-						<p:column headerText="#{msgs['alt.acao.editar']}" styleClass="sa-table-col-edit" style="width: 100px">
+						<p:column headerText="#{msgs['alt.acao.editar']}" styleClass="sa-table-col-edit" style="width: 100px"
+							rendered="#{consultaRegraAcessoController.podeEditar}">
 							<p:commandButton id="botaoEditarRegra"
 								action="#{consultaRegraAcessoController.editar(regra.id)}"
 								title="#{msgs['alt.acao.editar']}"
@@ -112,7 +114,8 @@
 								styleClass="ui-button-info ui-button-flat rounded-button" />
 						</p:column>
 						
-						<p:column headerText="#{msgs['alt.acao.excluir']}" styleClass="sa-table-col-edit" style="width: 100px">
+						<p:column headerText="#{msgs['alt.acao.excluir']}" styleClass="sa-table-col-edit" style="width: 100px"
+							rendered="#{consultaRegraAcessoController.podeEditar}">
 							<p:commandButton icon="pi pi-trash"
 								title="#{msgs['alt.acao.excluir']}"
 								styleClass="ui-button-danger ui-button-flat rounded-button">

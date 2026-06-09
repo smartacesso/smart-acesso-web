@@ -14,7 +14,7 @@
 				<p:inputText id="nome"
 					value="#{cadastroPedestreController.entidade.nome}"
 					required="true"
-					disabled="#{not cadastroPedestreController.usuarioTemPermissao()}" />
+					disabled="#{not cadastroPedestreController.podeEditarCadastro}" />
 			</div>
 
 			<div class="ui-g-12 ui-md-6">
@@ -31,11 +31,11 @@
 				<p:inputText id="email"
 					value="#{cadastroPedestreController.entidade.email}"
 					required="#{cadastroPedestreController.verificaObrigatorio('email')}"
-					disabled="#{not cadastroPedestreController.usuarioTemPermissao()}"
-					rendered="#{cadastroPedestreController.usuarioTemPermissao()}" />
+					disabled="#{not cadastroPedestreController.podeEditarCadastro}"
+					rendered="#{cadastroPedestreController.podeVerDadosSensiveis}" />
 				<h:outputText
 					value="#{cadastroPedestreController.getEmailMascarado()}"
-					rendered="#{not cadastroPedestreController.usuarioTemPermissao()}" />
+					rendered="#{not cadastroPedestreController.podeVerDadosSensiveis}" />
 			</div>
 
 			<div class="ui-g-12 ui-md-6">
@@ -44,15 +44,15 @@
 					value="#{cadastroPedestreController.entidade.cpf}"
 					converter="cpfConverter"
 					required="#{cadastroPedestreController.verificaObrigatorio('cpf')}"
-					disabled="#{not cadastroPedestreController.usuarioTemPermissao()}"
-					rendered="#{cadastroPedestreController.usuarioTemPermissao()}"
+					disabled="#{not cadastroPedestreController.podeEditarCadastro}"
+					rendered="#{cadastroPedestreController.podeVerDadosSensiveis}"
 					onclick="this.setSelectionRange(0,0);">
 					<p:ajax event="change" process="@this"
 						listener="#{cadastroPedestreController.onCpfBlur}" />
 				</p:inputMask>
 				<h:outputText
 					value="#{cadastroPedestreController.getCpfMascarado()}"
-					rendered="#{not cadastroPedestreController.usuarioTemPermissao()}" />
+					rendered="#{not cadastroPedestreController.podeVerDadosSensiveis}" />
 			</div>
 
 			<div class="ui-g-12 ui-md-6">
@@ -69,15 +69,15 @@
 				<p:inputText id="rg"
 					value="#{cadastroPedestreController.entidade.rg}"
 					required="#{cadastroPedestreController.verificaObrigatorio('rg')}"
-					disabled="#{not cadastroPedestreController.usuarioTemPermissao()}"
+					disabled="#{not cadastroPedestreController.podeEditarCadastro}"
 					onkeyup="$(this).val($(this).val().replace(/[^0-9a-zA-Z]/g, ''));"
-					rendered="#{cadastroPedestreController.usuarioTemPermissao()}">
+					rendered="#{cadastroPedestreController.podeVerDadosSensiveis}">
 					<p:ajax event="change" process="@this"
 						listener="#{cadastroPedestreController.onRgBlur}" />
 				</p:inputText>
 				<h:outputText
 					value="#{cadastroPedestreController.getRgMascarado()}"
-					rendered="#{not cadastroPedestreController.usuarioTemPermissao()}" />
+					rendered="#{not cadastroPedestreController.podeVerDadosSensiveis}" />
 			</div>
 
 			<div class="ui-g-12 ui-md-6">
@@ -86,7 +86,7 @@
 				<p:inputMask id="telefone" mask="(99) 9999-9999"
 					value="#{cadastroPedestreController.entidade.telefone}"
 					required="#{cadastroPedestreController.verificaObrigatorio('telefone')}"
-					disabled="#{not cadastroPedestreController.usuarioTemPermissao()}" />
+					disabled="#{not cadastroPedestreController.podeEditarCadastro or not cadastroPedestreController.podeVerDadosSensiveis}" />
 			</div>
 
 			<div class="ui-g-12 ui-md-6">
@@ -95,7 +95,7 @@
 				<p:inputMask id="celular" mask="(99) 9 9999-9999"
 					value="#{cadastroPedestreController.entidade.celular}"
 					required="#{cadastroPedestreController.verificaObrigatorio('celular')}"
-					disabled="#{not cadastroPedestreController.usuarioTemPermissao()}" />
+					disabled="#{not cadastroPedestreController.podeEditarCadastro or not cadastroPedestreController.podeVerDadosSensiveis}" />
 			</div>
 
 			<div class="ui-g-12">

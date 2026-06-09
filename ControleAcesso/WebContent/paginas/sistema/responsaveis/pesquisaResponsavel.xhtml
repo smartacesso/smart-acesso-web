@@ -29,6 +29,7 @@
 						value="#{msgs['alt.acao.novo']}"
 						icon="pi pi-plus" iconPos="left"
 						process="@this" update="@form" title="#{msgs['alt.acao.novo']}"
+						rendered="#{consultaResponsavelController.podeEditar}"
 						styleClass="sa-btn-label ui-button-success" />
 					<p:commandButton id="acaoLimpar"
 						action="#{consultaResponsavelController.limpar}"
@@ -87,7 +88,8 @@
 						</p:column>
 
 						<p:column headerText="#{msgs['alt.acao.editar']}"
-							style="text-align: center;">
+							style="text-align: center;"
+							rendered="#{consultaResponsavelController.podeEditar}">
 							<p:commandButton icon="pi pi-pencil"
 								title="#{msgs['alt.acao.editar']}"
 								action="#{consultaResponsavelController.editar(responsavel.id)}"
@@ -95,7 +97,8 @@
 						</p:column>
 
 						<p:column headerText="#{msgs['alt.acao.excluir']}"
-							style="text-align: center;">
+							style="text-align: center;"
+							rendered="#{consultaResponsavelController.podeEditar}">
 							<p:commandButton icon="pi pi-trash"
 								title="#{msgs['alt.acao.excluir']}"
 								rendered="#{responsavel.id != sessionScope.usuario.id}"

@@ -100,6 +100,9 @@ public class CadastroEmpresaController extends CadastroBaseController {
 	
 	@Override
 	public String salvar() {
+		if (!validarPermissaoWeb(br.com.startjob.acesso.modelo.enumeration.WebPermissao.EMPRESA_EDITAR)) {
+			return "";
+		}
 		EmpresaEntity empresa = (EmpresaEntity) getEntidade();
 
 		if(empresa.getTelefone() == null && empresa.getCelular() == null) {

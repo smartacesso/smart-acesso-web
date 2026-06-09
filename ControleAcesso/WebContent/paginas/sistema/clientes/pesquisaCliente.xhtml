@@ -29,6 +29,7 @@
 						value="#{msgs['alt.acao.novo.cliente']}"
 						title="#{msgs['alt.acao.novo.cliente']}"
 						icon="pi pi-plus" iconPos="left"
+						rendered="#{consultaClienteController.podeEditar}"
 						styleClass="sa-btn-label ui-button-success">
 						<p:ajax process="@this" update="@form" />
 					</p:commandButton>
@@ -91,7 +92,8 @@
 							<h:outputText value="#{cliente.status}" />
 						</p:column>
 						
-						<p:column headerText="#{msgs['alt.acao.editar']}" styleClass="sa-table-actions-col">
+						<p:column headerText="#{msgs['alt.acao.editar']}" styleClass="sa-table-actions-col"
+							rendered="#{consultaClienteController.podeEditar}">
 							<h:panelGroup styleClass="sa-table-actions">
 							<p:commandButton id="botaoEditarCliente"
 								action="#{consultaClienteController.editar(cliente.id)}"
@@ -100,7 +102,8 @@
 							</h:panelGroup>
 						</p:column>
 	
-						<p:column headerText="#{msgs['alt.acao.excluir']}" styleClass="sa-table-actions-col">
+						<p:column headerText="#{msgs['alt.acao.excluir']}" styleClass="sa-table-actions-col"
+							rendered="#{consultaClienteController.podeEditar}">
 							<h:panelGroup styleClass="sa-table-actions">
 							<p:commandButton title="#{msgs['alt.acao.excluir']}"
 								icon="pi pi-trash" styleClass="ui-button-rounded ui-button-danger ui-button-flat" >

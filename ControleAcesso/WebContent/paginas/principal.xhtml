@@ -26,7 +26,7 @@
 
 			<div class="index-container">
 				<f:subview id="estatisticas"
-					rendered="#{sessionScope.usuario.perfil == 'ADMINISTRADOR' or sessionScope.usuario.perfil == 'GERENTE'}" />
+					rendered="#{principalController.exibeEstatisticasGerenciais}" />
 
 				<div class="sa-dashboard-grid">
 

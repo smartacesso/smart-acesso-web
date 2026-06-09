@@ -33,13 +33,15 @@
 						icon="pi pi-pencil" iconPos="left"
 						onclick="PF('alteracaoEmMassa').show(); return false;"
 						styleClass="sa-btn-label ui-button-warning"
-						title="#{msgs['alt.acao.alterar.dados.em.massa']}" />
+						title="#{msgs['alt.acao.alterar.dados.em.massa']}"
+						rendered="#{alteracoesEmMassaController.podeEditar}" />
 					<p:commandButton id="acaoJustificativa"
 						value="Justificativa"
 						icon="pi pi-calendar" iconPos="left"
 						onclick="PF('dialogJustificativa').show(); return false;"
 						styleClass="sa-btn-label ui-button-flat"
-						title="Definir Período e Justificativa" />
+						title="Definir Período e Justificativa"
+						rendered="#{alteracoesEmMassaController.podeEditar}" />
 					<p:commandButton id="acaoLimpar"
 						action="#{alteracoesEmMassaController.limpar}"
 						value="#{msgs['alt.acao.limpar']}"
@@ -208,6 +210,7 @@
 						action="#{alteracoesEmMassaController.iniciarAlteracaoEmMassa}"
 						process="@form" update="@form"
 						styleClass="sa-btn-label ui-button-success"
+						rendered="#{alteracoesEmMassaController.podeEditar}"
 						oncomplete="PF('dialogJustificativa').hide();" />
 					<p:commandButton id="cancelarAlteracao"
 						value="#{msgs['alt.acao.cancelar']}"
@@ -248,6 +251,7 @@
 					<p:commandButton value="Salvar"
 						action="#{alteracoesEmMassaController.salvarJustificativa}"
 						update="@form" styleClass="sa-btn-label ui-button-success"
+						rendered="#{alteracoesEmMassaController.podeEditar}"
 						oncomplete="PF('dialogJustificativa').hide();" />
 					<p:commandButton value="Cancelar"
 						styleClass="sa-btn-label ui-button-flat"

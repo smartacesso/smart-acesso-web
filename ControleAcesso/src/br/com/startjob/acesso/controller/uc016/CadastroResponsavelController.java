@@ -43,6 +43,9 @@ public class CadastroResponsavelController extends BaseController {
 	
 	@Override
 	public String salvar() {
+		if (!validarPermissaoWeb(br.com.startjob.acesso.modelo.enumeration.WebPermissao.PEDESTRE_EDITAR)) {
+			return "";
+		}
 	    ResponsibleEntity responsavel = (ResponsibleEntity) getEntidade();
 	    boolean isNovo = (responsavel.getId() == null);
 

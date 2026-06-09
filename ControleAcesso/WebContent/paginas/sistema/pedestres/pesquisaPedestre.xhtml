@@ -80,14 +80,16 @@
 								value="#{consultaPedestreController.contatoPesquisa}" />
 						</div>
 
-						<div class="ui-g-12 ui-md-6">
+						<div class="ui-g-12 ui-md-6"
+							rendered="#{consultaPedestreController.podeVerFiltroCpf}">
 							<p:outputLabel for="filtro-avancado-cpf"
 								value="#{msgs['label.uc008.cpf']}" />
 							<p:inputText id="filtro-avancado-cpf"
 								value="#{consultaPedestreController.parans['cpf']}" />
 						</div>
 
-						<div class="ui-g-12 ui-md-6">
+						<div class="ui-g-12 ui-md-6"
+							rendered="#{consultaPedestreController.podeVerFiltroRg}">
 							<p:outputLabel for="filtro-avancado-rg"
 								value="#{msgs['label.uc008.rg']}" />
 							<p:inputMask id="filtro-avancado-rg"
@@ -179,9 +181,10 @@
 									value="#{msgs['alt.acao.novo']}"
 									icon="pi pi-plus" iconPos="left"
 									ajax="false" title="#{msgs['alt.acao.novo']}"
+									rendered="#{consultaPedestreController.podeEditar}"
 									styleClass="sa-btn-label ui-button-success" />
 								<p:commandButton id="btnLinkConviteVisitante"
-									rendered="#{consultaPedestreController.telaVisitantes and consultaPedestreController.adminOrGerente}"
+									rendered="#{consultaPedestreController.telaVisitantes and consultaPedestreController.podeGerarLinkFacial}"
 									value="Link novo visitante"
 									icon="pi pi-link" iconPos="left"
 									action="#{consultaPedestreController.abrirDialogLinkConviteVisitante}"
@@ -298,18 +301,16 @@
 										<h:outputText value="#{not empty pedestre.empresaVisitadaExibicao ? pedestre.empresaVisitadaExibicao : pedestre.empresa.nome}" />
 									</span>
 									<span class="sa-cell-secondary">
-										<h:outputText value="#{pedestre.cpf}">
-											<f:converter converterId="cpfConverter" />
-										</h:outputText>
+										<h:outputText
+											value="#{consultaPedestreController.cpfExibicao(pedestre.cpf)}" />
 									</span>
 								</h:panelGroup>
 							</p:column>
 
 							<p:column headerText="#{msgs['label.uc008.cpf']}"
 								styleClass="align-left col-desktop-only">
-								<h:outputText value="#{pedestre.cpf}">
-									<f:converter converterId="cpfConverter" />
-								</h:outputText>
+								<h:outputText
+									value="#{consultaPedestreController.cpfExibicao(pedestre.cpf)}" />
 							</p:column>
 
 							<p:column headerText="#{msgs['label.uc008.tipo']}"
@@ -363,7 +364,7 @@
 								styleClass="sa-table-col-actions sa-table-col-actions--multi">
 								<h:panelGroup styleClass="sa-table-actions">
 									<p:commandButton icon="pi pi-share-alt"
-										rendered="#{consultaPedestreController.telaVisitantes and consultaPedestreController.adminOrGerente}"
+										rendered="#{consultaPedestreController.telaVisitantes and consultaPedestreController.podeGerarLinkFacial}"
 										title="Enviar link cadastro facial"
 										action="#{consultaPedestreController.gerarLinkFacialVisitanteExistente}"
 										process="@this"
@@ -376,10 +377,11 @@
 										title="#{msgs['alt.acao.editar']}"
 										action="#{consultaPedestreController.editar(pedestre.id)}"
 										ajax="false"
+										rendered="#{consultaPedestreController.podeEditar}"
 										styleClass="ui-button-rounded ui-button-info ui-button-flat" />
 									<p:commandButton icon="pi pi-trash"
 										title="#{msgs['alt.acao.excluir']}"
-										rendered="#{sessionScope.usuario.perfil != 'OPERADOR'}"
+										rendered="#{consultaPedestreController.podeExcluir}"
 										styleClass="ui-button-rounded ui-button-danger ui-button-flat">
 										<f:setPropertyActionListener value="#{pedestre}"
 											target="#{consultaPedestreController.pedestreSelecionado}" />

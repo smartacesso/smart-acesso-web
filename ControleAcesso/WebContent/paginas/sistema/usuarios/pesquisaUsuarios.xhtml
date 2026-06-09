@@ -34,6 +34,7 @@
 						value="#{msgs['alt.acao.novo.usuario']}"
 						title="#{msgs['alt.acao.novo.usuario']}"
 						icon="pi pi-plus" iconPos="left"
+						rendered="#{consultaUsuarioController.podeEditar}"
 						styleClass="sa-btn-label ui-button-success">
 						<p:ajax process="@this" update="@form" />
 					</p:commandButton>
@@ -99,9 +100,8 @@
 
 						<p:column headerText="#{msgs['label.uc004.cpf']}"
 							styleClass="align-left col-desktop-only">
-							<h:outputText value="#{usuario.cpf}">
-								<f:converter converterId="cpfConverter" />
-							</h:outputText>
+							<h:outputText
+								value="#{consultaUsuarioController.cpfExibicaoPedestre(usuario.cpf)}" />
 						</p:column>
 
 						<p:column headerText="#{msgs['label.uc004.status']}"
@@ -117,7 +117,8 @@
 						</p:column>
 
 						<p:column headerText="#{msgs['alt.acao.editar']}"
-							style="text-align: center;">
+							style="text-align: center;"
+							rendered="#{consultaUsuarioController.podeEditar}">
 							<p:commandButton icon="pi pi-pencil"
 								title="#{msgs['alt.acao.novo.usuario']}"
 								action="#{consultaUsuarioController.editar(usuario.id)}"
@@ -125,7 +126,8 @@
 						</p:column>
 
 						<p:column headerText="#{msgs['alt.acao.excluir']}"
-							style="text-align: center;">
+							style="text-align: center;"
+							rendered="#{consultaUsuarioController.podeEditar}">
 							<p:commandButton icon="pi pi-trash"
 								title="#{msgs['alt.acao.excluir']}"
 								rendered="#{usuario.id != sessionScope.usuario.id}"

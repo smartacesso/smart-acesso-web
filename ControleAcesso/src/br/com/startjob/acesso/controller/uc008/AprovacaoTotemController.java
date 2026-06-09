@@ -95,6 +95,9 @@ public class AprovacaoTotemController extends BaseController {
 		if (selecionado == null || selecionado.getId() == null) {
 			return;
 		}
+		if (!validarPermissaoWeb(br.com.startjob.acesso.modelo.enumeration.WebPermissao.APROVACAO_TOTEM_EDITAR)) {
+			return;
+		}
 		try {
 			Long idCliente = getUsuarioLogado().getCliente().getId();
 			CadastroExternoEntity sol = totemService.buscarPorId(selecionado.getId(), idCliente);
@@ -132,6 +135,9 @@ public class AprovacaoTotemController extends BaseController {
 
 	public void recusar() {
 		if (selecionado == null || selecionado.getId() == null) {
+			return;
+		}
+		if (!validarPermissaoWeb(br.com.startjob.acesso.modelo.enumeration.WebPermissao.APROVACAO_TOTEM_EDITAR)) {
 			return;
 		}
 		if (motivoRecusa == null || motivoRecusa.trim().isEmpty()) {
@@ -178,14 +184,7 @@ public class AprovacaoTotemController extends BaseController {
 	}
 
 	public String formatarCpf(String cpf) {
-		if (cpf == null) {
-			return "";
-		}
-		String v = cpf.replaceAll("\\D", "");
-		if (v.length() != 11) {
-			return cpf;
-		}
-		return v.replaceFirst("(\\d{3})(\\d{3})(\\d{3})(\\d{2})", "$1.$2.$3-$4");
+		return cpfExibicaoPedestre(cpf);
 	}
 
 	public List<CadastroExternoEntity> getPendentes() {
@@ -206,6 +205,10 @@ public class AprovacaoTotemController extends BaseController {
 
 	public void setMotivoRecusa(String motivoRecusa) {
 		this.motivoRecusa = motivoRecusa;
+	}
+
+	public boolean isPodeEditar() {
+		return temPermissaoWeb(br.com.startjob.acesso.modelo.enumeration.WebPermissao.APROVACAO_TOTEM_EDITAR);
 	}
 
 }

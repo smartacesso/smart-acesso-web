@@ -229,6 +229,20 @@ public class SecurityFilter implements Filter {
 		return BaseConstant.URL_APLICACAO;
 	}
 
+	private String resolverTipoPedestre(HttpServletRequest req) {
+		String tipo = req.getParameter("tipo");
+		if (tipo != null && !tipo.isEmpty()) {
+			return tipo;
+		}
+		if (req.getSession(false) != null) {
+			Object tipoSessao = req.getSession(false).getAttribute("sa_consulta_pedestre_tipo");
+			if (tipoSessao instanceof String && !((String) tipoSessao).isEmpty()) {
+				return (String) tipoSessao;
+			}
+		}
+		return null;
+	}
+
 	/**
 	 * Verifica se usuário tem permissão de acesso a esta página.
 	 *
@@ -257,8 +271,9 @@ public class SecurityFilter implements Filter {
 				permissoes = WebPermissaoMatriz.codigosPadrao(((UsuarioEntity) usuario).getPerfil());
 			}
 		}
-		if (!WebUrlPermissaoMap.permissoesParaUri(uri).isEmpty()
-				&& !WebUrlPermissaoMap.possuiPermissaoParaUri(uri, permissoes)) {
+		String tipoPedestre = resolverTipoPedestre(req);
+		if (!WebUrlPermissaoMap.permissoesParaUri(uri, tipoPedestre).isEmpty()
+				&& !WebUrlPermissaoMap.possuiPermissaoParaUri(uri, tipoPedestre, permissoes)) {
 			RequestDispatcher requestDispatcher = req.getRequestDispatcher(
 					getMainSite(req) + "/paginas/bloqueado.xhtml");
 			requestDispatcher.forward(req, resp);

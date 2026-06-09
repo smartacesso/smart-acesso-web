@@ -42,6 +42,7 @@ import br.com.startjob.acesso.modelo.entity.PedestreRegraEntity;
 import br.com.startjob.acesso.modelo.enumeration.Status;
 import br.com.startjob.acesso.modelo.enumeration.TipoArquivo;
 import br.com.startjob.acesso.modelo.enumeration.TipoPedestre;
+import br.com.startjob.acesso.modelo.enumeration.WebPermissao;
 import br.com.startjob.acesso.service.CadastroFacialLinkService;
 
 @Named("consultaPedestreController")
@@ -198,8 +199,14 @@ public class ConsultaPedestreController extends BaseController {
 	}
 	
 	public void excluirPedestre() {
-		if(pedestreSelecionado != null) {
-			try {
+		if (pedestreSelecionado == null) {
+			return;
+		}
+		boolean visitante = TipoPedestre.VISITANTE.equals(pedestreSelecionado.getTipo());
+		if (!validarPermissaoWeb(visitante ? WebPermissao.VISITANTE_EXCLUIR : WebPermissao.PEDESTRE_EXCLUIR)) {
+			return;
+		}
+		try {
 				
 				ParametroEntity param = baseEJB.getParametroSistema(BaseConstant.PARAMETERS_NAME.REMOVE_CARTAO_EXCLUIDO,
 						getUsuarioLogado().getCliente().getId());
@@ -220,11 +227,30 @@ public class ConsultaPedestreController extends BaseController {
 				
 				buscar();
 				mensagemInfo("", "msg.generica.objeto.excluido.sucesso");
-			} catch(Exception e) {
-				e.printStackTrace();
-				mensagemFatal("", "#Não foi possível excluir este pedestre.");
-			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			mensagemFatal("", "#Não foi possível excluir este pedestre.");
 		}
+	}
+
+	public boolean isPodeEditar() {
+		return podeEditarPedestre(isTelaVisitantes());
+	}
+
+	public boolean isPodeExcluir() {
+		return podeExcluirPedestre(isTelaVisitantes());
+	}
+
+	public String cpfExibicao(String cpf) {
+		return cpfExibicaoPedestre(cpf);
+	}
+
+	public boolean isPodeVerFiltroCpf() {
+		return podeVerDadosSensiveisPedestre();
+	}
+
+	public boolean isPodeVerFiltroRg() {
+		return podeVerDadosSensiveisPedestre();
 	}
 	
 	@Override

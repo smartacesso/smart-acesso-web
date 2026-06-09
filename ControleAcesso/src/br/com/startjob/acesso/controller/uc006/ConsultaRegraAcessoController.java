@@ -16,6 +16,7 @@ import br.com.startjob.acesso.controller.BaseController;
 import br.com.startjob.acesso.modelo.entity.RegraEntity;
 import br.com.startjob.acesso.modelo.enumeration.TipoPedestre;
 import br.com.startjob.acesso.modelo.enumeration.TipoRegra;
+import br.com.startjob.acesso.modelo.enumeration.WebPermissao;
 
 @Named("consultaRegraAcessoController")
 @ViewScoped
@@ -45,9 +46,13 @@ public class ConsultaRegraAcessoController extends BaseController {
 	}
 	
 	public void excluirRegra() {
-		if(regraSelecionada != null) {
-			super.excluir(regraSelecionada.getId());
+		if (regraSelecionada == null) {
+			return;
 		}
+		if (!validarPermissaoWeb(br.com.startjob.acesso.modelo.enumeration.WebPermissao.CONFIG_REGRAS_EDITAR)) {
+			return;
+		}
+		super.excluir(regraSelecionada.getId());
 	}
 	
 	@Override
@@ -106,5 +111,9 @@ public class ConsultaRegraAcessoController extends BaseController {
 
 	public void setListaTiposPedestre(List<SelectItem> listaTiposPedestre) {
 		this.listaTiposPedestre = listaTiposPedestre;
+	}
+
+	public boolean isPodeEditar() {
+		return temPermissaoWeb(WebPermissao.CONFIG_REGRAS_EDITAR);
 	}
 }

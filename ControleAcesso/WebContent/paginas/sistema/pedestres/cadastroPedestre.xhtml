@@ -42,7 +42,7 @@
 					</ui:include>
 
 					<p:commandButton id="save"
-						rendered="#{not cadastroPedestreController.cadastroEmLote}"
+						rendered="#{not cadastroPedestreController.cadastroEmLote and cadastroPedestreController.podeEditarCadastro}"
 						action="#{cadastroPedestreController.salvar}"
 						value="#{msgs['alt.acao.save']}"
 						title="#{msgs['alt.acao.save']}"
@@ -53,7 +53,7 @@
 						partialSubmit="true"
 						onclick="return saPrepareSalvarAjax();" />
 					<p:commandButton id="saveLote"
-						rendered="#{cadastroPedestreController.cadastroEmLote}"
+						rendered="#{cadastroPedestreController.cadastroEmLote and cadastroPedestreController.podeEditarCadastro}"
 						action="#{cadastroPedestreController.salvar}"
 						value="#{msgs['alt.acao.save']}"
 						title="#{msgs['alt.acao.save']}"
@@ -110,13 +110,13 @@
 
 					<p:commandButton id="btnAbrirDialogWhatsapp"
 						title="Enviar link de cadastro facial" icon="pi pi-camera"
-						rendered="#{cadastroPedestreController.entidade.id != null and cadastroPedestreController.adminOrGerente}"
+						rendered="#{cadastroPedestreController.entidade.id != null and cadastroPedestreController.podeGerarLinkFacial}"
 						action="#{cadastroPedestreController.gerarLinkCadastroFacialLink()}"
 						process="@this"
 						styleClass="sa-btn-label ui-button-flat" />
 
 					<p:commandButton id="acaoExcliurPedestre"
-						rendered="#{cadastroPedestreController.entidade.id != null}"
+						rendered="#{cadastroPedestreController.entidade.id != null and cadastroPedestreController.podeExcluirCadastro}"
 						onclick="PF('confirmarExclusaoPedestre').show(); return false;"
 						title="#{msgs['alt.acao.excluir']}" icon="pi pi-trash"
 						styleClass="sa-btn-label ui-button-danger ui-button-flat" />
@@ -400,29 +400,29 @@
 								</p:tab>
 
 								<p:tab title="#{msgs['label.uc001.endereco']}"
-									rendered="#{cadastroPedestreController.isAdminOrGerente()}">
+									rendered="#{cadastroPedestreController.exibeAbaCadastroGerencial}">
 									<ui:include src="/WEB-INF/template/pedestres/endereco.xhtml" />
 								</p:tab>
 
 								<p:tab title="#{msgs['title.uc008.regras.acesso']}"
-									rendered="#{cadastroPedestreController.isAdminOrGerente() or cadastroPedestreController.isOperador()}">
+									rendered="#{cadastroPedestreController.exibeAbaCadastroOperacional}">
 									<ui:include
 										src="/WEB-INF/template/pedestres/regrasAcesso.xhtml" />
 								</p:tab>
 
 								<p:tab title="#{msgs['label.uc008.equipamentos']}"
-									rendered="#{cadastroPedestreController.isAdminOrGerente() or cadastroPedestreController.isOperador()}">
+									rendered="#{cadastroPedestreController.exibeAbaCadastroOperacional}">
 									<ui:include
 										src="/WEB-INF/template/pedestres/equipamentos.xhtml" />
 								</p:tab>
 
 								<p:tab title="#{msgs['label.uc008.documentos']}"
-									rendered="#{cadastroPedestreController.isAdminOrGerente() or cadastroPedestreController.isOperador() or cadastroPedestreController.isCuidador()}">
+									rendered="#{cadastroPedestreController.exibeAbaDocumentos}">
 									<ui:include src="/WEB-INF/template/pedestres/documentos.xhtml" />
 								</p:tab>
 
 								<p:tab title="#{msgs['label.uc016.responsavel']}"
-									rendered="#{cadastroPedestreController.isAdminOrGerente() or cadastroPedestreController.isOperador()}">
+									rendered="#{cadastroPedestreController.exibeAbaCadastroOperacional}">
 									<ui:include src="/WEB-INF/template/pedestres/responsavel.xhtml" />
 								</p:tab>
 
@@ -432,24 +432,24 @@
 								</p:tab>
 
 								<p:tab title="#{msgs['label.uc008.mensagem.personalizada']}"
-									rendered="#{cadastroPedestreController.isAdminOrGerente() or cadastroPedestreController.isOperador()}">
+									rendered="#{cadastroPedestreController.exibeAbaCadastroOperacional}">
 									<ui:include
 										src="/WEB-INF/template/pedestres/mensagensPersonalizadas.xhtml" />
 								</p:tab>
 
 								<p:tab title="#{msgs['label.uc017.editar.relatorio']}"
-									rendered="#{cadastroPedestreController.isAdminOrGerente() or cadastroPedestreController.isOperador()}">
+									rendered="#{cadastroPedestreController.exibeAbaCadastroOperacional}">
 									<ui:include
 										src="/WEB-INF/template/pedestres/editarRelatorio.xhtml" />
 								</p:tab>
 
 								<p:tab title="#{msgs['label.uc017.cota.mensal']}"
-									rendered="#{cadastroPedestreController.isAdminOrGerente()}">
+									rendered="#{cadastroPedestreController.exibeAbaCadastroGerencial}">
 									<ui:include src="/WEB-INF/template/pedestres/cotaMensal.xhtml" />
 								</p:tab>
 
 								<p:tab title="#{msgs['label.uc017.relatorio.diario']}"
-									rendered="#{cadastroPedestreController.isCuidador()}">
+									rendered="#{cadastroPedestreController.exibeAbaRelatorioDiario}">
 									<ui:include
 										src="/WEB-INF/template/pedestres/relatorioDiario.xhtml" />
 								</p:tab>

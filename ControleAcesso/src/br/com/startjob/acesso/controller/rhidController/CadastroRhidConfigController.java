@@ -62,6 +62,9 @@ public class CadastroRhidConfigController extends BaseController {
 
 	@Override
 	public String salvar() {
+		if (!validarPermissaoWeb(br.com.startjob.acesso.modelo.enumeration.WebPermissao.CONFIG_RHID_EDITAR)) {
+			return "";
+		}
 		try {
 			boolean cadastroNovo = configuracao == null || configuracao.getId() == null;
 			configuracao = rhidIntegracaoEJB.salvarConfiguracao(configuracao);

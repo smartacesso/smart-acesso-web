@@ -101,6 +101,9 @@ public class CadastroAvisoAppController extends BaseController implements Serial
 
 	@Override
 	public String salvar() {
+		if (!validarPermissaoWeb(br.com.startjob.acesso.modelo.enumeration.WebPermissao.AVISO_APP_EDITAR)) {
+			return "";
+		}
 		AvisoAppEntity entidade = (AvisoAppEntity) getEntidade();
 		entidade.setCliente(getUsuarioLogado().getCliente());
 

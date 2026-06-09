@@ -19,6 +19,7 @@ import br.com.startjob.acesso.controller.BaseController;
 import br.com.startjob.acesso.controller.MenuController;
 import br.com.startjob.acesso.modelo.BaseConstant;
 import br.com.startjob.acesso.modelo.entity.ParametroEntity;
+import br.com.startjob.acesso.modelo.enumeration.WebPermissao;
 import br.com.startjob.acesso.modelo.entity.base.BaseEntity;
 import br.com.startjob.acesso.modelo.utils.ConectionUtils;
 import br.com.startjob.acesso.utils.ResourceBundleUtils;
@@ -468,6 +469,9 @@ public class GerenciarParametrosController extends BaseController {
 
 	@Override
 	public String salvar() {
+		if (!validarPermissaoWeb(WebPermissao.CONFIG_PARAMETROS_EDITAR)) {
+			return "";
+		}
 		List<BaseEntity> all = new ArrayList<BaseEntity>();
 		String valorOriginalSOC = this.valorOriginalSOC + "";
 		all.addAll(parametrosGerais);
@@ -602,6 +606,10 @@ public class GerenciarParametrosController extends BaseController {
 
 	public List<ParametroEntity> getParametrosGerais() {
 		return parametrosGerais;
+	}
+
+	public boolean isPodeEditar() {
+		return temPermissaoWeb(WebPermissao.CONFIG_PARAMETROS_EDITAR);
 	}
 
 }

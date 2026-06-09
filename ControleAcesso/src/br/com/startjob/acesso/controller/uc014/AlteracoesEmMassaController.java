@@ -116,6 +116,9 @@ public class AlteracoesEmMassaController extends BaseController{
 	}
 	
 	public void iniciarAlteracaoEmMassa() {
+		if (!validarPermissaoWeb(br.com.startjob.acesso.modelo.enumeration.WebPermissao.ALTERACAO_MASSA_EDITAR)) {
+			return;
+		}
 		Long idCliente = getUsuarioLogado().getCliente().getId();
 		pedestreRegraAlteracao.setRegra(regraAlteracao);
 		
@@ -142,6 +145,9 @@ public class AlteracoesEmMassaController extends BaseController{
 	
 	
 	public void salvarJustificativa() {
+		if (!validarPermissaoWeb(br.com.startjob.acesso.modelo.enumeration.WebPermissao.ALTERACAO_MASSA_EDITAR)) {
+			return;
+		}
 		Long idCliente = getUsuarioLogado().getCliente().getId();
 		pedestreRegraAlteracao.setRegra(regraAlteracao);
 		
@@ -173,6 +179,9 @@ public class AlteracoesEmMassaController extends BaseController{
 //	}
 //	
 	public void alteraValorCampoAlterarEmMassaPedestre(PedestreEntity pedestre) {
+		if (!validarPermissaoWeb(br.com.startjob.acesso.modelo.enumeration.WebPermissao.ALTERACAO_MASSA_EDITAR)) {
+			return;
+		}
 		try {
 			baseEJB.alteraObjeto(pedestre);
 			pedestre.setVersao(pedestre.getVersao() + 1);
@@ -493,5 +502,9 @@ public class AlteracoesEmMassaController extends BaseController{
 	public void setMarcarTodosFlag(boolean marcarTodosFlag) {
 		this.marcarTodosFlag = marcarTodosFlag;
 	}
-	
+
+	public boolean isPodeEditar() {
+		return temPermissaoWeb(br.com.startjob.acesso.modelo.enumeration.WebPermissao.ALTERACAO_MASSA_EDITAR);
+	}
+
 }

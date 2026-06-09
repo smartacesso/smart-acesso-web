@@ -79,7 +79,8 @@
 						</h:outputText>
 					</p:column>
 
-					<p:column headerText="" style="width: 200px; text-align: right;">
+					<p:column headerText="" style="width: 200px; text-align: right;"
+						rendered="#{aprovacaoTotemController.podeEditar}">
 						<div class="sa-table-actions sa-table-actions--end sa-table-col-actions--multi">
 							<p:commandButton value="Aprovar" icon="pi pi-check"
 								styleClass="sa-btn-label ui-button-success"

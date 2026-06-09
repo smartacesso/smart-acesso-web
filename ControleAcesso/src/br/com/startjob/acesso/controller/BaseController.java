@@ -51,6 +51,7 @@ import br.com.startjob.acesso.modelo.utils.AppAmbienteUtils;
 import br.com.startjob.acesso.modelo.web.WebPermissaoMatriz;
 import br.com.startjob.acesso.security.WebPermissionContext;
 import br.com.startjob.acesso.utils.CookieUtils;
+import br.com.startjob.acesso.utils.DadosSensiveisUtil;
 import br.com.startjob.acesso.utils.ResourceBundleUtils;
 
 
@@ -1326,6 +1327,34 @@ public abstract class BaseController implements Serializable {
 			return false;
 		}
 		return true;
+	}
+
+	public boolean podeVerDadosSensiveisPedestre() {
+		return temPermissaoWeb(WebPermissao.PEDESTRE_DADOS_SENSIVEIS_VER);
+	}
+
+	public String cpfExibicaoPedestre(String cpf) {
+		return DadosSensiveisUtil.cpfExibicao(cpf, podeVerDadosSensiveisPedestre());
+	}
+
+	public String rgExibicaoPedestre(String rg) {
+		return DadosSensiveisUtil.rgExibicao(rg, podeVerDadosSensiveisPedestre());
+	}
+
+	public String emailExibicaoPedestre(String email) {
+		return DadosSensiveisUtil.emailExibicao(email, podeVerDadosSensiveisPedestre());
+	}
+
+	public boolean podeEditarPedestre(boolean visitante) {
+		return temPermissaoWeb(visitante ? WebPermissao.VISITANTE_EDITAR : WebPermissao.PEDESTRE_EDITAR);
+	}
+
+	public boolean podeExcluirPedestre(boolean visitante) {
+		return temPermissaoWeb(visitante ? WebPermissao.VISITANTE_EXCLUIR : WebPermissao.PEDESTRE_EXCLUIR);
+	}
+
+	public boolean isPodeGerarLinkFacial() {
+		return temPermissaoWeb(WebPermissao.PEDESTRE_LINK_FACIAL_GERAR);
 	}
 
 	@SuppressWarnings("unchecked")

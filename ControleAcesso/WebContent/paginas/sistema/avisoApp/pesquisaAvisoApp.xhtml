@@ -32,6 +32,7 @@
 						icon="pi pi-plus" iconPos="left"
 						process="@this"
 						title="Publicar novo aviso"
+						rendered="#{consultaAvisoAppController.podeEditar}"
 						styleClass="sa-btn-label ui-button-success" />
 					<p:commandButton id="acaoLimpar"
 						action="#{consultaAvisoAppController.limpar}"
@@ -98,10 +99,12 @@
 								<p:commandButton icon="pi pi-pencil" title="Editar"
 									action="#{consultaAvisoAppController.editar(item.id)}"
 									process="@this"
+									rendered="#{consultaAvisoAppController.podeEditar}"
 									styleClass="rounded-button ui-button-outlined ui-button-secondary" />
 								<p:commandButton icon="pi pi-trash" title="Excluir"
 									process="@this"
 									actionListener="#{consultaAvisoAppController.prepararExclusaoAviso}"
+									rendered="#{consultaAvisoAppController.podeEditar}"
 									styleClass="rounded-button ui-button-outlined ui-button-secondary">
 									<f:setPropertyActionListener value="#{item}"
 										target="#{consultaAvisoAppController.avisoSelecionado}" />

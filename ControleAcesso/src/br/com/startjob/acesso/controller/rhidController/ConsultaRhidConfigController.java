@@ -19,6 +19,7 @@ import com.rhid.services.dto.RhidOperacaoResultDTO;
 import br.com.startjob.acesso.controller.BaseController;
 import br.com.startjob.acesso.modelo.ejb.RhidIntegracaoEJBRemote;
 import br.com.startjob.acesso.modelo.entity.ConfiguracaoRhidEntity;
+import br.com.startjob.acesso.modelo.enumeration.WebPermissao;
 import br.com.startjob.acesso.modelo.entity.DominioRhidEntity;
 import br.com.startjob.acesso.services.rhid.RhidAgendadorService;
 
@@ -80,6 +81,9 @@ public class ConsultaRhidConfigController extends BaseController {
 	public void excluirConfiguracao(Long configId) {
 		if (configId == null) {
 			exibirErro("Configuração inválida para exclusão.");
+			return;
+		}
+		if (!validarPermissaoWeb(br.com.startjob.acesso.modelo.enumeration.WebPermissao.CONFIG_RHID_EDITAR)) {
 			return;
 		}
 		try {
@@ -288,5 +292,9 @@ public class ConsultaRhidConfigController extends BaseController {
 
 	public void setParamBuscaEmail(String paramBuscaEmail) {
 		this.paramBuscaEmail = paramBuscaEmail;
+	}
+
+	public boolean isPodeEditar() {
+		return temPermissaoWeb(WebPermissao.CONFIG_RHID_EDITAR);
 	}
 }

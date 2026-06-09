@@ -9,6 +9,7 @@ import javax.inject.Named;
 import br.com.startjob.acesso.annotations.UseCase;
 import br.com.startjob.acesso.controller.BaseController;
 import br.com.startjob.acesso.modelo.entity.ClienteEntity;
+import br.com.startjob.acesso.modelo.enumeration.WebPermissao;
 
 @Named("consultaClienteController")
 @ViewScoped
@@ -42,9 +43,13 @@ public class ConsultaClienteController extends BaseController {
 	}
 	
 	public void excluirCliente() {
-		if(clienteSelecionado != null) {
-			super.excluir(clienteSelecionado.getId());
+		if (clienteSelecionado == null) {
+			return;
 		}
+		if (!validarPermissaoWeb(br.com.startjob.acesso.modelo.enumeration.WebPermissao.ADMIN_CLIENTES_EDITAR)) {
+			return;
+		}
+		super.excluir(clienteSelecionado.getId());
 	}
 
 	public ClienteEntity getClienteSelecionado() {
@@ -54,5 +59,9 @@ public class ConsultaClienteController extends BaseController {
 	public void setClienteSelecionado(ClienteEntity clienteSelecionado) {
 		this.clienteSelecionado = clienteSelecionado;
 	}
-	
+
+	public boolean isPodeEditar() {
+		return temPermissaoWeb(WebPermissao.ADMIN_CLIENTES_EDITAR);
+	}
+
 }

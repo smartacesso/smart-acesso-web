@@ -89,6 +89,7 @@ import br.com.startjob.acesso.service.FacialWebSocketHelper;
 import br.com.startjob.acesso.service.NotificacaoAprovacaoTotemService;
 import br.com.startjob.acesso.service.TotemAprovacaoService;
 import br.com.startjob.acesso.to.WebSocketPedestrianAccessTO;
+import br.com.startjob.acesso.utils.DadosSensiveisUtil;
 import br.com.startjob.acesso.utils.ResourceBundleUtils;
 import br.com.startjob.acesso.utils.Utils;
 
@@ -846,6 +847,10 @@ public class CadastroPedestreController extends CadastroBaseController {
 		String retornoStr = "";
 		
 		PedestreEntity pedestre = getPedestreAtual();
+		boolean visitante = pedestre != null && pedestre.isVisitante();
+		if (!validarPermissaoWeb(visitante ? WebPermissao.VISITANTE_EDITAR : WebPermissao.PEDESTRE_EDITAR)) {
+			return "";
+		}
 		UsuarioEntity usuario = getUsuarioLogado();
 		pedestre.setCliente(getUsuarioLogado().getCliente());
 
@@ -1392,6 +1397,9 @@ public class CadastroPedestreController extends CadastroBaseController {
 	}
 
 	public void excluirPedestre() {
+		if (!validarPermissaoWeb(isCadastroVisitante() ? WebPermissao.VISITANTE_EXCLUIR : WebPermissao.PEDESTRE_EXCLUIR)) {
+			return;
+		}
 		try {
 			PedestreEntity pedestre = getPedestreAtual();
 			pedestre.setRemovido(true);
@@ -2197,13 +2205,33 @@ public class CadastroPedestreController extends CadastroBaseController {
 	}
 
 	public boolean exibeCampoSempreLiberado() {
-		if (!getUsuarioLogado().getPerfil().equals(PerfilAcesso.ADMINISTRADOR)
-				&& !getUsuarioLogado().getPerfil().equals(PerfilAcesso.GERENTE)) {
+		if (!isExibeAbaCadastroGerencial()) {
 			return false;
 		}
-
 		return (getPedestreAtual() != null && getPedestreAtual().getTipo().equals(TipoPedestre.PEDESTRE)
 				|| exibeCampoSempreLiberadoParaTodos);
+	}
+
+	/** Abas restritas a perfis com permissão de exclusão (equivalente admin/gerente na matriz padrão). */
+	public boolean isExibeAbaCadastroGerencial() {
+		if (isCadastroVisitante()) {
+			return temPermissaoWeb(WebPermissao.VISITANTE_EXCLUIR);
+		}
+		return temPermissaoWeb(WebPermissao.PEDESTRE_EXCLUIR);
+	}
+
+	/** Abas operacionais: edição + dados sensíveis (equivalente admin/gerente/operador/porteiro). */
+	public boolean isExibeAbaCadastroOperacional() {
+		return isPodeEditarCadastro() && podeVerDadosSensiveisPedestre();
+	}
+
+	public boolean isExibeAbaDocumentos() {
+		return isPodeEditarCadastro();
+	}
+
+	/** Relatório diário do cuidador (edição sem dados sensíveis). */
+	public boolean isExibeAbaRelatorioDiario() {
+		return isPodeEditarCadastro() && !podeVerDadosSensiveisPedestre();
 	}
 
 	public boolean exibeCampoCadastroFacialObrigatorio() {
@@ -2890,48 +2918,47 @@ public class CadastroPedestreController extends CadastroBaseController {
 		return urlLinks;
 	}
 	
+	public boolean isPodeVerDadosSensiveis() {
+		return podeVerDadosSensiveisPedestre();
+	}
+
+	/** @deprecated use {@link #isPodeVerDadosSensiveis()} */
 	public boolean usuarioTemPermissao() {
-		return temPermissaoWeb(WebPermissao.PEDESTRE_DADOS_SENSIVEIS_VER);
+		return isPodeVerDadosSensiveis();
+	}
+
+	public boolean isPodeEditarCadastro() {
+		return podeEditarPedestre(isCadastroVisitante());
+	}
+
+	public boolean isPodeExcluirCadastro() {
+		return podeExcluirPedestre(isCadastroVisitante());
 	}
 
 	public String getCpfMascarado() {
-	    if (usuarioTemPermissao() && getPedestreAtual() != null && getPedestreAtual().getCpf() != null) {
-	        return getPedestreAtual().getCpf();
-	    } else {
-	        return "XXX-XXX-XXX-XX";
-	    }
+		return cpfExibicaoPedestre(getPedestreAtual() != null ? getPedestreAtual().getCpf() : null);
 	}
 
 	public String getRgMascarado() {
-	    if (usuarioTemPermissao() && getPedestreAtual() != null && getPedestreAtual().getRg() != null) {
-	        return getPedestreAtual().getRg();
-	    } else {
-	        return "XX-XXXXXXXX";
-	    }
+		return rgExibicaoPedestre(getPedestreAtual() != null ? getPedestreAtual().getRg() : null);
 	}
 
 	public String getEmailMascarado() {
-	    if (usuarioTemPermissao() && getPedestreAtual() != null && getPedestreAtual().getEmail() != null) {
-	        return getPedestreAtual().getEmail();
-	    } else {
-	        return "XXXXX@XXXXX";
-	    }
+		return emailExibicaoPedestre(getPedestreAtual() != null ? getPedestreAtual().getEmail() : null);
 	}
 
 	public String getTelefoneMascarado() {
-	    if (usuarioTemPermissao() && getPedestreAtual() != null && getPedestreAtual().getTelefone() != null) {
-	        return getPedestreAtual().getTelefone();
-	    } else {
-	        return "(XX)XXXXXXXX";
-	    }
+		if (isPodeVerDadosSensiveis() && getPedestreAtual() != null && getPedestreAtual().getTelefone() != null) {
+			return getPedestreAtual().getTelefone();
+		}
+		return DadosSensiveisUtil.TELEFONE_MASCARADO;
 	}
 
 	public String getCelularMascarado() {
-	    if (usuarioTemPermissao() && getPedestreAtual() != null && getPedestreAtual().getCelular() != null) {
-	        return getPedestreAtual().getCelular();
-	    } else {
-	        return "(XX)XXXXXXXXX";
-	    }
+		if (isPodeVerDadosSensiveis() && getPedestreAtual() != null && getPedestreAtual().getCelular() != null) {
+			return getPedestreAtual().getCelular();
+		}
+		return DadosSensiveisUtil.CELULAR_MASCARADO;
 	}
 
 	public void cadastrarCota() {
@@ -2969,23 +2996,11 @@ public class CadastroPedestreController extends CadastroBaseController {
 	}
 
 	public boolean isOperador() {
-		if (PerfilAcesso.ADMINISTRADOR.equals(getUsuarioLogado().getPerfil())
-				|| PerfilAcesso.GERENTE.equals(getUsuarioLogado().getPerfil())
-				|| PerfilAcesso.OPERADOR.equals(getUsuarioLogado().getPerfil())) {
-			return true;
-		}
-	    return false;
+		return isExibeAbaCadastroOperacional();
 	}
-	
-	
+
 	public boolean isCuidador() {
-		if (PerfilAcesso.CUIDADOR.equals(getUsuarioLogado().getPerfil())
-			|| PerfilAcesso.RESPONSAVEL.equals(getUsuarioLogado().getPerfil())
-				|| PerfilAcesso.GERENTE.equals(getUsuarioLogado().getPerfil())
-				 || PerfilAcesso.ADMINISTRADOR.equals(getUsuarioLogado().getPerfil())) {
-			return true;
-		}
-	    return false;
+		return isExibeAbaDocumentos() && isExibeAbaRelatorioDiario();
 	}
 	
 	public void adicionarRelatorio() {

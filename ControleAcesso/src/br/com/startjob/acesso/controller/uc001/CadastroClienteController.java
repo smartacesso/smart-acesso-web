@@ -182,6 +182,9 @@ public class CadastroClienteController extends CadastroBaseController {
 
 	@Override
 	public String salvar() {
+		if (!validarPermissaoWeb(br.com.startjob.acesso.modelo.enumeration.WebPermissao.ADMIN_CLIENTES_EDITAR)) {
+			return "";
+		}
 		ClienteEntity cliente = (ClienteEntity) getEntidade();
 
 		if (listaPlanos == null || listaPlanos.isEmpty()) {

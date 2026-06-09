@@ -35,6 +35,7 @@
 						title="Nova configuração"
 						icon="pi pi-plus" iconPos="left"
 						process="@this"
+						rendered="#{consultaRhidConfigController.podeEditar}"
 						styleClass="sa-btn-label ui-button-success" />
 					<p:commandButton id="acaoLimpar"
 						action="#{consultaRhidConfigController.limpar}"
@@ -94,7 +95,8 @@
 						</p:column>
 
 						<p:column headerText="Ações" exportable="false"
-							styleClass="sa-table-col-actions sa-table-col-actions--multi">
+							styleClass="sa-table-col-actions sa-table-col-actions--multi"
+							rendered="#{consultaRhidConfigController.podeEditar}">
 							<h:panelGroup styleClass="sa-table-actions">
 								<p:commandButton icon="pi pi-pencil"
 									title="#{msgs['alt.acao.editar']}"

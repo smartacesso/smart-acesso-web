@@ -81,6 +81,9 @@ public class CadastroRegraAcessoController extends BaseController {
 	
 	@Override
 	public String salvar() {
+		if (!validarPermissaoWeb(br.com.startjob.acesso.modelo.enumeration.WebPermissao.CONFIG_REGRAS_EDITAR)) {
+			return "";
+		}
 		RegraEntity regra = (RegraEntity) getEntidade();
 		
 		if(listaHorarios != null && !listaHorarios.isEmpty()) {

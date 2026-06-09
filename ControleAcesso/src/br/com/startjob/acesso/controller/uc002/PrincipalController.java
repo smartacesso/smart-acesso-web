@@ -20,6 +20,7 @@ import br.com.startjob.acesso.modelo.entity.EquipamentoEntity;
 import br.com.startjob.acesso.modelo.entity.PedestreEntity;
 import br.com.startjob.acesso.modelo.entity.UsuarioEntity;
 import br.com.startjob.acesso.modelo.enumeration.TipoPedestre;
+import br.com.startjob.acesso.modelo.enumeration.WebPermissao;
 import br.com.startjob.acesso.modelo.utils.DateUtils;
 
 @SuppressWarnings("serial")
@@ -209,8 +210,9 @@ public class PrincipalController extends BaseController {
 	public void setPedestre(Long pedestre) {
 		this.pedestre = pedestre;
 	}
-	
-	
 
+	public boolean isExibeEstatisticasGerenciais() {
+		return temPermissaoWeb(WebPermissao.RELATORIO_OCUPACAO_VER);
+	}
 
 }

@@ -58,17 +58,20 @@ public class ConsultaResponsavelController  extends BaseController {
 	
 	
 	public void excluirResponsavel() {
-		if(responsavelSelecionado != null) {
-			responsavelSelecionado.setLogin(null);
-			responsavelSelecionado.setPassword(null);
-			try {
-				baseEJB.alteraObjeto(responsavelSelecionado);
-			} catch (Exception e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			super.excluir(responsavelSelecionado.getId());
+		if (responsavelSelecionado == null) {
+			return;
 		}
+		if (!validarPermissaoWeb(br.com.startjob.acesso.modelo.enumeration.WebPermissao.PEDESTRE_EDITAR)) {
+			return;
+		}
+		responsavelSelecionado.setLogin(null);
+		responsavelSelecionado.setPassword(null);
+		try {
+			baseEJB.alteraObjeto(responsavelSelecionado);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		super.excluir(responsavelSelecionado.getId());
 	}
 
 	public List<SelectItem> getListaResponsavel() {
@@ -93,6 +96,10 @@ public class ConsultaResponsavelController  extends BaseController {
 
 	public void setResponsavelSelecionado(ResponsibleEntity responsavelSelecionado) {
 		this.responsavelSelecionado = responsavelSelecionado;
+	}
+
+	public boolean isPodeEditar() {
+		return temPermissaoWeb(br.com.startjob.acesso.modelo.enumeration.WebPermissao.PEDESTRE_EDITAR);
 	}
 
 }

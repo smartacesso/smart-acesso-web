@@ -114,6 +114,9 @@ public class CadastroUsuarioController extends CadastroBaseController {
 	
 	@Override
 	public String salvar() {
+		if (!validarPermissaoWeb(br.com.startjob.acesso.modelo.enumeration.WebPermissao.USUARIO_EDITAR)) {
+			return "";
+		}
 	    UsuarioEntity usuario = (UsuarioEntity) getEntidade();
 
 	    boolean novoUsuario = (usuario.getId() == null);

@@ -13,6 +13,10 @@ import br.com.startjob.acesso.modelo.enumeration.WebPermissao;
  */
 public final class WebUrlPermissaoMap {
 
+	private static final String PATH_PESQUISA_PEDESTRE = "pedestres/pesquisapedestre";
+	private static final String PATH_CADASTRO_PEDESTRE = "pedestres/cadastropedestre";
+	private static final String PATH_CADASTRO_SIMPLIFICADO = "pedestres/cadastrosimplificado";
+
 	private static final Map<String, String> URL_PARA_PERMISSAO = new HashMap<>();
 
 	static {
@@ -22,6 +26,9 @@ public final class WebUrlPermissaoMap {
 		mapVer("pedestres/pesquisaCadastroErro", WebPermissao.CADASTRO_ERRO_VER);
 		mapVer("pedestres/pesquisaAprovacaoTotem", WebPermissao.APROVACAO_TOTEM_VER);
 		mapEditar("pedestres/cadastroAuto", WebPermissao.TOTEM_AUTO_VER);
+
+		mapVer("responsaveis/pesquisaResponsavel", WebPermissao.PEDESTRE_VER);
+		mapEditar("responsaveis/cadastroResponsavel", WebPermissao.PEDESTRE_EDITAR);
 
 		mapVer("correspondencia/pesquisaCorrespondencia", WebPermissao.CORRESPONDENCIA_VER);
 		mapEditar("correspondencia/cadastroCorrespondencia", WebPermissao.CORRESPONDENCIA_EDITAR);
@@ -81,12 +88,22 @@ public final class WebUrlPermissaoMap {
 	}
 
 	public static Set<String> permissoesParaUri(String uri) {
+		return permissoesParaUri(uri, null);
+	}
+
+	public static Set<String> permissoesParaUri(String uri, String tipoParam) {
 		if (uri == null) {
 			return Collections.emptySet();
 		}
 		String path = uri.toLowerCase();
 		if (path.contains("/principal")) {
 			return Collections.emptySet();
+		}
+		if (path.contains(PATH_PESQUISA_PEDESTRE)) {
+			return permissoesPedestreVisitante(tipoParam, true);
+		}
+		if (path.contains(PATH_CADASTRO_PEDESTRE) || path.contains(PATH_CADASTRO_SIMPLIFICADO)) {
+			return permissoesPedestreVisitante(tipoParam, false);
 		}
 		for (Map.Entry<String, String> entry : URL_PARA_PERMISSAO.entrySet()) {
 			if (path.contains(entry.getKey().toLowerCase())) {
@@ -97,7 +114,11 @@ public final class WebUrlPermissaoMap {
 	}
 
 	public static boolean possuiPermissaoParaUri(String uri, Set<String> permissoes) {
-		Set<String> exigidas = permissoesParaUri(uri);
+		return possuiPermissaoParaUri(uri, null, permissoes);
+	}
+
+	public static boolean possuiPermissaoParaUri(String uri, String tipoParam, Set<String> permissoes) {
+		Set<String> exigidas = permissoesParaUri(uri, tipoParam);
 		if (exigidas.isEmpty()) {
 			return true;
 		}
@@ -110,6 +131,24 @@ public final class WebUrlPermissaoMap {
 			}
 		}
 		return false;
+	}
+
+	private static Set<String> permissoesPedestreVisitante(String tipoParam, boolean ver) {
+		Set<String> codigos = new HashSet<>();
+		if ("pe".equalsIgnoreCase(tipoParam)) {
+			codigos.add(ver ? WebPermissao.PEDESTRE_VER.getCodigo() : WebPermissao.PEDESTRE_EDITAR.getCodigo());
+		} else if ("vi".equalsIgnoreCase(tipoParam)) {
+			codigos.add(ver ? WebPermissao.VISITANTE_VER.getCodigo() : WebPermissao.VISITANTE_EDITAR.getCodigo());
+		} else {
+			if (ver) {
+				codigos.add(WebPermissao.PEDESTRE_VER.getCodigo());
+				codigos.add(WebPermissao.VISITANTE_VER.getCodigo());
+			} else {
+				codigos.add(WebPermissao.PEDESTRE_EDITAR.getCodigo());
+				codigos.add(WebPermissao.VISITANTE_EDITAR.getCodigo());
+			}
+		}
+		return codigos;
 	}
 
 	private static Set<String> parseCodigos(String valor) {
