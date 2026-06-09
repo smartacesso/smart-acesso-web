@@ -2585,6 +2585,22 @@ body .ui-datatable.sa-table tbody td.sa-table-col-center {
 	text-align: center !important;
 }
 
+.sa-matriz-permissoes-wrap {
+	overflow-x: auto;
+	width: 100%;
+}
+
+body .ui-datatable.sa-matriz-permissoes-table table {
+	table-layout: fixed;
+	width: 100%;
+	min-width: 720px;
+}
+
+body .ui-datatable.sa-matriz-permissoes-table thead th,
+body .ui-datatable.sa-matriz-permissoes-table tbody td {
+	box-sizing: border-box;
+}
+
 body .ui-datatable.sa-table thead th.sa-table-col-edit,
 body .ui-datatable.sa-table tbody td.sa-table-col-edit {
 	text-align: center !important;

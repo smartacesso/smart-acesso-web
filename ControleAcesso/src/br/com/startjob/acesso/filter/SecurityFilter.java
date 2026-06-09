@@ -1,9 +1,7 @@
 package br.com.startjob.acesso.filter;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 import javax.servlet.Filter;
@@ -18,7 +16,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import br.com.startjob.acesso.modelo.BaseConstant;
+import br.com.startjob.acesso.modelo.entity.UsuarioEntity;
 import br.com.startjob.acesso.modelo.utils.AppAmbienteUtils;
+import br.com.startjob.acesso.modelo.web.WebPermissaoMatriz;
+import br.com.startjob.acesso.security.WebPermissionContext;
+import br.com.startjob.acesso.security.WebUrlPermissaoMap;
 
 /**
  * Servlet Filter implementation class SecurityFilter
@@ -239,51 +241,29 @@ public class SecurityFilter implements Filter {
 	 *             e
 	 * @throws ServletException
 	 */
-	@SuppressWarnings("rawtypes")
 	private void validaPermissaoUsuario(HttpServletRequest req, HttpServletResponse resp)
 			throws IOException, ServletException {
 
-		List<String> paginas = montaListaPaginasPermissao(req);// .getInstance(null,req).paginasPorUsuario();
-		boolean redirecionaErro = true;
+		if (req.getSession(false) == null
+				|| req.getSession(false).getAttribute(BaseConstant.LOGIN.USER_ENTITY) == null) {
+			return;
+		}
 
-		if (paginas != null && !paginas.isEmpty()) {
-			// verifica as paginas do usuário
-			// se ele estiver tentando acessar uma página
-			// que não pertence, envia para página avisando que
-			// usuário não tem permissão
-
-			for (Iterator iterator = paginas.iterator(); iterator.hasNext();) {
-				String pagina = (String) iterator.next();
-				if (req.getRequestURI().contains(pagina)) {
-					redirecionaErro = false;
-					break;
-				}
+		String uri = req.getRequestURI();
+		java.util.Set<String> permissoes = WebPermissionContext.permissoesDaSessao(req);
+		if (permissoes.isEmpty()) {
+			Object usuario = req.getSession(false).getAttribute(BaseConstant.LOGIN.USER_ENTITY);
+			if (usuario instanceof UsuarioEntity) {
+				permissoes = WebPermissaoMatriz.codigosPadrao(((UsuarioEntity) usuario).getPerfil());
 			}
-
-		} else {
-			// envia para página avisando que o usuário não tem
-			// permissão de acesso
-			redirecionaErro = false;
 		}
-
-		if (redirecionaErro) {
-			// envia para tela de erro de permissão
-			// req.getRequestDispatcher(BaseConstant.URL_APLICACAO+"/permissionDanied.jsf").forward(req,
-			// resp);
-			RequestDispatcher requestDispatcher = req.getRequestDispatcher(getMainSite(req) + "/bloqueado");
+		if (!WebUrlPermissaoMap.permissoesParaUri(uri).isEmpty()
+				&& !WebUrlPermissaoMap.possuiPermissaoParaUri(uri, permissoes)) {
+			RequestDispatcher requestDispatcher = req.getRequestDispatcher(
+					getMainSite(req) + "/paginas/bloqueado.xhtml");
 			requestDispatcher.forward(req, resp);
+			redirected = true;
 		}
-	}
-
-	/**
-	 * Monta lista de páginas que usuário tem permissão
-	 * 
-	 * @param req
-	 * @return
-	 */
-	private List<String> montaListaPaginasPermissao(HttpServletRequest req) {
-
-		return null;
 	}
 
 	/**

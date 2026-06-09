@@ -8,11 +8,14 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import java.util.Set;
+
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.faces.event.AbortProcessingException;
 import javax.faces.event.ComponentSystemEvent;
 import javax.faces.view.ViewScoped;
+import javax.inject.Inject;
 import javax.inject.Named;
 
 import org.primefaces.PrimeFaces;
@@ -20,7 +23,9 @@ import org.primefaces.PrimeFaces;
 import br.com.startjob.acesso.controller.BaseController;
 import br.com.startjob.acesso.modelo.BaseConstant;
 import br.com.startjob.acesso.modelo.ejb.LoginEJBRemote;
+import br.com.startjob.acesso.modelo.ejb.WebPermissaoEJBRemote;
 import br.com.startjob.acesso.modelo.entity.UsuarioEntity;
+import br.com.startjob.acesso.security.WebPermissionContext;
 import br.com.startjob.acesso.modelo.exception.AccountException;
 import br.com.startjob.acesso.modelo.utils.EncryptionUtils;
 import br.com.startjob.acesso.utils.MailSendUtils;
@@ -42,6 +47,12 @@ public class LoginController extends BaseController {
 	 */
 	@EJB
 	private LoginEJBRemote loginEJB;
+
+	@EJB
+	private WebPermissaoEJBRemote webPermissaoEJB;
+
+	@Inject
+	private WebPermissionContext webPermission;
 	
 	@PostConstruct
 	@Override
@@ -100,10 +111,17 @@ public class LoginController extends BaseController {
 //					}
 //				}
 				
+				Set<String> permissoesWeb = webPermissaoEJB.resolverPermissoesWeb(u);
+
 				//adiciona na sessão	
 				setSessioAtrribute(BaseConstant.LOGIN.USER_ENTITY, u);
+				setSessioAtrribute(BaseConstant.LOGIN.WEB_PERMISSIONS, permissoesWeb);
 				setSessioAtrribute("horaLogin",new SimpleDateFormat("HH:mm").format(new Date()));
 				setSessioAtrribute("GMT", Calendar.getInstance(new Locale("pt","BR")).getTimeZone().toString());
+
+				if (webPermission != null) {
+					webPermission.carregar(permissoesWeb);
+				}
 						
 				redirect("/paginas/principal.xhtml");
 				

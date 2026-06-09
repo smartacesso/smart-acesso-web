@@ -1,0 +1,27 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui">
+
+<body>
+	<ui:composition template="/tema/templates/template.xhtml">
+		<ui:define name="titulo">
+			#{msgs['title.sistema']} | Acesso negado
+		</ui:define>
+		<ui:define name="pageTitle">
+			<h:outputText value="Acesso negado" />
+		</ui:define>
+		<ui:define name="conteudo">
+			<p:panel styleClass="sa-panel-message">
+				<h:outputText value="#{msgs['msg.web.permissao.acesso.negado']}" />
+				<br />
+				<p:button value="Voltar ao início" outcome="/paginas/principal.xhtml" icon="pi pi-home"
+					styleClass="ui-button-secondary" style="margin-top: 1rem;" />
+			</p:panel>
+		</ui:define>
+	</ui:composition>
+</body>
+</html>

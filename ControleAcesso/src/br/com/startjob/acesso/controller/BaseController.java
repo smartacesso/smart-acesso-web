@@ -19,6 +19,7 @@ import java.util.Objects;
 import java.util.ResourceBundle;
 import javax.annotation.Resource;
 import javax.ejb.EJB;
+import javax.inject.Inject;
 import javax.faces.FacesException;
 import javax.faces.application.Application;
 import javax.faces.application.FacesMessage;
@@ -45,7 +46,10 @@ import br.com.startjob.acesso.modelo.entity.ParametroEntity;
 import br.com.startjob.acesso.modelo.entity.UsuarioEntity;
 import br.com.startjob.acesso.modelo.entity.base.BaseEntity;
 import br.com.startjob.acesso.modelo.enumeration.PerfilAcesso;
+import br.com.startjob.acesso.modelo.enumeration.WebPermissao;
 import br.com.startjob.acesso.modelo.utils.AppAmbienteUtils;
+import br.com.startjob.acesso.modelo.web.WebPermissaoMatriz;
+import br.com.startjob.acesso.security.WebPermissionContext;
 import br.com.startjob.acesso.utils.CookieUtils;
 import br.com.startjob.acesso.utils.ResourceBundleUtils;
 
@@ -130,6 +134,9 @@ public abstract class BaseController implements Serializable {
 	 */
 	@EJB
 	protected BaseEJBRemote baseEJB;
+
+	@Inject
+	protected WebPermissionContext webPermission;
 	
 	/**
 	 * Query para edição dos dados
@@ -1266,13 +1273,56 @@ public abstract class BaseController implements Serializable {
 		return PerfilAcesso.ADMINISTRADOR.equals(perfil) || PerfilAcesso.GERENTE.equals(perfil);
 	}
 
+	public boolean temPermissaoWeb(WebPermissao permissao) {
+		if (permissao == null) {
+			return false;
+		}
+		if (webPermission != null && webPermission.tem(permissao)) {
+			return true;
+		}
+		Object attr = getSessionAtrribute(BaseConstant.LOGIN.WEB_PERMISSIONS);
+		if (attr instanceof java.util.Set) {
+			return ((java.util.Set<?>) attr).contains(permissao.getCodigo());
+		}
+		UsuarioEntity logado = getUsuarioLogado();
+		if (logado.getPerfil() != null) {
+			return WebPermissaoMatriz.permissoesPadrao(logado.getPerfil()).contains(permissao);
+		}
+		return false;
+	}
+
+	public boolean temPermissaoWeb(String codigo) {
+		if (codigo == null || codigo.isEmpty()) {
+			return false;
+		}
+		if (webPermission != null && webPermission.tem(codigo)) {
+			return true;
+		}
+		Object attr = getSessionAtrribute(BaseConstant.LOGIN.WEB_PERMISSIONS);
+		if (attr instanceof java.util.Set) {
+			return ((java.util.Set<?>) attr).contains(codigo);
+		}
+		return false;
+	}
+
 	/**
 	 * Geração/envio de link de cadastro facial: somente administrador ou gerente.
 	 * @return false se não autorizado (mensagem exibida)
 	 */
 	protected boolean validarPermissaoGerarLinkCadastroFacial() {
-		if (!isAdminOrGerente()) {
+		if (!temPermissaoWeb(WebPermissao.PEDESTRE_LINK_FACIAL_GERAR)) {
 			mensagemFatal("", "msg.link.cadastro.facial.sem.permissao");
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * Valida permissão web; exibe mensagem padrão se negada.
+	 */
+	protected boolean validarPermissaoWeb(WebPermissao permissao) {
+		if (!temPermissaoWeb(permissao)) {
+			mensagemFatal("", "msg.web.permissao.acesso.negado");
 			return false;
 		}
 		return true;

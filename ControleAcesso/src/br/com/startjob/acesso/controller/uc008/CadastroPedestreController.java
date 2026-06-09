@@ -74,6 +74,7 @@ import br.com.startjob.acesso.modelo.entity.ResponsibleEntity;
 import br.com.startjob.acesso.modelo.entity.UsuarioEntity;
 import br.com.startjob.acesso.modelo.enumeration.Genero;
 import br.com.startjob.acesso.modelo.enumeration.PerfilAcesso;
+import br.com.startjob.acesso.modelo.enumeration.WebPermissao;
 import br.com.startjob.acesso.modelo.enumeration.Status;
 import br.com.startjob.acesso.modelo.enumeration.StatusCadastroExterno;
 import br.com.startjob.acesso.modelo.enumeration.TipoCadastroExterno;
@@ -2890,9 +2891,7 @@ public class CadastroPedestreController extends CadastroBaseController {
 	}
 	
 	public boolean usuarioTemPermissao() {
-	    // Lógica para verificar se o usuário pode ver os dados
-		UsuarioEntity usuarioLogado = menuController.getUsuarioLogado();
-		return !usuarioLogado.getPerfil().equals(PerfilAcesso.CUIDADOR);
+		return temPermissaoWeb(WebPermissao.PEDESTRE_DADOS_SENSIVEIS_VER);
 	}
 
 	public String getCpfMascarado() {

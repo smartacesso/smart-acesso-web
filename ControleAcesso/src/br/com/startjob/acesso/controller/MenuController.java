@@ -20,7 +20,7 @@ import br.com.startjob.acesso.modelo.BaseConstant;
 import br.com.startjob.acesso.modelo.ejb.PedestreEJBRemote;
 import br.com.startjob.acesso.modelo.entity.ParametroEntity;
 import br.com.startjob.acesso.modelo.entity.UsuarioEntity;
-import br.com.startjob.acesso.modelo.enumeration.PerfilAcesso;
+import br.com.startjob.acesso.modelo.enumeration.WebPermissao;
 import br.com.startjob.acesso.service.CadastroErroService;
 import br.com.startjob.acesso.service.TotemAprovacaoService;
 import br.com.startjob.acesso.modelo.utils.AppAmbienteUtils;
@@ -182,6 +182,9 @@ public class MenuController extends BaseController {
 
 	private void criaMenuAdministracao() {
 
+		if (!temPermissaoWeb(WebPermissao.ADMIN_CLIENTES_VER))
+			return;
+
 		if (!"smartponto".equals(usuarioLogado.getCliente().getNomeUnidadeOrganizacional())
 				&& !"startjob".equals(usuarioLogado.getCliente().getNomeUnidadeOrganizacional())
 				&& !"admingeral".equalsIgnoreCase(usuarioLogado.getLogin())
@@ -204,100 +207,140 @@ public class MenuController extends BaseController {
 
 	private void criaMenuConfiguracao() {
 
-		// não adiciona menu para usuários que não forem admins
-		if (!PerfilAcesso.ADMINISTRADOR.equals(usuarioLogado.getPerfil()))
+		if (!temPermissaoWeb(WebPermissao.CONFIG_PARAMETROS_VER)
+				&& !temPermissaoWeb(WebPermissao.CONFIG_REGRAS_VER)
+				&& !temPermissaoWeb(WebPermissao.CONFIG_RHID_VER)
+				&& !temPermissaoWeb(WebPermissao.CONFIG_WEB_PERMISSOES_VER))
 			return;
 
 		DefaultSubMenu configuracaoes = DefaultSubMenu.builder()
 				.label(resource.recuperaChave("menu.configuracao", getFacesContext()))
 				.icon("pi pi-fw pi-cog").build();
 
-		DefaultMenuItem rhidConfig = DefaultMenuItem.builder()
-				.value("Configuração RHID")
-				.styleClass("ui-simple-menu")
-				.url(BaseConstant.URL_APLICACAO + "/paginas/sistema/rhid/pesquisaRhidConfig.xhtml").build();
-		configuracaoes.getElements().add(rhidConfig);
+		if (temPermissaoWeb(WebPermissao.CONFIG_RHID_VER)) {
+			DefaultMenuItem rhidConfig = DefaultMenuItem.builder()
+					.value("Configuração RHID")
+					.styleClass("ui-simple-menu")
+					.url(BaseConstant.URL_APLICACAO + "/paginas/sistema/rhid/pesquisaRhidConfig.xhtml").build();
+			configuracaoes.getElements().add(rhidConfig);
+		}
 
-		DefaultMenuItem regras = DefaultMenuItem.builder()
-				.value(resource.recuperaChave("menu.configuracao.regras", getFacesContext()))
-				.styleClass("ui-simple-menu")
-				.url(BaseConstant.URL_APLICACAO + "/paginas/sistema/regras/pesquisaRegra.xhtml").build();
-		configuracaoes.getElements().add(regras);
+		if (temPermissaoWeb(WebPermissao.CONFIG_REGRAS_VER)) {
+			DefaultMenuItem regras = DefaultMenuItem.builder()
+					.value(resource.recuperaChave("menu.configuracao.regras", getFacesContext()))
+					.styleClass("ui-simple-menu")
+					.url(BaseConstant.URL_APLICACAO + "/paginas/sistema/regras/pesquisaRegra.xhtml").build();
+			configuracaoes.getElements().add(regras);
+		}
 
-		DefaultMenuItem parametrosGerais = DefaultMenuItem.builder()
-				.value(resource.recuperaChave("menu.configuracao.gerais", getFacesContext()))
-				.styleClass("ui-simple-menu")
-				.url(BaseConstant.URL_APLICACAO + "/paginas/sistema/configuracoes/gerenciarParametros.xhtml").build();
-		configuracaoes.getElements().add(parametrosGerais);
+		if (temPermissaoWeb(WebPermissao.CONFIG_PARAMETROS_VER)) {
+			DefaultMenuItem parametrosGerais = DefaultMenuItem.builder()
+					.value(resource.recuperaChave("menu.configuracao.gerais", getFacesContext()))
+					.styleClass("ui-simple-menu")
+					.url(BaseConstant.URL_APLICACAO + "/paginas/sistema/configuracoes/gerenciarParametros.xhtml").build();
+			configuracaoes.getElements().add(parametrosGerais);
+		}
 
-		menu.getElements().add(configuracaoes);
+		if (temPermissaoWeb(WebPermissao.CONFIG_WEB_PERMISSOES_VER)) {
+			DefaultMenuItem matrizPermissoes = DefaultMenuItem.builder()
+					.value(resource.recuperaChave("menu.configuracao.permissoes.web", getFacesContext()))
+					.styleClass("ui-simple-menu")
+					.url(BaseConstant.URL_APLICACAO + "/paginas/sistema/configuracoes/matrizPermissoes.xhtml").build();
+			configuracaoes.getElements().add(matrizPermissoes);
+		}
+
+		if (!configuracaoes.getElements().isEmpty()) {
+			menu.getElements().add(configuracaoes);
+		}
 
 	}
 
 	private void criaMenuRelatorio() {
 
-		// não adiciona menu para usuários que não forem admins ou gerentes
-		if (!PerfilAcesso.ADMINISTRADOR.equals(usuarioLogado.getPerfil())
-				&& !PerfilAcesso.GERENTE.equals(usuarioLogado.getPerfil()))
+		if (!temPermissaoWeb(WebPermissao.RELATORIO_PEDESTRE_VER)
+				&& !temPermissaoWeb(WebPermissao.RELATORIO_VISITANTE_VER)
+				&& !temPermissaoWeb(WebPermissao.RELATORIO_OCUPACAO_VER)
+				&& !temPermissaoWeb(WebPermissao.RELATORIO_LIBERACOES_VER)
+				&& !temPermissaoWeb(WebPermissao.RELATORIO_PERMANENCIA_VER)
+				&& !temPermissaoWeb(WebPermissao.RELATORIO_REFEICAO_VER))
 			return;
 
 		DefaultSubMenu relatorios = DefaultSubMenu.builder()
 				.label(resource.recuperaChave("menu.relatorio", getFacesContext()))
 				.icon("pi pi-fw pi-chart-bar").build();
 
-		DefaultMenuItem pedestres = DefaultMenuItem.builder()
-				.value(resource.recuperaChave("menu.relatorio.acesso.pedestre", getFacesContext()))
-				.styleClass("ui-simple-menu")
-				.url(BaseConstant.URL_APLICACAO + "/paginas/sistema/relatorios/pedestres.xhtml").build();
-		relatorios.getElements().add(pedestres);
+		if (temPermissaoWeb(WebPermissao.RELATORIO_PEDESTRE_VER)) {
+			DefaultMenuItem pedestres = DefaultMenuItem.builder()
+					.value(resource.recuperaChave("menu.relatorio.acesso.pedestre", getFacesContext()))
+					.styleClass("ui-simple-menu")
+					.url(BaseConstant.URL_APLICACAO + "/paginas/sistema/relatorios/pedestres.xhtml").build();
+			relatorios.getElements().add(pedestres);
+		}
 
-		DefaultMenuItem visitantes = DefaultMenuItem.builder()
-				.value(resource.recuperaChave("menu.relatorio.visitante", getFacesContext()))
-				.styleClass("ui-simple-menu")
-				.url(BaseConstant.URL_APLICACAO + "/paginas/sistema/relatorios/visitantes.xhtml").build();
-		relatorios.getElements().add(visitantes);
+		if (temPermissaoWeb(WebPermissao.RELATORIO_VISITANTE_VER)) {
+			DefaultMenuItem visitantes = DefaultMenuItem.builder()
+					.value(resource.recuperaChave("menu.relatorio.visitante", getFacesContext()))
+					.styleClass("ui-simple-menu")
+					.url(BaseConstant.URL_APLICACAO + "/paginas/sistema/relatorios/visitantes.xhtml").build();
+			relatorios.getElements().add(visitantes);
+		}
 
-		DefaultMenuItem ocupacao = DefaultMenuItem.builder()
-				.value(resource.recuperaChave("menu.relatorio.ocupacao", getFacesContext()))
-				.styleClass("ui-simple-menu")
-				.url(BaseConstant.URL_APLICACAO + "/paginas/sistema/relatorios/ocupacao.xhtml").build();
-		relatorios.getElements().add(ocupacao);
+		if (temPermissaoWeb(WebPermissao.RELATORIO_OCUPACAO_VER)) {
+			DefaultMenuItem ocupacao = DefaultMenuItem.builder()
+					.value(resource.recuperaChave("menu.relatorio.ocupacao", getFacesContext()))
+					.styleClass("ui-simple-menu")
+					.url(BaseConstant.URL_APLICACAO + "/paginas/sistema/relatorios/ocupacao.xhtml").build();
+			relatorios.getElements().add(ocupacao);
+		}
 
-		DefaultMenuItem liberacoesManuais = DefaultMenuItem.builder()
-				.value(resource.recuperaChave("menu.relatorio.liberacoes.manuais", getFacesContext()))
-				.styleClass("ui-simple-menu")
-				.url(BaseConstant.URL_APLICACAO + "/paginas/sistema/relatorios/liberacoesManuais.xhtml").build();
-		relatorios.getElements().add(liberacoesManuais);
+		if (temPermissaoWeb(WebPermissao.RELATORIO_LIBERACOES_VER)) {
+			DefaultMenuItem liberacoesManuais = DefaultMenuItem.builder()
+					.value(resource.recuperaChave("menu.relatorio.liberacoes.manuais", getFacesContext()))
+					.styleClass("ui-simple-menu")
+					.url(BaseConstant.URL_APLICACAO + "/paginas/sistema/relatorios/liberacoesManuais.xhtml").build();
+			relatorios.getElements().add(liberacoesManuais);
+		}
 
-		DefaultMenuItem relatorioPermanencia = DefaultMenuItem.builder()
-				.value(resource.recuperaChave("menu.relatorio.permanencia", getFacesContext()))
-				.styleClass("ui-simple-menu")
-				.url(BaseConstant.URL_APLICACAO + "/paginas/sistema/relatorios/relatorioPermanencia.xhtml").build();
-		relatorios.getElements().add(relatorioPermanencia);
-		
-		if(isRelatorioRonaHabilitado()) {
+		if (temPermissaoWeb(WebPermissao.RELATORIO_PERMANENCIA_VER)) {
+			DefaultMenuItem relatorioPermanencia = DefaultMenuItem.builder()
+					.value(resource.recuperaChave("menu.relatorio.permanencia", getFacesContext()))
+					.styleClass("ui-simple-menu")
+					.url(BaseConstant.URL_APLICACAO + "/paginas/sistema/relatorios/relatorioPermanencia.xhtml").build();
+			relatorios.getElements().add(relatorioPermanencia);
+		}
+
+		if (isRelatorioRonaHabilitado() && temPermissaoWeb(WebPermissao.RELATORIO_REFEICAO_VER)) {
 			DefaultMenuItem relatorioRefeicao = DefaultMenuItem.builder()
 					.value(resource.recuperaChave("menu.relatorio.refeicao", getFacesContext()))
 					.styleClass("ui-simple-menu")
 					.url(BaseConstant.URL_APLICACAO + "/paginas/sistema/relatorios/relatorioRefeicao.xhtml").build();
 			relatorios.getElements().add(relatorioRefeicao);
-
 		}
-	
-		menu.getElements().add(relatorios);
+
+		if (!relatorios.getElements().isEmpty()) {
+			menu.getElements().add(relatorios);
+		}
 
 	}
 
 	private void criaMenuCadastro() {
-		// nao cria menu cadastro para responsavel
-		if (PerfilAcesso.RESPONSAVEL.equals(usuarioLogado.getPerfil()))
+		if (!temPermissaoWeb(WebPermissao.PEDESTRE_VER)
+				&& !temPermissaoWeb(WebPermissao.VISITANTE_VER)
+				&& !temPermissaoWeb(WebPermissao.CADASTRO_ERRO_VER)
+				&& !temPermissaoWeb(WebPermissao.APROVACAO_TOTEM_VER)
+				&& !temPermissaoWeb(WebPermissao.CORRESPONDENCIA_VER)
+				&& !temPermissaoWeb(WebPermissao.AVISO_APP_VER)
+				&& !temPermissaoWeb(WebPermissao.TOTEM_AUTO_VER)
+				&& !temPermissaoWeb(WebPermissao.ALTERACAO_MASSA_VER)
+				&& !temPermissaoWeb(WebPermissao.USUARIO_VER)
+				&& !temPermissaoWeb(WebPermissao.EMPRESA_VER))
 			return;
 
 		DefaultSubMenu cadastros = DefaultSubMenu.builder()
 				.label(resource.recuperaChave("menu.cadastro", getFacesContext()))
 				.icon("pi pi-fw pi-users").build();
 
-		if (!PerfilAcesso.PORTEIRO.equals(usuarioLogado.getPerfil())) {
+		if (temPermissaoWeb(WebPermissao.PEDESTRE_VER)) {
 			DefaultMenuItem pedestres = DefaultMenuItem.builder()
 					.value(resource.recuperaChave("menu.cadastro.pedestre", getFacesContext()))
 					.url(BaseConstant.URL_APLICACAO + "/paginas/sistema/pedestres/pesquisaPedestre.xhtml?tipo=pe")
@@ -305,26 +348,29 @@ public class MenuController extends BaseController {
 			cadastros.getElements().add(pedestres);
 		}
 
-		DefaultMenuItem visitantes = DefaultMenuItem.builder()
-				.value(resource.recuperaChave("menu.cadastro.visitante", getFacesContext()))
-				.url(BaseConstant.URL_APLICACAO + "/paginas/sistema/pedestres/pesquisaPedestre.xhtml?tipo=vi")
-				.styleClass("ui-simple-menu").build();
-		cadastros.getElements().add(visitantes);
+		if (temPermissaoWeb(WebPermissao.VISITANTE_VER)) {
+			DefaultMenuItem visitantes = DefaultMenuItem.builder()
+					.value(resource.recuperaChave("menu.cadastro.visitante", getFacesContext()))
+					.url(BaseConstant.URL_APLICACAO + "/paginas/sistema/pedestres/pesquisaPedestre.xhtml?tipo=vi")
+					.styleClass("ui-simple-menu").build();
+			cadastros.getElements().add(visitantes);
+		}
 
-		boolean alertaErrosCadastro = quantidadeCadastrosComErro > 0;
-		String rotuloErros = alertaErrosCadastro
-				? resource.recuperaChave("menu.cadastro.erros", getFacesContext()) + " ("
-						+ quantidadeCadastrosComErro + ")"
-				: resource.recuperaChave("menu.cadastro.erros", getFacesContext());
-		DefaultMenuItem cadastrosErro = DefaultMenuItem.builder()
-				.value(rotuloErros)
-				.url(BaseConstant.URL_APLICACAO + "/paginas/sistema/pedestres/pesquisaCadastroErro.xhtml")
-				.styleClass(alertaErrosCadastro ? "ui-simple-menu sa-menu-cadastros-erro--alert" : "ui-simple-menu")
-				.build();
-		cadastros.getElements().add(cadastrosErro);
+		if (temPermissaoWeb(WebPermissao.CADASTRO_ERRO_VER)) {
+			boolean alertaErrosCadastro = quantidadeCadastrosComErro > 0;
+			String rotuloErros = alertaErrosCadastro
+					? resource.recuperaChave("menu.cadastro.erros", getFacesContext()) + " ("
+							+ quantidadeCadastrosComErro + ")"
+					: resource.recuperaChave("menu.cadastro.erros", getFacesContext());
+			DefaultMenuItem cadastrosErro = DefaultMenuItem.builder()
+					.value(rotuloErros)
+					.url(BaseConstant.URL_APLICACAO + "/paginas/sistema/pedestres/pesquisaCadastroErro.xhtml")
+					.styleClass(alertaErrosCadastro ? "ui-simple-menu sa-menu-cadastros-erro--alert" : "ui-simple-menu")
+					.build();
+			cadastros.getElements().add(cadastrosErro);
+		}
 
-		if (PerfilAcesso.ADMINISTRADOR.equals(usuarioLogado.getPerfil())
-				|| PerfilAcesso.GERENTE.equals(usuarioLogado.getPerfil())) {
+		if (temPermissaoWeb(WebPermissao.APROVACAO_TOTEM_VER)) {
 			boolean alertaPendentes = quantidadeAprovacoesPendentes > 0;
 			String rotuloAprovacoes = alertaPendentes
 					? resource.recuperaChave("menu.cadastro.aprovacao.pendentes", getFacesContext()) + " ("
@@ -339,8 +385,7 @@ public class MenuController extends BaseController {
 			cadastros.getElements().add(aprovacaoPendentes);
 		}
 
-		if (isModuloCorrespondenciaHabilitad()) {
-			// para admins ou gerentes
+		if (isModuloCorrespondenciaHabilitad() && temPermissaoWeb(WebPermissao.CORRESPONDENCIA_VER)) {
 			DefaultMenuItem cadastroCorrespondencia = DefaultMenuItem.builder()
 					.value(resource.recuperaChave("menu.cadastro.correspondencia", getFacesContext()))
 					.url(BaseConstant.URL_APLICACAO + "/paginas/sistema/correspondencia/pesquisaCorrespondencia.xhtml")
@@ -348,34 +393,31 @@ public class MenuController extends BaseController {
 			cadastros.getElements().add(cadastroCorrespondencia);
 		}
 
-		if (PerfilAcesso.ADMINISTRADOR.equals(usuarioLogado.getPerfil())
-				|| PerfilAcesso.GERENTE.equals(usuarioLogado.getPerfil())) {
+		if (temPermissaoWeb(WebPermissao.AVISO_APP_VER)) {
 			DefaultMenuItem avisosApp = DefaultMenuItem.builder()
 					.value(resource.recuperaChave("menu.cadastro.aviso.app", getFacesContext()))
 					.url(BaseConstant.URL_APLICACAO + "/paginas/sistema/avisoApp/pesquisaAvisoApp.xhtml")
 					.styleClass("ui-simple-menu").build();
 			cadastros.getElements().add(avisosApp);
 		}
-		
-		DefaultMenuItem caadastroAuto = DefaultMenuItem.builder()
-				.value(resource.recuperaChave("menu.cadastro.totem", getFacesContext()))
-				.url(BaseConstant.URL_APLICACAO + "/paginas/sistema/pedestres/cadastroAuto.xhtml")
-				.styleClass("ui-simple-menu").build();
-		cadastros.getElements().add(caadastroAuto);
-		
-		// para admins ou gerentes
-		if (PerfilAcesso.ADMINISTRADOR.equals(usuarioLogado.getPerfil())
-				|| PerfilAcesso.GERENTE.equals(usuarioLogado.getPerfil())) {
+
+		if (temPermissaoWeb(WebPermissao.TOTEM_AUTO_VER)) {
+			DefaultMenuItem caadastroAuto = DefaultMenuItem.builder()
+					.value(resource.recuperaChave("menu.cadastro.totem", getFacesContext()))
+					.url(BaseConstant.URL_APLICACAO + "/paginas/sistema/pedestres/cadastroAuto.xhtml")
+					.styleClass("ui-simple-menu").build();
+			cadastros.getElements().add(caadastroAuto);
+		}
+
+		if (temPermissaoWeb(WebPermissao.ALTERACAO_MASSA_VER)) {
 			DefaultMenuItem alteracaoEmMassa = DefaultMenuItem.builder()
 					.value(resource.recuperaChave("menu.cadastro.alteracao.massa", getFacesContext()))
 					.url(BaseConstant.URL_APLICACAO + "/paginas/sistema/alteracoes/alteracoesEmMassa.xhtml")
 					.styleClass("ui-simple-menu").build();
 			cadastros.getElements().add(alteracaoEmMassa);
 		}
-		
 
-		if (PerfilAcesso.ADMINISTRADOR.equals(usuarioLogado.getPerfil())
-				|| PerfilAcesso.GERENTE.equals(usuarioLogado.getPerfil())) {
+		if (temPermissaoWeb(WebPermissao.USUARIO_VER)) {
 			DefaultMenuItem usuarios = DefaultMenuItem.builder()
 					.value(resource.recuperaChave("menu.cadastro.usuario", getFacesContext()))
 					.url(BaseConstant.URL_APLICACAO + "/paginas/sistema/usuarios/pesquisaUsuarios.xhtml")
@@ -383,8 +425,7 @@ public class MenuController extends BaseController {
 			cadastros.getElements().add(usuarios);
 		}
 
-		if (!PerfilAcesso.PORTEIRO.equals(usuarioLogado.getPerfil())
-				&& !PerfilAcesso.CUIDADOR.equals(usuarioLogado.getPerfil())) {
+		if (temPermissaoWeb(WebPermissao.EMPRESA_VER)) {
 			DefaultMenuItem empresas = DefaultMenuItem.builder()
 					.value(resource.recuperaChave("menu.cadastro.empresa", getFacesContext()))
 					.url(BaseConstant.URL_APLICACAO + "/paginas/sistema/empresas/pesquisaEmpresa.xhtml")
@@ -392,35 +433,42 @@ public class MenuController extends BaseController {
 			cadastros.getElements().add(empresas);
 		}
 
-		menu.getElements().add(cadastros);
+		if (!cadastros.getElements().isEmpty()) {
+			menu.getElements().add(cadastros);
+		}
 		quantidadePendentesNoMenu = quantidadeAprovacoesPendentes;
 		quantidadeErrosNoMenu = quantidadeCadastrosComErro;
 	}
 	
 	private void criaMenuDispositivos() {
-		// nao cria menu cadastro para responsavel
-		if (PerfilAcesso.RESPONSAVEL.equals(usuarioLogado.getPerfil()))
+		if (!temPermissaoWeb(WebPermissao.DISPOSITIVO_EQUIPAMENTOS_VER)
+				&& !temPermissaoWeb(WebPermissao.DISPOSITIVO_CAMERAS_VER))
 			return;
 
 		DefaultSubMenu dispositivos = DefaultSubMenu.builder()
 				.label("Dispositivos")
 				.icon("pi pi-fw pi-video").build();
-		
-		
-		DefaultMenuItem equipamentos = DefaultMenuItem.builder()
-				.value(resource.recuperaChave("menu.relatorio.equipamentos", getFacesContext()))
-				.styleClass("ui-simple-menu")
-				.url(BaseConstant.URL_APLICACAO + "/paginas/sistema/relatorios/equipamentosConectados.xhtml").build();
-		dispositivos.getElements().add(equipamentos);
 
-		DefaultMenuItem hikivision = DefaultMenuItem.builder()
-				.value(resource.recuperaChave("menu.cameras.hikivision", getFacesContext()))
-				.url(BaseConstant.URL_APLICACAO + "/paginas/sistema/cameras/cameras.xhtml")
-				.styleClass("ui-simple-menu").build();
+		if (temPermissaoWeb(WebPermissao.DISPOSITIVO_EQUIPAMENTOS_VER)) {
+			DefaultMenuItem equipamentos = DefaultMenuItem.builder()
+					.value(resource.recuperaChave("menu.relatorio.equipamentos", getFacesContext()))
+					.styleClass("ui-simple-menu")
+					.url(BaseConstant.URL_APLICACAO + "/paginas/sistema/relatorios/equipamentosConectados.xhtml")
+					.build();
+			dispositivos.getElements().add(equipamentos);
+		}
 
-		dispositivos.getElements().add(hikivision);
-		
-		menu.getElements().add(dispositivos);
+		if (temPermissaoWeb(WebPermissao.DISPOSITIVO_CAMERAS_VER)) {
+			DefaultMenuItem hikivision = DefaultMenuItem.builder()
+					.value(resource.recuperaChave("menu.cameras.hikivision", getFacesContext()))
+					.url(BaseConstant.URL_APLICACAO + "/paginas/sistema/cameras/cameras.xhtml")
+					.styleClass("ui-simple-menu").build();
+			dispositivos.getElements().add(hikivision);
+		}
+
+		if (!dispositivos.getElements().isEmpty()) {
+			menu.getElements().add(dispositivos);
+		}
 	}
 
 	private void montaMenuUsuario() {
@@ -451,8 +499,7 @@ public class MenuController extends BaseController {
 
 		DefaultSubMenu ajuda = DefaultSubMenu.builder().label("Ajuda").icon("pi pi-fw pi-question-circle").build();
 
-		if (PerfilAcesso.ADMINISTRADOR.equals(usuarioLogado.getPerfil())
-				|| PerfilAcesso.GERENTE.equals(usuarioLogado.getPerfil())) {
+		if (temPermissaoWeb(WebPermissao.AJUDA_DOWNLOAD_DESKTOP_VER)) {
 			DefaultMenuItem downloadApp = DefaultMenuItem.builder().value("Controle Acesso Desktop")
 					.styleClass("ui-simple-menu").onclick("PF('downloads').show()").build();
 			ajuda.getElements().add(downloadApp);
@@ -550,8 +597,7 @@ public class MenuController extends BaseController {
 		if (usuario == null || usuario.getCliente() == null) {
 			return;
 		}
-		if (!PerfilAcesso.ADMINISTRADOR.equals(usuario.getPerfil())
-				&& !PerfilAcesso.GERENTE.equals(usuario.getPerfil())) {
+		if (!temPermissaoWeb(WebPermissao.APROVACAO_TOTEM_VER)) {
 			return;
 		}
 		try {
@@ -609,6 +655,10 @@ public class MenuController extends BaseController {
 		setSessioAtrribute("horaLogin", null);
 		setSessioAtrribute("iUser", null);
 		setSessioAtrribute("roles", null);
+		setSessioAtrribute(BaseConstant.LOGIN.WEB_PERMISSIONS, null);
+		if (webPermission != null) {
+			webPermission.limpar();
+		}
 		getRequest().getSession().invalidate();
 
 		// envia login.jsf

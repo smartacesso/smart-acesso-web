@@ -74,6 +74,9 @@ public interface BaseConstant {
 	public static interface LOGIN{
 		
 		public static final String USER_ENTITY = "usuario";
+
+		/** Códigos {@link br.com.startjob.acesso.modelo.enumeration.WebPermissao} ativos na sessão web. */
+		public static final String WEB_PERMISSIONS = "webPermissoes";
 		
 	}
 	

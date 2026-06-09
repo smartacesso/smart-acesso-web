@@ -1,0 +1,107 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui">
+
+<body>
+
+	<ui:composition template="/tema/templates/template.xhtml">
+
+		<ui:define name="titulo">
+			#{msgs['title.sistema']} | #{msgs['title.configuracoes.permissoes.web']}
+		</ui:define>
+		<ui:define name="pageTitle">
+			<h:outputText value="#{msgs['title.configuracoes.permissoes.web']}" />
+		</ui:define>
+		<ui:define name="pageSubtitle">
+			<h:outputText value="#{sessionScope.usuario.cliente.nome}" rendered="#{sessionScope.usuario != null}" />
+		</ui:define>
+
+		<ui:define name="tools">
+			<p:toolbar styleClass="sa-toolbar-wrap">
+				<p:toolbarGroup styleClass="sa-toolbar-actions">
+					<p:commandButton action="#{matrizPermissoesController.salvar}"
+						value="#{msgs['alt.acao.save']}"
+						icon="pi pi-check"
+						styleClass="sa-btn-label ui-button-success"
+						rendered="#{matrizPermissoesController.temPermissaoWeb('WEB_CONFIG_WEB_PERMISSOES_EDITAR')}">
+						<p:ajax process="@form" update="@form menuForm" />
+					</p:commandButton>
+					<p:commandButton action="#{matrizPermissoesController.restaurarPadrao}"
+						value="#{msgs['label.web.permissao.restaurar.padrao']}"
+						icon="pi pi-refresh"
+						styleClass="sa-btn-label ui-button-secondary"
+						rendered="#{matrizPermissoesController.temPermissaoWeb('WEB_CONFIG_WEB_PERMISSOES_EDITAR')}">
+						<p:ajax process="@this" update="@form" />
+					</p:commandButton>
+				</p:toolbarGroup>
+			</p:toolbar>
+		</ui:define>
+
+		<ui:define name="conteudo">
+			<p:panel>
+				<p class="sa-hint-text">
+					<h:outputText value="#{msgs['hint.web.permissao.matriz']}" />
+				</p>
+
+				<div class="sa-matriz-permissoes-wrap">
+					<p:dataTable id="matrizPermissoesTable"
+						value="#{matrizPermissoesController.linhas}"
+						var="linha"
+						styleClass="tabela-responsive sa-table sa-matriz-permissoes-table"
+						tableStyle="table-layout: fixed; width: 100%;"
+						emptyMessage="#{msgs['msg.web.permissao.lista.vazia']}">
+
+						<p:column headerText="#{msgs['label.web.permissao.descricao']}"
+							style="width: 38%; text-align: left;"
+							headerStyle="width: 38%; text-align: left;">
+							<h:outputText value="#{msgs[linha.messageKey]}" />
+						</p:column>
+
+						<p:column headerText="ADMIN"
+							styleClass="sa-table-col-center"
+							style="width: 10%; text-align: center;"
+							headerStyle="width: 10%; text-align: center;">
+							<p:selectBooleanCheckbox value="#{linha.administrador}" />
+						</p:column>
+						<p:column headerText="GERENTE"
+							styleClass="sa-table-col-center"
+							style="width: 10%; text-align: center;"
+							headerStyle="width: 10%; text-align: center;">
+							<p:selectBooleanCheckbox value="#{linha.gerente}" />
+						</p:column>
+						<p:column headerText="OPERADOR"
+							styleClass="sa-table-col-center"
+							style="width: 10%; text-align: center;"
+							headerStyle="width: 10%; text-align: center;">
+							<p:selectBooleanCheckbox value="#{linha.operador}" />
+						</p:column>
+						<p:column headerText="PORTEIRO"
+							styleClass="sa-table-col-center"
+							style="width: 10%; text-align: center;"
+							headerStyle="width: 10%; text-align: center;">
+							<p:selectBooleanCheckbox value="#{linha.porteiro}" />
+						</p:column>
+						<p:column headerText="CUIDADOR"
+							styleClass="sa-table-col-center"
+							style="width: 10%; text-align: center;"
+							headerStyle="width: 10%; text-align: center;">
+							<p:selectBooleanCheckbox value="#{linha.cuidador}" />
+						</p:column>
+						<p:column headerText="RESPONSÁVEL"
+							styleClass="sa-table-col-center"
+							style="width: 12%; text-align: center;"
+							headerStyle="width: 12%; text-align: center;">
+							<p:selectBooleanCheckbox value="#{linha.responsavel}" />
+						</p:column>
+					</p:dataTable>
+				</div>
+			</p:panel>
+		</ui:define>
+
+	</ui:composition>
+</body>
+</html>
