@@ -1,1 +1,7 @@
 /build/
+
+# Credenciais Firebase / segredos de servidor (nunca commitar)
+*firebase*adminsdk*.json
+*google-services.json
+GoogleService-Info.plist
+/secrets/

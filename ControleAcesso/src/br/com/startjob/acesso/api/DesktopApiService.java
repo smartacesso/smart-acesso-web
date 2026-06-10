@@ -33,9 +33,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.JsonObject;
 import com.google.gson.reflect.TypeToken;
 
+import br.com.startjob.acesso.modelo.ejb.AppEJBRemote;
 import br.com.startjob.acesso.modelo.ejb.BaseEJB;
 import br.com.startjob.acesso.modelo.ejb.BaseEJBRemote;
 import br.com.startjob.acesso.modelo.ejb.PedestreEJBRemote;
+import br.com.startjob.acesso.service.AppPushNotificationService;
 import br.com.startjob.acesso.modelo.entity.AcessoEntity;
 import br.com.startjob.acesso.modelo.entity.BiometriaEntity;
 import br.com.startjob.acesso.modelo.entity.CargoEntity;
@@ -524,7 +526,19 @@ public class DesktopApiService extends BaseService {
 
 			if (!logs.isEmpty()) {
 				getEjb("BaseEJB").saveRegisterLogs(logs);
+				// App antigo: deviceKey + localhost:8085 (responsáveis legado)
 				getEjb("BaseEJB").enviaNotificacao(logs);
+				// App novo (AppRequestService): FCM para RESPONSAVEL (tutorados) + GERENCIAL (empresa)
+				try {
+					AppEJBRemote appEjb = (AppEJBRemote) getEjb("AppEJB");
+					AppPushNotificationService pushService = new AppPushNotificationService(appEjb);
+					for (AcessoEntity log : logs) {
+						pushService.notificarAcesso(log);
+					}
+				} catch (Exception pushEx) {
+					System.err.println("Erro ao enviar push FCM de acesso (app novo): " + pushEx.getMessage());
+					pushEx.printStackTrace();
+				}
 			}
 
 		} catch (Exception e) {

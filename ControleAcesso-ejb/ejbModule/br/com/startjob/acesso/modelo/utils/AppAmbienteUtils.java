@@ -52,6 +52,8 @@ public class AppAmbienteUtils {
 	public static final String CONFIG_AMBIENTE_SGDB = "config.sgdb.utilizado";
 	public static final String CONFIG_AMBIENTE_SCHEMA = "config.schema.name";
 	public static final String CONFIG_AMBIENTE_SQL_SERVER_VESION = "config.sqlserver.version";
+	/** Caminho absoluto ao JSON da service account Firebase (push FCM). Fallback após system property / env. */
+	public static final String CONFIG_FIREBASE_SERVICE_ACCOUNT_PATH = "config.firebase.service.account.path";
 	
 	/**
 	 * Retorna se ambiente configurado é de produção

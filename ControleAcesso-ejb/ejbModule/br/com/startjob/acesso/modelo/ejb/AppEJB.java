@@ -15,8 +15,12 @@ import br.com.startjob.acesso.modelo.entity.AcessoEntity;
 import br.com.startjob.acesso.modelo.entity.AvisoAppEntity;
 import br.com.startjob.acesso.modelo.entity.ClienteEntity;
 import br.com.startjob.acesso.modelo.entity.CorrespondenciaEntity;
+import br.com.startjob.acesso.modelo.entity.DeviceTokenEntity;
 import br.com.startjob.acesso.modelo.entity.PedestreEntity;
+import br.com.startjob.acesso.modelo.enumeration.PerfilAcessoApp;
+import br.com.startjob.acesso.modelo.enumeration.TipoPedestre;
 import br.com.startjob.acesso.modelo.to.app.AvisoListItem;
+import br.com.startjob.acesso.modelo.to.app.EncomendaListItem;
 import br.com.startjob.acesso.modelo.to.app.PageResult;
 
 @Stateless
@@ -119,50 +123,100 @@ public class AppEJB extends BaseEJB implements AppEJBRemote {
 	}
 
 	/**
-	 * Encomendas do destinatário logado ({@code destinatario.id = userId}).
-	 * Perfil GERENCIAL: ainda restrito ao próprio pedestre; ampliar escopo exige regra de negócio explícita.
+	 * Encomendas do destinatário logado ou de todo o cliente (perfil GERENCIAL).
 	 */
 	@Override
-	public PageResult<CorrespondenciaEntity> buscarEncomendasPaginada(Long userId, Long idCliente, Date dataInicio,
-			Date dataFim, String status, String busca, int pagina, int tamanho) {
+	public PageResult<EncomendaListItem> buscarEncomendasPaginada(Long userId, Long idCliente, Date dataInicio,
+			Date dataFim, String status, String busca, int pagina, int tamanho, boolean listarTodasDoCliente) {
 
-	    StringBuilder fromWhere = buildEncomendasFromWhere(dataInicio, dataFim, status, busca);
+	    StringBuilder fromWhere = buildEncomendasFromWhere(dataInicio, dataFim, status, busca, listarTodasDoCliente);
 
 	    StringBuilder jpqlData = new StringBuilder();
-	    jpqlData.append("SELECT new br.com.startjob.acesso.modelo.entity.CorrespondenciaEntity(");
+	    jpqlData.append("SELECT new br.com.startjob.acesso.modelo.to.app.EncomendaListItem(");
 	    jpqlData.append("c.id, c.dataRecebimento, c.dataRetirada, c.tipo, c.codigoRastreio, c.confirmaRetirada, ");
-	    jpqlData.append("c.nomeQuemRetirou, c.documentoQuemRetirou) ");
+	    jpqlData.append("c.nomeQuemRetirou, c.documentoQuemRetirou, d.id, d.nome) ");
 	    jpqlData.append(fromWhere);
 	    jpqlData.append("ORDER BY c.dataRecebimento DESC");
 
-	    TypedQuery<CorrespondenciaEntity> query = em.createQuery(jpqlData.toString(), CorrespondenciaEntity.class);
-	    setEncomendasParameters(query, idCliente, userId, dataInicio, dataFim, status, busca);
+	    TypedQuery<EncomendaListItem> query = em.createQuery(jpqlData.toString(), EncomendaListItem.class);
+	    setEncomendasParameters(query, idCliente, userId, dataInicio, dataFim, status, busca, listarTodasDoCliente);
 	    query.setFirstResult(pagina * tamanho);
 	    query.setMaxResults(tamanho);
-	    List<CorrespondenciaEntity> items = query.getResultList();
+	    List<EncomendaListItem> items = query.getResultList();
 
 	    StringBuilder jpqlCount = new StringBuilder();
 	    jpqlCount.append("SELECT COUNT(c.id) ");
 	    jpqlCount.append(fromWhere);
 	    TypedQuery<Long> countQuery = em.createQuery(jpqlCount.toString(), Long.class);
-	    setEncomendasParameters(countQuery, idCliente, userId, dataInicio, dataFim, status, busca);
+	    setEncomendasParameters(countQuery, idCliente, userId, dataInicio, dataFim, status, busca, listarTodasDoCliente);
 	    long total = countQuery.getSingleResult();
 
 	    return new PageResult<>(new ArrayList<>(items), total);
 	}
 
 	@Override
-	public long contarEncomendasPendentes(Long userId, Long idCliente) {
-		String jpql = "SELECT COUNT(c.id) FROM CorrespondenciaEntity c "
-				+ "WHERE c.cliente.id = :idCliente "
-				+ "AND c.destinatario.id = :idPedestre "
-				+ "AND (c.removido = false OR c.removido IS NULL) "
-				+ "AND (c.confirmaRetirada IS NULL OR c.confirmaRetirada <> 'S')";
+	public EncomendaListItem confirmarRetiradaEncomenda(Long idEncomenda, Long idPedestreLogado, Long idCliente,
+			String nomeQuemRetirou, String documentoQuemRetirou, boolean perfilGerencial) throws Exception {
+		if (idEncomenda == null) {
+			throw new Exception("INVALID_PARAMS");
+		}
+		if (nomeQuemRetirou == null || nomeQuemRetirou.trim().isEmpty()
+				|| documentoQuemRetirou == null || documentoQuemRetirou.trim().isEmpty()) {
+			throw new Exception("INVALID_PARAMS");
+		}
 
-		return em.createQuery(jpql, Long.class)
+		String jpql = "SELECT c FROM CorrespondenciaEntity c "
+				+ "JOIN FETCH c.destinatario d "
+				+ "WHERE c.id = :id AND c.cliente.id = :idCliente "
+				+ "AND (c.removido = false OR c.removido IS NULL)";
+		List<CorrespondenciaEntity> lista = em.createQuery(jpql, CorrespondenciaEntity.class)
+				.setParameter("id", idEncomenda)
 				.setParameter("idCliente", idCliente)
-				.setParameter("idPedestre", userId)
-				.getSingleResult();
+				.setMaxResults(1)
+				.getResultList();
+
+		if (lista.isEmpty()) {
+			throw new Exception("NOT_FOUND");
+		}
+
+		CorrespondenciaEntity correspondencia = lista.get(0);
+		if (!perfilGerencial) {
+			if (correspondencia.getDestinatario() == null
+					|| !idPedestreLogado.equals(correspondencia.getDestinatario().getId())) {
+				throw new Exception("FORBIDDEN");
+			}
+		}
+
+		if ("S".equals(correspondencia.getConfirmaRetirada())) {
+			throw new Exception("ALREADY_CONFIRMED");
+		}
+
+		correspondencia.setConfirmaRetirada("S");
+		correspondencia.setDataRetirada(new Date());
+		correspondencia.setNomeQuemRetirou(nomeQuemRetirou.trim());
+		correspondencia.setDocumentoQuemRetirou(documentoQuemRetirou.trim());
+		correspondencia.setDataAlteracao(new Date());
+
+		CorrespondenciaEntity salva = (CorrespondenciaEntity) alteraObjeto(correspondencia)[0];
+		return toEncomendaListItem(salva);
+	}
+
+	@Override
+	public long contarEncomendasPendentes(Long userId, Long idCliente, boolean listarTodasDoCliente) {
+		StringBuilder jpql = new StringBuilder();
+		jpql.append("SELECT COUNT(c.id) FROM CorrespondenciaEntity c ");
+		jpql.append("WHERE c.cliente.id = :idCliente ");
+		if (!listarTodasDoCliente) {
+			jpql.append("AND c.destinatario.id = :idPedestre ");
+		}
+		jpql.append("AND (c.removido = false OR c.removido IS NULL) ");
+		jpql.append("AND (c.confirmaRetirada IS NULL OR c.confirmaRetirada <> 'S')");
+
+		TypedQuery<Long> query = em.createQuery(jpql.toString(), Long.class).setParameter("idCliente", idCliente);
+		if (!listarTodasDoCliente) {
+			query.setParameter("idPedestre", userId);
+		}
+		return query.getSingleResult();
 	}
 
 	@Override
@@ -248,6 +302,21 @@ public class AppEJB extends BaseEJB implements AppEJBRemote {
 	}
 
 	@Override
+	public void excluirAvisoApp(Long id, Long idCliente) throws Exception {
+		if (id == null || idCliente == null) {
+			throw new Exception("INVALID_PARAMS");
+		}
+		AvisoAppEntity aviso = buscarAvisoAppPorId(id, idCliente);
+		if (aviso == null) {
+			throw new Exception("NOT_FOUND");
+		}
+		aviso.setRemovido(true);
+		aviso.setDataRemovido(new Date());
+		aviso.setDataAlteracao(new Date());
+		alteraObjeto(aviso);
+	}
+
+	@Override
 	public byte[] buscarImagemAvisoApp(Long id, Long idCliente) {
 		String jpql = "SELECT a.imagem FROM AvisoAppEntity a WHERE a.id = :id AND a.cliente.id = :idCliente "
 				+ "AND (a.removido = false OR a.removido IS NULL)";
@@ -299,11 +368,14 @@ public class AppEJB extends BaseEJB implements AppEJBRemote {
 		}
 	}
 
-	private StringBuilder buildEncomendasFromWhere(Date dataInicio, Date dataFim, String status, String busca) {
+	private StringBuilder buildEncomendasFromWhere(Date dataInicio, Date dataFim, String status, String busca,
+			boolean listarTodasDoCliente) {
 		StringBuilder jpql = new StringBuilder();
-		jpql.append("FROM CorrespondenciaEntity c ");
+		jpql.append("FROM CorrespondenciaEntity c JOIN c.destinatario d ");
 		jpql.append("WHERE c.cliente.id = :idCliente ");
-		jpql.append("AND c.destinatario.id = :idPedestre ");
+		if (!listarTodasDoCliente) {
+			jpql.append("AND c.destinatario.id = :idPedestre ");
+		}
 		jpql.append("AND (c.removido = false OR c.removido IS NULL) ");
 
 		if (dataInicio != null) {
@@ -321,15 +393,17 @@ public class AppEJB extends BaseEJB implements AppEJBRemote {
 		}
 		if (busca != null && !busca.trim().isEmpty()) {
 			jpql.append("AND (LOWER(c.codigoRastreio) LIKE :busca OR LOWER(c.tipo) LIKE :busca ");
-			jpql.append("OR LOWER(c.nomeQuemRetirou) LIKE :busca) ");
+			jpql.append("OR LOWER(c.nomeQuemRetirou) LIKE :busca OR LOWER(d.nome) LIKE :busca) ");
 		}
 		return jpql;
 	}
 
 	private void setEncomendasParameters(TypedQuery<?> query, Long idCliente, Long userId, Date dataInicio, Date dataFim,
-			String status, String busca) {
+			String status, String busca, boolean listarTodasDoCliente) {
 		query.setParameter("idCliente", idCliente);
-		query.setParameter("idPedestre", userId);
+		if (!listarTodasDoCliente) {
+			query.setParameter("idPedestre", userId);
+		}
 		if (dataInicio != null) {
 			query.setParameter("inicio", dataInicio);
 		}
@@ -372,5 +446,207 @@ public class AppEJB extends BaseEJB implements AppEJBRemote {
 	    return em.createQuery(jpql, Long.class)
 	            .setParameter("userId", userId)
 	            .getResultList();
+	}
+
+	@Override
+	public DeviceTokenEntity upsertDeviceToken(Long idPedestre, String fcmToken, String platform, String appVersion) {
+		if (idPedestre == null) {
+			throw new IllegalArgumentException("idPedestre é obrigatório para registrar device token");
+		}
+		String tokenNorm = fcmToken.trim();
+		String platformNorm = normalizarPlatform(platform);
+		String versionNorm = normalizarAppVersion(appVersion);
+		Date now = new Date();
+		PedestreEntity pedestre = em.getReference(PedestreEntity.class, idPedestre);
+
+		TypedQuery<DeviceTokenEntity> byToken = em.createNamedQuery("DeviceTokenEntity.findByFcmToken",
+				DeviceTokenEntity.class);
+		byToken.setParameter("fcmToken", tokenNorm);
+		List<DeviceTokenEntity> existing = byToken.getResultList();
+
+		DeviceTokenEntity entity;
+		if (!existing.isEmpty()) {
+			entity = existing.get(0);
+		} else {
+			entity = new DeviceTokenEntity();
+			entity.setFcmToken(tokenNorm);
+			entity.setPedestre(pedestre);
+			entity.setPlatform(platformNorm);
+			entity.setAppVersion(versionNorm);
+			entity.setAtualizadoEm(now);
+			entity.setAtivo(true);
+			entity.setDataCriacao(now);
+			entity.setDataAlteracao(now);
+			em.persist(entity);
+			return entity;
+		}
+
+		entity.setPedestre(pedestre);
+		entity.setPlatform(platformNorm);
+		entity.setAppVersion(versionNorm);
+		entity.setAtualizadoEm(now);
+		entity.setAtivo(true);
+		entity.setDataAlteracao(now);
+		return entity;
+	}
+
+	@Override
+	public void invalidarDeviceToken(Long idPedestre, String fcmToken) {
+		Date now = new Date();
+		List<DeviceTokenEntity> tokens;
+
+		if (fcmToken != null && !fcmToken.trim().isEmpty()) {
+			TypedQuery<DeviceTokenEntity> query = em.createNamedQuery("DeviceTokenEntity.findByPedestreAndFcmToken",
+					DeviceTokenEntity.class);
+			query.setParameter("idPedestre", idPedestre);
+			query.setParameter("fcmToken", fcmToken.trim());
+			tokens = query.getResultList();
+		} else {
+			tokens = buscarDeviceTokensAtivos(idPedestre);
+		}
+
+		for (DeviceTokenEntity token : tokens) {
+			token.setAtivo(false);
+			token.setAtualizadoEm(now);
+			token.setDataAlteracao(now);
+		}
+	}
+
+	@Override
+	public void invalidarDeviceTokenPorFcm(String fcmToken) {
+		if (fcmToken == null || fcmToken.trim().isEmpty()) {
+			return;
+		}
+		TypedQuery<DeviceTokenEntity> query = em.createNamedQuery("DeviceTokenEntity.findByFcmToken",
+				DeviceTokenEntity.class);
+		query.setParameter("fcmToken", fcmToken.trim());
+		Date now = new Date();
+		for (DeviceTokenEntity token : query.getResultList()) {
+			token.setAtivo(false);
+			token.setAtualizadoEm(now);
+			token.setDataAlteracao(now);
+		}
+	}
+
+	@Override
+	public List<DeviceTokenEntity> buscarDeviceTokensAtivos(Long idPedestre) {
+		TypedQuery<DeviceTokenEntity> query = em.createNamedQuery("DeviceTokenEntity.findAtivosByPedestre",
+				DeviceTokenEntity.class);
+		query.setParameter("idPedestre", idPedestre);
+		return query.getResultList();
+	}
+
+	@Override
+	public List<Long> buscarIdsResponsaveisPorPedestre(Long idPedestre) {
+		String jpql = "SELECT r.id FROM PedestreEntity p JOIN p.responsaveis r "
+				+ "WHERE p.id = :idPedestre AND (p.removido = false OR p.removido IS NULL) "
+				+ "AND (r.removido = false OR r.removido IS NULL)";
+		return em.createQuery(jpql, Long.class).setParameter("idPedestre", idPedestre).getResultList();
+	}
+
+	@Override
+	public List<Long> buscarIdsResponsaveisAppPorPedestre(Long idPedestre) {
+		if (idPedestre == null) {
+			return new ArrayList<>();
+		}
+		String jpql = "SELECT r.id FROM PedestreEntity p JOIN p.responsaveis r "
+				+ "WHERE p.id = :idPedestre "
+				+ "AND r.perfilApp = :perfilResponsavel "
+				+ "AND r.id <> p.id "
+				+ "AND (p.removido = false OR p.removido IS NULL) "
+				+ "AND (r.removido = false OR r.removido IS NULL)";
+		return em.createQuery(jpql, Long.class)
+				.setParameter("idPedestre", idPedestre)
+				.setParameter("perfilResponsavel", PerfilAcessoApp.RESPONSAVEL)
+				.getResultList();
+	}
+
+	@Override
+	public List<Long> buscarIdsGerenciaisAppPorPedestre(Long idPedestre) {
+		if (idPedestre == null) {
+			return new ArrayList<>();
+		}
+		String jpql = "SELECT g.id FROM PedestreEntity p, PedestreEntity g "
+				+ "WHERE p.id = :idPedestre "
+				+ "AND p.tipo = :tipoPedestre "
+				+ "AND p.empresa IS NOT NULL "
+				+ "AND g.empresa.id = p.empresa.id "
+				+ "AND g.perfilApp = :perfilGerencial "
+				+ "AND g.id <> p.id "
+				+ "AND (p.removido = false OR p.removido IS NULL) "
+				+ "AND (g.removido = false OR g.removido IS NULL)";
+		return em.createQuery(jpql, Long.class)
+				.setParameter("idPedestre", idPedestre)
+				.setParameter("tipoPedestre", TipoPedestre.PEDESTRE)
+				.setParameter("perfilGerencial", PerfilAcessoApp.GERENCIAL)
+				.getResultList();
+	}
+
+	@Override
+	public List<Long> buscarIdsPedestresNotificaveisAppPorCliente(Long idCliente) {
+		String jpql = "SELECT p.id FROM PedestreEntity p "
+				+ "WHERE p.cliente.id = :idCliente AND p.perfilApp IS NOT NULL "
+				+ "AND (p.removido = false OR p.removido IS NULL)";
+		return em.createQuery(jpql, Long.class).setParameter("idCliente", idCliente).getResultList();
+	}
+
+	@Override
+	public String buscarNomePedestre(Long idPedestre) {
+		if (idPedestre == null) {
+			return null;
+		}
+		PedestreEntity pedestre = em.find(PedestreEntity.class, idPedestre);
+		return pedestre != null ? pedestre.getNome() : null;
+	}
+
+	private String normalizarPlatform(String platform) {
+		if (platform == null) {
+			return null;
+		}
+		String p = platform.trim().toLowerCase();
+		if ("android".equals(p)) {
+			return "ANDROID";
+		}
+		if ("ios".equals(p) || "iphone".equals(p) || "ipad".equals(p)) {
+			return "IOS";
+		}
+		return platform.trim().toUpperCase();
+	}
+
+	private String normalizarAppVersion(String appVersion) {
+		if (appVersion == null || appVersion.trim().isEmpty()) {
+			return null;
+		}
+		String v = appVersion.trim();
+		return v.length() > 50 ? v.substring(0, 50) : v;
+	}
+
+	@Override
+	public CorrespondenciaEntity buscarCorrespondenciaPorIdECliente(Long id, Long idCliente) {
+		if (id == null || idCliente == null) {
+			return null;
+		}
+		String jpql = "SELECT c FROM CorrespondenciaEntity c JOIN FETCH c.destinatario d "
+				+ "WHERE c.id = :id AND c.cliente.id = :idCliente "
+				+ "AND (c.removido = false OR c.removido IS NULL)";
+		List<CorrespondenciaEntity> lista = em.createQuery(jpql, CorrespondenciaEntity.class)
+				.setParameter("id", id)
+				.setParameter("idCliente", idCliente)
+				.setMaxResults(1)
+				.getResultList();
+		return lista.isEmpty() ? null : lista.get(0);
+	}
+
+	private EncomendaListItem toEncomendaListItem(CorrespondenciaEntity correspondencia) {
+		Long destinatarioId = null;
+		String destinatarioNome = null;
+		if (correspondencia.getDestinatario() != null) {
+			destinatarioId = correspondencia.getDestinatario().getId();
+			destinatarioNome = correspondencia.getDestinatario().getNome();
+		}
+		return new EncomendaListItem(correspondencia.getId(), correspondencia.getDataRecebimento(),
+				correspondencia.getDataRetirada(), correspondencia.getTipo(), correspondencia.getCodigoRastreio(),
+				correspondencia.getConfirmaRetirada(), correspondencia.getNomeQuemRetirou(),
+				correspondencia.getDocumentoQuemRetirou(), destinatarioId, destinatarioNome);
 	}
 }

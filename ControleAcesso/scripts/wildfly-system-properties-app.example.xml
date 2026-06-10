@@ -1,0 +1,15 @@
+<!--
+  Exemplo de propriedades para API mobile + push FCM no WildFly (standalone.xml).
+  Copie o bloco <system-properties> para o seu standalone.xml e ajuste os caminhos.
+
+  jwt.secret           → login do app (POST /app/login) e Bearer JWT
+  firebase.service.account.path → JSON da service account (NÃO commitar; NÃO é google-services.json)
+
+  E-mail (correspondência, reset senha, retirada): ver wildfly-mail-sendgrid.example.xml
+  JNDI usado pelo código: java:/mail/suporte e java:jboss/mail/suporte
+-->
+<system-properties>
+    <property name="jwt.secret" value="ALTERE_CHAVE_SECRETA_LONGA"/>
+    <property name="firebase.service.account.path"
+              value="C:/secrets/smartacesso-mobile-firebase-adminsdk.json"/>
+</system-properties>

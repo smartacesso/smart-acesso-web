@@ -16,9 +16,11 @@ import javax.mail.Session;
 import org.primefaces.event.CaptureEvent;
 import br.com.startjob.acesso.annotations.UseCase;
 import br.com.startjob.acesso.controller.BaseController;
+import br.com.startjob.acesso.modelo.ejb.AppEJBRemote;
 import br.com.startjob.acesso.modelo.ejb.PedestreEJBRemote;
 import br.com.startjob.acesso.modelo.entity.CorrespondenciaEntity;
 import br.com.startjob.acesso.modelo.entity.PedestreEntity;
+import br.com.startjob.acesso.service.AppPushNotificationService;
 import br.com.startjob.acesso.utils.MailSendUtils;
 
 @Named("cadastroCorrespondenciaController")
@@ -37,6 +39,9 @@ public class CadastroCorrespondenciaController extends BaseController implements
 	
 	@EJB
 	private PedestreEJBRemote pedestreEJB;
+
+	@EJB
+	private AppEJBRemote appEJB;
 
 	@PostConstruct
 	@Override
@@ -80,7 +85,12 @@ public class CadastroCorrespondenciaController extends BaseController implements
 			} catch (Exception e) {
 				System.err.println("Erro ao tentar enviar e-mail de correspondência: " + e.getMessage());
 				e.printStackTrace();
-				// O e-mail falhou, mas não quebramos a tela do porteiro. Apenas logamos.
+			}
+			try {
+				new AppPushNotificationService(appEJB).notificarEncomenda(entidade);
+			} catch (Exception e) {
+				System.err.println("Erro ao enviar push de correspondência: " + e.getMessage());
+				e.printStackTrace();
 			}
 		}
 

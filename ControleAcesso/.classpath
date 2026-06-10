@@ -15,5 +15,7 @@
 	<classpathentry kind="lib" path="C:/ambiente/workspaces/smart-acesso-web/ControleAcesso/WebContent/WEB-INF/lib/jersey-media-multipart-3.1.10.jar"/>
 	<classpathentry kind="lib" path="C:/ambiente/workspaces/smart-acesso-web/ControleAcesso/WebContent/WEB-INF/lib/jersey-multipart-1.19.4.jar"/>
 	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/jjwt-0.9.1.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/firebase-admin-9.3.0.jar"/>
+	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/google-auth-library-oauth2-http-1.28.0.jar"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>

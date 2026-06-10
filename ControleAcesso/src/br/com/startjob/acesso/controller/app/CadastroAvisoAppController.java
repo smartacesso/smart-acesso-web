@@ -13,6 +13,7 @@ import br.com.startjob.acesso.annotations.UseCase;
 import br.com.startjob.acesso.controller.BaseController;
 import br.com.startjob.acesso.modelo.ejb.AppEJBRemote;
 import br.com.startjob.acesso.modelo.entity.AvisoAppEntity;
+import br.com.startjob.acesso.service.AppPushNotificationService;
 import br.com.startjob.acesso.services.AvisoAppImagemUploadServlet;
 
 @Named("cadastroAvisoAppController")
@@ -114,7 +115,8 @@ public class CadastroAvisoAppController extends BaseController implements Serial
 		try {
 			boolean novo = entidade.getId() == null;
 			aplicarImagemNaEntidade(entidade, novo);
-			appEJB.salvarAvisoApp(entidade);
+			AvisoAppEntity salvo = appEJB.salvarAvisoApp(entidade);
+			new AppPushNotificationService(appEJB).notificarAviso(salvo, novo);
 			limparImagemPendente();
 			mensagemInfo("", novo ? "msg.generica.objeto.incluido.sucesso" : "msg.generica.objeto.alterado.sucesso");
 			redirect("/paginas/sistema/avisoApp/pesquisaAvisoApp.xhtml?acao=OK");

@@ -4,15 +4,22 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import javax.annotation.Resource;
 import javax.ejb.EJB;
+import javax.mail.Session;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
@@ -28,8 +35,8 @@ import br.com.startjob.acesso.modelo.ejb.AppEJBRemote;
 import br.com.startjob.acesso.modelo.entity.AcessoEntity;
 import br.com.startjob.acesso.modelo.entity.AvisoAppEntity;
 import br.com.startjob.acesso.modelo.entity.ClienteEntity;
-import br.com.startjob.acesso.modelo.entity.CorrespondenciaEntity;
 import br.com.startjob.acesso.modelo.entity.PedestreEntity;
+import br.com.startjob.acesso.modelo.to.app.EncomendaListItem;
 import br.com.startjob.acesso.modelo.enumeration.PerfilAcessoApp;
 import br.com.startjob.acesso.modelo.enumeration.TipoPedestre;
 import br.com.startjob.acesso.modelo.to.app.AvisoListItem;
@@ -42,14 +49,30 @@ import br.com.startjob.acesso.to.app.AvisoItemDTO;
 import br.com.startjob.acesso.to.app.AvisoSalvarRequest;
 import br.com.startjob.acesso.to.app.AvisosRequest;
 import br.com.startjob.acesso.to.app.CadastroRequest;
+import br.com.startjob.acesso.to.app.CadastroVisitanteResponseDTO;
+import br.com.startjob.acesso.to.app.ConfirmarRetiradaRequest;
+import br.com.startjob.acesso.to.app.DeviceTokenRequest;
+import br.com.startjob.acesso.to.app.EmpresaResumoDTO;
+import br.com.startjob.acesso.to.app.EncomendaItemDTO;
 import br.com.startjob.acesso.to.app.EncomendaRequest;
+import br.com.startjob.acesso.to.app.HealthResponse;
+import br.com.startjob.acesso.to.app.PushStatusResponse;
+import br.com.startjob.acesso.modelo.entity.DeviceTokenEntity;
+import br.com.startjob.acesso.utils.ImagemBase64Util;
+import br.com.startjob.acesso.utils.MailSendUtils;
 import br.com.startjob.acesso.modelo.ejb.PedestreEJBRemote;
 import br.com.startjob.acesso.modelo.entity.EmpresaEntity;
+import br.com.startjob.acesso.service.AppPushNotificationService;
 import br.com.startjob.acesso.service.CadastroFacialLinkService;
+import br.com.startjob.acesso.service.FirebaseConfig;
+import br.com.startjob.acesso.service.FirebasePushResult;
+import br.com.startjob.acesso.service.FirebasePushService;
+import br.com.startjob.acesso.utils.JwtConfig;
 import br.com.startjob.acesso.to.app.LinkConviteVisitanteRequest;
 import br.com.startjob.acesso.to.app.LinkConviteVisitanteResponse;
 import br.com.startjob.acesso.to.app.LoginRequest;
 import br.com.startjob.acesso.to.app.LoginResponse;
+import br.com.startjob.acesso.to.app.PushTestRequest;
 import br.com.startjob.acesso.to.app.PaginatedResponse;
 import br.com.startjob.acesso.to.app.PedestreResumoDTO;
 import br.com.startjob.acesso.to.app.ResumoResponse;
@@ -63,6 +86,8 @@ import io.jsonwebtoken.Claims;
 @Path("/app")
 public class AppRequestService extends BaseService {
 
+	private static final Logger LOG = Logger.getLogger(AppRequestService.class.getName());
+
 	@Context
 	private HttpServletRequest request;
 
@@ -73,6 +98,9 @@ public class AppRequestService extends BaseService {
 
 	@EJB
 	private AppEJBRemote appEjb;
+
+	@Resource(mappedName = "java:/mail/suporte")
+	private Session mailSession;
 
 	@POST
 	@Path("/login")
@@ -115,7 +143,9 @@ public class AppRequestService extends BaseService {
 
 			UsuarioDTO userDto = new UsuarioDTO();
 			userDto.setId(usuario.getId());
-			userDto.setNome(usuario.getLogin());
+			userDto.setNome(usuario.getNome() != null && !usuario.getNome().trim().isEmpty()
+					? usuario.getNome().trim()
+					: usuario.getLogin());
 			userDto.setCliente(loginRequest.getCliente());
 			userDto.setPerfil(usuario.getPerfilApp().name());
 
@@ -124,11 +154,152 @@ public class AppRequestService extends BaseService {
 			loginResponse.setTipo("Bearer");
 			loginResponse.setUsuario(userDto);
 
+			LOG.info("App login OK: pedestreId=" + usuario.getId() + ", cliente=" + loginRequest.getCliente()
+					+ ", perfil=" + usuario.getPerfilApp().name()
+					+ " (mobile deve chamar POST /app/device-token em seguida)");
+
 			return Response.ok(loginResponse).build();
 
+		} catch (IllegalStateException e) {
+			return AppApiResponses.jsonError(Status.INTERNAL_SERVER_ERROR,
+					"Servidor sem jwt.secret configurado", "JWT_NOT_CONFIGURED");
 		} catch (Exception e) {
 			e.printStackTrace();
 			return AppApiResponses.jsonError(Status.INTERNAL_SERVER_ERROR, "Erro ao realizar login", "INTERNAL_ERROR");
+		}
+	}
+
+	@GET
+	@Path("/health")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response health() {
+		HealthResponse health = new HealthResponse();
+		health.setJwtConfigured(JwtConfig.isConfigured());
+		String firebasePath = FirebaseConfig.resolveServiceAccountPath();
+		health.setFirebasePathConfigured(firebasePath != null && !firebasePath.trim().isEmpty());
+		health.setFirebaseFileExists(FirebaseConfig.isServiceAccountConfigured());
+		health.setFirebaseReady(FirebasePushService.tryEnsureInitialized());
+		if (!health.isJwtConfigured()) {
+			health.setStatus("degraded");
+		} else if (!health.isFirebaseReady()) {
+			health.setStatus("degraded");
+		}
+		return Response.ok(health).build();
+	}
+
+	/**
+	 * Envio manual de push (perfil GERENCIAL) para validar Firebase após deploy.
+	 */
+	@POST
+	@Path("/push/test")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response pushTest(@Context HttpHeaders headers, PushTestRequest body) {
+		try {
+			AppAuthContext auth = resolveAuth(headers);
+			if (auth.error != null) {
+				return auth.error;
+			}
+			if (!isPerfilGerencial(auth.perfil)) {
+				return AppApiResponses.jsonError(Status.FORBIDDEN, "Perfil não autorizado", "FORBIDDEN");
+			}
+			if (body == null || body.getFcmToken() == null || body.getFcmToken().trim().isEmpty()) {
+				return AppApiResponses.jsonError(Status.BAD_REQUEST, "fcmToken é obrigatório", "INVALID_PARAMS");
+			}
+			String fcmTokenTeste = body.getFcmToken().trim();
+			if (AppPushNotificationService.pareceTokenExpo(fcmTokenTeste)) {
+				return AppApiResponses.jsonError(Status.BAD_REQUEST,
+						"Token Expo invalido para Firebase Admin SDK. Use getDevicePushTokenAsync() no app.",
+						"EXPO_TOKEN_NOT_SUPPORTED");
+			}
+
+			String title = body.getTitle() != null && !body.getTitle().trim().isEmpty()
+					? body.getTitle().trim() : "Teste Smart Acesso";
+			String text = body.getBody() != null && !body.getBody().trim().isEmpty()
+					? body.getBody().trim() : "Push de teste do servidor";
+
+			FirebasePushResult result = FirebasePushService.send(appEjb, fcmTokenTeste, title, text,
+					AppPushNotificationService.montarPayload("aviso", "/avisos", null, title, text));
+
+			if (result.isSuccess()) {
+				java.util.Map<String, Object> ok = new java.util.HashMap<>();
+				ok.put("ok", true);
+				ok.put("messageId", result.getMessageId());
+				return Response.ok(ok).build();
+			}
+			return AppApiResponses.jsonError(Status.BAD_REQUEST,
+					result.getError() != null ? result.getError() : "Falha ao enviar push", "PUSH_FAILED");
+		} catch (Exception e) {
+			e.printStackTrace();
+			return AppApiResponses.jsonError(Status.INTERNAL_SERVER_ERROR, "Erro ao enviar push de teste",
+					"INTERNAL_ERROR");
+		}
+	}
+
+	/**
+	 * Diagnóstico: verifica se o usuário logado tem token FCM registrado para receber push.
+	 */
+	@GET
+	@Path("/push/status")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response pushStatus(@Context HttpHeaders headers) {
+		try {
+			AppAuthContext auth = resolveAuth(headers);
+			if (auth.error != null) {
+				return auth.error;
+			}
+
+			List<DeviceTokenEntity> tokens = appEjb.buscarDeviceTokensAtivos(auth.userId);
+			PushStatusResponse status = new PushStatusResponse();
+			status.setPedestreId(auth.userId);
+			status.setTokensAtivos(tokens != null ? tokens.size() : 0);
+
+			if (tokens != null) {
+				for (DeviceTokenEntity token : tokens) {
+					PushStatusResponse.TokenResumo resumo = new PushStatusResponse.TokenResumo();
+					resumo.setPlatform(token.getPlatform());
+					resumo.setAppVersion(token.getAppVersion());
+					resumo.setTokenMascarado(mascararFcmToken(token.getFcmToken()));
+					resumo.setPareceExpoToken(AppPushNotificationService.pareceTokenExpo(token.getFcmToken()));
+					status.getTokens().add(resumo);
+				}
+			}
+			return Response.ok(status).build();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return AppApiResponses.jsonError(Status.INTERNAL_SERVER_ERROR, "Erro ao consultar status de push",
+					"INTERNAL_ERROR");
+		}
+	}
+
+	@GET
+	@Path("/me")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response me(@Context HttpHeaders headers) {
+		try {
+			AppAuthContext auth = resolveAuth(headers);
+			if (auth.error != null) {
+				return auth.error;
+			}
+
+			PedestreEJBRemote pedestreEJB = (PedestreEJBRemote) getEjb("PedestreEJB");
+			PedestreEntity pedestre = buscaPedestrePorId(auth.userId, auth.cliente.getId(), pedestreEJB);
+			if (pedestre == null) {
+				return AppApiResponses.jsonError(Status.NOT_FOUND, "Usuário não encontrado", "NOT_FOUND");
+			}
+
+			UsuarioDTO userDto = new UsuarioDTO();
+			userDto.setId(pedestre.getId());
+			userDto.setNome(pedestre.getNome() != null && !pedestre.getNome().trim().isEmpty()
+					? pedestre.getNome().trim()
+					: pedestre.getLogin());
+			userDto.setCliente(auth.cliente.getNomeUnidadeOrganizacional());
+			userDto.setPerfil(auth.perfil);
+
+			return Response.ok(userDto).build();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return AppApiResponses.jsonError(Status.UNAUTHORIZED, "Token inválido", "TOKEN_INVALID");
 		}
 	}
 
@@ -185,16 +356,80 @@ public class AppRequestService extends BaseService {
 			int pagina = body.getPagina();
 			int tamanho = normalizeTamanho(body.getTamanho());
 
-			PageResult<CorrespondenciaEntity> page = appEjb.buscarEncomendasPaginada(auth.userId,
+			boolean listarTodasDoCliente = isPerfilGerencial(auth.perfil);
+			PageResult<EncomendaListItem> page = appEjb.buscarEncomendasPaginada(auth.userId,
 					auth.cliente.getId(), range.inicio, range.fim, body.getStatus(), body.getBusca(), pagina,
-					tamanho);
+					tamanho, listarTodasDoCliente);
 
-			return Response.ok(PaginatedResponse.of(page.getItems(), page.getTotal(), pagina, tamanho)).build();
+			boolean perfilGerencial = listarTodasDoCliente;
+			List<EncomendaItemDTO> content = page.getItems().stream()
+					.map(item -> EncomendaItemDTO.from(item, auth.userId, perfilGerencial))
+					.collect(Collectors.toList());
+			return Response.ok(PaginatedResponse.of(content, page.getTotal(), pagina, tamanho)).build();
 
 		} catch (Exception e) {
 			e.printStackTrace();
 			return AppApiResponses.jsonError(Status.UNAUTHORIZED, "Token inválido ou erro na consulta",
 					"TOKEN_INVALID");
+		}
+	}
+
+	@POST
+	@Path("/encomendas/confirmar-retirada")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response confirmarRetiradaEncomenda(@Context HttpHeaders headers, ConfirmarRetiradaRequest body) {
+		try {
+			AppAuthContext auth = resolveAuth(headers);
+			if (auth.error != null) {
+				return auth.error;
+			}
+			if (body == null || body.getId() == null) {
+				return AppApiResponses.jsonError(Status.BAD_REQUEST, "id é obrigatório", "INVALID_PARAMS");
+			}
+			if (body.getNomeQuemRetirou() == null || body.getNomeQuemRetirou().trim().isEmpty()
+					|| body.getDocumentoQuemRetirou() == null || body.getDocumentoQuemRetirou().trim().isEmpty()) {
+				return AppApiResponses.jsonError(Status.BAD_REQUEST,
+						"nomeQuemRetirou e documentoQuemRetirou são obrigatórios", "INVALID_PARAMS");
+			}
+
+			boolean perfilGerencial = isPerfilGerencial(auth.perfil);
+			EncomendaListItem atualizada = appEjb.confirmarRetiradaEncomenda(body.getId(), auth.userId,
+					auth.cliente.getId(), body.getNomeQuemRetirou(), body.getDocumentoQuemRetirou(), perfilGerencial);
+
+			try {
+				br.com.startjob.acesso.modelo.entity.CorrespondenciaEntity paraEmail = appEjb
+						.buscarCorrespondenciaPorIdECliente(body.getId(), auth.cliente.getId());
+				if (paraEmail != null) {
+					MailSendUtils.enviaConfirmacaoRetirada(paraEmail, mailSession);
+				}
+			} catch (Exception mailEx) {
+				System.err.println("Erro ao enviar e-mail de confirmação de retirada: " + mailEx.getMessage());
+				mailEx.printStackTrace();
+			}
+
+			new AppPushNotificationService(appEjb).notificarRetiradaEncomenda(atualizada);
+
+			return Response.ok(EncomendaItemDTO.from(atualizada, auth.userId, perfilGerencial)).build();
+
+		} catch (Exception e) {
+			String code = e.getMessage();
+			if ("NOT_FOUND".equals(code)) {
+				return AppApiResponses.jsonError(Status.NOT_FOUND, "Encomenda não encontrada", "NOT_FOUND");
+			}
+			if ("FORBIDDEN".equals(code)) {
+				return AppApiResponses.jsonError(Status.FORBIDDEN,
+						"Você não tem permissão para confirmar a retirada desta encomenda", "FORBIDDEN");
+			}
+			if ("ALREADY_CONFIRMED".equals(code)) {
+				return AppApiResponses.jsonError(Status.BAD_REQUEST, "Encomenda já foi retirada", "ALREADY_CONFIRMED");
+			}
+			if ("INVALID_PARAMS".equals(code)) {
+				return AppApiResponses.jsonError(Status.BAD_REQUEST, "Parâmetros inválidos", "INVALID_PARAMS");
+			}
+			e.printStackTrace();
+			return AppApiResponses.jsonError(Status.INTERNAL_SERVER_ERROR, "Erro ao confirmar retirada",
+					"INTERNAL_ERROR");
 		}
 	}
 
@@ -228,7 +463,7 @@ public class AppRequestService extends BaseService {
 	}
 
 	/**
-	 * Cadastro/edição de aviso pelo app (perfil gerencial). Imagem: usar tela web ou endpoint futuro.
+	 * Cadastro/edição de aviso pelo app (perfil gerencial). Imagem opcional em {@code imagemBase64}.
 	 */
 	@POST
 	@Path("/avisos/salvar")
@@ -261,13 +496,49 @@ public class AppRequestService extends BaseService {
 			aviso.setTitulo(body.getTitulo().trim());
 			aviso.setDescricao(body.getDescricao());
 			aviso.setDataPublicacao(parseDataPublicacao(body.getDataPublicacao()));
+			if (body.getImagemBase64() != null && !body.getImagemBase64().trim().isEmpty()) {
+				try {
+					aviso.setImagem(ImagemBase64Util.decodificar(body.getImagemBase64()));
+				} catch (IllegalArgumentException ex) {
+					return AppApiResponses.jsonError(Status.BAD_REQUEST, "imagemBase64 inválida", "INVALID_PARAMS");
+				}
+			}
 
+			boolean novo = body.getId() == null;
 			AvisoAppEntity salvo = appEjb.salvarAvisoApp(aviso);
+			new AppPushNotificationService(appEjb).notificarAviso(salvo, novo);
 			return Response.ok(toAvisoItemFromEntity(salvo)).build();
 
 		} catch (Exception e) {
 			e.printStackTrace();
 			return AppApiResponses.jsonError(Status.BAD_REQUEST, "Erro ao salvar aviso", "SAVE_ERROR");
+		}
+	}
+
+	@DELETE
+	@Path("/avisos/{id}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response excluirAviso(@Context HttpHeaders headers, @PathParam("id") Long id) {
+		try {
+			AppAuthContext auth = resolveAuth(headers);
+			if (auth.error != null) {
+				return auth.error;
+			}
+			if (!PerfilAcessoApp.GERENCIAL.name().equals(auth.perfil)) {
+				return AppApiResponses.jsonError(Status.FORBIDDEN, "Perfil não autorizado", "FORBIDDEN");
+			}
+			if (id == null) {
+				return AppApiResponses.jsonError(Status.BAD_REQUEST, "id é obrigatório", "INVALID_PARAMS");
+			}
+
+			appEjb.excluirAvisoApp(id, auth.cliente.getId());
+			return Response.ok().build();
+		} catch (Exception e) {
+			if ("NOT_FOUND".equals(e.getMessage())) {
+				return AppApiResponses.jsonError(Status.NOT_FOUND, "Aviso não encontrado", "NOT_FOUND");
+			}
+			e.printStackTrace();
+			return AppApiResponses.jsonError(Status.BAD_REQUEST, "Erro ao excluir aviso", "DELETE_ERROR");
 		}
 	}
 
@@ -292,6 +563,74 @@ public class AppRequestService extends BaseService {
 	}
 
 	@POST
+	@Path("/device-token")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response registrarDeviceToken(@Context HttpHeaders headers, DeviceTokenRequest body) {
+		try {
+			AppAuthContext auth = resolveAuth(headers);
+			if (auth.error != null) {
+				return auth.error;
+			}
+			if (body == null || body.getFcmToken() == null || body.getFcmToken().trim().isEmpty()) {
+				return AppApiResponses.jsonError(Status.BAD_REQUEST, "fcmToken é obrigatório", "INVALID_PARAMS");
+			}
+			if (body.getPlatform() == null || !isPlataformaValida(body.getPlatform())) {
+				return AppApiResponses.jsonError(Status.BAD_REQUEST, "platform deve ser ANDROID ou IOS", "INVALID_PARAMS");
+			}
+			String fcmToken = body.getFcmToken().trim();
+			if (AppPushNotificationService.pareceTokenExpo(fcmToken)) {
+				LOG.warning("Device token rejeitado (Expo): pedestreId=" + auth.userId + ", token="
+						+ mascararFcmToken(fcmToken));
+				return AppApiResponses.jsonError(Status.BAD_REQUEST,
+						"Token Expo nao e aceito. No app use Notifications.getDevicePushTokenAsync() "
+								+ "em build nativo (expo run:android / EAS), nao getExpoPushTokenAsync() nem Expo Go",
+						"EXPO_TOKEN_NOT_SUPPORTED");
+			}
+
+			appEjb.upsertDeviceToken(auth.userId, fcmToken, body.getPlatform(), body.getAppVersion());
+			int tokensAtivos = appEjb.buscarDeviceTokensAtivos(auth.userId).size();
+			LOG.info("Device token registrado: pedestreId=" + auth.userId + ", platform=" + body.getPlatform()
+					+ ", tokensAtivos=" + tokensAtivos + ", token=" + mascararFcmToken(fcmToken));
+
+			Map<String, Object> ok = new HashMap<>();
+			ok.put("ok", true);
+			ok.put("pedestreId", auth.userId);
+			ok.put("tokensAtivos", tokensAtivos);
+			ok.put("tokenMascarado", mascararFcmToken(fcmToken));
+			return Response.ok(ok).build();
+		} catch (Exception e) {
+			LOG.log(Level.SEVERE, "Erro ao registrar device token", e);
+			return AppApiResponses.jsonError(Status.INTERNAL_SERVER_ERROR, "Erro ao registrar device token",
+					"INTERNAL_ERROR");
+		}
+	}
+
+	@DELETE
+	@Path("/device-token")
+	@Consumes(MediaType.APPLICATION_JSON)
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response removerDeviceToken(@Context HttpHeaders headers, DeviceTokenRequest body) {
+		try {
+			AppAuthContext auth = resolveAuth(headers);
+			if (auth.error != null) {
+				return auth.error;
+			}
+
+			String fcmToken = body != null ? body.getFcmToken() : null;
+			appEjb.invalidarDeviceToken(auth.userId, fcmToken);
+			LOG.info("Device token invalidado: pedestreId=" + auth.userId
+					+ (fcmToken != null && !fcmToken.trim().isEmpty()
+							? ", token=" + mascararFcmToken(fcmToken.trim()) : ", todos os tokens"));
+			return Response.ok().build();
+		} catch (Exception e) {
+			LOG.log(Level.SEVERE, "Erro ao invalidar device token", e);
+			return AppApiResponses.jsonError(Status.INTERNAL_SERVER_ERROR, "Erro ao invalidar device token",
+					"INTERNAL_ERROR");
+		}
+	}
+
+	@POST
 	@Path("/resumo")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
@@ -306,7 +645,9 @@ public class AppRequestService extends BaseService {
 
 			ResumoResponse resumo = new ResumoResponse();
 			resumo.setAcessosHoje(appEjb.contarAcessosHoje(idsPermitidos, auth.cliente.getId()));
-			resumo.setEncomendasPendentes(appEjb.contarEncomendasPendentes(auth.userId, auth.cliente.getId()));
+			boolean listarTodasDoCliente = isPerfilGerencial(auth.perfil);
+			resumo.setEncomendasPendentes(
+					appEjb.contarEncomendasPendentes(auth.userId, auth.cliente.getId(), listarTodasDoCliente));
 
 			return Response.ok(resumo).build();
 
@@ -322,29 +663,24 @@ public class AppRequestService extends BaseService {
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response cadastrar(@Context HttpHeaders headers, CadastroRequest novoCadastro) {
-
-		String authHeader = headers.getHeaderString(HttpHeaders.AUTHORIZATION);
-		if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-			return AppApiResponses.jsonError(Status.UNAUTHORIZED, "Token não fornecido", "TOKEN_MISSING");
-		}
-
-		String token = authHeader.substring(7);
-
 		try {
-			Claims claims = JwtUtil.validarToken(token);
-			String cliente = (String) claims.get("cliente");
-
-			ClienteEntity clienteEntity = appEjb.buscaClientesPorUnidadeOrganizacional(cliente);
+			AppAuthContext auth = resolveAuth(headers);
+			if (auth.error != null) {
+				return auth.error;
+			}
+			if (!PerfilAcessoApp.GERENCIAL.name().equals(auth.perfil)) {
+				return AppApiResponses.jsonError(Status.FORBIDDEN, "Perfil não autorizado", "FORBIDDEN");
+			}
 
 			if (novoCadastro == null) {
 				return AppApiResponses.jsonError(Status.BAD_REQUEST, "Corpo da requisição vazio", "INVALID_BODY");
 			}
 
-			PedestreEntity novo = criarNovoCadastro(clienteEntity, novoCadastro);
+			PedestreEntity novo = criarNovoCadastro(auth.cliente, novoCadastro);
 
 			PedestreEntity salva = (PedestreEntity) getEjb("BaseEJB").gravaObjeto(novo)[0];
 
-			return Response.status(Status.CREATED).entity(salva).build();
+			return Response.status(Status.CREATED).entity(CadastroVisitanteResponseDTO.from(salva)).build();
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -363,7 +699,7 @@ public class AppRequestService extends BaseService {
 		novo.setNome(novoDto.getNome());
 		novo.setCpf(cpfTratado);
 		novo.setCelular(novoDto.getCelular());
-		novo.setObservacoes(novo.getObservacoes());
+		novo.setObservacoes(novoDto.getOberservacao());
 		novo.setStatus(br.com.startjob.acesso.modelo.enumeration.Status.ATIVO);
 		novo.setCodigoCartaoAcesso(cpfTratado);
 
@@ -400,7 +736,11 @@ public class AppRequestService extends BaseService {
 			java.util.List<EmpresaEntity> empresas = (java.util.List<EmpresaEntity>) pedestreEJB
 					.pesquisaArgFixos(EmpresaEntity.class, "findAllByIdCliente2", args);
 
-			return Response.ok(empresas != null ? empresas : new ArrayList<>()).build();
+			List<EmpresaResumoDTO> resumo = empresas != null
+					? empresas.stream().map(EmpresaResumoDTO::from).collect(Collectors.toList())
+					: new ArrayList<>();
+
+			return Response.ok(resumo).build();
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -566,6 +906,25 @@ public class AppRequestService extends BaseService {
 			dataFim = new Date();
 		}
 		return new DateRange(dataInicio, dataFim);
+	}
+
+	private static String mascararFcmToken(String token) {
+		if (token == null || token.length() <= 8) {
+			return "***";
+		}
+		return token.substring(0, 4) + "..." + token.substring(token.length() - 4);
+	}
+
+	private boolean isPlataformaValida(String platform) {
+		if (platform == null) {
+			return false;
+		}
+		String p = platform.trim().toLowerCase();
+		return "android".equals(p) || "ios".equals(p) || "iphone".equals(p) || "ipad".equals(p);
+	}
+
+	private boolean isPerfilGerencial(String perfil) {
+		return PerfilAcessoApp.GERENCIAL.name().equals(perfil);
 	}
 
 	private AppAuthContext resolveAuth(HttpHeaders headers) throws Exception {
