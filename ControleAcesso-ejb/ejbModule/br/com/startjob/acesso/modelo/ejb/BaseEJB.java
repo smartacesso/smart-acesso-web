@@ -574,6 +574,7 @@ public class BaseEJB implements BaseEJBRemote {
 	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
+	@TransactionTimeout(unit = TimeUnit.SECONDS, value = 60)
 	public List<?> pesquisaArgFixos(Class classeEntidade, String namedQuery, Map<String, Object> arg) throws Exception {
 
 		try {
@@ -609,9 +610,9 @@ public class BaseEJB implements BaseEJBRemote {
 			return result;
 
 		} catch (Exception e) {
-			// encapsula exceção
-			logger.debug("Lança erro no pesquisaArgFixos");
-			e.printStackTrace();
+			logger.errorf("Erro em pesquisaArgFixos (%s.%s): %s",
+					classeEntidade != null ? classeEntidade.getSimpleName() : "?",
+					namedQuery, e.getMessage());
 			throw new Exception(e.getMessage());
 		}
 
@@ -620,6 +621,7 @@ public class BaseEJB implements BaseEJBRemote {
 	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
+	@TransactionTimeout(unit = TimeUnit.SECONDS, value = 60)
 	public List<?> pesquisaArgFixosLimitadoOrdenado(Class classeEntidade, String namedQuery, Map<String, Object> arg,
 			List<String> order, int ini, int quant) throws Exception {
 
@@ -672,9 +674,9 @@ public class BaseEJB implements BaseEJBRemote {
 			return result;
 
 		} catch (Exception e) {
-			// encapsula exceção
-			logger.debug("Lança erro no pesquisaArgFixos");
-			e.printStackTrace();
+			logger.errorf("Erro em pesquisaArgFixos (%s.%s): %s",
+					classeEntidade != null ? classeEntidade.getSimpleName() : "?",
+					namedQuery, e.getMessage());
 			throw new Exception(e.getMessage());
 		}
 
@@ -690,6 +692,7 @@ public class BaseEJB implements BaseEJBRemote {
 	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
+	@TransactionTimeout(unit = TimeUnit.SECONDS, value = 60)
 	public List<?> pesquisaArgFixosLimitado(Class classeEntidade, String namedQuery, Map<String, Object> arg, int ini,
 			int quant) throws Exception {
 
@@ -727,9 +730,9 @@ public class BaseEJB implements BaseEJBRemote {
 			return result;
 
 		} catch (Exception e) {
-			// encapsula exceção
-			logger.debug("Lança erro no pesquisaArgFixos");
-			e.printStackTrace();
+			logger.errorf("Erro em pesquisaArgFixos (%s.%s): %s",
+					classeEntidade != null ? classeEntidade.getSimpleName() : "?",
+					namedQuery, e.getMessage());
 			throw new Exception(e.getMessage());
 		}
 
@@ -745,6 +748,7 @@ public class BaseEJB implements BaseEJBRemote {
 	@Override
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
+	@TransactionTimeout(unit = TimeUnit.SECONDS, value = 60)
 	public List<? extends BaseEntity> pesquisaArgFixos(Class classeEntidade, String namedQuery, Map<String, Object> arg,
 			int limit) throws Exception {
 
@@ -781,9 +785,9 @@ public class BaseEJB implements BaseEJBRemote {
 			return result;
 
 		} catch (Exception e) {
-			// encapsula exceção
-			logger.debug("Lança erro no pesquisaArgFixos");
-			e.printStackTrace();
+			logger.errorf("Erro em pesquisaArgFixos (%s.%s): %s",
+					classeEntidade != null ? classeEntidade.getSimpleName() : "?",
+					namedQuery, e.getMessage());
 			throw new Exception(e.getMessage());
 		}
 
@@ -1959,7 +1963,7 @@ public class BaseEJB implements BaseEJBRemote {
 
 	@Override
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
-	@TransactionTimeout(unit = TimeUnit.HOURS, value = 2)
+	@TransactionTimeout(unit = TimeUnit.SECONDS, value = 60)
 	public void saveRegisterLogs(List<AcessoEntity> logs) throws Exception {
 		if (logs == null || logs.isEmpty()) {
 			return;

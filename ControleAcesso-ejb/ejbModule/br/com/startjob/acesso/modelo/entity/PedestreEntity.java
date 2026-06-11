@@ -422,6 +422,23 @@ public class PedestreEntity extends ClienteBaseEntity {
 
 	@Column(name = "CODIGO_PERMISSAO", nullable = true, length = 15)
 	private String codigoPermissao;
+
+	@Column(name = "HASH_INTEGRACAO_SENIOR", nullable = true, length = 64)
+	private String hashIntegracaoSenior;
+
+	@Column(name = "HASH_ESCALA_SENIOR", nullable = true, length = 64)
+	private String hashEscalaSenior;
+
+	@Column(name = "USA_REF_SENIOR", nullable = true, length = 1)
+	private String usaRefSenior;
+
+	@Type(type = "org.hibernate.type.NumericBooleanType")
+	@Column(name = "ESCALA_SENIOR_PENDENTE", nullable = true)
+	private Boolean escalaSeniorPendente;
+
+	@Temporal(TemporalType.DATE)
+	@Column(name = "DATA_ULTIMA_VERIFICACAO_ESCALA", nullable = true)
+	private Date dataUltimaVerificacaoEscala;
 	
 	@Column(name = "AUTO_ATENDIMENTO", nullable = true)
 	private Boolean autoAtendimento;
@@ -544,6 +561,7 @@ public class PedestreEntity extends ClienteBaseEntity {
 		this.codigoCartaoAcesso = funcionarioSeniorDto.getNumCracha() != null ? funcionarioSeniorDto.getNumCracha() : null;
 		this.rg = funcionarioSeniorDto.getRg();
 		this.codigoPermissao = funcionarioSeniorDto.getCodPrm(); // codigo permissao
+		this.usaRefSenior = funcionarioSeniorDto.getUsaRef();
 		this.cliente = empresaEntity.getCliente();
 		this.empresa = empresaEntity;
 		this.tipo = TipoPedestre.PEDESTRE;
@@ -578,6 +596,7 @@ public class PedestreEntity extends ClienteBaseEntity {
 		
 		this.rg = funcionarioSeniorDto.getRg();
 		this.codigoPermissao = funcionarioSeniorDto.getCodPrm(); // codigo permissao
+		this.usaRefSenior = funcionarioSeniorDto.getUsaRef();
 		this.setDataAlteracao(new Date());
 		this.sempreLiberado = false;
 
@@ -1148,6 +1167,46 @@ public class PedestreEntity extends ClienteBaseEntity {
 
 	public void setCodigoPermissao(String codigoPermissao) {
 		this.codigoPermissao = codigoPermissao;
+	}
+
+	public String getHashIntegracaoSenior() {
+		return hashIntegracaoSenior;
+	}
+
+	public void setHashIntegracaoSenior(String hashIntegracaoSenior) {
+		this.hashIntegracaoSenior = hashIntegracaoSenior;
+	}
+
+	public String getHashEscalaSenior() {
+		return hashEscalaSenior;
+	}
+
+	public void setHashEscalaSenior(String hashEscalaSenior) {
+		this.hashEscalaSenior = hashEscalaSenior;
+	}
+
+	public String getUsaRefSenior() {
+		return usaRefSenior;
+	}
+
+	public void setUsaRefSenior(String usaRefSenior) {
+		this.usaRefSenior = usaRefSenior;
+	}
+
+	public Boolean getEscalaSeniorPendente() {
+		return escalaSeniorPendente;
+	}
+
+	public void setEscalaSeniorPendente(Boolean escalaSeniorPendente) {
+		this.escalaSeniorPendente = escalaSeniorPendente;
+	}
+
+	public Date getDataUltimaVerificacaoEscala() {
+		return dataUltimaVerificacaoEscala;
+	}
+
+	public void setDataUltimaVerificacaoEscala(Date dataUltimaVerificacaoEscala) {
+		this.dataUltimaVerificacaoEscala = dataUltimaVerificacaoEscala;
 	}
 
 	public List<HistoricoCotaEntity> getCotas() {

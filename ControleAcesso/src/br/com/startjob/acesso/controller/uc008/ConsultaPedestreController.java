@@ -2,9 +2,6 @@ package br.com.startjob.acesso.controller.uc008;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.time.LocalDate;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -489,31 +486,12 @@ public class ConsultaPedestreController extends BaseController {
 	
 	public void executarIntegracaoPedestre() {
 	    try {
-	    	// Decide o modo de importação a partir da presença da data
-	    	ModoImportacaoFuncionario modo;
-	    	String dataParaBusca = null;
-
-	    	if (data == null) {
-	    	    modo = ModoImportacaoFuncionario.COMPLETA;
-	    	} else {
-	    	    modo = ModoImportacaoFuncionario.INCREMENTAL;
-
-	    	    // converte java.util.Date para LocalDate
-	    	    LocalDate dataLocal = data.toInstant()  // pega o Instant
-	    	                               .atZone(ZoneId.systemDefault()) // aplica o fuso local
-	    	                               .toLocalDate();               // pega LocalDate
-
-	    	    // formata para dd/MM/yyyy
-	    	    dataParaBusca = dataLocal.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-	    	}
-
-	    	// chama o EJB
 	    	pedestreEJB.importaFuncionariosSenior(
 	    	    empresaSelecionada, 
 	    	    getUsuarioLogado().getCliente(), 
-	    	    modo,
+	    	    ModoImportacaoFuncionario.COMPLETA,
 	    	    codFil, 
-	    	    dataParaBusca,   // null se completa, dd/MM/yyyy se incremental
+	    	    null,
 	    	    numCad, 
 	    	    tipCol
 	    	);

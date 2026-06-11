@@ -25,6 +25,7 @@ import javax.ws.rs.core.Response.Status;
 
 import org.apache.commons.codec.binary.Base64;
 import org.hibernate.Hibernate;
+import org.jboss.logging.Logger;
 import org.primefaces.shaded.json.JSONArray;
 import org.primefaces.shaded.json.JSONException;
 import org.primefaces.shaded.json.JSONObject;
@@ -77,6 +78,8 @@ import br.com.startjob.acesso.to.UserTO;
 @Path("/access")
 public class DesktopApiService extends BaseService {
 
+	private static final Logger LOG = Logger.getLogger(DesktopApiService.class);
+
 	@Context
 	private HttpServletRequest request;
 
@@ -84,6 +87,50 @@ public class DesktopApiService extends BaseService {
 	private HttpServletResponse response;
 
 	private static SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss:sss");
+
+	private static void logApiError(Exception e) {
+		if (isDatabaseConnectionFailure(e)) {
+			LOG.warnf("Falha JDBC na API desktop: %s", rootMessage(e));
+		} else {
+			LOG.errorf("Erro na API desktop: %s", rootMessage(e));
+		}
+	}
+
+	private static Status errorStatus(Exception e) {
+		return isDatabaseConnectionFailure(e) ? Status.SERVICE_UNAVAILABLE : Status.INTERNAL_SERVER_ERROR;
+	}
+
+	private static boolean isDatabaseConnectionFailure(Throwable t) {
+		for (Throwable current = t; current != null; current = current.getCause()) {
+			if (current instanceof java.sql.SQLException) {
+				return true;
+			}
+			String className = current.getClass().getName();
+			if (className.contains("ResourceException") || className.contains("GenericJDBCException")
+					|| className.contains("PersistenceException")) {
+				return true;
+			}
+			String message = current.getMessage();
+			if (message != null && (message.contains("Unable to acquire JDBC Connection")
+					|| message.contains("Unable to get managed connection")
+					|| message.contains("connect timed out")
+					|| message.contains("Read timed out")
+					|| message.contains("IJ000453")
+					|| message.contains("IJ031084"))) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	private static String rootMessage(Throwable t) {
+		Throwable root = t;
+		while (root.getCause() != null) {
+			root = root.getCause();
+		}
+		String message = root.getMessage();
+		return message != null ? message : root.getClass().getSimpleName();
+	}
 
 	/**
 	 * Testa webservice.
@@ -165,8 +212,8 @@ public class DesktopApiService extends BaseService {
 			statusResponse = Status.OK;
 
 		} catch (Exception e) {
-			statusResponse = Status.INTERNAL_SERVER_ERROR;
-			e.printStackTrace();
+			logApiError(e);
+			statusResponse = errorStatus(e);
 		}
 
 		return Response.status(statusResponse).entity(pedestrianAccessList).build();
@@ -202,8 +249,8 @@ public class DesktopApiService extends BaseService {
 			statusResponse = Status.OK;
 
 		} catch (Exception e) {
-			statusResponse = Status.INTERNAL_SERVER_ERROR;
-			e.printStackTrace();
+			logApiError(e);
+			statusResponse = errorStatus(e);
 		}
 		return Response.status(statusResponse).entity(usersAccessListTO).build();
 	}
@@ -238,10 +285,9 @@ public class DesktopApiService extends BaseService {
 			return Response.status(Status.OK).entity(locaisTO).build();
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			logApiError(e);
+			return Response.status(errorStatus(e)).entity(null).build();
 		}
-
-		return Response.status(Status.NOT_FOUND).entity(null).build();
 	}
 
 	@GET
@@ -280,8 +326,8 @@ public class DesktopApiService extends BaseService {
 			}
 
 		} catch (Exception e) {
-			statusResponse = Status.INTERNAL_SERVER_ERROR;
-			e.printStackTrace();
+			logApiError(e);
+			statusResponse = errorStatus(e);
 		}
 
 		return Response.status(statusResponse).entity(empresasTO).build();
@@ -321,8 +367,8 @@ public class DesktopApiService extends BaseService {
 			statusResponse = Status.OK;
 
 		} catch (Exception e) {
-			statusResponse = Status.INTERNAL_SERVER_ERROR;
-			e.printStackTrace();
+			logApiError(e);
+			statusResponse = errorStatus(e);
 		}
 
 		return Response.status(statusResponse).entity(regrasTo).build();
@@ -360,8 +406,8 @@ public class DesktopApiService extends BaseService {
 			statusResponse = Status.OK;
 
 		} catch (Exception e) {
-			statusResponse = Status.INTERNAL_SERVER_ERROR;
-			e.printStackTrace();
+			logApiError(e);
+			statusResponse = errorStatus(e);
 		}
 
 		return Response.status(statusResponse).entity(parametros).build();
@@ -399,8 +445,8 @@ public class DesktopApiService extends BaseService {
 			statusResponse = Status.OK;
 
 		} catch (Exception e) {
-			statusResponse = Status.INTERNAL_SERVER_ERROR;
-			e.printStackTrace();
+			logApiError(e);
+			statusResponse = errorStatus(e);
 		}
 
 		return Response.status(statusResponse).entity(planos).build();
@@ -417,7 +463,7 @@ public class DesktopApiService extends BaseService {
 					"findAllWithRemovidosByIdRegra", args);
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			logApiError(e);
 		}
 
 		return horarios;
@@ -434,7 +480,7 @@ public class DesktopApiService extends BaseService {
 					.pesquisaArgFixos(DepartamentoEntity.class, "findAllWithRemovidosByIdEmpresa", args);
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			logApiError(e);
 		}
 
 		return departamentos;
@@ -451,7 +497,7 @@ public class DesktopApiService extends BaseService {
 					.pesquisaArgFixos(CentroCustoEntity.class, "findAllWithRemovidosByIdEmpresa", args);
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			logApiError(e);
 		}
 		return centros;
 	}
@@ -467,7 +513,7 @@ public class DesktopApiService extends BaseService {
 					"findAllWithRemovidosByIdEmpresa", args);
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			logApiError(e);
 		}
 		return cargos;
 	}
@@ -484,7 +530,9 @@ public class DesktopApiService extends BaseService {
 
 		try {
 			JSONArray jsonArray = new JSONArray(parans);
-			System.out.println("Quantide de logs recebidos: " + jsonArray.length());
+			if (LOG.isDebugEnabled()) {
+				LOG.debugf("Quantidade de logs recebidos: %d", jsonArray.length());
+			}
 
 			if (jsonArray.length() <= 0) {
 				return Response.status(Status.BAD_REQUEST).entity("See status code.").build();
@@ -542,8 +590,8 @@ public class DesktopApiService extends BaseService {
 			}
 
 		} catch (Exception e) {
-			statusResponse = Status.INTERNAL_SERVER_ERROR;
-			e.printStackTrace();
+			logApiError(e);
+			statusResponse = errorStatus(e);
 		}
 
 		return Response.status(statusResponse).entity("See status code.").build();
@@ -582,8 +630,8 @@ public class DesktopApiService extends BaseService {
 				statusResponse = Status.OK;
 			}
 		} catch (Exception e) {
-			statusResponse = Status.INTERNAL_SERVER_ERROR;
-			e.printStackTrace();
+			logApiError(e);
+			statusResponse = errorStatus(e);
 		}
 		return Response.status(statusResponse).entity(lastVersion).build();
 	}
@@ -656,7 +704,7 @@ public class DesktopApiService extends BaseService {
 							try {
 								getEjb("BaseEJB").updateDataAlteracao(PedestreEntity.class, new Date(), user.getId());
 							} catch (Exception e) {
-								e.printStackTrace();
+								logApiError(e);
 							}
 						}
 					}
@@ -665,8 +713,8 @@ public class DesktopApiService extends BaseService {
 				statusResponse = Status.BAD_REQUEST;
 			}
 		} catch (Exception e) {
-			statusResponse = Status.INTERNAL_SERVER_ERROR;
-			e.printStackTrace();
+			logApiError(e);
+			statusResponse = errorStatus(e);
 		}
 		return Response.status(statusResponse).entity("See status code.").build();
 	}
@@ -740,13 +788,13 @@ public class DesktopApiService extends BaseService {
 //					gravaBiometrias(visitante, jsonObject);
 //
 //				} catch (Exception e) {
-//					e.printStackTrace();
+//					logApiError(e);
 //				}
 //			}
 //
 //		} catch (Exception e) {
 //			statusResponse = Status.INTERNAL_SERVER_ERROR;
-//			e.printStackTrace();
+//			logApiError(e);
 //		}
 //
 //		return Response.status(statusResponse).entity("See status code.").build();
@@ -891,7 +939,7 @@ public class DesktopApiService extends BaseService {
 	        } catch (Exception e) {
 	            erros++;
 	            System.err.println("ERRO PROCESSANDO ITEM " + i + ": " + e.getMessage());
-	            e.printStackTrace(); // Log completo para erro silencioso virar visível
+	            logApiError(e);
 	        }
 	    }
 
@@ -994,7 +1042,7 @@ public class DesktopApiService extends BaseService {
 
 	    } catch (Exception e) {
 	        statusResponse = Status.INTERNAL_SERVER_ERROR;
-	        e.printStackTrace();
+	        logApiError(e);
 	    }
 
 	    return Response.status(statusResponse).entity("See status code.").build();
@@ -1017,7 +1065,7 @@ public class DesktopApiService extends BaseService {
 				return visitantes.stream().findFirst().orElse(null);
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			logApiError(e);
 		}
 
 		return null;
@@ -1036,7 +1084,7 @@ public class DesktopApiService extends BaseService {
 				return visitantes.stream().findFirst().orElse(null);
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			logApiError(e);
 		}
 
 		return null;
@@ -1056,7 +1104,7 @@ public class DesktopApiService extends BaseService {
 				return locais.stream().findFirst().orElse(null);
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			logApiError(e);
 		}
 
 		return null;
@@ -1076,7 +1124,7 @@ public class DesktopApiService extends BaseService {
 				return locais.stream().findFirst().orElse(null);
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			logApiError(e);
 		}
 
 		return null;
@@ -1144,7 +1192,7 @@ public class DesktopApiService extends BaseService {
 			}
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			logApiError(e);
 			System.out.println("Visitante não possui regras.");
 		}
 	}
@@ -1172,14 +1220,14 @@ public class DesktopApiService extends BaseService {
 			try {
 				getEjb("BaseEJB").updateDataAlteracao(PedestreEntity.class, new Date(), idPedestrian);
 			} catch (Exception e) {
-				e.printStackTrace();
+				logApiError(e);
 			}
 
 			statusResponse = Status.OK;
 
 		} catch (Exception e) {
-			statusResponse = Status.INTERNAL_SERVER_ERROR;
-			e.printStackTrace();
+			logApiError(e);
+			statusResponse = errorStatus(e);
 		}
 		return Response.status(statusResponse).build();
 	}
@@ -1288,8 +1336,8 @@ public class DesktopApiService extends BaseService {
 				}
 			}
 		} catch (Exception e) {
-			statusResponse = Status.INTERNAL_SERVER_ERROR;
-			e.printStackTrace();
+			logApiError(e);
+			statusResponse = errorStatus(e);
 		}
 		return Response.status(statusResponse).entity("See status code.").build();
 	}
@@ -1321,8 +1369,8 @@ public class DesktopApiService extends BaseService {
 			}
 
 		} catch (Exception e) {
-			statusResponse = Status.INTERNAL_SERVER_ERROR;
-			e.printStackTrace();
+			logApiError(e);
+			statusResponse = errorStatus(e);
 		}
 
 		return Response.status(statusResponse).entity(retorno).build();
@@ -1452,8 +1500,8 @@ public class DesktopApiService extends BaseService {
 			}
 
 		} catch (Exception e) {
-			statusResponse = Status.INTERNAL_SERVER_ERROR;
-			e.printStackTrace();
+			logApiError(e);
+			statusResponse = errorStatus(e);
 		}
 		return Response.status(statusResponse).entity("See status code.").build();
 	}
@@ -1485,8 +1533,8 @@ public class DesktopApiService extends BaseService {
 			}
 
 		} catch (Exception e) {
-			statusResponse = Status.INTERNAL_SERVER_ERROR;
-			e.printStackTrace();
+			logApiError(e);
+			statusResponse = errorStatus(e);
 		}
 
 		return Response.status(statusResponse).entity(retorno).build();
@@ -1498,7 +1546,7 @@ public class DesktopApiService extends BaseService {
 		try {
 			cliente = (ClienteEntity) getEjb("BaseEJB").recuperaObjeto(ClienteEntity.class, idCliente);
 		} catch (Exception e) {
-			e.printStackTrace();
+			logApiError(e);
 		}
 
 		return cliente;
@@ -1947,7 +1995,7 @@ public class DesktopApiService extends BaseService {
 			try {
 				getEjb("BaseEJB").gravaObjeto(acesso);
 			} catch (Exception e) {
-				e.printStackTrace();
+				logApiError(e);
 			}
 		}
 	}
@@ -1968,7 +2016,7 @@ public class DesktopApiService extends BaseService {
 			try {
 				getEjb("BaseEJB").gravaObjeto(biometria);
 			} catch (Exception e) {
-				e.printStackTrace();
+				logApiError(e);
 			}
 		}
 	}
@@ -1985,7 +2033,7 @@ public class DesktopApiService extends BaseService {
 				return equipamentos.stream().findFirst().orElse(null);
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			logApiError(e);
 		}
 
 		return null;
@@ -1998,7 +2046,7 @@ public class DesktopApiService extends BaseService {
 		try {
 			entidade = getEjb("BaseEJB").recuperaObjeto(classeEntidade, id);
 		} catch (Exception e) {
-			e.printStackTrace();
+			logApiError(e);
 		}
 
 		return entidade;
@@ -2031,12 +2079,12 @@ public class DesktopApiService extends BaseService {
 						}
 					}
 				} catch (Exception e) {
-					e.printStackTrace();
+					logApiError(e);
 				}
 			}
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			logApiError(e);
 			return Response.status(Status.INTERNAL_SERVER_ERROR).entity("See status code.").build();
 		}
 
@@ -2057,7 +2105,7 @@ public class DesktopApiService extends BaseService {
 				return regras.stream().findFirst().orElse(null);
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			logApiError(e);
 		}
 
 		return null;

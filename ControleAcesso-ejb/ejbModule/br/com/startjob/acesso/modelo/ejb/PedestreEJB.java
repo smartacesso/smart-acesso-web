@@ -64,6 +64,7 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.senior.services.IntegracaoSeniorService;
+import com.senior.services.SeniorSyncUtils;
 import com.senior.services.Enum.ModoImportacaoFuncionario;
 import com.senior.services.dto.EmpresaSeniorDto;
 import com.senior.services.dto.FuncionarioSeniorDto;
@@ -1704,12 +1705,9 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		System.out.println("Processo Senior finalizado");
 	}
 
-	private static final Map<Long, Integer> cacheQtdExecucoes = new HashMap<>();
-	private static final Map<Long, LocalDate> cacheUltimaExecucaoCompleta = new HashMap<>();
+	private static final Map<Long, LocalDate> cacheRefreshEscalaDiario = new HashMap<>();
 
 	private void importarEmpresasComControle(ClienteEntity cliente) {
-	    LocalTime agora = LocalTime.now();
-	    LocalDate hoje = LocalDate.now();
 	    IntegracaoSeniorEntity config = cliente.getIntegracaoSenior();
 
 	    if (config == null) {
@@ -1717,51 +1715,39 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 	        return;
 	    }
 
-	    // quantidade de execuções no intervalo de 24h
-	    int qtdExec = config.getQuantidadeExecucoes() != null ? config.getQuantidadeExecucoes() : 1;
+	    boolean refreshEscalaDiario = isRefreshEscalaDiario(cliente, config);
+	    System.out.println("Executando COMPLETA (diff local) para cliente " + cliente.getId()
+	            + " às " + LocalTime.now()
+	            + (refreshEscalaDiario ? " [refresh diário de escala]" : ""));
+	    importarEmpresasSenior(cliente, ModoImportacaoFuncionario.COMPLETA, refreshEscalaDiario);
+
+	    if (refreshEscalaDiario) {
+	        cacheRefreshEscalaDiario.put(cliente.getId(), LocalDate.now());
+	    }
+	}
+
+	private boolean isRefreshEscalaDiario(ClienteEntity cliente, IntegracaoSeniorEntity config) {
+	    if (!config.isRegraHabilitada()) {
+	        return false;
+	    }
+
+	    LocalDate hoje = LocalDate.now();
+	    if (hoje.equals(cacheRefreshEscalaDiario.get(cliente.getId()))) {
+	        return false;
+	    }
+
 	    int horaInicio = config.getHoraInicio() != null ? config.getHoraInicio() : 0;
+	    LocalTime agora = LocalTime.now();
 
-	    // intervalo em minutos
-	    long intervaloMinutos = (24 * 60) / qtdExec;
+	    return agora.getHour() == horaInicio && agora.getMinute() < 10;
+	}
 
-	    // gera os horários esperados para execução completa
-	    List<LocalTime> horariosExecucao = new ArrayList<>();
-	    for (int i = 0; i < qtdExec; i++) {
-	        int minutosExec = (horaInicio * 60) + (i * (int) intervaloMinutos);
-	        int hora = (minutosExec / 60) % 24;
-	        int minuto = minutosExec % 60;
-	        horariosExecucao.add(LocalTime.of(hora, minuto));
-	    }
+	private boolean isEscalaSeniorPendente(PedestreEntity pedestre) {
+	    return pedestre != null && Boolean.TRUE.equals(pedestre.getEscalaSeniorPendente());
+	}
 
-	    // controla execuções do dia
-	    if (!hoje.equals(cacheUltimaExecucaoCompleta.get(cliente.getId()))) {
-	        cacheQtdExecucoes.put(cliente.getId(), 0);
-	        cacheUltimaExecucaoCompleta.put(cliente.getId(), hoje);
-	    }
-
-	    int qtdHoje = cacheQtdExecucoes.getOrDefault(cliente.getId(), 0);
-	    boolean execucaoCompleta = false;
-
-	    // considera completa se estiver em um dos horários previstos (tolerância de até 5 minutos)
-	    for (LocalTime horario : horariosExecucao) {
-	        if (agora.getHour() == horario.getHour() &&
-	            Math.abs(agora.getMinute() - horario.getMinute()) < 5 &&
-	            qtdHoje < qtdExec) {
-	            execucaoCompleta = true;
-	            break;
-	        }
-	    }
-
-	    if (execucaoCompleta) {
-	        System.out.println("Executando COMPLETA para cliente " + cliente.getId() +
-	                           " às " + agora);
-	        importarEmpresasSenior(cliente, ModoImportacaoFuncionario.COMPLETA);
-	        cacheQtdExecucoes.put(cliente.getId(), qtdHoje + 1);
-	    } else {
-	        System.out.println("Executando INCREMENTAL para cliente " + cliente.getId() +
-	                           " às " + agora);
-	        importarEmpresasSenior(cliente, ModoImportacaoFuncionario.INCREMENTAL);
-	    }
+	private Date hojeSemHora() {
+	    return java.sql.Date.valueOf(LocalDate.now());
 	}
 
 	
@@ -1782,31 +1768,8 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 	}
 
 
-	private List<FuncionarioSeniorDto> buscarFuncionariosDemitidos(String numEmp, final ClienteEntity cliente) {
-		System.out.println("buscando todos funcionarios demitidos no dia no empresa" + numEmp);
-
-		LocalDate data = LocalDate.now();
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-		String dataString = data.format(formatter);
-
-		IntegracaoSeniorService integracaoSeniorService = new IntegracaoSeniorService(cliente);
-
-		return integracaoSeniorService.buscarFuncionariosDemitidos(numEmp, dataString);
-	}
-
-	private List<FuncionarioSeniorDto> buscarFuncionariosAdmitidos(String numEmp, final ClienteEntity cliente) {
-		System.out.println("buscando todos funcionarios demitidos no dia no empresa" + numEmp);
-
-		LocalDate data = LocalDate.now();
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-		String dataString = data.format(formatter);
-
-		IntegracaoSeniorService integracaoSeniorService = new IntegracaoSeniorService(cliente);
-
-		return integracaoSeniorService.buscarFuncionariosAdmitidos(numEmp, dataString);
-	}
-
-	private void importarEmpresasSenior(final ClienteEntity cliente, ModoImportacaoFuncionario modo) {
+	private void importarEmpresasSenior(final ClienteEntity cliente, ModoImportacaoFuncionario modo,
+			boolean refreshEscalaDiario) {
 		IntegracaoSeniorEntity integracao = cliente.getIntegracaoSenior();
 		List<EmpresaSeniorDto> empresasSenior = buscaTodasEmpresasSenior(cliente);
 
@@ -1838,14 +1801,8 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 					System.out.println("Importando empresa: " + empresaSenior.getNumEmp() + ", nome: "
 							+ empresaSenior.getNomEmp());
 
-					String dataParaBusca = null;
-					if (modo == ModoImportacaoFuncionario.INCREMENTAL) {
-						LocalDate hoje = LocalDate.now();
-						dataParaBusca = hoje.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
-					}
-
-					importaFuncionariosSenior(empresaExistente, cliente, modo, integracao.getCodFil(), dataParaBusca,
-							null, integracao.getTipCol());
+					importaFuncionariosSenior(empresaExistente, cliente, modo, integracao.getCodFil(), null,
+							null, integracao.getTipCol(), refreshEscalaDiario);
 
 					if (Objects.isNull(empresaExistente.getPrimeiroImportacaoFuncionarioSeniorSucesso())
 							|| Boolean.FALSE.equals(empresaExistente.getPrimeiroImportacaoFuncionarioSeniorSucesso())) {
@@ -1889,102 +1846,261 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 	        return;
 	    }
 
-	    importaFuncionariosSenior(empresaExistente, cliente, modo, codFil, data, numCad, tipCol);
+	    importaFuncionariosSenior(empresaExistente, cliente, modo, codFil, data, numCad, tipCol, false);
 	}
 	
-	// Controle de execução de regras por funcionário
-	private static final Map<Long, LocalDate> cacheExecucaoRegras = new HashMap<>();
-
 	public void importaFuncionariosSenior(final EmpresaEntity empresaExistente, final ClienteEntity cliente,
 			ModoImportacaoFuncionario modo, String codFil, String data, String numCad, String tipCol) {
-		List<FuncionarioSeniorDto> funcionarios = new ArrayList<>();
+		importaFuncionariosSenior(empresaExistente, cliente, modo, codFil, data, numCad, tipCol, false);
+	}
 
-		if (modo == ModoImportacaoFuncionario.COMPLETA) {
-			System.out.println("Importação COMPLETA");
-			funcionarios = buscaTodosOsFuncioriosDaEmpresa(
-			        empresaExistente.getCodEmpresaSenior(),
-			        cliente,
-			        codFil,   // vindo do filtro (pode ser null)
-			        data,     // vindo do filtro (pode ser null)
-			        numCad,   // vindo do filtro (pode ser null)
-			        tipCol    // vindo do filtro (pode ser null)
-			);
-		} else {
-			System.out.println("Importação INCREMENTAL");
-			List<FuncionarioSeniorDto> alterados = new ArrayList<>();
-			List<FuncionarioSeniorDto> admitidos = new ArrayList<>();
+	public void importaFuncionariosSenior(final EmpresaEntity empresaExistente, final ClienteEntity cliente,
+			ModoImportacaoFuncionario modo, String codFil, String data, String numCad, String tipCol,
+			boolean refreshEscalaDiario) {
 
-			System.out.println("data recebida: " + data);
-			
-			alterados =  buscaTodosOsFuncioriosDaEmpresa(
-			        empresaExistente.getCodEmpresaSenior(),
-			        cliente,
-			        codFil,   // vindo do filtro (pode ser null)
-			        data,     // vindo do filtro (pode ser null)
-			        numCad,   // vindo do filtro (pode ser null)
-			        tipCol    // vindo do filtro (pode ser null)
-			);
+		System.out.println("Importação COMPLETA (diff local)"
+				+ (refreshEscalaDiario ? " + refresh diário de escala" : ""));
+		List<FuncionarioSeniorDto> funcionarios = buscaTodosOsFuncioriosDaEmpresa(
+		        empresaExistente.getCodEmpresaSenior(),
+		        cliente,
+		        codFil,
+		        null,
+		        numCad,
+		        tipCol);
 
-			funcionarios = Stream.concat(alterados.stream(), admitidos.stream()).distinct()
-					.collect(Collectors.toList());
-		}
-
-		if (funcionarios.isEmpty()) {
+		if (funcionarios == null || funcionarios.isEmpty()) {
 			System.out.println("Processo finalizado lista vazia");
 			return;
 		}
 
-		System.out.println("Quantidade de funcionários processados: " + funcionarios.size());
-		LocalDate hoje = LocalDate.now();
+		final boolean permissaoHabilitada = cliente.getIntegracaoSenior().isPermissaoHabilitada();
+		final boolean regrasHabilitadas = cliente.getIntegracaoSenior().isRegraHabilitada();
 
-		funcionarios.forEach(funcionario -> {
+		int total = funcionarios.size();
+		int ignorados = 0;
+		int dadosAtualizados = 0;
+		int permissoesAtualizadas = 0;
+		int regrasAtualizadas = 0;
+		int escalasVerificadas = 0;
+		int escalasPendentes = 0;
+
+		System.out.println("Quantidade de funcionários retornados pela Senior: " + total);
+
+		for (FuncionarioSeniorDto funcionario : funcionarios) {
 			logger.info("===== ======== =====");
 
 			System.out.println("DTO recebido: matrícula = " + funcionario.getNumeroMatricula() + ", nome = "
 					+ funcionario.getNome() + ", RG = " + funcionario.getRg() + ", codPermissao = "
 					+ funcionario.getCodPrm());
 
-			Optional<PedestreEntity> pedestreExistente = buscaPedestreExistente(funcionario, empresaExistente);
+			final String hashDadosNovo = SeniorSyncUtils.computeDadosHash(funcionario);
+			final Optional<PedestreEntity> pedestreExistenteOpt = buscaPedestreExistente(funcionario, empresaExistente);
+			final boolean pedestreNovo = !pedestreExistenteOpt.isPresent();
 
-			if (pedestreExistente.isPresent()) {
-				System.out.println("Pedestre encontrado: ID " + pedestreExistente.get().getId() + ", nome: "
-						+ pedestreExistente.get().getNome());
+			if (pedestreExistenteOpt.isPresent()) {
+				PedestreEntity existente = pedestreExistenteOpt.get();
+				System.out.println("Pedestre encontrado: ID " + existente.getId() + ", nome: " + existente.getNome());
+
+				boolean dadosIguais = hashDadosNovo.equals(existente.getHashIntegracaoSenior());
+				boolean escalaPendente = isEscalaSeniorPendente(existente);
+				boolean forcarEscala = refreshEscalaDiario || escalaPendente;
+
+				if (dadosIguais && !forcarEscala) {
+					ignorados++;
+					System.out.println("Skip (sem alteração): matrícula " + funcionario.getNumeroMatricula());
+					continue;
+				}
 			} else {
 				System.out.println("Pedestre **não encontrado** para matrícula: " + funcionario.getNumeroMatricula());
 			}
 
+			final String codigoPermissaoAntes = pedestreExistenteOpt.map(PedestreEntity::getCodigoPermissao).orElse(null);
+			final String usaRefAntes = pedestreExistenteOpt.map(PedestreEntity::getUsaRefSenior).orElse(null);
+			final Status statusAntes = pedestreExistenteOpt.map(PedestreEntity::getStatus).orElse(null);
+
 			LocalEntity localPadrao = buscaLocalPadrao(cliente.getId());
-			
-			PedestreEntity pedestre = pedestreExistente
+			PedestreEntity pedestre = pedestreExistenteOpt
 					.orElseGet(() -> new PedestreEntity(funcionario, empresaExistente, localPadrao));
 
+			boolean hashDadosMudou = pedestreNovo || !hashDadosNovo.equals(pedestre.getHashIntegracaoSenior());
 
-			pedestre.updateFuncionarioSenior(funcionario, empresaExistente);
-			pedestre.setAlterado(true);
+			if (hashDadosMudou) {
+				pedestre.updateFuncionarioSenior(funcionario, empresaExistente);
+				pedestre.setHashIntegracaoSenior(hashDadosNovo);
+				pedestre.setAlterado(true);
+			}
 
 			try {
-				pedestre = (PedestreEntity) (pedestreExistente.isPresent() ? alteraObjeto(pedestre)[0]
-						: gravaObjeto(pedestre)[0]);
+				if (hashDadosMudou) {
+					pedestre = (PedestreEntity) (pedestreExistenteOpt.isPresent() ? alteraObjeto(pedestre)[0]
+							: gravaObjeto(pedestre)[0]);
+					em.flush();
+					dadosAtualizados++;
+				}
 
-				em.flush();
-				
-				if (cliente.getIntegracaoSenior().isPermissaoHabilitada() /*&& isPermissaoAlterada(pedestre, funcionario)*/) {
-					System.out.println("Verificando permissao");
+				if (permissaoHabilitada && (pedestreNovo || isPermissaoOuUsaRefAlterado(codigoPermissaoAntes, usaRefAntes, funcionario))) {
+					System.out.println("Atualizando permissão");
 					atualizarPermissao(cliente, pedestre, funcionario);
+					permissoesAtualizadas++;
 				}
 
-				if (cliente.getIntegracaoSenior().isRegraHabilitada() /*&& isPermissaoAlterada(pedestre, funcionario)*/) {
+				if (regrasHabilitadas && precisaAtualizarRegras(pedestreNovo, statusAntes, pedestre, funcionario,
+						refreshEscalaDiario)) {
 					System.out.println("Verificando regra");
-					processarRegrasPorFuncionario(pedestre, cliente, funcionario);
+					boolean escalaEraPendente = isEscalaSeniorPendente(pedestre);
+					int resultadoEscala = processarRegrasComDiff(pedestre, cliente, funcionario, refreshEscalaDiario);
+					if (resultadoEscala == 1) {
+						regrasAtualizadas++;
+					} else if (resultadoEscala == 2) {
+						escalasPendentes++;
+					} else if (resultadoEscala == 0 && (refreshEscalaDiario || escalaEraPendente)) {
+						escalasVerificadas++;
+					}
 				}
 
-				
-				
 			} catch (Exception e) {
-				System.err.println("Erro ao processar regras para: " + funcionario.getNome());
+				System.err.println("Erro ao processar funcionário Senior: " + funcionario.getNome());
 				e.printStackTrace();
 			}
-		});
+		}
+
+		System.out.println("Senior sync — total: " + total + ", ignorados: " + ignorados
+				+ ", dados atualizados: " + dadosAtualizados + ", permissões: " + permissoesAtualizadas
+				+ ", regras: " + regrasAtualizadas + ", escalas verificadas: " + escalasVerificadas
+				+ ", escalas pendentes: " + escalasPendentes
+				+ (refreshEscalaDiario ? " [refresh diário]" : ""));
+	}
+
+	private boolean isPermissaoOuUsaRefAlterado(String codigoPermissaoAntes, String usaRefAntes,
+			FuncionarioSeniorDto funcionario) {
+		if (Objects.isNull(codigoPermissaoAntes) || codigoPermissaoAntes.isEmpty()) {
+			return true;
+		}
+		if (!codigoPermissaoAntes.equals(funcionario.getCodPrm())) {
+			return true;
+		}
+		return !Objects.equals(usaRefAntes, funcionario.getUsaRef());
+	}
+
+	private boolean precisaAtualizarRegras(boolean pedestreNovo, Status statusAntes, PedestreEntity pedestre,
+			FuncionarioSeniorDto funcionario, boolean refreshEscalaDiario) {
+		if (pedestreNovo) {
+			return true;
+		}
+		if (refreshEscalaDiario) {
+			return true;
+		}
+		if (isEscalaSeniorPendente(pedestre)) {
+			return true;
+		}
+		if (pedestre.getHashEscalaSenior() == null) {
+			return true;
+		}
+		return statusMudou(statusAntes, funcionario);
+	}
+
+	private boolean statusMudou(Status statusAntes, FuncionarioSeniorDto funcionario) {
+		Status statusNovo = resolverStatusSenior(funcionario);
+		return !Objects.equals(statusAntes, statusNovo);
+	}
+
+	private Status resolverStatusSenior(FuncionarioSeniorDto funcionario) {
+		if (Objects.nonNull(funcionario.getDatDem())) {
+			return Status.INATIVO;
+		}
+		if (Objects.nonNull(funcionario.getDatAfa())) {
+			return Status.INATIVO;
+		}
+		return Status.ATIVO;
+	}
+
+	private EscalaSeniorContext buscarContextoEscala(FuncionarioSeniorDto funcionario, ClienteEntity cliente) {
+		HorarioPedestreDto escala = buscaEscalaPedestre(funcionario.getNumeroMatricula(), cliente);
+		List<HorarioSeniorDto> horarios = new ArrayList<>();
+		String snapshot;
+
+		if (Objects.isNull(escala)) {
+			snapshot = SeniorSyncUtils.buildEscalaSnapshotFolga();
+		} else if ("0".equalsIgnoreCase(escala.getIdescala())) {
+			snapshot = SeniorSyncUtils.buildEscalaSnapshotSemIntervalo(escala);
+		} else {
+			horarios = buscaHorariosEscala(escala.getIdescala(), cliente);
+			if (horarios == null) {
+				horarios = new ArrayList<>();
+			}
+			snapshot = SeniorSyncUtils.buildEscalaSnapshot(escala, horarios);
+		}
+
+		EscalaSeniorContext contexto = new EscalaSeniorContext();
+		contexto.escala = escala;
+		contexto.horarios = horarios;
+		contexto.hash = SeniorSyncUtils.computeEscalaHash(snapshot);
+		return contexto;
+	}
+
+	/**
+	 * @return 1 = regra atualizada, 0 = sem mudança, 2 = adiada (em jornada)
+	 */
+	private int processarRegrasComDiff(PedestreEntity pedestre, ClienteEntity cliente,
+			FuncionarioSeniorDto funcionario, boolean refreshEscalaDiario) {
+		EscalaSeniorContext contexto = buscarContextoEscala(funcionario, cliente);
+
+		if (contexto.hash.equals(pedestre.getHashEscalaSenior())) {
+			System.out.println("Escala sem alteração para matrícula " + funcionario.getNumeroMatricula());
+			if (refreshEscalaDiario || isEscalaSeniorPendente(pedestre)) {
+				salvarVerificacaoEscala(pedestre, false);
+			}
+			return 0;
+		}
+
+		if (!processarRegrasPorFuncionario(pedestre, cliente, funcionario, contexto.escala, contexto.horarios)) {
+			System.out.println("Escala adiada (funcionário em jornada): matrícula "
+					+ funcionario.getNumeroMatricula());
+			salvarEscalaPendente(pedestre);
+			return 2;
+		}
+
+		try {
+			pedestre.setHashEscalaSenior(contexto.hash);
+			pedestre.setEscalaSeniorPendente(false);
+			pedestre.setDataUltimaVerificacaoEscala(hojeSemHora());
+			pedestre.setAlterado(true);
+			alteraObjeto(pedestre);
+		} catch (Exception e) {
+			System.out.println("Erro ao salvar hash de escala");
+			e.printStackTrace();
+		}
+
+		return 1;
+	}
+
+	private void salvarEscalaPendente(PedestreEntity pedestre) {
+		try {
+			pedestre.setEscalaSeniorPendente(true);
+			pedestre.setAlterado(true);
+			alteraObjeto(pedestre);
+		} catch (Exception e) {
+			System.out.println("Erro ao marcar escala pendente");
+			e.printStackTrace();
+		}
+	}
+
+	private void salvarVerificacaoEscala(PedestreEntity pedestre, boolean pendente) {
+		try {
+			pedestre.setEscalaSeniorPendente(pendente);
+			pedestre.setDataUltimaVerificacaoEscala(hojeSemHora());
+			pedestre.setAlterado(true);
+			alteraObjeto(pedestre);
+		} catch (Exception e) {
+			System.out.println("Erro ao salvar verificação de escala");
+			e.printStackTrace();
+		}
+	}
+
+	private static final class EscalaSeniorContext {
+		private HorarioPedestreDto escala;
+		private List<HorarioSeniorDto> horarios;
+		private String hash;
 	}
 
 	private LocalEntity buscaLocalPadrao(final Long idCliente) {
@@ -2040,14 +2156,6 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		return nomeLocalPadrao;
 	}
 
-	private boolean isPermissaoAlterada(final PedestreEntity pedestre, final FuncionarioSeniorDto funcionario) {
-		if (Objects.isNull(pedestre.getCodigoPermissao()) || pedestre.getCodigoPermissao().isEmpty()) {
-			return true;
-		}
-
-		return !pedestre.getCodigoPermissao().equals(funcionario.getCodPrm());
-	}
-
 	private void atualizarPermissao(final ClienteEntity cliente, PedestreEntity pedestre, FuncionarioSeniorDto funcionario) {
 		System.out.println("Atualizando permissão do funcionario id : " + pedestre.getId() + " nome : "
 				+ pedestre.getNome() + " permissão recebido : " + funcionario.getCodPrm());
@@ -2084,32 +2192,28 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 		}
 	}
 
-	private void processarRegrasPorFuncionario(PedestreEntity pedestre, ClienteEntity cliente,
-			FuncionarioSeniorDto funcionario) {
-		
+	private boolean processarRegrasPorFuncionario(PedestreEntity pedestre, ClienteEntity cliente,
+			FuncionarioSeniorDto funcionario, HorarioPedestreDto escala, List<HorarioSeniorDto> horarios) {
+
 		PedestreRegraEntity pedestreRegraValida = buscaRegraAtiva(pedestre.getId());
 
 		if (pedestreRegraValida != null && estaTrabalhandoHoje(pedestreRegraValida.getRegra().getHorarios())) {
 		    System.out.println("Funcionário em jornada de trabalho...");
-		    return;
+		    return false;
 		}
-		
+
 		System.out.println("Atualizando regra...");
-		
-		HorarioPedestreDto escala = buscaEscalaPedestre(funcionario.getNumeroMatricula(), cliente);
-		List<HorarioSeniorDto> horarios = new ArrayList<>();
 
 		if (Objects.nonNull(escala)) {
 			if ("0".equalsIgnoreCase(escala.getIdescala())) {
 				System.out.println("ESCALA SEM INTERVALO");
 				criaRegraFolga(pedestre, cliente, horarios, funcionario);
-				return;
+				return true;
 			}
 
 			System.out.println("Atualizando regras do funcionario id : " + funcionario.getNumeroMatricula() + " nome : "
 					+ pedestre.getNome() + ", ESCALA : " + escala.getIdescala());
 
-			horarios = buscaHorariosEscala(escala.getIdescala(), cliente);
 			if (Objects.nonNull(horarios) && !horarios.isEmpty()) {
 
 				RegraEntity regra = processaRegraComHorarios(escala, horarios, cliente);
@@ -2119,13 +2223,13 @@ public class PedestreEJB extends BaseEJB implements PedestreEJBRemote {
 			} else {
 				System.out.println("ESCALA SEM HORARIO");
 				criaRegraFolga(pedestre, cliente, horarios, funcionario);
-//				criaRegraPadrao(pedestre, cliente, horarios, funcionario);
 			}
 		} else {
 			System.out.println("FOLGA");
 			criaRegraFolga(pedestre, cliente, horarios, funcionario);
-//			criaRegraPadrao(pedestre, cliente, horarios, funcionario);
 		}
+
+		return true;
 	}
 
 	private List<HorarioSeniorDto> buscaHorariosEscala(final String escala, final ClienteEntity cliente) {
